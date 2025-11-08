@@ -1,0 +1,377 @@
+// Mock data for teacher functionality
+import { TeacherClass, Student, AttendanceRecord, TeachingJournal, Grade, Schedule, Announcement, Document, EReport } from '../types/teacher';
+
+// Mock teacher data
+export const mockTeacher = {
+  id: '1',
+  name: 'Budi Santoso, S.Pd.',
+  nip: '198506152008011001',
+  email: 'budi.santoso@sekolah.sch.id',
+  phone: '+62 812-3456-7890',
+  role: 'guru' as const,
+  isHomeroomTeacher: true,
+  homeroomClass: 'XII IPA 1',
+  subjects: ['Matematika', 'Fisika'],
+  joinDate: '2008-01-01',
+  education: 'S1 Pendidikan Fisika',
+  certification: 'Sertifikat Pendidik Profesional',
+};
+
+// Mock classes data
+export const mockClasses: TeacherClass[] = [
+  {
+    id: '1',
+    name: 'XII IPA 1',
+    grade: 'XII',
+    major: 'IPA',
+    homeroomTeacher: mockTeacher.name,
+    studentCount: 32,
+    schedule: ['Senin', 'Rabu', 'Jumat'],
+  },
+  {
+    id: '2',
+    name: 'XI IPA 2',
+    grade: 'XI',
+    major: 'IPA',
+    homeroomTeacher: 'Dewi Lestari, S.Pd.',
+    studentCount: 30,
+    schedule: ['Selasa', 'Kamis'],
+  },
+  {
+    id: '3',
+    name: 'X IPA 3',
+    grade: 'X',
+    major: 'IPA',
+    homeroomTeacher: 'Ahmad Wijaya, S.Pd.',
+    studentCount: 28,
+    schedule: ['Senin', 'Kamis'],
+  },
+];
+
+// Mock students data
+export const mockStudents: Student[] = [
+  {
+    id: '1',
+    nis: '2024001',
+    name: 'Ahmad Rizki Pratama',
+    class: 'XII IPA 1',
+    gender: 'L',
+    birthDate: '2006-05-15',
+    address: 'Jl. Merdeka No. 123, Jakarta',
+    phone: '+62 812-3456-7890',
+    parentsName: 'Bapak H. Pratama',
+    parentsPhone: '+62 813-5678-9012',
+  },
+  {
+    id: '2',
+    nis: '2024002',
+    name: 'Siti Nurhaliza',
+    class: 'XII IPA 1',
+    gender: 'P',
+    birthDate: '2006-08-22',
+    address: 'Jl. Sudirman No. 456, Jakarta',
+    phone: '+62 812-2345-6789',
+    parentsName: 'Ibu Siti Aminah',
+    parentsPhone: '+62 813-4567-8901',
+  },
+  {
+    id: '3',
+    nis: '2024003',
+    name: 'Muhammad Fadli',
+    class: 'XII IPA 1',
+    gender: 'L',
+    birthDate: '2006-12-10',
+    address: 'Jl. Gatot Subroto No. 789, Jakarta',
+    phone: '+62 812-3456-7891',
+    parentsName: 'Bapak Fadli Muhammad',
+    parentsPhone: '+62 813-5678-9013',
+  },
+  // Add more students...
+];
+
+// Mock attendance records
+export const mockAttendanceRecords: AttendanceRecord[] = [
+  {
+    id: '1',
+    studentId: '1',
+    studentName: 'Ahmad Rizki Pratama',
+    class: 'XII IPA 1',
+    date: '2024-01-15',
+    status: 'hadir',
+    subject: 'Matematika',
+    teacher: mockTeacher.name,
+    notes: '',
+  },
+  {
+    id: '2',
+    studentId: '2',
+    studentName: 'Siti Nurhaliza',
+    class: 'XII IPA 1',
+    date: '2024-01-15',
+    status: 'sakit',
+    subject: 'Matematika',
+    teacher: mockTeacher.name,
+    notes: 'Sertakan surat dokter',
+  },
+  {
+    id: '3',
+    studentId: '3',
+    studentName: 'Muhammad Fadli',
+    class: 'XII IPA 1',
+    date: '2024-01-15',
+    status: 'izin',
+    subject: 'Matematika',
+    teacher: mockTeacher.name,
+    notes: 'Izin orang tua',
+  },
+];
+
+// Mock teaching journals
+export const mockTeachingJournals: TeachingJournal[] = [
+  {
+    id: '1',
+    date: '2024-01-15',
+    class: 'XII IPA 1',
+    subject: 'Matematika',
+    material: 'Turunan Fungsi Trigonometri',
+    topic: 'Turunan dari sin(x), cos(x), tan(x)',
+    teachingMethod: 'Ceramah, Diskusi, Latihan Soal',
+    media: 'Papan tulis, LCD, Modul',
+    evaluation: 'Tugas individu',
+    notes: 'Siswa antusias, perlu lebih banyak latihan soal aplikasi',
+    attendance: {
+      total: 32,
+      present: 30,
+      sick: 1,
+      permit: 1,
+      absent: 0,
+    },
+  },
+  {
+    id: '2',
+    date: '2024-01-14',
+    class: 'XI IPA 2',
+    subject: 'Fisika',
+    material: 'Hukum Newton',
+    topic: 'Hukum Newton I, II, dan III',
+    teachingMethod: 'Demonstrasi, Eksperimen Sederhana',
+    media: 'Alat peraga demonstrasi, Video',
+    evaluation: 'Quiz singkat',
+    notes: 'Siswa aktif dalam eksperimen, pemahaman konsep baik',
+    attendance: {
+      total: 30,
+      present: 28,
+      sick: 2,
+      permit: 0,
+      absent: 0,
+    },
+  },
+];
+
+// Mock grades data
+export const mockGrades: Grade[] = [
+  {
+    id: '1',
+    studentId: '1',
+    studentName: 'Ahmad Rizki Pratama',
+    class: 'XII IPA 1',
+    subject: 'Matematika',
+    semester: 'Ganjil',
+    academicYear: '2024/2025',
+    assignments: [
+      { name: 'Tugas 1', score: 85, maxScore: 100 },
+      { name: 'Tugas 2', score: 90, maxScore: 100 },
+      { name: 'Tugas 3', score: 88, maxScore: 100 },
+    ],
+    midTerm: 87,
+    finalExam: 92,
+    average: 88.4,
+    grade: 'A',
+    description: 'Sangat Baik',
+  },
+  {
+    id: '2',
+    studentId: '2',
+    studentName: 'Siti Nurhaliza',
+    class: 'XII IPA 1',
+    subject: 'Matematika',
+    semester: 'Ganjil',
+    academicYear: '2024/2025',
+    assignments: [
+      { name: 'Tugas 1', score: 92, maxScore: 100 },
+      { name: 'Tugas 2', score: 95, maxScore: 100 },
+      { name: 'Tugas 3', score: 90, maxScore: 100 },
+    ],
+    midTerm: 93,
+    finalExam: 96,
+    average: 93.2,
+    grade: 'A',
+    description: 'Sangat Baik',
+  },
+];
+
+// Mock schedule data
+export const mockSchedule: Schedule[] = [
+  {
+    id: '1',
+    day: 'Senin',
+    time: '07:00-08:30',
+    class: 'XII IPA 1',
+    subject: 'Matematika',
+    teacher: mockTeacher.name,
+    room: 'Lab. Komputer 1',
+  },
+  {
+    id: '2',
+    day: 'Senin',
+    time: '10:00-11:30',
+    class: 'X IPA 3',
+    subject: 'Fisika',
+    teacher: mockTeacher.name,
+    room: 'Lab. Fisika',
+  },
+  {
+    id: '3',
+    day: 'Rabu',
+    time: '08:30-10:00',
+    class: 'XII IPA 1',
+    subject: 'Matematika',
+    teacher: mockTeacher.name,
+    room: 'Ruang 12',
+  },
+  {
+    id: '4',
+    day: 'Kamis',
+    time: '07:00-08:30',
+    class: 'XI IPA 2',
+    subject: 'Fisika',
+    teacher: mockTeacher.name,
+    room: 'Lab. Fisika',
+  },
+  {
+    id: '5',
+    day: 'Jumat',
+    time: '09:00-10:30',
+    class: 'XII IPA 1',
+    subject: 'Matematika',
+    teacher: mockTeacher.name,
+    room: 'Ruang 12',
+  },
+];
+
+// Mock announcements
+export const mockAnnouncements: Announcement[] = [
+  {
+    id: '1',
+    title: 'Pengumuman Ujian Tengah Semester',
+    content: 'UTS akan dilaksanakan pada tanggal 20-25 Maret 2024. Siswa diharapkan mempersiapkan diri dengan baik.',
+    type: 'academic',
+    priority: 'high',
+    sender: 'Kepala Sekolah',
+    timestamp: new Date('2024-01-10T08:00:00'),
+    targetAudience: ['guru', 'siswa'],
+  },
+  {
+    id: '2',
+    title: 'Workshop Pengembangan Profesional',
+    content: 'Akan ada workshop tentang pembelajaran berbasis digital pada hari Sabtu, 18 Maret 2024.',
+    type: 'event',
+    priority: 'medium',
+    sender: 'Kurikulum',
+    timestamp: new Date('2024-01-09T10:30:00'),
+    targetAudience: ['guru'],
+  },
+  {
+    id: '3',
+    title: 'Libur Semester Ganjil',
+    content: 'Libur semester ganjil akan dimulai dari tanggal 25 Desember 2024 hingga 6 Januari 2025.',
+    type: 'holiday',
+    priority: 'low',
+    sender: 'Tata Usaha',
+    timestamp: new Date('2024-01-08T14:00:00'),
+    targetAudience: ['guru', 'siswa', 'orang_tua'],
+  },
+];
+
+// Mock documents
+export const mockDocuments: Document[] = [
+  {
+    id: '1',
+    name: 'CP Matematika XII IPA 1',
+    type: 'CP',
+    description: 'Capaian Pembelajaran Matematika Kelas XII IPA 1',
+    fileName: 'cp-matematika-xii-ipa-1.pdf',
+    fileSize: 2456789,
+    uploadDate: new Date('2024-01-05T09:00:00'),
+    status: 'approved',
+    uploadedBy: mockTeacher.name,
+  },
+  {
+    id: '2',
+    name: 'ATP Fisika Semester Genap',
+    type: 'ATP',
+    description: 'Alur Tujuan Pembelajaran Fisika Semester Genap',
+    fileName: 'atp-fisika-genap.pdf',
+    fileSize: 1876543,
+    uploadDate: new Date('2024-01-04T10:30:00'),
+    status: 'pending',
+    uploadedBy: mockTeacher.name,
+  },
+  {
+    id: '3',
+    name: 'Modul Ajar Turunan',
+    type: 'Modul Ajar',
+    description: 'Modul ajar materi turunan fungsi',
+    fileName: 'modul-ajar-turunan.pdf',
+    fileSize: 3456789,
+    uploadDate: new Date('2024-01-03T13:15:00'),
+    status: 'approved',
+    uploadedBy: mockTeacher.name,
+  },
+];
+
+// Mock E-Reports
+export const mockEReports: EReport[] = [
+  {
+    id: '1',
+    title: 'Rapor Siswa XII IPA 1 Semester Ganjil',
+    type: 'semester',
+    class: 'XII IPA 1',
+    semester: 'Ganjil',
+    academicYear: '2024/2025',
+    status: 'completed',
+    generatedDate: new Date('2024-01-08T16:00:00'),
+    dueDate: new Date('2024-01-15T23:59:59'),
+    studentCount: 32,
+    completedCount: 32,
+    description: 'Rapor semester ganjil untuk kelas XII IPA 1',
+  },
+  {
+    id: '2',
+    title: 'Rapor Siswa XI IPA 2 Semester Ganjil',
+    type: 'semester',
+    class: 'XI IPA 2',
+    semester: 'Ganjil',
+    academicYear: '2024/2025',
+    status: 'in_progress',
+    generatedDate: new Date('2024-01-09T08:00:00'),
+    dueDate: new Date('2024-01-20T23:59:59'),
+    studentCount: 30,
+    completedCount: 25,
+    description: 'Rapor semester ganjil untuk kelas XI IPA 2',
+  },
+  {
+    id: '3',
+    title: 'Rapor Siswa X IPA 3 Semester Ganjil',
+    type: 'semester',
+    class: 'X IPA 3',
+    semester: 'Ganjil',
+    academicYear: '2024/2025',
+    status: 'pending',
+    generatedDate: new Date('2024-01-10T10:00:00'),
+    dueDate: new Date('2024-01-25T23:59:59'),
+    studentCount: 28,
+    completedCount: 0,
+    description: 'Rapor semester ganjil untuk kelas X IPA 3',
+  },
+];
