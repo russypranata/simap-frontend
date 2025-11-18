@@ -4,7 +4,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Plus } from 'lucide-react';
-import { JournalCard } from '@/features/teacher/components/JournalCard';
+import { JournalCard } from '@/features/teacher/components/journal';
 import { TeachingJournal } from '@/features/teacher/types/teacher';
 
 interface JournalListProps {

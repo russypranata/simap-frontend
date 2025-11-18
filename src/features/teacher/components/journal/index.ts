@@ -5,3 +5,4 @@ export { JournalTable } from './JournalTable';
 export { JournalStatistics } from './JournalStatistics';
 export { JournalForm } from './JournalForm';
 export { JournalViewModal } from './JournalViewModal';
+export { JournalCard } from './JournalCard';
