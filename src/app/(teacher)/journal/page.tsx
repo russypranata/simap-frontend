@@ -1,5 +1,5 @@
-import { Journal } from '@/features/teacher/pages/Journal';
+import { JournalPage } from '@/features/teacher/pages/JournalPage';
 
-export default function JournalPage() {
-  return <Journal />;
+export default function JournalPageComponent() {
+  return <JournalPage />;
 }
