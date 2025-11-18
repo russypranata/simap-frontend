@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -63,7 +64,7 @@ export const Announcements: React.FC = () => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    category: 'general' as 'academic' | 'event' | 'general',
+    type: 'general' as 'academic' | 'event' | 'general' | 'holiday',
     priority: 'medium' as 'high' | 'medium' | 'low',
     targetAudience: ['guru', 'siswa'] as ('guru' | 'siswa' | 'admin' | 'orang_tua')[],
   });
@@ -145,7 +146,7 @@ export const Announcements: React.FC = () => {
     setFormData({
       title: announcement.title,
       content: announcement.content,
-      category: announcement.category,
+      type: announcement.type,
       priority: announcement.priority,
       targetAudience: announcement.targetAudience,
     });
@@ -157,7 +158,7 @@ export const Announcements: React.FC = () => {
     setFormData({
       title: '',
     content: '',
-    category: 'general',
+    type: 'general',
     priority: 'medium',
     targetAudience: ['guru', 'siswa'],
   });
@@ -175,7 +176,7 @@ export const Announcements: React.FC = () => {
   const filteredAnnouncements = announcements.filter(announcement => {
     const matchesSearch = announcement.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          announcement.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || announcement.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || announcement.type === selectedCategory;
     const matchesPriority = selectedPriority === 'all' || announcement.priority === selectedPriority;
     
     return matchesSearch && matchesCategory && matchesPriority;
@@ -184,9 +185,9 @@ export const Announcements: React.FC = () => {
   // Get statistics
   const getAnnouncementStats = () => {
     const total = announcements.length;
-    const academic = announcements.filter(a => a.category === 'academic').length;
-    const event = announcements.filter(a => a.category === 'event').length;
-    const general = announcements.filter(a => a.category === 'general').length;
+    const academic = announcements.filter(a => a.type === 'academic').length;
+    const event = announcements.filter(a => a.type === 'event').length;
+    const general = announcements.filter(a => a.type === 'general').length;
     const high = announcements.filter(a => a.priority === 'high').length;
     const medium = announcements.filter(a => a.priority === 'medium').length;
     const low = announcements.filter(a => a.priority === 'low').length;
@@ -372,7 +373,7 @@ export const Announcements: React.FC = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="category">Kategori *</Label>
-                    <Select value={formData.category} onValueChange={(value: any) => setFormData(prev => ({ ...prev, category: value }))}>
+                    <Select value={formData.type} onValueChange={(value: any) => setFormData(prev => ({ ...prev, type: value }))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih kategori" />
                       </SelectTrigger>
@@ -380,6 +381,7 @@ export const Announcements: React.FC = () => {
                         <SelectItem value="academic">Akademik</SelectItem>
                         <SelectItem value="event">Acara</SelectItem>
                         <SelectItem value="general">Umum</SelectItem>
+                        <SelectItem value="holiday">Libur</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -631,7 +633,7 @@ export const Announcements: React.FC = () => {
                     className="flex items-center space-x-2"
                   >
                     <FileText className="h-4 w-4" />
-                    <span>Export PDF</Span>
+                    <span>Export PDF</span>
                   </Button>
                 </div>
               </div>
@@ -852,73 +854,76 @@ export const Announcements: React.FC = () => {
           {selectedAnnouncement && (
             <div className="space-y-6">
               {isEditing ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-title">Judul Pengumuman</Label>
+                        <Input
+                          id="edit-title"
+                          value={formData.title}
+                          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-category">Kategori</Label>
+                        <Select value={formData.type} onValueChange={(value: any) => setFormData(prev => ({ ...prev, type: value }))}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="academic">Akademik</SelectItem>
+                            <SelectItem value="event">Acara</SelectItem>
+                            <SelectItem value="general">Umum</SelectItem>
+                            <SelectItem value="holiday">Libur</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="edit-title">Judul Pengumuman</Label>
-                      <Input
-                        id="edit-title"
-                        value={formData.title}
-                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                      <Label htmlFor="edit-content">Konten</Label>
+                      <Textarea
+                        id="edit-content"
+                        value={formData.content}
+                        onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                        rows={6}
                       />
                     </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="edit-category">Kategori</Label>
-                      <Select value={formData.category} onValueChange={(value: any) => setFormData(prev => ({ ...prev, category: value }))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="academic">Akademik</SelectItem>
-                          <SelectItem value="event">Acara</SelectItem>
-                          <SelectItem value="general">Umum</SelectItem>
-                        </SelectContent>
-                      </Select>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-priority">Prioritas</Label>
+                        <Select value={formData.priority} onValueChange={(value: any) => setFormData(prev => ({ ...prev, priority: value }))}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="high">Penting</SelectItem>
+                            <SelectItem value="medium">Sedang</SelectItem>
+                            <SelectItem value="low">Biasa</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-content">Konten</Label>
-                    <Textarea
-                      id="edit-content"
-                      value={formData.content}
-                      onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                      rows={6}
-                    />
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                      Batal
+                    </Button>
+                    <Button onClick={handleUpdateAnnouncement}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Perbarui
+                    </Button>
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="edit-priority">Prioritas</Label>
-                      <Select value={formData.priority} onValueChange={(value: any) => setFormData(prev => ({ ...prev, priority: value }))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="high">Penting</SelectItem>
-                          <SelectItem value="medium">Sedang</SelectItem>
-                          <SelectItem value="low">Biasa</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
-                    Batal
-                  </Button>
-                  <Button onClick={handleUpdateAnnouncement}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Perbarui
-                  </Button>
-                </div>
+                </>
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3 mb-4">
-                    <div className={`p-2 rounded-lg ${getCategoryColor(selectedAnnouncement.category)}`}>
-                      {getCategoryIcon(selectedAnnouncement.category)}
+                    <div className={`p-2 rounded-lg ${getCategoryColor(selectedAnnouncement.type)}`}>
+                      {getCategoryIcon(selectedAnnouncement.type)}
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold">{selectedAnnouncement.title}</h3>
@@ -926,8 +931,8 @@ export const Announcements: React.FC = () => {
                         <Badge className={getPriorityColor(selectedAnnouncement.priority)}>
                           {getPriorityLabel(selectedAnnouncement.priority)}
                         </Badge>
-                        <Badge className={getCategoryColor(selectedAnnouncement.category)}>
-                          {getCategoryLabel(selectedAnnouncement.category)}
+                        <Badge className={getCategoryColor(selectedAnnouncement.type)}>
+                          {getCategoryLabel(selectedAnnouncement.type)}
                         </Badge>
                       </div>
                     </div>
@@ -976,9 +981,9 @@ export const Announcements: React.FC = () => {
                 </div>
               )}
             </div>
-          </DialogContent>
-        </Dialog>
-      </Tabs>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

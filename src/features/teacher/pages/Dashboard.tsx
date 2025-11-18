@@ -1,14 +1,24 @@
-'use client';
+"use client";
 
-import React, { useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTeacherData } from '../hooks/useTeacherData';
-import { formatDate, formatTime, getDayName } from '@/features/shared/utils/dateFormatter';
+import React, { useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTeacherData } from "../hooks/useTeacherData";
+import {
+  formatDate,
+  formatTime,
+  getDayName,
+} from "@/features/shared/utils/dateFormatter";
 import {
   Users,
   Calendar,
@@ -30,7 +40,7 @@ import {
   ArrowUp,
   ArrowDown,
   MoreHorizontal,
-} from 'lucide-react';
+} from "lucide-react";
 
 // Stat Card Component
 interface StatCardProps {
@@ -46,40 +56,44 @@ interface StatCardProps {
   };
 }
 
-const StatCard: React.FC<StatCardProps> = ({ 
-  title, 
-  value, 
-  description, 
-  icon: Icon, 
-  color, 
+const StatCard: React.FC<StatCardProps> = ({
+  title,
+  value,
+  description,
+  icon: Icon,
+  color,
   bgColor,
-  trend 
+  trend,
 }) => {
   return (
     <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+      <CardHeader className="relative pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground pr-12">
           {title}
         </CardTitle>
-        <div className={`p-2 rounded-lg ${bgColor}`}>
+        <div className={`absolute top-4 right-4 p-2 rounded-lg ${bgColor}`}>
           <Icon className={`h-4 w-4 ${color}`} />
         </div>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-foreground">
-            {value}
-          </div>
+          <div className="text-2xl font-bold text-foreground">{value}</div>
           {trend && (
-            <div className={`flex items-center text-xs ${trend.isUp ? 'text-green-600' : 'text-red-600'}`}>
-              {trend.isUp ? <ArrowUp className="h-3 w-3 mr-1" /> : <ArrowDown className="h-3 w-3 mr-1" />}
+            <div
+              className={`flex items-center text-xs ${
+                trend.isUp ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {trend.isUp ? (
+                <ArrowUp className="h-3 w-3 mr-1" />
+              ) : (
+                <ArrowDown className="h-3 w-3 mr-1" />
+              )}
               {trend.value}%
             </div>
           )}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          {description}
-        </p>
+        <p className="text-xs text-muted-foreground mt-1">{description}</p>
       </CardContent>
     </Card>
   );
@@ -91,20 +105,35 @@ interface ScheduleItemProps {
   isCurrent?: boolean;
 }
 
-const ScheduleItem: React.FC<ScheduleItemProps> = ({ schedule, isCurrent = false }) => {
+const ScheduleItem: React.FC<ScheduleItemProps> = ({
+  schedule,
+  isCurrent = false,
+}) => {
   const currentTime = formatTime(new Date());
-  const scheduleTime = schedule.time.split('-')[0];
+  const scheduleTime = schedule.time.split("-")[0];
   const isPast = currentTime > scheduleTime && !isCurrent;
 
   return (
-    <div className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${
-      isCurrent ? 'bg-primary/10 border-primary/30' : 
-      isPast ? 'bg-muted/30 border-muted' : 
-      'bg-background hover:bg-muted/50'
-    }`}>
+    <div
+      className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${
+        isCurrent
+          ? "bg-primary/10 border-primary/30"
+          : isPast
+          ? "bg-muted/30 border-muted"
+          : "bg-background hover:bg-muted/50"
+      }`}
+    >
       <div className="flex items-center space-x-4">
-        <div className={`p-2 rounded-lg ${isCurrent ? 'bg-primary/20' : 'bg-muted'}`}>
-          <Clock className={`h-4 w-4 ${isCurrent ? 'text-primary' : 'text-muted-foreground'}`} />
+        <div
+          className={`p-2 rounded-lg ${
+            isCurrent ? "bg-primary/20" : "bg-muted"
+          }`}
+        >
+          <Clock
+            className={`h-4 w-4 ${
+              isCurrent ? "text-primary" : "text-muted-foreground"
+            }`}
+          />
         </div>
         <div>
           <p className="font-medium text-sm">{schedule.subject}</p>
@@ -114,7 +143,10 @@ const ScheduleItem: React.FC<ScheduleItemProps> = ({ schedule, isCurrent = false
         </div>
       </div>
       <div className="text-right">
-        <Badge variant={isCurrent ? 'default' : 'secondary'} className="text-xs">
+        <Badge
+          variant={isCurrent ? "default" : "secondary"}
+          className="text-xs"
+        >
           {schedule.time}
         </Badge>
         {isCurrent && (
@@ -130,20 +162,28 @@ interface AnnouncementItemProps {
   announcement: any;
 }
 
-const AnnouncementItem: React.FC<AnnouncementItemProps> = ({ announcement }) => {
+const AnnouncementItem: React.FC<AnnouncementItemProps> = ({
+  announcement,
+}) => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-blue-100 text-blue-800 border-blue-200';
+      case "high":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      default:
+        return "bg-blue-100 text-blue-800 border-blue-200";
     }
   };
 
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
-      case 'high': return 'Penting';
-      case 'medium': return 'Sedang';
-      default: return 'Biasa';
+      case "high":
+        return "Penting";
+      case "medium":
+        return "Sedang";
+      default:
+        return "Biasa";
     }
   };
 
@@ -154,7 +194,9 @@ const AnnouncementItem: React.FC<AnnouncementItemProps> = ({ announcement }) => 
           <div className="p-1 rounded bg-muted">
             <Megaphone className="h-3 w-3 text-muted-foreground" />
           </div>
-          <h4 className="font-medium text-sm line-clamp-1">{announcement.title}</h4>
+          <h4 className="font-medium text-sm line-clamp-1">
+            {announcement.title}
+          </h4>
         </div>
         <Badge className={`text-xs ${getPriorityColor(announcement.priority)}`}>
           {getPriorityLabel(announcement.priority)}
@@ -165,7 +207,7 @@ const AnnouncementItem: React.FC<AnnouncementItemProps> = ({ announcement }) => 
       </p>
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>{announcement.sender}</span>
-        <span>{formatDate(announcement.timestamp, 'dd MMM yyyy')}</span>
+        <span>{formatDate(announcement.timestamp, "dd MMM yyyy")}</span>
       </div>
     </div>
   );
@@ -184,7 +226,7 @@ interface ActivityItemProps {
 
 const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
   const Icon = activity.icon;
-  
+
   return (
     <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
       <div className="p-2 rounded-full bg-muted">
@@ -265,136 +307,124 @@ export const TeacherDashboard: React.FC = () => {
   // Enhanced stat cards with trends
   const statCards: StatCardProps[] = [
     {
-      title: 'Jumlah Kelas',
+      title: "Jumlah Kelas",
       value: dashboardStats?.totalClasses || 0,
-      description: 'Kelas yang diampu',
+      description: "Kelas yang diampu",
       icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      trend: { value: 12, isUp: true }
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      trend: { value: 12, isUp: true },
     },
     {
-      title: 'Jadwal Hari Ini',
+      title: "Jadwal Hari Ini",
       value: dashboardStats?.todaySchedule || 0,
-      description: 'Jam mengajar',
+      description: "Jam mengajar",
       icon: Calendar,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      trend: { value: 8, isUp: false }
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      trend: { value: 8, isUp: false },
     },
     {
-      title: 'Jurnal Mengajar',
+      title: "Jurnal Mengajar",
       value: dashboardStats?.teachingJournals || 0,
-      description: 'Jurnal bulan ini',
+      description: "Jurnal bulan ini",
       icon: BookOpen,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      trend: { value: 25, isUp: true }
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      trend: { value: 25, isUp: true },
     },
     {
-      title: 'Status Absensi',
-      value: `${dashboardStats?.attendanceStatus.present || 0}/${dashboardStats?.attendanceStatus.total || 0}`,
-      description: 'Siswa hadir hari ini',
+      title: "Status Absensi",
+      value: `${dashboardStats?.attendanceStatus.present || 0}/${
+        dashboardStats?.attendanceStatus.total || 0
+      }`,
+      description: "Siswa hadir hari ini",
       icon: UserCheck,
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50',
-      trend: { value: 5, isUp: true }
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
+      trend: { value: 5, isUp: true },
     },
     {
-      title: 'Dokumen Terkirim',
+      title: "Dokumen Terkirim",
       value: dashboardStats?.documentsSent || 0,
-      description: 'Dokumen disetujui',
+      description: "Dokumen disetujui",
       icon: FileCheck,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      trend: { value: 15, isUp: true }
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+      trend: { value: 15, isUp: true },
     },
     {
-      title: 'Pengumuman Terbaru',
+      title: "Pengumuman Terbaru",
       value: dashboardStats?.latestAnnouncements || 0,
-      description: 'Pengumuman minggu ini',
+      description: "Pengumuman minggu ini",
       icon: Bell,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
-      trend: { value: 3, isUp: false }
+      color: "text-red-600",
+      bgColor: "bg-red-50",
+      trend: { value: 3, isUp: false },
     },
   ];
 
   const attendancePercentage = dashboardStats?.attendanceStatus.total
-    ? (dashboardStats.attendanceStatus.present / dashboardStats.attendanceStatus.total) * 100
+    ? (dashboardStats.attendanceStatus.present /
+        dashboardStats.attendanceStatus.total) *
+      100
     : 0;
 
   // Mock recent activities
   const recentActivities = [
     {
-      id: '1',
-      type: 'attendance',
-      title: 'Presensi kelas XII IPA 1 berhasil disimpan',
-      time: '10 menit yang lalu',
+      id: "1",
+      type: "attendance",
+      title: "Presensi kelas XII IPA 1 berhasil disimpan",
+      time: "10 menit yang lalu",
       icon: CheckCircle,
     },
     {
-      id: '2',
-      type: 'journal',
-      title: 'Jurnal mengajar Matematika ditambahkan',
-      time: '1 jam yang lalu',
+      id: "2",
+      type: "journal",
+      title: "Jurnal mengajar Matematika ditambahkan",
+      time: "1 jam yang lalu",
       icon: BookOpen,
     },
     {
-      id: '3',
-      type: 'document',
-      title: 'Dokumen CP Matematika diunggah',
-      time: '2 jam yang lalu',
+      id: "3",
+      type: "document",
+      title: "Dokumen CP Matematika diunggah",
+      time: "2 jam yang lalu",
       icon: FileText,
     },
     {
-      id: '4',
-      type: 'grade',
-      title: 'Nilai UTS Fisika diperbarui',
-      time: '3 jam yang lalu',
+      id: "4",
+      type: "grade",
+      title: "Nilai UTS Fisika diperbarui",
+      time: "3 jam yang lalu",
       icon: Award,
     },
   ];
 
   // Get current schedule
-  const currentSchedule = schedule?.find(s => {
+  const currentSchedule = schedule?.find((s) => {
     const currentTime = formatTime(new Date());
-    const [startTime, endTime] = s.time.split('-');
+    const [startTime, endTime] = s.time.split("-");
     return currentTime >= startTime && currentTime <= endTime;
   });
 
-  const todaySchedule = schedule?.filter(s => {
-    const currentTime = formatTime(new Date());
-    const scheduleTime = s.time.split('-')[0];
-    return currentTime <= scheduleTime;
-  }) || [];
+  const todaySchedule =
+    schedule?.filter((s) => {
+      const currentTime = formatTime(new Date());
+      const scheduleTime = s.time.split("-")[0];
+      return currentTime <= scheduleTime;
+    }) || [];
 
   return (
     <div className="space-y-6">
-      {/* Header with Profile */}
+      {/* Header without Profile */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">
-            Dashboard Guru
-          </h1>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard Guru</h1>
           <p className="text-muted-foreground">
             {getDayName(new Date())}, {formatDate(new Date())}
           </p>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          <div className="text-right">
-            <p className="text-sm font-medium">{profile?.name || 'Guru'}</p>
-            <p className="text-xs text-muted-foreground">
-              {profile?.subjects?.join(', ') || 'Guru Mata Pelajaran'}
-            </p>
-          </div>
-          <Avatar className="h-10 w-10">
-            <AvatarImage src="/avatars/teacher.jpg" alt="Profile" />
-            <AvatarFallback>
-              {profile?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'G'}
-            </AvatarFallback>
-          </Avatar>
         </div>
       </div>
 
@@ -418,7 +448,7 @@ export const TeacherDashboard: React.FC = () => {
                   <span>Overview Absensi Hari Ini</span>
                 </CardTitle>
                 <Badge variant="outline" className="text-xs">
-                  {formatDate(new Date(), 'dd MMMM yyyy')}
+                  {formatDate(new Date(), "dd MMMM yyyy")}
                 </Badge>
               </div>
               <CardDescription>
@@ -430,22 +460,17 @@ export const TeacherDashboard: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Kehadiran</span>
                   <span className="text-sm text-muted-foreground">
-                    {dashboardStats?.attendanceStatus.present || 0} dari {dashboardStats?.attendanceStatus.total || 0} siswa
+                    {dashboardStats?.attendanceStatus.present || 0} dari{" "}
+                    {dashboardStats?.attendanceStatus.total || 0} siswa
                   </span>
                 </div>
                 <Progress value={attendancePercentage} className="h-3" />
-                <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-2 gap-4 text-center">
                   <div className="p-2 bg-green-50 rounded-lg">
                     <div className="text-lg font-bold text-green-600">
                       {dashboardStats?.attendanceStatus.present || 0}
                     </div>
                     <div className="text-xs text-green-600">Hadir</div>
-                  </div>
-                  <div className="p-2 bg-yellow-50 rounded-lg">
-                    <div className="text-lg font-bold text-yellow-600">
-                      {dashboardStats?.attendanceStatus.sick || 0}
-                    </div>
-                    <div className="text-xs text-yellow-600">Sakit</div>
                   </div>
                   <div className="p-2 bg-red-50 rounded-lg">
                     <div className="text-lg font-bold text-red-600">
@@ -478,23 +503,27 @@ export const TeacherDashboard: React.FC = () => {
               <div className="space-y-3">
                 {currentSchedule && (
                   <div className="mb-4">
-                    <p className="text-sm font-medium text-primary mb-2">Sedang Berlangsung</p>
+                    <p className="text-sm font-medium text-primary mb-2">
+                      Sedang Berlangsung
+                    </p>
                     <ScheduleItem schedule={currentSchedule} isCurrent={true} />
                   </div>
                 )}
-                
+
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-2">
-                    {currentSchedule ? 'Jadwal Berikutnya' : 'Jadwal Hari Ini'}
+                    {currentSchedule ? "Jadwal Berikutnya" : "Jadwal Hari Ini"}
                   </p>
                   {todaySchedule.length > 0 ? (
-                    todaySchedule.slice(0, 3).map((schedule, index) => (
-                      <ScheduleItem 
-                        key={index} 
-                        schedule={schedule} 
-                        isCurrent={false}
-                      />
-                    ))
+                    todaySchedule
+                      .slice(0, 3)
+                      .map((schedule, index) => (
+                        <ScheduleItem
+                          key={index}
+                          schedule={schedule}
+                          isCurrent={false}
+                        />
+                      ))
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
                       <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
@@ -521,16 +550,19 @@ export const TeacherDashboard: React.FC = () => {
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
-              <CardDescription>
-                Pengumuman terkini dari sekolah
-              </CardDescription>
+              <CardDescription>Pengumuman terkini dari sekolah</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {announcements && announcements.length > 0 ? (
-                  announcements.slice(0, 3).map((announcement, index) => (
-                    <AnnouncementItem key={index} announcement={announcement} />
-                  ))
+                  announcements
+                    .slice(0, 3)
+                    .map((announcement, index) => (
+                      <AnnouncementItem
+                        key={index}
+                        announcement={announcement}
+                      />
+                    ))
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     <Megaphone className="h-12 w-12 mx-auto mb-3 opacity-50" />
@@ -548,9 +580,7 @@ export const TeacherDashboard: React.FC = () => {
                 <Activity className="h-5 w-5 text-purple-600" />
                 <span>Aktivitas Terkini</span>
               </CardTitle>
-              <CardDescription>
-                Aktivitas terbaru Anda
-              </CardDescription>
+              <CardDescription>Aktivitas terbaru Anda</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
@@ -579,7 +609,7 @@ export const TeacherDashboard: React.FC = () => {
             <Button
               variant="outline"
               className="h-20 flex-col space-y-2 hover:bg-primary hover:text-primary-foreground transition-all duration-200"
-              onClick={() => window.location.hash = '/teacher/attendance'}
+              onClick={() => (window.location.hash = "/teacher/attendance")}
             >
               <Users className="h-6 w-6" />
               <span className="text-xs font-medium">Presensi</span>
@@ -587,7 +617,7 @@ export const TeacherDashboard: React.FC = () => {
             <Button
               variant="outline"
               className="h-20 flex-col space-y-2 hover:bg-primary hover:text-primary-foreground transition-all duration-200"
-              onClick={() => window.location.hash = '/teacher/journal'}
+              onClick={() => (window.location.hash = "/teacher/journal")}
             >
               <BookOpen className="h-6 w-6" />
               <span className="text-xs font-medium">Jurnal</span>
@@ -595,7 +625,7 @@ export const TeacherDashboard: React.FC = () => {
             <Button
               variant="outline"
               className="h-20 flex-col space-y-2 hover:bg-primary hover:text-primary-foreground transition-all duration-200"
-              onClick={() => window.location.hash = '/teacher/grades'}
+              onClick={() => (window.location.hash = "/teacher/grades")}
             >
               <Award className="h-6 w-6" />
               <span className="text-xs font-medium">Nilai</span>
@@ -603,7 +633,7 @@ export const TeacherDashboard: React.FC = () => {
             <Button
               variant="outline"
               className="h-20 flex-col space-y-2 hover:bg-primary hover:text-primary-foreground transition-all duration-200"
-              onClick={() => window.location.hash = '/teacher/schedule'}
+              onClick={() => (window.location.hash = "/teacher/schedule")}
             >
               <Calendar className="h-6 w-6" />
               <span className="text-xs font-medium">Jadwal</span>
@@ -611,7 +641,9 @@ export const TeacherDashboard: React.FC = () => {
             <Button
               variant="outline"
               className="h-20 flex-col space-y-2 hover:bg-primary hover:text-primary-foreground transition-all duration-200"
-              onClick={() => window.location.hash = '/teacher/upload-documents'}
+              onClick={() =>
+                (window.location.hash = "/teacher/upload-documents")
+              }
             >
               <FileText className="h-6 w-6" />
               <span className="text-xs font-medium">Upload</span>
@@ -619,7 +651,7 @@ export const TeacherDashboard: React.FC = () => {
             <Button
               variant="outline"
               className="h-20 flex-col space-y-2 hover:bg-primary hover:text-primary-foreground transition-all duration-200"
-              onClick={() => window.location.hash = '/teacher/announcements'}
+              onClick={() => (window.location.hash = "/teacher/announcements")}
             >
               <Megaphone className="h-6 w-6" />
               <span className="text-xs font-medium">Pengumuman</span>
@@ -647,13 +679,13 @@ export const TeacherDashboard: React.FC = () => {
                 <span className="text-sm font-medium">92%</span>
               </div>
               <Progress value={92} className="h-2" />
-              
+
               <div className="flex items-center justify-between">
                 <span className="text-sm">Jurnal Selesai</span>
                 <span className="text-sm font-medium">85%</span>
               </div>
               <Progress value={85} className="h-2" />
-              
+
               <div className="flex items-center justify-between">
                 <span className="text-sm">Dokumen Terupload</span>
                 <span className="text-sm font-medium">78%</span>
@@ -669,9 +701,7 @@ export const TeacherDashboard: React.FC = () => {
               <AlertCircle className="h-5 w-5 text-orange-600" />
               <span>Tugas Pending</span>
             </CardTitle>
-            <CardDescription>
-              Tugas yang perlu diselesaikan
-            </CardDescription>
+            <CardDescription>Tugas yang perlu diselesaikan</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -680,21 +710,29 @@ export const TeacherDashboard: React.FC = () => {
                   <AlertCircle className="h-4 w-4 text-red-600" />
                   <div>
                     <p className="text-sm font-medium">Nilai UTS XII IPA 1</p>
-                    <p className="text-xs text-muted-foreground">Deadline: 2 hari lagi</p>
+                    <p className="text-xs text-muted-foreground">
+                      Deadline: 2 hari lagi
+                    </p>
                   </div>
                 </div>
-                <Badge variant="destructive" className="text-xs">Penting</Badge>
+                <Badge variant="destructive" className="text-xs">
+                  Penting
+                </Badge>
               </div>
-              
+
               <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <Clock className="h-4 w-4 text-yellow-600" />
                   <div>
                     <p className="text-sm font-medium">Upload CP Matematika</p>
-                    <p className="text-xs text-muted-foreground">Deadline: 5 hari lagi</p>
+                    <p className="text-xs text-muted-foreground">
+                      Deadline: 5 hari lagi
+                    </p>
                   </div>
                 </div>
-                <Badge variant="secondary" className="text-xs">Sedang</Badge>
+                <Badge variant="secondary" className="text-xs">
+                  Sedang
+                </Badge>
               </div>
             </div>
           </CardContent>

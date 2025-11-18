@@ -4,10 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRole } from '@/app/context/RoleContext';
 import { useTeacherData } from '../hooks/useTeacherData';
-import { EReport } from '../types/teacher';
+import type { EReport as EReportType } from '../types/teacher';
 import { formatDate, formatTime, getRelativeTime } from '@/features/shared/utils/dateFormatter';
 import { 
   FileText, 
@@ -51,7 +54,7 @@ export const EReport: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<EReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<EReportType | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -70,7 +73,7 @@ export const EReport: React.FC = () => {
     }
   };
 
-  const handleViewReport = (report: EReport) => {
+  const handleViewReport = (report: EReportType) => {
     setSelectedReport(report);
     setIsViewDialogOpen(true);
   };
@@ -191,7 +194,7 @@ export const EReport: React.FC = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const getProgressPercentage = (report: EReport) => {
+  const getProgressPercentage = (report: EReportType) => {
     if (report.studentCount === 0) return 0;
     return (report.completedCount / report.studentCount) * 100;
   };
@@ -483,7 +486,7 @@ export const EReport: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-bold">{stats.kenaikan}</span>
                     <span className="text-xs text-muted-foreground">
-                      ({((stats.kaikan / stats.total) * 100).toFixed(1)}%)
+                      ({((stats.kenaikan / stats.total) * 100).toFixed(1)}%)
                     </span>
                   </div>
                 </div>
@@ -634,7 +637,8 @@ export const EReport: React.FC = () => {
                                 {getStatusIcon(report.status)}
                                 <span className="text-xs">{getStatusLabel(report.status)}</span>
                               </div>
-                            </td>
+                            </Badge>
+                          </td>
                           <td className="p-3">
                             <div className="flex items-center space-x-2">
                               <div className="w-16 bg-muted rounded-full h-2">
@@ -763,7 +767,7 @@ export const EReport: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <span className="text-sm font-bold">{stats.kenaikan}</span>
                       <span className="text-xs text-muted-foreground">
-                        ({((stats.kaikan / stats.total) * 100).toFixed(1)}%)
+                        ({((stats.kenaikan / stats.total) * 100).toFixed(1)}%)
                       </span>
                     </div>
                   </div>
@@ -838,6 +842,7 @@ export const EReport: React.FC = () => {
                     </div>
                   );
                 })}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -921,6 +926,7 @@ export const EReport: React.FC = () => {
                     {formatDate(selectedReport.generatedDate, 'dd MMMM yyyy HH:mm')}
                   </div>
                 </div>
+              </div>
 
               {/* Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1007,9 +1013,9 @@ export const EReport: React.FC = () => {
                 </div>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      </Tabs>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

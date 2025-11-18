@@ -234,7 +234,7 @@ export const JournalCard: React.FC<JournalCardProps> = ({
             </div>
             <div className="text-center p-2 bg-red-50 rounded">
               <div className="font-medium text-red-600">{journal.attendance.absent}</div>
-              <div className="text-red-600">Absen</div>
+              <div className="text-red-600">Alpa</div>
             </div>
           </div>
         </div>

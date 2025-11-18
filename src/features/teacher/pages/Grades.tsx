@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useTeacherData } from '../hooks/useTeacherData';
 import { GradeInputForm } from '../components/GradeInputForm';
-import { Grade } from '../types/grade';
+import type { Grade } from '../types/teacher';
 import { formatDate, formatTime, getRelativeTime } from '@/features/shared/utils/dateFormatter';
 import { 
   Award, 
@@ -113,7 +113,10 @@ export const Grades: React.FC = () => {
     try {
       // Save each grade individually
       for (const gradeData of gradesData) {
-        await saveGrade(gradeData);
+        await saveGrade({
+          ...gradeData,
+          semester: gradeData.semester as 'Ganjil' | 'Genap'
+        });
       }
       toast.success('Data nilai berhasil disimpan!');
       fetchGrades(selectedClass, selectedSubject, selectedSemester);
@@ -772,9 +775,6 @@ export const Grades: React.FC = () => {
                       <span className="text-sm font-bold text-blue-600">
                         {stats.passRate}%
                       </span>
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {stats.totalStudents > 0 && Math.round((parseFloat(stats.passRate) / 100) * stats.totalStudents)} dari {stats.totalStudents} siswa lulus
                     </div>
                   </div>
                 </div>

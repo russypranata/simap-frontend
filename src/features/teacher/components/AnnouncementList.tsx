@@ -47,12 +47,14 @@ export const AnnouncementList: React.FC<AnnouncementListProps> = ({
     ? announcements.slice(0, maxItems)
     : announcements;
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
+  const getCategoryIcon = (type: string) => {
+    switch (type) {
       case 'academic':
         return <AlertCircle className="h-4 w-4 text-blue-500" />;
       case 'event':
         return <Calendar className="h-4 w-4 text-green-500" />;
+      case 'holiday':
+        return <Bell className="h-4 w-4 text-purple-500" />;
       case 'general':
         return <Info className="h-4 w-4 text-gray-500" />;
       default:
@@ -60,12 +62,14 @@ export const AnnouncementList: React.FC<AnnouncementListProps> = ({
     }
   };
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
+  const getCategoryColor = (type: string) => {
+    switch (type) {
       case 'academic':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'event':
         return 'bg-green-100 text-green-800 border-green-200';
+      case 'holiday':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'general':
         return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
@@ -86,12 +90,14 @@ export const AnnouncementList: React.FC<AnnouncementListProps> = ({
     }
   };
 
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
+  const getCategoryLabel = (type: string) => {
+    switch (type) {
       case 'academic':
         return 'Akademik';
       case 'event':
         return 'Acara';
+      case 'holiday':
+        return 'Libur';
       case 'general':
         return 'Umum';
       default:
@@ -135,8 +141,8 @@ export const AnnouncementList: React.FC<AnnouncementListProps> = ({
                     {announcement.title}
                   </h4>
                   <div className="flex items-center space-x-1">
-                    <Badge className={getCategoryColor(announcement.category)}>
-                      {getCategoryLabel(announcement.category)}
+                    <Badge className={getCategoryColor(announcement.type)}>
+                      {getCategoryLabel(announcement.type)}
                     </Badge>
                     <Badge className={getPriorityColor(announcement.priority)}>
                       {getPriorityLabel(announcement.priority)}
@@ -183,10 +189,10 @@ export const AnnouncementList: React.FC<AnnouncementListProps> = ({
                     {announcement.title}
                   </h3>
                   <div className="flex items-center space-x-2">
-                    <Badge className={getCategoryColor(announcement.category)}>
+                    <Badge className={getCategoryColor(announcement.type)}>
                       <div className="flex items-center space-x-1">
-                        {getCategoryIcon(announcement.category)}
-                        <span>{getCategoryLabel(announcement.category)}</span>
+                        {getCategoryIcon(announcement.type)}
+                        <span>{getCategoryLabel(announcement.type)}</span>
                       </div>
                     </Badge>
                     <Badge className={getPriorityColor(announcement.priority)}>

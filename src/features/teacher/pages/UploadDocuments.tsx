@@ -1,19 +1,33 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileUploadButton } from '../components/FileUploadButton';
-import { useTeacherData } from '../hooks/useTeacherData';
-import { Document } from '../types/teacher';
-import { formatDate, formatTime, getRelativeTime } from '@/features/shared/utils/dateFormatter';
-import { 
-  FileText, 
-  Upload, 
-  Download, 
-  Search, 
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileUploadButton } from "@/features/shared/components/FileUploadButton";
+import { useTeacherData } from "../hooks/useTeacherData";
+import type { Document } from "../types/teacher";
+import {
+  formatDate,
+  formatTime,
+  getRelativeTime,
+} from "@/features/shared/utils/dateFormatter";
+import {
+  FileText,
+  Upload,
+  Download,
+  Search,
   Filter,
   RefreshCw,
   CheckCircle,
@@ -29,9 +43,9 @@ import {
   BarChart3,
   TrendingUp,
   Calendar,
-  User
-} from 'lucide-react';
-import { toast } from 'sonner';
+  User,
+} from "lucide-react";
+import { toast } from "sonner";
 
 export const UploadDocuments: React.FC = () => {
   const {
@@ -43,108 +57,108 @@ export const UploadDocuments: React.FC = () => {
     clearError,
   } = useTeacherData();
 
-  const { isHomeroomTeacher } = useRole();
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('upload');
+
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("upload");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Document types with descriptions
   const documentTypes = [
     {
-      id: 'CP',
-      name: 'Capaian Pembelajaran',
-      description: 'Capaian pembelajaran yang harus dicapai siswa',
-      category: 'planning',
+      id: "CP",
+      name: "Capaian Pembelajaran",
+      description: "Capaian pembelajaran yang harus dicapai siswa",
+      category: "planning",
       required: true,
     },
     {
-      id: 'ATP',
-      name: 'Alur Tujuan Pembelajaran',
-      description: 'Alur tujuan pembelajaran untuk mencapai CP',
-      category: 'planning',
+      id: "ATP",
+      name: "Alur Tujuan Pembelajaran",
+      description: "Alur tujuan pembelajaran untuk mencapai CP",
+      category: "planning",
       required: true,
     },
     {
-      id: 'Modul Ajar',
-      name: 'Modul Ajar',
-      description: 'Modul pembelajaran untuk siswa',
-      category: 'teaching',
+      id: "Modul Ajar",
+      name: "Modul Ajar",
+      description: "Modul pembelajaran untuk siswa",
+      category: "teaching",
       required: true,
     },
     {
-      id: 'Prota',
-      name: 'Program Tahunan',
-      description: 'Program tahunan pembelajaran',
-      category: 'planning',
+      id: "Prota",
+      name: "Program Tahunan",
+      description: "Program tahunan pembelajaran",
+      category: "planning",
       required: true,
     },
     {
-      id: 'Prosem',
-      name: 'Program Semester',
-      description: 'Program semester pembelajaran',
-      category: 'planning',
+      id: "Prosem",
+      name: "Program Semester",
+      description: "Program semester pembelajaran",
+      category: "planning",
       required: true,
     },
     {
-      id: 'Analisis Alokasi Waktu',
-      name: 'Analisis Alokasi Waktu',
-      description: 'Analisis alokasi waktu efektif',
-      category: 'planning',
+      id: "Analisis Alokasi Waktu",
+      name: "Analisis Alokasi Waktu",
+      description: "Analisis alokasi waktu efektif",
+      category: "planning",
       required: true,
     },
     {
-      id: 'KKTP',
-      name: 'Kriteria Ketuntasan Minimal',
-      description: 'Kriteria ketuntasan minimal pembelajaran',
-      category: 'planning',
+      id: "KKTP",
+      name: "Kriteria Ketuntasan Minimal",
+      description: "Kriteria ketuntasan minimal pembelajaran",
+      category: "planning",
       required: true,
     },
     {
-      id: 'Kisi-Kisi Soal',
-      name: 'Kisi-Kisi Soal',
-      description: 'Kisi-kisi soal penilaian',
-      category: 'assessment',
+      id: "Kisi-Kisi Soal",
+      name: "Kisi-Kisi Soal",
+      description: "Kisi-kisi soal penilaian",
+      category: "assessment",
       required: true,
     },
     {
-      id: 'Analisis Asesmen',
-      name: 'Analisis Asesmen',
-      description: 'Analisis hasil asesmen pembelajaran',
-      category: 'assessment',
+      id: "Analisis Asesmen",
+      name: "Analisis Asesmen",
+      description: "Analisis hasil asesmen pembelajaran",
+      category: "assessment",
       required: true,
     },
     {
-      id: 'Jurnal Refleksi',
-      name: 'Jurnal Refleksi',
-      description: 'Jurnal refleksi guru',
-      category: 'reflection',
+      id: "Jurnal Refleksi",
+      name: "Jurnal Refleksi",
+      description: "Jurnal refleksi guru",
+      category: "reflection",
       required: true,
     },
     {
-      id: 'Dokumen PKB',
-      name: 'Dokumen PKB',
-      description: 'Dokumen Pengembangan Keprofesian Berkelanjutan',
-      category: 'development',
+      id: "Dokumen PKB",
+      name: "Dokumen PKB",
+      description: "Dokumen Pengembangan Keprofesian Berkelanjutan",
+      category: "development",
       required: true,
     },
     {
-      id: 'Daya Serap',
-      name: 'Daya Serap',
-      description: 'Analisis daya serap siswa',
-      category: 'assessment',
+      id: "Daya Serap",
+      name: "Daya Serap",
+      description: "Analisis daya serap siswa",
+      category: "assessment",
       required: true,
     },
   ];
 
   const documentCategories = [
-    { id: 'all', name: 'Semua Kategori' },
-    { id: 'planning', name: 'Perencanaan' },
-    { id: 'teaching', name: 'Pembelajaran' },
-    { id: 'assessment', name: 'Penilaian' },
-    { id: 'reflection', name: 'Refleksi' },
-    { id: 'development', name: 'Pengembangan' },
+    { id: "all", name: "Semua Kategori" },
+    { id: "planning", name: "Perencanaan" },
+    { id: "teaching", name: "Pembelajaran" },
+    { id: "assessment", name: "Penilaian" },
+    { id: "reflection", name: "Refleksi" },
+    { id: "development", name: "Pengembangan" },
   ];
 
   useEffect(() => {
@@ -155,9 +169,9 @@ export const UploadDocuments: React.FC = () => {
     setIsRefreshing(true);
     try {
       await fetchDocuments();
-      toast.success('Data dokumen berhasil diperbarui!');
+      toast.success("Data dokumen berhasil diperbarui!");
     } catch (error) {
-      toast.error('Gagal memperbarui data dokumen');
+      toast.error("Gagal memperbarui data dokumen");
     } finally {
       setIsRefreshing(false);
     }
@@ -171,15 +185,17 @@ export const UploadDocuments: React.FC = () => {
   }) => {
     try {
       await uploadDocument(data);
-      toast.success('Dokumen berhasil diupload!');
+      toast.success("Dokumen berhasil diupload!");
       fetchDocuments();
     } catch (error) {
-      toast.error('Gagal mengupload dokumen');
+      toast.error("Gagal mengupload dokumen");
     }
   };
 
-  const handleExportData = (format: 'excel' | 'pdf' | 'csv') => {
-    toast.success(`Data dokumen berhasil diunduh dalam format ${format.toUpperCase()}!`);
+  const handleExportData = (format: "excel" | "pdf" | "csv") => {
+    toast.success(
+      `Data dokumen berhasil diunduh dalam format ${format.toUpperCase()}!`
+    );
   };
 
   const handlePrint = () => {
@@ -187,26 +203,31 @@ export const UploadDocuments: React.FC = () => {
   };
 
   // Filter documents
-  const filteredDocuments = documents.filter(doc => {
-    const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doc.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
-    const matchesStatus = selectedStatus === 'all' || doc.status === selectedStatus;
-    
-    return matchesSearch && matchesCategory && matchesStatus;
+  const filteredDocuments = documents.filter((doc) => {
+    const matchesSearch =
+      doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      selectedStatus === "all" || doc.status === selectedStatus;
+
+    return matchesSearch && matchesStatus;
   });
 
   // Get document statistics
   const getDocumentStats = () => {
     const total = documents.length;
-    const uploaded = documents.filter(doc => doc.status === 'approved').length;
-    const pending = documents.filter(doc => doc.status === 'pending').length;
+    const uploaded = documents.filter(
+      (doc) => doc.status === "approved"
+    ).length;
+    const pending = documents.filter((doc) => doc.status === "pending").length;
     const missing = documentTypes.length - uploaded;
-    
-    const categoryStats = documentCategories.slice(1).map(category => ({
+
+    const categoryStats = documentCategories.slice(1).map((category) => ({
       category: category.name,
-      total: documentTypes.filter(doc => doc.category === category.id).length,
-      uploaded: documents.filter(doc => doc.category === category.id && doc.status === 'approved').length,
+      total: documentTypes.filter((doc) => doc.category === category.id).length,
+      uploaded: documents.filter(
+        (doc) => documentTypes.find(dt => dt.id === doc.type && dt.category === category.id) && doc.status === "approved"
+      ).length,
     }));
 
     return {
@@ -215,7 +236,8 @@ export const UploadDocuments: React.FC = () => {
       pending,
       missing,
       categoryStats,
-      completionRate: total > 0 ? ((uploaded / documentTypes.length) * 100).toFixed(1) : '0',
+      completionRate:
+        total > 0 ? ((uploaded / documentTypes.length) * 100).toFixed(1) : "0",
     };
   };
 
@@ -223,24 +245,24 @@ export const UploadDocuments: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved':
-        return 'text-green-600 bg-green-50 border-green-200';
-      case 'pending':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'rejected':
-        return 'text-red-600 bg-red-50 border-red-200';
+      case "approved":
+        return "text-green-600 bg-green-50 border-green-200";
+      case "pending":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200";
+      case "rejected":
+        return "text-red-600 bg-red-50 border-red-200";
       default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
+        return "text-gray-600 bg-gray-50 border-gray-200";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'approved':
+      case "approved":
         return <CheckCircle className="h-4 w-4" />;
-      case 'pending':
+      case "pending":
         return <Clock className="h-4 w-4" />;
-      case 'rejected':
+      case "rejected":
         return <XCircle className="h-4 w-4" />;
       default:
         return <AlertCircle className="h-4 w-4" />;
@@ -249,23 +271,23 @@ export const UploadDocuments: React.FC = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'approved':
-        return 'Tersedia';
-      case 'pending':
-        return 'Menunggu Persetujuan';
-      case 'rejected':
-        return 'Ditolak';
+      case "approved":
+        return "Tersedia";
+      case "pending":
+        return "Menunggu Persetujuan";
+      case "rejected":
+        return "Ditolak";
       default:
-        return 'Tidak Diketahui';
+        return "Tidak Diketahui";
     }
   };
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   if (loading) {
@@ -316,7 +338,7 @@ export const UploadDocuments: React.FC = () => {
             Kelola dan upload dokumen pembelajaran dan administrasi
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
@@ -324,10 +346,12 @@ export const UploadDocuments: React.FC = () => {
             disabled={isRefreshing}
             className="flex items-center space-x-2"
           >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
             <span>Refresh</span>
           </Button>
-          
+
           <Button
             variant="outline"
             onClick={handlePrint}
@@ -348,9 +372,7 @@ export const UploadDocuments: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              Dokumen terupload
-            </p>
+            <p className="text-xs text-muted-foreground">Dokumen terupload</p>
           </CardContent>
         </Card>
 
@@ -360,10 +382,10 @@ export const UploadDocuments: React.FC = () => {
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.uploaded}</div>
-            <p className="text-xs text-muted-foreground">
-              Dokumen disetujui
-            </p>
+            <div className="text-2xl font-bold text-green-600">
+              {stats.uploaded}
+            </div>
+            <p className="text-xs text-muted-foreground">Dokumen disetujui</p>
           </CardContent>
         </Card>
 
@@ -373,7 +395,9 @@ export const UploadDocuments: React.FC = () => {
             <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+            <div className="text-2xl font-bold text-yellow-600">
+              {stats.pending}
+            </div>
             <p className="text-xs text-muted-foreground">
               Menunggu persetujuan
             </p>
@@ -386,16 +410,20 @@ export const UploadDocuments: React.FC = () => {
             <TrendingUp className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.completionRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              Dokumen lengkap
-            </p>
+            <div className="text-2xl font-bold text-blue-600">
+              {stats.completionRate}%
+            </div>
+            <p className="text-xs text-muted-foreground">Dokumen lengkap</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="upload">Upload Dokumen</TabsTrigger>
           <TabsTrigger value="list">Daftar Dokumen</TabsTrigger>
@@ -427,9 +455,11 @@ export const UploadDocuments: React.FC = () => {
                         {documentTypes.map((doc) => (
                           <SelectItem key={doc.id} value={doc.id}>
                             <div className="flex items-center space-x-2">
-                              <div className={`w-2 h-2 rounded-full ${
-                                doc.required ? 'bg-red-500' : 'bg-gray-400'
-                              }`} />
+                              <div
+                                className={`w-2 h-2 rounded-full ${
+                                  doc.required ? "bg-red-500" : "bg-gray-400"
+                                }`}
+                              />
                               <div>
                                 <div className="font-medium">{doc.name}</div>
                                 <div className="text-xs text-muted-foreground">
@@ -442,7 +472,7 @@ export const UploadDocuments: React.FC = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="document-name">Nama Dokumen</Label>
                     <Input
@@ -464,12 +494,12 @@ export const UploadDocuments: React.FC = () => {
                 <div className="space-y-2">
                   <Label>File Dokumen</Label>
                   <FileUploadButton
-                    onFileSelect={(files) => {
+                    onFileSelect={(files: File[]) => {
                       if (files.length > 0) {
                         handleUploadDocument({
                           name: files[0].name,
-                          type: 'CP', // This would come from the select
-                          description: 'Dokumen pembelajaran',
+                          type: "CP", // This would come from the select
+                          description: "Dokumen pembelajaran",
                           file: files[0],
                         });
                       }
@@ -497,16 +527,26 @@ export const UploadDocuments: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 {documentTypes.map((docType) => {
-                  const isUploaded = documents.some(doc => doc.type === docType.id && doc.status === 'approved');
-                  
+                  const isUploaded = documents.some(
+                    (doc) =>
+                      doc.type === docType.id && doc.status === "approved"
+                  );
+
                   return (
-                    <div key={docType.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={docType.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${
-                          docType.required ? 'bg-red-500' : 'bg-gray-400'
-                        }`} />
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            docType.required ? "bg-red-500" : "bg-gray-400"
+                          }`}
+                        />
                         <div>
-                          <div className="font-medium text-sm">{docType.name}</div>
+                          <div className="font-medium text-sm">
+                            {docType.name}
+                          </div>
                           <div className="text-xs text-muted-foreground">
                             {docType.description}
                           </div>
@@ -522,7 +562,10 @@ export const UploadDocuments: React.FC = () => {
                             Tersedia
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-red-600 bg-red-50 border-red-200">
+                          <Badge
+                            variant="outline"
+                            className="text-red-600 bg-red-50 border-red-200"
+                          >
                             <AlertCircle className="h-3 w-3 mr-1" />
                             Belum Upload
                           </Badge>
@@ -552,9 +595,12 @@ export const UploadDocuments: React.FC = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                  >
                     <SelectTrigger className="w-40">
                       <SelectValue placeholder="Filter kategori" />
                     </SelectTrigger>
@@ -566,8 +612,11 @@ export const UploadDocuments: React.FC = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                  
-                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+
+                  <Select
+                    value={selectedStatus}
+                    onValueChange={setSelectedStatus}
+                  >
                     <SelectTrigger className="w-32">
                       <SelectValue placeholder="Filter status" />
                     </SelectTrigger>
@@ -580,17 +629,18 @@ export const UploadDocuments: React.FC = () => {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-muted-foreground">
-                  Menampilkan {filteredDocuments.length} dari {documents.length} dokumen
+                  Menampilkan {filteredDocuments.length} dari {documents.length}{" "}
+                  dokumen
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleExportData('excel')}
+                    onClick={() => handleExportData("excel")}
                     className="flex items-center space-x-2"
                   >
                     <Download className="h-4 w-4" />
@@ -599,7 +649,7 @@ export const UploadDocuments: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleExportData('pdf')}
+                    onClick={() => handleExportData("pdf")}
                     className="flex items-center space-x-2"
                   >
                     <FileText className="h-4 w-4" />
@@ -627,13 +677,27 @@ export const UploadDocuments: React.FC = () => {
                   <table className="w-full">
                     <thead className="bg-muted/50">
                       <tr>
-                        <th className="text-left p-3 font-medium text-sm">Nama Dokumen</th>
-                        <th className="text-left p-3 font-medium text-sm">Jenis</th>
-                        <th className="text-left p-3 font-medium text-sm">Kategori</th>
-                        <th className="text-left p-3 font-medium text-sm">Ukuran</th>
-                        <th className="text-left p-3 font-medium text-sm">Tanggal Upload</th>
-                        <th className="text-left p-3 font-medium text-sm">Status</th>
-                        <th className="text-left p-3 font-medium text-sm">Aksi</th>
+                        <th className="text-left p-3 font-medium text-sm">
+                          Nama Dokumen
+                        </th>
+                        <th className="text-left p-3 font-medium text-sm">
+                          Jenis
+                        </th>
+                        <th className="text-left p-3 font-medium text-sm">
+                          Kategori
+                        </th>
+                        <th className="text-left p-3 font-medium text-sm">
+                          Ukuran
+                        </th>
+                        <th className="text-left p-3 font-medium text-sm">
+                          Tanggal Upload
+                        </th>
+                        <th className="text-left p-3 font-medium text-sm">
+                          Status
+                        </th>
+                        <th className="text-left p-3 font-medium text-sm">
+                          Aksi
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -641,7 +705,9 @@ export const UploadDocuments: React.FC = () => {
                         <tr key={doc.id} className="border-b hover:bg-muted/30">
                           <td className="p-3">
                             <div>
-                              <div className="font-medium text-sm">{doc.name}</div>
+                              <div className="font-medium text-sm">
+                                {doc.name}
+                              </div>
                               <div className="text-xs text-muted-foreground line-clamp-1">
                                 {doc.description}
                               </div>
@@ -654,20 +720,22 @@ export const UploadDocuments: React.FC = () => {
                           </td>
                           <td className="p-3">
                             <Badge variant="secondary" className="text-xs">
-                              {doc.category}
+                              {documentTypes.find(dt => dt.id === doc.type)?.category || 'N/A'}
                             </Badge>
                           </td>
                           <td className="p-3 text-sm">
                             {formatFileSize(doc.fileSize)}
                           </td>
                           <td className="p-3 text-sm">
-                            {formatDate(doc.uploadDate, 'dd MMM yyyy')}
+                            {formatDate(doc.uploadDate, "dd MMM yyyy")}
                           </td>
                           <td className="p-3">
                             <Badge className={getStatusColor(doc.status)}>
                               <div className="flex items-center space-x-1">
                                 {getStatusIcon(doc.status)}
-                                <span className="text-xs">{getStatusLabel(doc.status)}</span>
+                                <span className="text-xs">
+                                  {getStatusLabel(doc.status)}
+                                </span>
                               </div>
                             </Badge>
                           </td>
@@ -704,11 +772,13 @@ export const UploadDocuments: React.FC = () => {
                   Belum Ada Dokumen
                 </h3>
                 <p className="text-muted-foreground text-center max-w-md mb-4">
-                  {searchTerm || selectedCategory !== 'all' || selectedStatus !== 'all'
-                    ? 'Tidak ada dokumen yang cocok dengan filter yang dipilih.'
-                    : 'Belum ada dokumen yang diupload. Mulai dengan mengupload dokumen pada tab Upload Dokumen.'}
+                  {searchTerm ||
+                  selectedCategory !== "all" ||
+                  selectedStatus !== "all"
+                    ? "Tidak ada dokumen yang cocok dengan filter yang dipilih."
+                    : "Belum ada dokumen yang diupload. Mulai dengan mengupload dokumen pada tab Upload Dokumen."}
                 </p>
-                <Button onClick={() => setActiveTab('upload')}>
+                <Button onClick={() => setActiveTab("upload")}>
                   <Plus className="h-4 w-4 mr-2" />
                   Upload Dokumen
                 </Button>
@@ -734,9 +804,14 @@ export const UploadDocuments: React.FC = () => {
               <CardContent>
                 <div className="space-y-4">
                   {stats.categoryStats.map((category) => (
-                    <div key={category.category} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div
+                      key={category.category}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
                       <div className="flex-1">
-                        <div className="font-medium text-sm">{category.category}</div>
+                        <div className="font-medium text-sm">
+                          {category.category}
+                        </div>
                         <div className="text-xs text-muted-foreground">
                           {category.uploaded} dari {category.total} dokumen
                         </div>
@@ -745,11 +820,18 @@ export const UploadDocuments: React.FC = () => {
                         <div className="w-20 bg-muted rounded-full h-2">
                           <div
                             className="h-2 rounded-full bg-green-500"
-                            style={{ width: `${(category.uploaded / category.total) * 100}%` }}
+                            style={{
+                              width: `${
+                                (category.uploaded / category.total) * 100
+                              }%`,
+                            }}
                           />
                         </div>
                         <span className="text-sm font-medium">
-                          {((category.uploaded / category.total) * 100).toFixed(0)}%
+                          {((category.uploaded / category.total) * 100).toFixed(
+                            0
+                          )}
+                          %
                         </span>
                       </div>
                     </div>
@@ -779,20 +861,26 @@ export const UploadDocuments: React.FC = () => {
                       Dokumen Lengkap
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">{stats.uploaded}</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {stats.uploaded}
+                      </div>
                       <div className="text-xs text-green-600">Tersedia</div>
                     </div>
-                    
+
                     <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                      <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {stats.pending}
+                      </div>
                       <div className="text-xs text-yellow-600">Menunggu</div>
                     </div>
-                    
+
                     <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <div className="text-2xl font-bold text-red-600">{stats.missing}</div>
+                      <div className="text-2xl font-bold text-red-600">
+                        {stats.missing}
+                      </div>
                       <div className="text-xs text-red-600">Belum Upload</div>
                     </div>
                   </div>
@@ -817,27 +905,46 @@ export const UploadDocuments: React.FC = () => {
                 <table className="w-full">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-left p-3 font-medium text-sm">Jenis Dokumen</th>
-                      <th className="text-left p-3 font-medium text-sm">Kategori</th>
-                      <th className="text-left p-3 font-medium text-sm">Status</th>
-                      <th className="text-left p-3 font-medium text-sm">Tanggal Upload</th>
-                      <th className="text-left p-3 font-medium text-sm">Ukuran</th>
+                      <th className="text-left p-3 font-medium text-sm">
+                        Jenis Dokumen
+                      </th>
+                      <th className="text-left p-3 font-medium text-sm">
+                        Kategori
+                      </th>
+                      <th className="text-left p-3 font-medium text-sm">
+                        Status
+                      </th>
+                      <th className="text-left p-3 font-medium text-sm">
+                        Tanggal Upload
+                      </th>
+                      <th className="text-left p-3 font-medium text-sm">
+                        Ukuran
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {documentTypes.map((docType) => {
-                      const doc = documents.find(d => d.type === docType.id);
-                      const status = doc?.status || 'missing';
-                      
+                      const doc = documents.find((d) => d.type === docType.id);
+                      const status = doc?.status || "missing";
+
                       return (
-                        <tr key={docType.id} className="border-b hover:bg-muted/30">
+                        <tr
+                          key={docType.id}
+                          className="border-b hover:bg-muted/30"
+                        >
                           <td className="p-3">
                             <div className="flex items-center space-x-2">
-                              <div className={`w-2 h-2 rounded-full ${
-                                docType.required ? 'bg-red-500' : 'bg-gray-400'
-                              }`} />
+                              <div
+                                className={`w-2 h-2 rounded-full ${
+                                  docType.required
+                                    ? "bg-red-500"
+                                    : "bg-gray-400"
+                                }`}
+                              />
                               <div>
-                                <div className="font-medium text-sm">{docType.name}</div>
+                                <div className="font-medium text-sm">
+                                  {docType.name}
+                                </div>
                                 <div className="text-xs text-muted-foreground">
                                   {docType.description}
                                 </div>
@@ -850,8 +957,11 @@ export const UploadDocuments: React.FC = () => {
                             </Badge>
                           </td>
                           <td className="p-3">
-                            {status === 'missing' ? (
-                              <Badge variant="outline" className="text-red-600 bg-red-50 border-red-200">
+                            {status === "missing" ? (
+                              <Badge
+                                variant="outline"
+                                className="text-red-600 bg-red-50 border-red-200"
+                              >
                                 <AlertCircle className="h-3 w-3 mr-1" />
                                 Belum Upload
                               </Badge>
@@ -859,16 +969,20 @@ export const UploadDocuments: React.FC = () => {
                               <Badge className={getStatusColor(status)}>
                                 <div className="flex items-center space-x-1">
                                   {getStatusIcon(status)}
-                                  <span className="text-xs">{getStatusLabel(status)}</span>
+                                  <span className="text-xs">
+                                    {getStatusLabel(status)}
+                                  </span>
                                 </div>
                               </Badge>
                             )}
                           </td>
                           <td className="p-3 text-sm">
-                            {doc ? formatDate(doc.uploadDate, 'dd MMM yyyy') : '-'}
+                            {doc
+                              ? formatDate(doc.uploadDate, "dd MMM yyyy")
+                              : "-"}
                           </td>
                           <td className="p-3 text-sm">
-                            {doc ? formatFileSize(doc.fileSize) : '-'}
+                            {doc ? formatFileSize(doc.fileSize) : "-"}
                           </td>
                         </tr>
                       );

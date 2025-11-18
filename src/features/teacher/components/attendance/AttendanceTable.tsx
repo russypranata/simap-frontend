@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Student, AttendanceRecord } from '../types/teacher';
+import { Student, AttendanceRecord } from '../../types/teacher';
 import { formatDate, formatTime, getRelativeTime } from '@/features/shared/utils/dateFormatter';
 import { 
   CheckCircle, 
@@ -236,7 +236,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
       <Badge variant={variants[status] || 'outline'} className="flex items-center space-x-1">
         {getStatusIcon(status)}
         <span className="capitalize">
-          {status === 'tanpa-keterangan' ? 'Tanpa Keterangan' : status}
+          {status === 'tanpa-keterangan' ? 'Alpa' : status}
         </span>
       </Badge>
     );
@@ -375,7 +375,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             </div>
             <div className="text-center p-3 bg-red-50 rounded-lg border border-red-200">
               <div className="text-2xl font-bold text-red-600">{stats['tanpa-keterangan']}</div>
-              <div className="text-sm text-red-600">Tanpa Keterangan</div>
+              <div className="text-sm text-red-600">Alpa</div>
               <div className="text-xs text-red-500 mt-1">{((stats['tanpa-keterangan'] / students.length) * 100).toFixed(1)}%</div>
             </div>
             <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
@@ -416,7 +416,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                   <SelectItem value="hadir">Hadir</SelectItem>
                   <SelectItem value="sakit">Sakit</SelectItem>
                   <SelectItem value="izin">Izin</SelectItem>
-                  <SelectItem value="tanpa-keterangan">Tanpa Keterangan</SelectItem>
+                  <SelectItem value="tanpa-keterangan">Alpa</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -538,7 +538,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                             <SelectItem value="tanpa-keterangan">
                               <div className="flex items-center space-x-2">
                                 <XCircle className="h-4 w-4 text-red-500" />
-                                <span>Tanpa Keterangan</span>
+                                <span>Alpa</span>
                               </div>
                             </SelectItem>
                           </SelectContent>
@@ -590,7 +590,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                                           </span>
                                         </div>
                                         <span className="text-xs text-muted-foreground">
-                                          {getRelativeTime(record.timestamp)}
+                                          {record.subject}
                                         </span>
                                       </div>
                                       {record.notes && (

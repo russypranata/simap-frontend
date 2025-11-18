@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTeacherData } from '../hooks/useTeacherData';
 import { ScheduleList } from '../components/ScheduleList';
 import { formatDate, formatTime, getDayName } from '@/features/shared/utils/dateFormatter';
@@ -21,7 +23,11 @@ import {
   MoreHorizontal,
   Edit,
   Trash2,
-  Plus
+  Plus,
+  RefreshCw,
+  Printer,
+  Download,
+  BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -118,6 +124,23 @@ export const Schedule: React.FC = () => {
   };
 
   const weekDates = getCurrentWeekDates();
+
+  const getDaySchedules = (day: string) => {
+    return schedule.filter(s => s.day === day);
+  };
+
+  const getCurrentTimeStatus = (time: string) => {
+    const currentTime = formatTime(new Date());
+    const [startTime, endTime] = time.split('-');
+    
+    if (currentTime < startTime) {
+      return { status: 'upcoming', label: 'Akan Datang', color: 'text-blue-600' };
+    } else if (currentTime >= startTime && currentTime <= endTime) {
+      return { status: 'ongoing', label: 'Sedang Berlangsung', color: 'text-green-600' };
+    } else {
+      return { status: 'finished', label: 'Selesai', color: 'text-gray-600' };
+    }
+  };
 
   if (loading) {
     return (
@@ -288,7 +311,8 @@ export const Schedule: React.FC = () => {
                 <span>Export</span>
               </Button>
             </div>
-          </CardHeader>
+          </div>
+        </CardHeader>
           <CardContent>
             <ScheduleList 
               schedules={schedule} 
@@ -524,7 +548,6 @@ export const Schedule: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </Tabs>
     </div>
   );
 };
