@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  PieChart, 
-  BarChart3, 
+import {
+  PieChart,
+  BarChart3,
   TrendingUp,
   TrendingDown,
   CheckCircle,
@@ -14,6 +14,7 @@ import {
 interface StatisticSectionProps {
   stats: {
     total: number;
+    totalRecords: number;
     hadir: number;
     sakit: number;
     izin: number;
@@ -47,7 +48,7 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
             <span>Distribusi Kehadiran</span>
           </CardTitle>
           <CardDescription>
-            Proporsi kehadiran vs ketidakhadiran hari ini
+            Proporsi kehadiran vs ketidakhadiran semester ini
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -62,7 +63,7 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
                     fill="none"
                     stroke="#22c55e"
                     strokeWidth="32"
-                    strokeDasharray={`${(stats.hadir / stats.total) * 502.4} 502.4`}
+                    strokeDasharray={`${(stats.hadir / stats.totalRecords) * 502.4} 502.4`}
                     transform="rotate(-90 96 96)"
                   />
                   <circle
@@ -72,8 +73,8 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
                     fill="none"
                     stroke="#ef4444"
                     strokeWidth="32"
-                    strokeDasharray={`${((stats.total - stats.hadir) / stats.total) * 502.4} 502.4`}
-                    strokeDashoffset={`-${(stats.hadir / stats.total) * 502.4}`}
+                    strokeDasharray={`${((stats.totalRecords - stats.hadir) / stats.totalRecords) * 502.4} 502.4`}
+                    strokeDashoffset={`-${(stats.hadir / stats.totalRecords) * 502.4}`}
                     transform="rotate(-90 96 96)"
                   />
                 </svg>
@@ -89,7 +90,7 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
                 </div>
                 <div className="flex items-center justify-center space-x-2">
                   <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-                  <span className="text-sm">Tidak Hadir: {stats.total - stats.hadir}</span>
+                  <span className="text-sm">Tidak Hadir: {stats.totalRecords - stats.hadir}</span>
                 </div>
               </div>
               {previousDayChange && (
@@ -132,10 +133,9 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
                       <div className="flex items-center space-x-2">
                         <div className="flex-1 bg-muted rounded-full h-2">
                           <div
-                            className={`h-2 rounded-full ${
-                              percentage >= 90 ? 'bg-green-500' :
+                            className={`h-2 rounded-full ${percentage >= 90 ? 'bg-green-500' :
                               percentage >= 75 ? 'bg-yellow-500' : 'bg-red-500'
-                            }`}
+                              }`}
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
@@ -162,7 +162,7 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
               <span>Ringkasan Presensi</span>
             </CardTitle>
             <CardDescription>
-              Statistik presensi hari ini
+              Statistik presensi semester ini
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -172,10 +172,10 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
                   {stats.percentage}%
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Tingkat Kehadiran Hari Ini
+                  Tingkat Kehadiran Semester Ini
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-green-50 rounded-lg">
                   <div className="flex items-center space-x-2">
@@ -186,7 +186,7 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
                     {stats.hadir}
                   </div>
                 </div>
-                
+
                 <div className="p-4 bg-red-50 rounded-lg">
                   <div className="flex items-center space-x-2">
                     <XCircle className="h-5 w-5 text-red-600" />

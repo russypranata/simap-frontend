@@ -47,6 +47,7 @@ export interface AttendanceRecord {
   status: 'hadir' | 'sakit' | 'izin' | 'tanpa-keterangan';
   subject: string;
   teacher: string;
+  lessonHour: string; // e.g., '1-2', '3-4', etc.
   notes?: string;
 }
 
@@ -55,6 +56,7 @@ export interface TeachingJournal {
   date: string;
   class: string;
   subject: string;
+  lessonHour: string;
   material: string;
   topic: string;
   teachingMethod: string;
@@ -100,6 +102,8 @@ export interface Schedule {
   subject: string;
   teacher: string;
   room: string;
+  hasJournal?: boolean;      // Indicates if teaching journal has been created
+  hasAttendance?: boolean;   // Indicates if attendance has been recorded
 }
 
 export interface Announcement {

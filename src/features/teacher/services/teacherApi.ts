@@ -17,14 +17,13 @@ import {
   mockTeacher,
   mockClasses,
   mockStudents,
-  mockAttendanceRecords,
-  mockTeachingJournals,
   mockGrades,
-  mockSchedule,
   mockAnnouncements,
   mockDocuments,
   mockEReports,
 } from './mockData';
+import { extendedMockSchedule } from './extendedMockSchedule';
+import { extendedMockAttendanceRecords, extendedMockTeachingJournals } from './extendedMockData';
 
 // Mock API base URL (not actually used since we're mocking)
 const API_BASE_URL = '/api';
@@ -34,7 +33,7 @@ const mockAxios = {
   get: async <T = any>(url: string): Promise<{ data: T }> => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 300));
-    
+
     switch (url) {
       case '/teacher/profile':
         return { data: mockTeacher as T };
@@ -43,13 +42,13 @@ const mockAxios = {
       case '/teacher/students':
         return { data: mockStudents as T };
       case '/teacher/attendance':
-        return { data: mockAttendanceRecords as T };
+        return { data: extendedMockAttendanceRecords as T };
       case '/teacher/journals':
-        return { data: mockTeachingJournals as T };
+        return { data: extendedMockTeachingJournals as T };
       case '/teacher/grades':
         return { data: mockGrades as T };
       case '/teacher/schedule':
-        return { data: mockSchedule as T };
+        return { data: extendedMockSchedule as T };
       case '/teacher/announcements':
         return { data: mockAnnouncements as T };
       case '/teacher/documents':
@@ -59,15 +58,15 @@ const mockAxios = {
       case '/teacher/dashboard':
         const stats: DashboardStats = {
           totalClasses: mockClasses.length,
-          todaySchedule: mockSchedule.filter(s => s.day === 'Senin').length,
-          teachingJournals: mockTeachingJournals.length,
+          todaySchedule: extendedMockSchedule.filter(s => s.day === 'Senin').length,
+          teachingJournals: extendedMockTeachingJournals.length,
           attendanceStatus: {
-            present: mockAttendanceRecords.filter(a => a.status === 'hadir').length,
-            absent: mockAttendanceRecords.filter(a => a.status !== 'hadir').length,
-            total: mockAttendanceRecords.length,
+            present: extendedMockAttendanceRecords.filter(a => a.status === 'hadir').length,
+            absent: extendedMockAttendanceRecords.filter(a => a.status !== 'hadir').length,
+            total: extendedMockAttendanceRecords.length,
           },
           documentsSent: mockDocuments.filter(d => d.status === 'approved').length,
-          latestAnnouncements: mockAnnouncements.filter(a => 
+          latestAnnouncements: mockAnnouncements.filter(a =>
             new Date().getTime() - a.timestamp.getTime() < 7 * 24 * 60 * 60 * 1000
           ).length,
         };
@@ -79,7 +78,7 @@ const mockAxios = {
 
   post: async <T = any>(url: string, data: any): Promise<{ data: T }> => {
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     switch (url) {
       case '/teacher/attendance':
         return { data: { success: true, message: 'Absensi berhasil disimpan' } as T };
@@ -147,7 +146,7 @@ export const teacherApi = {
   getAttendanceRecords: async (classId?: string, date?: string): Promise<AttendanceRecord[]> => {
     const response = await mockAxios.get<AttendanceRecord[]>('/teacher/attendance');
     let filtered = response.data;
-    
+
     if (classId) {
       // Find class name from ID
       const classData = mockClasses.find(c => c.id === classId);
@@ -155,11 +154,11 @@ export const teacherApi = {
         filtered = filtered.filter(record => record.class === classData.name);
       }
     }
-    
+
     if (date) {
       filtered = filtered.filter(record => record.date === date);
     }
-    
+
     return filtered;
   },
 
@@ -179,15 +178,15 @@ export const teacherApi = {
   getTeachingJournals: async (classId?: string, subject?: string): Promise<TeachingJournal[]> => {
     const response = await mockAxios.get<TeachingJournal[]>('/teacher/journals');
     let filtered = response.data;
-    
+
     if (classId) {
       filtered = filtered.filter(journal => journal.class === classId);
     }
-    
+
     if (subject) {
       filtered = filtered.filter(journal => journal.subject === subject);
     }
-    
+
     return filtered;
   },
 
@@ -210,19 +209,19 @@ export const teacherApi = {
   getGrades: async (classId?: string, subject?: string, semester?: string): Promise<Grade[]> => {
     const response = await mockAxios.get<Grade[]>('/teacher/grades');
     let filtered = response.data;
-    
+
     if (classId) {
       filtered = filtered.filter(grade => grade.class === classId);
     }
-    
+
     if (subject) {
       filtered = filtered.filter(grade => grade.subject === subject);
     }
-    
+
     if (semester) {
       filtered = filtered.filter(grade => grade.semester === semester);
     }
-    
+
     return filtered;
   },
 
@@ -249,15 +248,15 @@ export const teacherApi = {
   getAnnouncements: async (type?: string, priority?: string): Promise<Announcement[]> => {
     const response = await mockAxios.get<Announcement[]>('/teacher/announcements');
     let filtered = response.data;
-    
+
     if (type) {
       filtered = filtered.filter(announcement => announcement.type === type);
     }
-    
+
     if (priority) {
       filtered = filtered.filter(announcement => announcement.priority === priority);
     }
-    
+
     return filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   },
 
@@ -265,15 +264,15 @@ export const teacherApi = {
   getDocuments: async (type?: string, status?: string): Promise<Document[]> => {
     const response = await mockAxios.get<Document[]>('/teacher/documents');
     let filtered = response.data;
-    
+
     if (type) {
       filtered = filtered.filter(document => document.type === type);
     }
-    
+
     if (status) {
       filtered = filtered.filter(document => document.status === status);
     }
-    
+
     return filtered.sort((a, b) => b.uploadDate.getTime() - a.uploadDate.getTime());
   },
 
@@ -291,15 +290,15 @@ export const teacherApi = {
   getEReports: async (classId?: string, status?: string): Promise<EReport[]> => {
     const response = await mockAxios.get<EReport[]>('/teacher/ereports');
     let filtered = response.data;
-    
+
     if (classId) {
       filtered = filtered.filter(ereport => ereport.class === classId);
     }
-    
+
     if (status) {
       filtered = filtered.filter(ereport => ereport.status === status);
     }
-    
+
     return filtered.sort((a, b) => b.generatedDate.getTime() - a.generatedDate.getTime());
   },
 };

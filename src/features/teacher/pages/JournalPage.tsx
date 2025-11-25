@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useTeacherData } from '@/features/teacher/hooks/useTeacherData';
 import { 
   JournalStatsCards,
@@ -13,17 +12,21 @@ import {
   JournalTable,
   JournalStatistics,
   JournalForm,
-  JournalViewModal
+  JournalReports,
 } from '@/features/teacher/components/journal';
 import { TeachingJournal } from '@/features/teacher/types/teacher';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
+import { LESSON_HOURS } from '@/features/teacher/constants/attendance';
 import { 
   BookOpen, 
   Plus, 
   Printer,
-  RefreshCw
+  RefreshCw,
+  Grid,
+  List as ListIcon // Import List icon and alias it to avoid conflict
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 // Mock subjects
 const SUBJECTS = [
@@ -68,6 +71,7 @@ const MEDIA_OPTIONS = [
 ];
 
 export const JournalPage: React.FC = () => {
+  const router = useRouter();
   const {
     loading,
     error,
@@ -80,24 +84,23 @@ export const JournalPage: React.FC = () => {
     clearError,
   } = useTeacherData();
 
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [selectedJournal, setSelectedJournal] = useState<TeachingJournal | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClass, setFilterClass] = useState('all');
   const [filterSubject, setFilterSubject] = useState('all');
   const [activeTab, setActiveTab] = useState('list');
+  const [viewType, setViewType] = useState('card'); // Add viewType state for card/table toggle
 
-  // Form state
+  // Form state - using arrays for teaching methods and media
   const [formData, setFormData] = useState({
     date: formatDate(new Date(), 'yyyy-MM-dd'),
     class: '',
     subject: '',
+    lessonHour: '', // Add lessonHour field
     material: '',
     topic: '',
-    teachingMethod: '',
-    media: '',
+    teachingMethod: [], // Array for multiple selections
+    media: [], // Array for multiple selections
     evaluation: '',
     notes: '',
     attendance: {
@@ -113,6 +116,19 @@ export const JournalPage: React.FC = () => {
     fetchTeachingJournals();
   }, []);
 
+  // Convert array values to comma-separated strings for API
+  const formatJournalData = (data: typeof formData) => {
+    return {
+      ...data,
+      teachingMethod: Array.isArray(data.teachingMethod) 
+        ? data.teachingMethod.join(', ') 
+        : data.teachingMethod,
+      media: Array.isArray(data.media) 
+        ? data.media.join(', ') 
+        : data.media,
+    };
+  };
+
   const handleCreateJournal = async () => {
     if (!formData.class || !formData.subject || !formData.material || !formData.topic) {
       toast.error('Mohon lengkapi semua field yang wajib diisi');
@@ -121,9 +137,11 @@ export const JournalPage: React.FC = () => {
 
     setIsSaving(true);
     try {
-      await saveTeachingJournal(formData);
+      // Format data before sending to API
+      const formattedData = formatJournalData(formData);
+      await saveTeachingJournal(formattedData);
       toast.success('Jurnal mengajar berhasil disimpan!');
-      setIsCreateDialogOpen(false);
+      router.push('/journal/new');
       resetForm();
       fetchTeachingJournals();
     } catch (error) {
@@ -133,15 +151,11 @@ export const JournalPage: React.FC = () => {
     }
   };
 
-  const handleUpdateJournal = async () => {
-    if (!selectedJournal) return;
-
+  const handleUpdateJournal = async (updatedJournal: TeachingJournal) => {
     setIsSaving(true);
     try {
-      await updateTeachingJournal(selectedJournal.id, formData);
+      await updateTeachingJournal(updatedJournal.id, updatedJournal);
       toast.success('Jurnal mengajar berhasil diperbarui!');
-      setIsViewDialogOpen(false);
-      resetForm();
       fetchTeachingJournals();
     } catch (error) {
       toast.error('Gagal memperbarui jurnal mengajar');
@@ -163,25 +177,11 @@ export const JournalPage: React.FC = () => {
   };
 
   const handleViewJournal = (journal: TeachingJournal) => {
-    setSelectedJournal(journal);
-    setIsViewDialogOpen(true);
+    router.push(`/journal/view?id=${journal.id}`);
   };
 
   const handleEditJournal = (journal: TeachingJournal) => {
-    setSelectedJournal(journal);
-    setFormData({
-      date: journal.date,
-      class: journal.class,
-      subject: journal.subject,
-      material: journal.material,
-      topic: journal.topic,
-      teachingMethod: journal.teachingMethod,
-      media: journal.media,
-      evaluation: journal.evaluation,
-      notes: journal.notes,
-      attendance: journal.attendance,
-    });
-    setIsViewDialogOpen(true);
+    router.push(`/journal/edit?id=${journal.id}`);
   };
 
   const resetForm = () => {
@@ -189,10 +189,11 @@ export const JournalPage: React.FC = () => {
       date: formatDate(new Date(), 'yyyy-MM-dd'),
       class: '',
       subject: '',
+      lessonHour: '', // Add lessonHour field
       material: '',
       topic: '',
-      teachingMethod: '',
-      media: '',
+      teachingMethod: [],
+      media: [],
       evaluation: '',
       notes: '',
       attendance: {
@@ -297,32 +298,13 @@ export const JournalPage: React.FC = () => {
             <span>Cetak</span>
           </Button>
           
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center space-x-2">
-                <Plus className="h-4 w-4" />
-                <span>Tambah Jurnal Baru</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Tambah Jurnal Mengajar Baru</DialogTitle>
-                <DialogDescription>
-                  Isi data jurnal mengajar untuk mencatat kegiatan pembelajaran
-                </DialogDescription>
-              </DialogHeader>
-              
-              <JournalForm
-                classes={classes}
-                subjects={SUBJECTS}
-                teachingMethods={TEACHING_METHODS}
-                mediaOptions={MEDIA_OPTIONS}
-                isSaving={isSaving}
-                onSave={handleCreateJournal}
-                onCancel={() => setIsCreateDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
+          <Button 
+            className="flex items-center space-x-2"
+            onClick={() => router.push('/journal/new')}
+          >
+            <Plus className="h-4 w-4" />
+            <span>Tambah Jurnal Baru</span>
+          </Button>
         </div>
       </div>
 
@@ -333,11 +315,27 @@ export const JournalPage: React.FC = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="list">Daftar Jurnal</TabsTrigger>
-          <TabsTrigger value="table">Tabel</TabsTrigger>
           <TabsTrigger value="statistics">Statistik</TabsTrigger>
+          <TabsTrigger value="reports">Laporan</TabsTrigger>
         </TabsList>
 
         <TabsContent value="list" className="space-y-6">
+          {/* View Type Selector */}
+          <div className="flex justify-end">
+            <Tabs value={viewType} onValueChange={setViewType} className="w-48">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="card" className="flex items-center justify-center gap-2">
+                  <Grid className="h-4 w-4" />
+                  Kartu
+                </TabsTrigger>
+                <TabsTrigger value="table" className="flex items-center justify-center gap-2">
+                  <ListIcon className="h-4 w-4" />
+                  Tabel
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          
           {/* Filters */}
           <Card>
             <CardContent className="p-4">
@@ -351,7 +349,7 @@ export const JournalPage: React.FC = () => {
                 classes={classes}
                 subjects={SUBJECTS}
                 onExportData={handleExportData}
-                onCreateNew={() => setIsCreateDialogOpen(true)}
+                onCreateNew={() => router.push('/journal/new')}
                 totalJournals={teachingJournals.length}
                 filteredCount={teachingJournals.filter(journal => {
                   const matchesSearch = journal.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -365,30 +363,30 @@ export const JournalPage: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Journal List */}
-          <JournalList
-            journals={teachingJournals}
-            searchTerm={searchTerm}
-            filterClass={filterClass}
-            filterSubject={filterSubject}
-            onView={handleViewJournal}
-            onEdit={handleEditJournal}
-            onDelete={handleDeleteJournal}
-            onCreateNew={() => setIsCreateDialogOpen(true)}
-            totalJournals={teachingJournals.length}
-          />
-        </TabsContent>
-
-        <TabsContent value="table" className="space-y-6">
-          <JournalTable
-            journals={teachingJournals}
-            searchTerm={searchTerm}
-            filterClass={filterClass}
-            filterSubject={filterSubject}
-            onView={handleViewJournal}
-            onEdit={handleEditJournal}
-            onDelete={handleDeleteJournal}
-          />
+          {/* Journal Content based on view type */}
+          {viewType === 'card' ? (
+            <JournalList
+              journals={teachingJournals}
+              searchTerm={searchTerm}
+              filterClass={filterClass}
+              filterSubject={filterSubject}
+              onView={handleViewJournal}
+              onEdit={handleEditJournal}
+              onDelete={handleDeleteJournal}
+              onCreateNew={() => router.push('/journal/new')}
+              totalJournals={teachingJournals.length}
+            />
+          ) : (
+            <JournalTable
+              journals={teachingJournals}
+              searchTerm={searchTerm}
+              filterClass={filterClass}
+              filterSubject={filterSubject}
+              onView={handleViewJournal}
+              onEdit={handleEditJournal}
+              onDelete={handleDeleteJournal}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="statistics" className="space-y-6">
@@ -400,17 +398,15 @@ export const JournalPage: React.FC = () => {
             searchTerm={searchTerm}
           />
         </TabsContent>
-      </Tabs>
 
-      {/* View/Edit Dialog */}
-      {selectedJournal && (
-        <JournalViewModal
-          isOpen={isViewDialogOpen}
-          journal={selectedJournal}
-          onClose={() => setIsViewDialogOpen(false)}
-          onEdit={handleEditJournal}
-        />
-      )}
+        <TabsContent value="reports" className="space-y-6">
+          <JournalReports
+            journals={teachingJournals}
+            classes={classes}
+            subjects={SUBJECTS}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

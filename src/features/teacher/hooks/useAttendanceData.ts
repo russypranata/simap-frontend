@@ -18,11 +18,11 @@ export const useAttendanceData = (selectedClass: string, selectedDate: string) =
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
-    if (selectedClass) {
-      fetchStudents(selectedClass);
-      fetchAttendanceRecords(selectedClass, selectedDate);
-    }
-  }, [selectedClass, selectedDate]);
+    // If selectedClass is provided, fetch specific data
+    // If not provided, fetch ALL data (Global Mode)
+    fetchStudents(selectedClass);
+    fetchAttendanceRecords(selectedClass);
+  }, [selectedClass]);
 
   const handleSaveAttendance = async (attendanceData: {
     studentId: string;
@@ -31,18 +31,19 @@ export const useAttendanceData = (selectedClass: string, selectedDate: string) =
     status: 'hadir' | 'sakit' | 'izin' | 'tanpa-keterangan';
     subject: string;
     notes?: string;
+    lessonHour?: string;
   }[]) => {
     try {
       await saveAttendance(attendanceData);
       setIsSaved(true);
       setHasUnsavedChanges(false);
-      toast.success('✅ Data absensi berhasil disimpan!');
+      toast.success('Data presensi berhasil disimpan');
       // Refresh data
       if (selectedClass) {
-        await fetchAttendanceRecords(selectedClass, selectedDate);
+        await fetchAttendanceRecords(selectedClass);
       }
     } catch (error) {
-      toast.error('Gagal menyimpan data absensi');
+      toast.error('Gagal menyimpan data presensi');
     }
   };
 
@@ -66,7 +67,6 @@ export const useAttendanceData = (selectedClass: string, selectedDate: string) =
     }));
 
     await handleSaveAttendance(allPresentData);
-    toast.success('Semua siswa ditandai hadir!');
   };
 
   return {

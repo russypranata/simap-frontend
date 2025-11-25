@@ -82,12 +82,12 @@ export const JournalFilterSection: React.FC<JournalFilterSectionProps> = ({
         </div>
       </div>
       
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="text-sm text-muted-foreground">
           Menampilkan {filteredCount} dari {totalJournals} jurnal
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -95,7 +95,7 @@ export const JournalFilterSection: React.FC<JournalFilterSectionProps> = ({
             className="flex items-center space-x-2"
           >
             <Download className="h-4 w-4" />
-            <span>Export Excel</span>
+            <span>Ekspor Excel</span>
           </Button>
           <Button
             variant="outline"
@@ -104,7 +104,7 @@ export const JournalFilterSection: React.FC<JournalFilterSectionProps> = ({
             className="flex items-center space-x-2"
           >
             <FileText className="h-4 w-4" />
-            <span>Export PDF</span>
+            <span>Ekspor PDF</span>
           </Button>
           <Button
             className="flex items-center space-x-2"

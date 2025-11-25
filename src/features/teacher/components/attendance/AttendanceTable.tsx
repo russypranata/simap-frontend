@@ -13,16 +13,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Student, AttendanceRecord } from '../../types/teacher';
 import { formatDate, formatTime, getRelativeTime } from '@/features/shared/utils/dateFormatter';
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
-  Clock, 
-  Save, 
-  Search, 
+import {
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Clock,
+  Save,
+  Search,
   Filter,
-  Download,
-  Upload,
   Eye,
   Edit,
   Trash2,
@@ -40,6 +38,7 @@ interface AttendanceTableProps {
   selectedClass: string;
   selectedDate: string;
   selectedSubject: string;
+  selectedLessonHour: string; // Added prop
   onSave: (attendanceData: {
     studentId: string;
     class: string;
@@ -47,6 +46,7 @@ interface AttendanceTableProps {
     status: 'hadir' | 'sakit' | 'izin' | 'tanpa-keterangan';
     subject: string;
     notes?: string;
+    lessonHour?: string; // Added optional field for saving
   }[]) => Promise<void>;
   existingRecords?: AttendanceRecord[];
   isLoading?: boolean;
@@ -64,36 +64,45 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   selectedClass,
   selectedDate,
   selectedSubject,
+  selectedLessonHour,
   onSave,
   existingRecords = [],
   isLoading = false,
 }) => {
   const [attendanceData, setAttendanceData] = useState<Record<string, StudentAttendanceData>>({});
-  const [isSaving, setIsSaving] = useState(false);
-  const [selectAll, setSelectAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'hadir' | 'sakit' | 'izin' | 'tanpa-keterangan'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [showHistory, setShowHistory] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [selectedStudentHistory, setSelectedStudentHistory] = useState<Student | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+
+  // Extract lesson hour code from display string (e.g., "Jam ke-1-2 (07:00-08:30)" -> "1-2")
+  const lessonHourCode = useMemo(() => {
+    const match = selectedLessonHour.match(/Jam ke-([0-9-]+)/);
+    return match ? match[1] : '';
+  }, [selectedLessonHour]);
 
   // Initialize attendance data with existing records or default values
   React.useEffect(() => {
     const initialData: Record<string, StudentAttendanceData> = {};
-    
+
     students.forEach(student => {
       const existingRecord = existingRecords.find(
-        record => record.studentId === student.id && 
-        record.date === selectedDate && 
-        record.subject === selectedSubject
+        record => record.studentId === student.id &&
+          record.date === selectedDate &&
+          record.subject === selectedSubject &&
+          (!lessonHourCode || record.lessonHour === lessonHourCode)
       );
-      
+
       const previousRecord = existingRecords.find(
-        record => record.studentId === student.id && 
-        record.date !== selectedDate
+        record => record.studentId === student.id &&
+          record.date !== selectedDate
       );
-      
+
       initialData[student.id] = {
         studentId: student.id,
         status: existingRecord?.status || 'hadir',
@@ -101,17 +110,23 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         previousRecord,
       };
     });
-    
+
     setAttendanceData(initialData);
-  }, [students, existingRecords, selectedDate, selectedSubject]);
+  }, [students, existingRecords, selectedDate, selectedSubject, lessonHourCode]);
+
+  // Reset save status when filters change
+  React.useEffect(() => {
+    setIsSaved(false);
+    setHasUnsavedChanges(false);
+  }, [selectedClass, selectedDate, selectedSubject, selectedLessonHour]);
 
   // Filter and paginate students
   const filteredStudents = useMemo(() => {
     let filtered = students.filter(student => {
       const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          student.nis.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || 
-                           attendanceData[student.id]?.status === statusFilter;
+        student.nis.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === 'all' ||
+        attendanceData[student.id]?.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
 
@@ -134,6 +149,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         status,
       },
     }));
+    setHasUnsavedChanges(true);
+    setIsSaved(false);
   };
 
   const handleNotesChange = (studentId: string, notes: string) => {
@@ -144,21 +161,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         notes,
       },
     }));
-  };
-
-  const handleSelectAll = (checked: boolean) => {
-    setSelectAll(checked);
-    const newStatus = checked ? 'hadir' : 'tanpa-keterangan';
-    setAttendanceData(prev => {
-      const updated: Record<string, StudentAttendanceData> = {};
-      students.forEach(student => {
-        updated[student.id] = {
-          ...prev[student.id],
-          status: newStatus,
-        };
-      });
-      return updated;
-    });
+    setHasUnsavedChanges(true);
+    setIsSaved(false);
   };
 
   const handleQuickStatusSet = (status: 'hadir' | 'sakit' | 'izin' | 'tanpa-keterangan') => {
@@ -176,6 +180,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
 
   const handleSave = async () => {
     setIsSaving(true);
+
     try {
       const attendanceArray = students.map(student => ({
         studentId: student.id,
@@ -184,9 +189,14 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         status: attendanceData[student.id]?.status || 'hadir',
         subject: selectedSubject,
         notes: attendanceData[student.id]?.notes || '',
+        lessonHour: lessonHourCode,
       }));
 
       await onSave(attendanceArray);
+
+      // Update save status
+      setIsSaved(true);
+      setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Error saving attendance:', error);
     } finally {
@@ -206,7 +216,6 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
       });
       return updated;
     });
-    setSelectAll(false);
   };
 
   const getStatusIcon = (status: string) => {
@@ -240,6 +249,17 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         </span>
       </Badge>
     );
+  };
+
+  const getStatusLabel = (status: string): string => {
+    const labels: Record<string, string> = {
+      'hadir': 'Hadir',
+      'sakit': 'Sakit',
+      'izin': 'Izin',
+      'tanpa-keterangan': 'Alpa',
+      'all': 'Semua'
+    };
+    return labels[status] || status;
   };
 
   const getAttendanceStats = () => {
@@ -281,77 +301,71 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
       <Card>
         <CardHeader>
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <div>
-              <CardTitle className="flex items-center space-x-2">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
                 <Users className="h-5 w-5" />
-                <span>Presensi Siswa</span>
-                <Badge variant="outline">{formatDate(selectedDate)}</Badge>
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                {selectedClass} • {selectedSubject}
-              </p>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-base font-semibold text-gray-900">Presensi Siswa</h3>
+                  <Badge variant="outline">{formatDate(selectedDate)}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">
+                  {selectedClass} • {selectedSubject}
+                </p>
+              </div>
             </div>
-            
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="select-all" className="text-sm">
+
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mt-2">
+              {/* Quick Selection Toolbar */}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                   Pilih Semua:
-                </Label>
-                <Checkbox
-                  id="select-all"
-                  checked={selectAll}
-                  onCheckedChange={handleSelectAll}
-                />
+                </span>
+
+                <div className="flex flex-wrap items-center gap-1 p-1 bg-muted/40 rounded-lg border border-border/50">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleQuickStatusSet('hadir')}
+                    className="h-8 px-3 text-green-600 hover:text-green-700 hover:bg-green-50 font-medium"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-1.5" />
+                    Hadir
+                  </Button>
+                  <div className="w-px h-4 bg-border/50 mx-0.5" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleQuickStatusSet('sakit')}
+                    className="h-8 px-3 text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 font-medium"
+                  >
+                    <AlertCircle className="h-4 w-4 mr-1.5" />
+                    Sakit
+                  </Button>
+                  <div className="w-px h-4 bg-border/50 mx-0.5" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleQuickStatusSet('izin')}
+                    className="h-8 px-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium"
+                  >
+                    <Clock className="h-4 w-4 mr-1.5" />
+                    Izin
+                  </Button>
+                  <div className="w-px h-4 bg-border/50 mx-0.5" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleQuickStatusSet('tanpa-keterangan')}
+                    className="h-8 px-3 text-red-600 hover:text-red-700 hover:bg-red-50 font-medium"
+                  >
+                    <XCircle className="h-4 w-4 mr-1.5" />
+                    Alpa
+                  </Button>
+                </div>
               </div>
-              
-              <div className="flex items-center space-x-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleQuickStatusSet('hadir')}
-                  className="text-green-600 hover:text-green-700"
-                >
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  Hadir
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleQuickStatusSet('sakit')}
-                  className="text-yellow-600 hover:text-yellow-700"
-                >
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  Sakit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleQuickStatusSet('izin')}
-                  className="text-blue-600 hover:text-blue-700"
-                >
-                  <Clock className="h-4 w-4 mr-1" />
-                  Izin
-                </Button>
-              </div>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleReset}
-                disabled={isSaving}
-              >
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Reset
-              </Button>
-              
-              <Button
-                onClick={handleSave}
-                disabled={isSaving || isLoading}
-                className="flex items-center space-x-2"
-              >
-                <Save className="h-4 w-4" />
-                <span>{isSaving ? 'Menyimpan...' : 'Simpan'}</span>
-              </Button>
+
             </div>
           </div>
         </CardHeader>
@@ -398,16 +412,25 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                   placeholder="Cari nama atau NIS siswa..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 pr-10"
                 />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground transition-colors"
+                    title="Clear search"
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </button>
+                )}
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Label htmlFor="status-filter" className="text-sm whitespace-nowrap">
                 Filter Status:
               </Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'hadir' | 'sakit' | 'izin' | 'tanpa-keterangan')}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
@@ -420,7 +443,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Label htmlFor="items-per-page" className="text-sm whitespace-nowrap">
                 Tampilkan:
@@ -439,33 +462,17 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
               </Select>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between mt-4">
             <div className="text-sm text-muted-foreground">
               Menampilkan {paginatedStudents.length} dari {filteredStudents.length} siswa
               {searchTerm && ` (hasil pencarian: "${searchTerm}")`}
             </div>
-            
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.print()}
-              >
-                <Download className="h-4 w-4 mr-1" />
-                Cetak
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-              >
-                <Upload className="h-4 w-4 mr-1" />
-                Export
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
+
+
 
       {/* Attendance Table */}
       <Card>
@@ -484,140 +491,186 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {paginatedStudents.map((student, index) => {
-                  const currentData = attendanceData[student.id];
-                  const globalIndex = (currentPage - 1) * itemsPerPage + index + 1;
-                  
-                  return (
-                    <tr 
-                      key={student.id} 
-                      className={`border-b hover:bg-muted/30 transition-colors ${
-                        currentData?.status === 'tanpa-keterangan' ? 'bg-red-50/30' : ''
-                      }`}
-                    >
-                      <td className="p-4 text-sm font-medium">{globalIndex}</td>
-                      <td className="p-4 text-sm font-mono">{student.nis}</td>
-                      <td className="p-4">
-                        <div>
-                          <div className="text-sm font-medium">{student.name}</div>
-                          <div className="text-xs text-muted-foreground">{student.class}</div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <Badge variant={student.gender === 'L' ? 'default' : 'secondary'} className="text-xs">
-                          {student.gender === 'L' ? 'Laki-laki' : 'Perempuan'}
-                        </Badge>
-                      </td>
-                      <td className="p-4">
-                        <Select
-                          value={currentData?.status || 'hadir'}
-                          onValueChange={(value: any) => handleStatusChange(student.id, value)}
-                        >
-                          <SelectTrigger className="w-40">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="hadir">
-                              <div className="flex items-center space-x-2">
-                                <CheckCircle className="h-4 w-4 text-green-500" />
-                                <span>Hadir</span>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="sakit">
-                              <div className="flex items-center space-x-2">
-                                <AlertCircle className="h-4 w-4 text-yellow-500" />
-                                <span>Sakit</span>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="izin">
-                              <div className="flex items-center space-x-2">
-                                <Clock className="h-4 w-4 text-blue-500" />
-                                <span>Izin</span>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="tanpa-keterangan">
-                              <div className="flex items-center space-x-2">
-                                <XCircle className="h-4 w-4 text-red-500" />
-                                <span>Alpa</span>
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            placeholder="Catatan (opsional)"
-                            value={currentData?.notes || ''}
-                            onChange={(e) => handleNotesChange(student.id, e.target.value)}
-                            className="flex-1 min-w-48"
-                          />
-                          {currentData?.previousRecord && (
-                            <Badge variant="outline" className="text-xs whitespace-nowrap">
-                              Ada catatan sebelumnya
-                            </Badge>
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center space-x-1">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleViewHistory(student)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle>Riwayat Presensi - {student.name}</DialogTitle>
-                                <DialogDescription>
-                                  Riwayat presensi siswa untuk mata pelajaran {selectedSubject}
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-3 max-h-96 overflow-y-auto">
-                                {getStudentHistory(student.id).length > 0 ? (
-                                  getStudentHistory(student.id).map((record, index) => (
-                                    <div key={index} className="p-3 border rounded-lg">
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-2">
-                                          {getStatusBadge(record.status)}
-                                          <span className="text-sm font-medium">
-                                            {formatDate(record.date, 'dd MMMM yyyy')}
+                {paginatedStudents.length > 0 ? (
+                  paginatedStudents.map((student, index) => {
+                    const currentData = attendanceData[student.id];
+                    const globalIndex = (currentPage - 1) * itemsPerPage + index + 1;
+
+                    return (
+                      <tr
+                        key={student.id}
+                        className={`border-b hover:bg-muted/30 transition-colors ${currentData?.status === 'tanpa-keterangan' ? 'bg-red-50/30' : ''
+                          }`}
+                      >
+                        <td className="p-4 text-sm font-medium">{globalIndex}</td>
+                        <td className="p-4 text-sm font-mono">{student.nis}</td>
+                        <td className="p-4">
+                          <div>
+                            <div className="text-sm font-medium">{student.name}</div>
+                            <div className="text-xs text-muted-foreground">{student.class}</div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <Badge variant={student.gender === 'L' ? 'default' : 'secondary'} className="text-xs">
+                            {student.gender === 'L' ? 'Laki-laki' : 'Perempuan'}
+                          </Badge>
+                        </td>
+                        <td className="p-4">
+                          <Select
+                            value={currentData?.status || 'hadir'}
+                            onValueChange={(value: any) => handleStatusChange(student.id, value)}
+                          >
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="hadir">
+                                <div className="flex items-center space-x-2">
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <span>Hadir</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="sakit">
+                                <div className="flex items-center space-x-2">
+                                  <AlertCircle className="h-4 w-4 text-yellow-500" />
+                                  <span>Sakit</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="izin">
+                                <div className="flex items-center space-x-2">
+                                  <Clock className="h-4 w-4 text-blue-500" />
+                                  <span>Izin</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="tanpa-keterangan">
+                                <div className="flex items-center space-x-2">
+                                  <XCircle className="h-4 w-4 text-red-500" />
+                                  <span>Alpa</span>
+                                </div>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              placeholder="Catatan (opsional)"
+                              value={currentData?.notes || ''}
+                              onChange={(e) => handleNotesChange(student.id, e.target.value)}
+                              className="flex-1 min-w-48"
+                            />
+                            {currentData?.previousRecord && (
+                              <Badge variant="outline" className="text-xs whitespace-nowrap">
+                                Ada catatan sebelumnya
+                              </Badge>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center space-x-1">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleViewHistory(student)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle>Riwayat Presensi - {student.name}</DialogTitle>
+                                  <DialogDescription>
+                                    Riwayat presensi siswa untuk mata pelajaran {selectedSubject}
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-3 max-h-96 overflow-y-auto">
+                                  {getStudentHistory(student.id).length > 0 ? (
+                                    getStudentHistory(student.id).map((record, index) => (
+                                      <div key={index} className="p-3 border rounded-lg">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center space-x-2">
+                                            {getStatusBadge(record.status)}
+                                            <span className="text-sm font-medium">
+                                              {formatDate(record.date, 'dd MMMM yyyy')}
+                                            </span>
+                                          </div>
+                                          <span className="text-xs text-muted-foreground">
+                                            {record.subject}
                                           </span>
                                         </div>
-                                        <span className="text-xs text-muted-foreground">
-                                          {record.subject}
-                                        </span>
+                                        {record.notes && (
+                                          <p className="text-sm text-muted-foreground mt-2">
+                                            Catatan: {record.notes}
+                                          </p>
+                                        )}
                                       </div>
-                                      {record.notes && (
-                                        <p className="text-sm text-muted-foreground mt-2">
-                                          Catatan: {record.notes}
-                                        </p>
-                                      )}
+                                    ))
+                                  ) : (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                      <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                                      <p className="text-sm">Belum ada riwayat presensi</p>
                                     </div>
-                                  ))
-                                ) : (
-                                  <div className="text-center py-8 text-muted-foreground">
-                                    <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                    <p className="text-sm">Belum ada riwayat presensi</p>
-                                  </div>
-                                )}
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                                  )}
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="p-12">
+                      <div className="flex flex-col items-center justify-center text-center space-y-4">
+                        <div className="rounded-full bg-muted p-6">
+                          <Search className="h-12 w-12 text-muted-foreground" />
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        <div className="space-y-2">
+                          <h3 className="text-lg font-semibold text-foreground">
+                            Tidak Ada Data Ditemukan
+                          </h3>
+                          <p className="text-sm text-muted-foreground max-w-md">
+                            {searchTerm ? (
+                              <>
+                                Tidak ada siswa yang cocok dengan pencarian <strong>"{searchTerm}"</strong>
+                                {statusFilter !== 'all' && <> dan status <strong>{getStatusLabel(statusFilter)}</strong></>}.
+                              </>
+                            ) : statusFilter !== 'all' ? (
+                              <>
+                                Tidak ada siswa dengan status <strong>{getStatusLabel(statusFilter)}</strong>.
+                              </>
+                            ) : (
+                              'Tidak ada data siswa yang tersedia untuk ditampilkan.'
+                            )}
+                          </p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          {(searchTerm || statusFilter !== 'all') && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSearchTerm('');
+                                setStatusFilter('all');
+                              }}
+                              className="flex items-center gap-2"
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                              Reset Pencarian & Filter
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
-          
+
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between p-4 border-t">
@@ -670,7 +723,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                   disabled={currentPage === totalPages}
                 >
                   Selanjutnya
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
             </div>
@@ -678,78 +731,118 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         </CardContent>
       </Card>
 
+      {/* Save Button - Between Table and Summary */}
+      <div className="flex justify-end">
+        <Button
+          onClick={handleSave}
+          disabled={isSaving || isLoading}
+          className="px-6"
+        >
+          <Save className="h-4 w-4 mr-2" />
+          <span>{isSaving ? 'Menyimpan...' : 'Simpan Presensi'}</span>
+        </Button>
+      </div>
+
       {/* Summary Card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <BookOpen className="h-5 w-5" />
-            <span>Ringkasan Presensi</span>
-          </CardTitle>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-gray-900">Ringkasan Presensi</h3>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-muted/30 rounded-lg">
-              <h4 className="font-medium text-sm mb-2">Statistik Hari Ini</h4>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span>Total Siswa:</span>
-                  <span className="font-medium">{students.length}</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Composition Section */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Komposisi Kehadiran</span>
+                <span className="font-medium">
+                  {students.length} Siswa
+                </span>
+              </div>
+
+              {/* Multi-colored Progress Bar */}
+              <div className="h-2 w-full bg-secondary rounded-full overflow-hidden flex">
+                {/* Hadir - Green */}
+                <div
+                  className="h-full bg-green-500 transition-all duration-500"
+                  style={{ width: `${(Object.values(attendanceData).filter(d => d.status === 'hadir').length / students.length) * 100}%` }}
+                />
+                {/* Sakit - Yellow */}
+                <div
+                  className="h-full bg-yellow-500 transition-all duration-500"
+                  style={{ width: `${(Object.values(attendanceData).filter(d => d.status === 'sakit').length / students.length) * 100}%` }}
+                />
+                {/* Izin - Blue */}
+                <div
+                  className="h-full bg-blue-500 transition-all duration-500"
+                  style={{ width: `${(Object.values(attendanceData).filter(d => d.status === 'izin').length / students.length) * 100}%` }}
+                />
+                {/* Alpa - Red */}
+                <div
+                  className="h-full bg-red-500 transition-all duration-500"
+                  style={{ width: `${(Object.values(attendanceData).filter(d => d.status === 'tanpa-keterangan').length / students.length) * 100}%` }}
+                />
+              </div>
+
+              {/* Legend */}
+              <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span>Hadir: {Object.values(attendanceData).filter(d => d.status === 'hadir').length}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Sudah Dipresensi:</span>
-                  <span className="font-medium">
-                    {Object.values(attendanceData).filter(d => d.status !== 'hadir' || d.notes).length}
-                  </span>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                  <span>Sakit: {Object.values(attendanceData).filter(d => d.status === 'sakit').length}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Belum Dipresensi:</span>
-                  <span className="font-medium">
-                    {Object.values(attendanceData).filter(d => d.status === 'hadir' && !d.notes).length}
-                  </span>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-blue-500" />
+                  <span>Izin: {Object.values(attendanceData).filter(d => d.status === 'izin').length}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                  <span>Alpa: {Object.values(attendanceData).filter(d => d.status === 'tanpa-keterangan').length}</span>
                 </div>
               </div>
             </div>
-            
-            <div className="p-4 bg-muted/30 rounded-lg">
-              <h4 className="font-medium text-sm mb-2">Informasi Kelas</h4>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span>Kelas:</span>
-                  <span className="font-medium">{selectedClass}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Mata Pelajaran:</span>
-                  <span className="font-medium">{selectedSubject}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tanggal:</span>
-                  <span className="font-medium">{formatDate(selectedDate, 'dd MMMM yyyy')}</span>
-                </div>
+
+            {/* Class Info */}
+            <div className="space-y-2 text-sm border-l pl-6">
+              <div className="grid grid-cols-2 gap-2">
+                <span className="text-muted-foreground">Kelas</span>
+                <span className="font-medium text-right">{selectedClass}</span>
+
+                <span className="text-muted-foreground">Mapel</span>
+                <span className="font-medium text-right truncate" title={selectedSubject}>{selectedSubject}</span>
+
+                <span className="text-muted-foreground">Tanggal</span>
+                <span className="font-medium text-right">{formatDate(selectedDate, 'dd MMM yyyy')}</span>
               </div>
             </div>
-            
-            <div className="p-4 bg-muted/30 rounded-lg">
-              <h4 className="font-medium text-sm mb-2">Status Penyimpanan</h4>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span>Terakhir Disimpan:</span>
-                  <span className="font-medium">
-                    {existingRecords.length > 0 ? 'Ada data' : 'Belum ada'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Perubahan:</span>
-                  <span className="font-medium">
-                    {Object.values(attendanceData).filter(d => 
-                      d.status !== 'hadir' || d.notes
-                    ).length} siswa
-                  </span>
-                </div>
+
+            {/* Status Info */}
+            <div className="space-y-2 text-sm border-l pl-6">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Status Simpan</span>
+                <Badge variant={existingRecords.length > 0 ? "default" : "secondary"} className="text-xs">
+                  {existingRecords.length > 0 ? 'Tersimpan' : 'Belum Disimpan'}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-muted-foreground">Kehadiran</span>
+                <span className="font-medium">
+                  {((Object.values(attendanceData).filter(d => d.status === 'hadir').length / students.length) * 100).toFixed(0)}%
+                </span>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
-    </div>
+    </div >
   );
 };

@@ -4,22 +4,17 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TeachingJournal } from '../types/teacher';
-import { formatDate, formatTime, getRelativeTime } from '@/features/shared/utils/dateFormatter';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { TeachingJournal } from '@/features/teacher/types/teacher';
+import { formatDate, getRelativeTime } from '@/features/shared/utils/dateFormatter';
 import { 
-  BookOpen, 
-  Calendar, 
-  Users, 
-  Clock, 
-  Edit, 
-  Eye, 
-  Trash2, 
-  FileText,
-  Target,
-  Award,
-  CheckCircle,
-  AlertCircle,
-  MoreHorizontal
+  BookOpen, Calendar, Users, Clock, Edit, Eye, Trash2, FileText,
+  Target, Award, CheckCircle, AlertCircle, MoreHorizontal, History
 } from 'lucide-react';
 
 interface JournalCardProps {
@@ -41,30 +36,22 @@ export const JournalCard: React.FC<JournalCardProps> = ({
 }) => {
   const getStatusIcon = (status: 'completed' | 'in_progress' | 'draft') => {
     switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'in_progress':
-        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'in_progress': return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+      default: return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
 
   const getStatusBadge = (status: 'completed' | 'in_progress' | 'draft') => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      completed: 'default',
-      in_progress: 'secondary',
-      draft: 'outline',
+    const variants: Record<'completed' | 'in_progress' | 'draft', 'default' | 'secondary' | 'outline'> = { 
+      completed: 'default', 
+      in_progress: 'secondary', 
+      draft: 'outline' 
     };
-
-    const labels: Record<string, string> = {
-      completed: 'Selesai',
-      in_progress: 'Dalam Proses',
-      draft: 'Draft',
-    };
+    const labels = { completed: 'Selesai', in_progress: 'Dalam Proses', draft: 'Draft' };
 
     return (
-      <Badge variant={variants[status] || 'outline'} className="flex items-center space-x-1">
+      <Badge variant={variants[status] || 'outline'} className="flex items-center gap-1 text-sm">
         {getStatusIcon(status)}
         <span>{labels[status] || status}</span>
       </Badge>
@@ -76,209 +63,217 @@ export const JournalCard: React.FC<JournalCardProps> = ({
     return ((journal.attendance.present / journal.attendance.total) * 100).toFixed(1);
   };
 
+  // Format teaching methods for display
+  const formatTeachingMethods = (methods: string | string[]) => {
+    if (Array.isArray(methods)) {
+      return methods.join(', ');
+    }
+    return methods;
+  };
+
+  // Format media for display
+  const formatMedia = (media: string | string[]) => {
+    if (Array.isArray(media)) {
+      return media.join(', ');
+    }
+    return media;
+  };
+
   if (compact) {
     return (
-      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+      <Card className="hover:shadow-md transition-shadow duration-200 cursor-pointer border-0 bg-card/90 backdrop-blur-sm overflow-hidden rounded-lg">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between">
+          {/* Header with class badge on top-left and action menu on top-right */}
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <Badge variant="default" className="text-xs">
+              {journal.class}
+            </Badge>
+            {showActions && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 p-0">
+                    <MoreHorizontal className="h-3.5 w-3.5 rotate-90" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="flex flex-col">
+                  <DropdownMenuItem onClick={() => onView?.(journal)}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Lihat
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onEdit?.(journal)}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+          
+          <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-2 mb-2">
-                <BookOpen className="h-4 w-4 text-primary" />
+              <div className="flex items-center gap-2 mb-2">
+                <BookOpen className="h-4 w-4 text-primary shrink-0" />
                 <h4 className="font-medium text-sm truncate">{journal.subject}</h4>
-                <Badge variant="outline" className="text-xs">{journal.class}</Badge>
               </div>
               <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                 {journal.topic}
               </p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {formatDate(journal.date, 'dd MMM yyyy')}
-                </span>
-                <div className="flex items-center space-x-1">
-                  <Users className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">
-                    {journal.attendance.present}/{journal.attendance.total}
-                  </span>
+              {/* Improved layout for date and lesson hour */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  <span>{formatDate(journal.date, 'dd MMM yyyy')}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  <span>{journal.lessonHour}</span>
                 </div>
               </div>
             </div>
-            {showActions && (
-              <div className="flex items-center space-x-1 ml-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onView?.(journal)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit?.(journal)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
     );
   }
 
+  // Full version
   return (
-    <Card className="hover:shadow-lg transition-all duration-300">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2 mb-2">
-              <BookOpen className="h-5 w-5 text-primary" />
-              <CardTitle className="text-lg truncate">{journal.subject}</CardTitle>
-              <Badge variant="outline">{journal.class}</Badge>
-            </div>
-            <CardDescription className="text-sm">
-              {formatDate(journal.date, 'EEEE, dd MMMM yyyy')}
-            </CardDescription>
-          </div>
+    <Card className="hover:shadow-lg transition-all duration-300 border-0 bg-card/90 backdrop-blur-sm overflow-hidden rounded-lg">
+      <CardHeader className="pb-3 px-6 pt-4">
+        {/* Header with class badge on top-left and action menu on top-right */}
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <Badge variant="default" className="text-sm">
+            {journal.class}
+          </Badge>
           {showActions && (
-            <div className="flex items-center space-x-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onView?.(journal)}
-                className="h-8 w-8 p-0"
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onEdit?.(journal)}
-                className="h-8 w-8 p-0"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onDelete?.(journal)}
-                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4 rotate-90" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="flex flex-col">
+                <DropdownMenuItem onClick={() => onView?.(journal)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Lihat
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onEdit?.(journal)}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => onDelete?.(journal)}
+                  className="text-red-600 focus:bg-red-50 focus:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Hapus
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {/* Material and Topic */}
-        <div>
-          <div className="flex items-center space-x-2 mb-2">
-            <Target className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Materi:</span>
+        
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <BookOpen className="h-5 w-5 text-primary shrink-0" />
+              <CardTitle className="text-lg font-semibold truncate">{journal.subject}</CardTitle>
+            </div>
+            {/* Improved layout for date and lesson hour */}
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <CardDescription className="text-sm flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                {formatDate(journal.date, 'EEEE, dd MMMM yyyy')}
+              </CardDescription>
+              <CardDescription className="text-sm flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                {journal.lessonHour}
+              </CardDescription>
+            </div>
           </div>
-          <p className="text-sm text-foreground font-medium">{journal.material}</p>
-          <p className="text-sm text-muted-foreground">{journal.topic}</p>
+        </div>
+      </CardHeader>
+
+      <CardContent className="px-4 pb-4 space-y-4">
+        {/* Material */}
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Target className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="text-sm font-medium">Materi</span>
+          </div>
+          <p className="text-sm text-foreground truncate">{journal.material}</p>
+        </div>
+        
+        {/* Activity */}
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="text-sm font-medium">Kegiatan</span>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{journal.topic}</p>
         </div>
 
-        {/* Teaching Method and Media */}
+        {/* Method & Media */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <div className="flex items-center space-x-2 mb-2">
-              <Award className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Metode:</span>
+            <div className="flex items-center gap-2 mb-1">
+              <Award className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-sm font-medium">Metode</span>
             </div>
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {journal.teachingMethod}
-            </p>
+            <p className="text-sm text-muted-foreground line-clamp-2">{formatTeachingMethods(journal.teachingMethod)}</p>
           </div>
-          
           <div>
-            <div className="flex items-center space-x-2 mb-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Media:</span>
+            <div className="flex items-center gap-2 mb-1">
+              <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-sm font-medium">Media</span>
             </div>
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {journal.media}
-            </p>
+            <p className="text-sm text-muted-foreground line-clamp-2">{formatMedia(journal.media)}</p>
           </div>
         </div>
 
-        {/* Attendance Overview */}
-        <div className="p-3 bg-muted/30 rounded-lg">
+        {/* Attendance */}
+        <div className="p-3 bg-muted/20 rounded-lg">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Kehadiran:</span>
+              <span className="text-sm font-medium">Kehadiran</span>
             </div>
             <span className="text-sm font-medium">
               {journal.attendance.present}/{journal.attendance.total} ({getAttendancePercentage()}%)
             </span>
           </div>
-          
-          <div className="grid grid-cols-4 gap-2 text-xs">
-            <div className="text-center p-2 bg-green-50 rounded">
-              <div className="font-medium text-green-600">{journal.attendance.present}</div>
-              <div className="text-green-600">Hadir</div>
-            </div>
-            <div className="text-center p-2 bg-yellow-50 rounded">
-              <div className="font-medium text-yellow-600">{journal.attendance.sick}</div>
-              <div className="text-yellow-600">Sakit</div>
-            </div>
-            <div className="text-center p-2 bg-blue-50 rounded">
-              <div className="font-medium text-blue-600">{journal.attendance.permit}</div>
-              <div className="text-blue-600">Izin</div>
-            </div>
-            <div className="text-center p-2 bg-red-50 rounded">
-              <div className="font-medium text-red-600">{journal.attendance.absent}</div>
-              <div className="text-red-600">Alpa</div>
-            </div>
+          <div className="grid grid-cols-4 gap-2">
+            {(['present', 'sick', 'permit', 'absent'] as const).map((type) => {
+              const labels = { present: 'Hadir', sick: 'Sakit', permit: 'Izin', absent: 'Alpa' };
+              const colors = {
+                present: 'bg-green-50 text-green-700',
+                sick: 'bg-yellow-50 text-yellow-700',
+                permit: 'bg-blue-50 text-blue-700',
+                absent: 'bg-red-50 text-red-700',
+              };
+              return (
+                <div key={type} className="text-center p-2 rounded-md">
+                  <div className={`font-semibold text-sm ${colors[type].split(' ')[1]}`}>
+                    {journal.attendance[type]}
+                  </div>
+                  <div className={`text-xs mt-0.5 ${colors[type].split(' ')[1]}`}>
+                    {labels[type]}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
-
-        {/* Notes */}
-        {journal.notes && (
-          <div>
-            <div className="flex items-center space-x-2 mb-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Catatan:</span>
-            </div>
-            <p className="text-sm text-muted-foreground line-clamp-3">
-              {journal.notes}
-            </p>
-          </div>
-        )}
-
-        {/* Evaluation */}
-        <div>
-          <div className="flex items-center space-x-2 mb-2">
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Evaluasi:</span>
-          </div>
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {journal.evaluation}
-          </p>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-3 border-t">
-          <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-            <div className="flex items-center space-x-1">
-              <Calendar className="h-3 w-3" />
-              <span>{formatDate(journal.date, 'dd MMM yyyy')}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Clock className="h-3 w-3" />
+        <div className="flex items-center justify-between pt-3 border-t border-muted">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <History className="h-4 w-4" />
               <span>{getRelativeTime(journal.date)}</span>
             </div>
           </div>
-          
-          <div className="flex items-center space-x-2">
-            {getStatusBadge('completed')}
-          </div>
+          <div>{getStatusBadge('completed')}</div>
         </div>
       </CardContent>
     </Card>

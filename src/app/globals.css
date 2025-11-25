@@ -120,3 +120,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Sonner Toast Customization */
+[data-sonner-toast][data-type="success"] {
+  --normal-bg: hsl(143, 85%, 96%) !important;
+  --normal-border: hsl(145, 92%, 91%) !important;
+  --normal-text: hsl(140, 100%, 27%) !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: hsl(140, 100%, 27%) !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-content] {
+  color: hsl(140, 60%, 20%) !important;
+}

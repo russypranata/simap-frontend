@@ -1,5 +1,5 @@
-import { TeacherDashboard } from '@/features/teacher/pages/Dashboard';
+import { SchedulePage } from '@/features/teacher/pages/SchedulePage';
 
-export default function SchedulePage() {
-  return <TeacherDashboard />; // Will be implemented later
+export default function SchedulePageWrapper() {
+  return <SchedulePage />;
 }
