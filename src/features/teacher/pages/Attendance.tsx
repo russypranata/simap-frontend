@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,6 +9,7 @@ import { useTeacherData } from '../hooks/useTeacherData';
 import { useAttendanceData } from '../hooks/useAttendanceData';
 import { useAttendanceStatistics } from '../hooks/useAttendanceStatistics';
 import { useAttendanceHistory } from '../hooks/useAttendanceHistory';
+
 import {
   AttendanceTable,
   FilterSection,
@@ -15,21 +17,37 @@ import {
   HistorySection,
   MonthlyRecap,
   ModalDetailPresensi,
-  StatsCards
+  StatsCards,
+  EditAttendanceView,
+  DuplicateConfirmModal,
+  UnsavedChangesDialog,
+  ReportsSection,
+  DailySummary
 } from '../components/attendance';
-import { SUBJECTS, LESSON_HOURS } from '../constants/attendance';
+import { SUBJECTS, LESSON_HOURS, ACADEMIC_YEARS, SEMESTERS } from '../constants/attendance';
+import { getHolidayInfo } from '../constants/holidays';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
 import {
   Users,
   RefreshCw,
   ChevronDown,
-  Filter
+  Filter,
+  Save,
+  AlertTriangle,
+  Calendar,
+  Clock,
+  FileText,
+  ClipboardCheck,
+  BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
+
 
 import { useSearchParams } from 'next/navigation';
 
 export const Attendance: React.FC = () => {
+  // const { toast } = useToast(); // Removed shadcn toast
+  const router = useRouter();
   const { loading, error, classes, profile, schedule, clearError } = useTeacherData();
   const searchParams = useSearchParams();
 
@@ -44,6 +62,7 @@ export const Attendance: React.FC = () => {
   });
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedLessonHour, setSelectedLessonHour] = useState('');
+  // State
   const [activeTab, setActiveTab] = useState('attendance');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -56,11 +75,15 @@ export const Attendance: React.FC = () => {
     setHasUnsavedChanges,
     handleSaveAttendance,
     handleMarkAllPresent,
+    checkDuplicate,
+    refresh: refreshAttendance,
   } = useAttendanceData(selectedClass, selectedDate);
 
   // Independent state for Statistics Tab
   const [statsSelectedClass, setStatsSelectedClass] = useState(''); // Default to empty (Global)
   const [statsSelectedSubject, setStatsSelectedSubject] = useState(''); // Default to empty (All Subjects)
+  const [statsAcademicYear, setStatsAcademicYear] = useState<string>(ACADEMIC_YEARS[0]);
+  const [statsSemester, setStatsSemester] = useState<string>(SEMESTERS[0]);
 
   // Calculate available subjects based on selected class for Statistics
   const statsAvailableSubjects = React.useMemo(() => {
@@ -85,6 +108,20 @@ export const Attendance: React.FC = () => {
     setStatsSelectedSubject('');
   }, [statsSelectedClass]);
 
+  // Auto-select class if only one is available (Statistics Tab)
+  useEffect(() => {
+    if (classes.length === 1 && !statsSelectedClass) {
+      setStatsSelectedClass(classes[0].id);
+    }
+  }, [classes, statsSelectedClass]);
+
+  // Auto-select subject if only one is available (Statistics Tab)
+  useEffect(() => {
+    if (statsAvailableSubjects.length === 1 && !statsSelectedSubject) {
+      setStatsSelectedSubject(statsAvailableSubjects[0]);
+    }
+  }, [statsAvailableSubjects, statsSelectedSubject]);
+
   // Always use today for statistics trend
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -92,12 +129,29 @@ export const Attendance: React.FC = () => {
   const {
     students: statsStudents,
     attendanceRecords: rawStatsAttendanceRecords,
+    refresh: refreshStats,
   } = useAttendanceData(statsSelectedClass, todayStr);
 
   // Filter records by subject if selected
-  const statsAttendanceRecords = statsSelectedSubject
-    ? rawStatsAttendanceRecords.filter(r => r.subject === statsSelectedSubject)
-    : rawStatsAttendanceRecords;
+  // Filter records by subject and academic period
+  const statsAttendanceRecords = React.useMemo(() => {
+    let records = rawStatsAttendanceRecords;
+
+    // Filter by Subject
+    if (statsSelectedSubject) {
+      records = records.filter(r => r.subject === statsSelectedSubject);
+    }
+
+    // Filter by Academic Year & Semester
+    // Now using explicit fields from the record as requested
+    records = records.filter(r => {
+      const matchYear = r.academicYear === statsAcademicYear;
+      const matchSemester = statsSemester ? r.semester === statsSemester : true;
+      return matchYear && matchSemester;
+    });
+
+    return records;
+  }, [rawStatsAttendanceRecords, statsSelectedSubject, statsAcademicYear, statsSemester]);
 
   const statsClassData = classes.find(c => c.id === statsSelectedClass);
   // If class selected, filter students. If not (Global), use all fetched students.
@@ -106,7 +160,7 @@ export const Attendance: React.FC = () => {
     : statsStudents;
 
   // Calculate statistics based on the independent stats data
-  const { stats: statsTabStats, attendanceTrend: statsTabTrend, previousDayChange: statsTabChange } = useAttendanceStatistics(
+  const { stats: statsTabStats, attendanceTrend: statsTabTrend } = useAttendanceStatistics(
     statsAttendanceRecords,
     statsFilteredStudents,
     todayStr
@@ -116,23 +170,120 @@ export const Attendance: React.FC = () => {
   const selectedClassData = classes.find(c => c.id === selectedClass);
   const filteredStudents = selectedClass ? students.filter(s => s.class === selectedClassData?.name) : [];
 
-  const { stats, attendanceTrend, previousDayChange } = useAttendanceStatistics(
+  const { stats, attendanceTrend } = useAttendanceStatistics(
     attendanceRecords,
     filteredStudents,
     selectedDate
   );
 
+  // History Tab - Independent data source from localStorage
   const {
+    // Filter states
+    selectedClass: historySelectedClass,
+    setSelectedClass: setHistorySelectedClass,
+    selectedSubject: historySelectedSubject,
+    setSelectedSubject: setHistorySelectedSubject,
+    selectedStatus: historySelectedStatus,
+    setSelectedStatus: setHistorySelectedStatus,
     searchTerm,
     setSearchTerm,
     dateRange,
     setDateRange,
+    academicYear: historyAcademicYear,
+    setAcademicYear: setHistoryAcademicYear,
+    semester: historySemester,
+    setSemester: setHistorySemester,
+
+    // Data
     recentRecords,
+    totalRecordsCount,
+    filterSummary,
+    refresh: refreshHistory,
+    resetFilters: resetHistoryFilters,
+    setToday,
+    setThisWeek,
+    setThisMonth,
+    activeDateFilter,
+
+    // Pagination
+    currentPage,
+    totalPages,
+    itemsPerPage,
+    setItemsPerPage,
+    startIndex,
+    endIndex,
+    goToPage,
+    nextPage,
+    previousPage,
+
+    // Modal
     selectedHistoryRecord,
     showHistoryModal,
     openHistoryModal,
     closeHistoryModal,
-  } = useAttendanceHistory(attendanceRecords);
+    isLoading: isHistoryLoading,
+    updateRecord,
+    deleteRecord,
+    exportToCSV,
+    isEditing,
+  } = useAttendanceHistory(); // No parameters - loads independently from localStorage
+
+  // State for Full Page Edit View
+  const [isEditingPage, setIsEditingPage] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<any | null>(null);
+
+  // State for Duplicate Confirmation Modal
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicateRecord, setDuplicateRecord] = useState<any | null>(null);
+  const [pendingAttendanceData, setPendingAttendanceData] = useState<any[] | null>(null);
+
+  // State for Unsaved Changes Modal
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [pendingTab, setPendingTab] = useState<string | null>(null);
+  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+
+  const handleEditFromHistory = (record: any) => {
+    setEditingRecord(record);
+    setIsEditingPage(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingPage(false);
+    setEditingRecord(null);
+  };
+
+  const handleSaveEdit = async (updatedRecord: any) => {
+    const success = await updateRecord(updatedRecord);
+    if (success) {
+      setIsEditingPage(false);
+      setEditingRecord(null);
+    }
+    return success;
+  };
+
+  // Duplicate Modal Handlers
+  const handleDuplicateEdit = () => {
+    if (duplicateRecord) {
+      setShowDuplicateModal(false);
+      handleEditFromHistory(duplicateRecord);
+    }
+  };
+
+  const handleDuplicateOverwrite = async () => {
+    if (pendingAttendanceData) {
+      await handleSaveAttendance(pendingAttendanceData);
+      await refreshHistory();
+      setShowDuplicateModal(false);
+      setPendingAttendanceData(null);
+      setDuplicateRecord(null);
+    }
+  };
+
+  const handleDuplicateCancel = () => {
+    setShowDuplicateModal(false);
+    setPendingAttendanceData(null);
+    setDuplicateRecord(null);
+  };
 
   // Calculate available subjects based on selected class, schedule AND selected date (day)
   const subjects = React.useMemo(() => {
@@ -167,11 +318,81 @@ export const Attendance: React.FC = () => {
     return uniqueSubjects;
   }, [selectedClass, selectedDate, classes, schedule, profile]);
 
-  // Reset selectedSubject and selectedLessonHour when class or date changes
+
+
+  // Holiday Validation
+  const [holidayWarning, setHolidayWarning] = useState<{ isHoliday: boolean; name: string | null }>({ isHoliday: false, name: null });
+
   React.useEffect(() => {
-    setSelectedSubject('');
-    setSelectedLessonHour('');
-  }, [selectedClass, selectedDate]);
+    if (selectedDate) {
+      const info = getHolidayInfo(selectedDate);
+      setHolidayWarning(info);
+
+      // Optional: Clear selection if holiday (or keep it to show warning)
+      if (info.isHoliday) {
+        setSelectedSubject('');
+        setSelectedLessonHour('');
+      }
+    }
+  }, [selectedDate]);
+
+  // Warn user before leaving page with unsaved changes
+  React.useEffect(() => {
+    // Handle browser navigation (refresh, close tab, external links)
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges && activeTab === 'attendance') {
+        e.preventDefault();
+        e.returnValue = ''; // Chrome requires returnValue to be set
+        return '';
+      }
+    };
+
+    // Handle Next.js client-side navigation (navbar, internal links)
+
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Note: Next.js App Router doesn't have router.events
+    // We'll use a different approach with Link component interception
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges, activeTab, router]);
+
+
+
+  // Global Link Interceptor (Navbar & External Links)
+  React.useEffect(() => {
+    const handleAnchorClick = (e: MouseEvent) => {
+      if (hasUnsavedChanges && activeTab === 'attendance') {
+        const target = e.target as HTMLElement;
+        const anchor = target.closest('a');
+
+        // If clicked element is a link or inside a link
+        if (anchor) {
+          const href = anchor.getAttribute('href');
+          // Ignore empty links, anchor links to same page id, or javascript:void
+          if (!href || href.startsWith('#') || href.startsWith('javascript')) return;
+
+          // Prevent default navigation
+          e.preventDefault();
+          e.stopPropagation();
+
+          // Show custom modal instead of window.confirm
+          setPendingUrl(href);
+          setShowUnsavedModal(true);
+        }
+      }
+    };
+
+    // Use capture phase (true) to intercept before Next.js Link handles it
+    window.addEventListener('click', handleAnchorClick, true);
+
+    return () => {
+      window.removeEventListener('click', handleAnchorClick, true);
+    };
+  }, [hasUnsavedChanges, activeTab, router]);
 
   // Auto-select subject if only one available
   React.useEffect(() => {
@@ -333,6 +554,19 @@ export const Attendance: React.FC = () => {
       const todayString = `${year}-${month}-${day}`;
       setSelectedDate(todayString);
 
+      // Reset Statistics Filters
+      setStatsSelectedClass('');
+      setStatsSelectedSubject('');
+      setStatsAcademicYear(ACADEMIC_YEARS[0]);
+      setStatsSemester(SEMESTERS[0]);
+
+      // Reset History Filters
+      resetHistoryFilters();
+
+      // Trigger data refresh
+      refreshAttendance();
+      refreshStats();
+
       // Force re-render by incrementing refresh key
       setRefreshKey(prev => prev + 1);
 
@@ -352,10 +586,56 @@ export const Attendance: React.FC = () => {
   };
 
   const handleTabChange = (newTab: string) => {
+    // Check if switching away from attendance tab with unsaved changes
     if (hasUnsavedChanges && activeTab === 'attendance') {
-      toast.warning('⚠️ Anda memiliki perubahan yang belum disimpan!');
+      setPendingTab(newTab);
+      setShowUnsavedModal(true);
+      return; // Block tab change
     }
+
     setActiveTab(newTab);
+  };
+
+  // Unsaved Changes Modal Handlers
+  const handleUnsavedSave = async () => {
+    // Get current attendance data from AttendanceTable
+    // This will  const handleUnsavedSave = async () => {
+    // In "Lanjutkan" mode (which is actually discard but proceed), we just reset flag and switch
+    // The user explicitly chose "Lanjutkan" knowing data will be lost (as per modal text)
+    setHasUnsavedChanges(false);
+    setShowUnsavedModal(false);
+
+    if (pendingTab) {
+      setActiveTab(pendingTab);
+      setPendingTab(null);
+    }
+
+    if (pendingUrl) {
+      router.push(pendingUrl);
+      setPendingUrl(null);
+    }
+  };
+
+  const handleUnsavedDiscard = () => {
+    // This is "Buang & Lanjutkan" button
+    setHasUnsavedChanges(false);
+    setShowUnsavedModal(false);
+
+    if (pendingTab) {
+      setActiveTab(pendingTab);
+      setPendingTab(null);
+    }
+
+    if (pendingUrl) {
+      router.push(pendingUrl);
+      setPendingUrl(null);
+    }
+  };
+
+  const handleUnsavedCancel = () => {
+    setShowUnsavedModal(false);
+    setPendingTab(null);
+    setPendingUrl(null);
   };
 
   const handleFilterChange = () => {
@@ -377,6 +657,7 @@ export const Attendance: React.FC = () => {
   if (loading) {
     return (
       <div className="space-y-6">
+
         {/* Header Skeleton */}
         <div className="animate-pulse">
           <div className="h-8 bg-muted rounded w-1/3 mb-2"></div>
@@ -429,15 +710,59 @@ export const Attendance: React.FC = () => {
 
 
 
+  if (isEditingPage && editingRecord) {
+    return (
+      <EditAttendanceView
+        record={editingRecord}
+        onSave={handleSaveEdit}
+        onCancel={handleCancelEdit}
+        isLoading={isHistoryLoading}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Unsaved Changes Warning Banner */}
+      {hasUnsavedChanges && activeTab === 'attendance' && (
+        <div className="sticky top-0 z-50 animate-in slide-in-from-top">
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-yellow-800">
+                  Anda memiliki perubahan yang belum disimpan
+                </p>
+                <p className="text-xs text-yellow-700 mt-1">
+                  Jangan lupa klik tombol "Save" di bawah sebelum meninggalkan halaman ini
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                <Save className="h-5 w-5 text-yellow-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Presensi Siswa</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">
+            Presensi <span className="text-primary">Siswa</span>
+          </h1>
           <p className="text-muted-foreground">
             Kelola presensi siswa untuk setiap mata pelajaran
           </p>
+          <div className="flex items-center gap-3 mt-4">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <Calendar className="h-4 w-4" />
+              <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
+            </div>
+            <div className="h-4 w-[1px] bg-border" />
+            <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
+          </div>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -454,15 +779,47 @@ export const Attendance: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="attendance">Presensi</TabsTrigger>
-          <TabsTrigger value="statistics">Statistik</TabsTrigger>
-          <TabsTrigger value="history">Riwayat</TabsTrigger>
-          <TabsTrigger value="monthly">Rekap Bulanan</TabsTrigger>
+          <TabsTrigger value="attendance" className="gap-2">
+            <ClipboardCheck className="h-4 w-4" />
+            Presensi
+          </TabsTrigger>
+          <TabsTrigger value="statistics" className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Statistik
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-2">
+            <Clock className="h-4 w-4" />
+            Riwayat
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="gap-2">
+            <FileText className="h-4 w-4" />
+            Laporan
+          </TabsTrigger>
         </TabsList>
 
+
         <TabsContent value="attendance" className="space-y-6">
+          {/* Daily Summary */}
+          <DailySummary
+            schedule={schedule}
+            attendanceRecords={attendanceRecords}
+            selectedDate={selectedDate}
+            classes={classes}
+            onFillFilter={(classId, subject, lessonHour) => {
+              setSelectedClass(classId);
+              setSelectedSubject(subject);
+              setSelectedLessonHour(lessonHour);
+
+              const className = classes.find(c => c.id === classId)?.name || classId;
+              toast.success('Filter Diaktifkan', {
+                description: `Filter diset untuk ${subject} - ${className}`,
+                duration: 3000,
+              });
+            }}
+          />
+
           <FilterSection
             key={`filter-${refreshKey}`}
             selectedClass={selectedClass}
@@ -494,14 +851,56 @@ export const Attendance: React.FC = () => {
               selectedDate={selectedDate}
               selectedSubject={selectedSubject}
               selectedLessonHour={selectedLessonHour}
-              onSave={handleSaveAttendance}
+              hasUnsavedChanges={hasUnsavedChanges}
+              onUnsavedChanges={setHasUnsavedChanges}
+
+              onSave={async (data) => {
+                // Check for duplicate before saving
+                const lessonHourNumber = selectedLessonHour.match(/Jam ke-([0-9-]+)/)?.[1] || '';
+                const { isDuplicate, existingRecord } = checkDuplicate(
+                  selectedDate,
+                  selectedClassData?.name || '',
+                  selectedSubject,
+                  lessonHourNumber
+                );
+
+                if (isDuplicate) {
+                  // Show duplicate confirmation modal
+                  setDuplicateRecord(existingRecord);
+                  setPendingAttendanceData(data);
+                  setShowDuplicateModal(true);
+                  return;
+                }
+
+                // No duplicate, proceed with save
+                await handleSaveAttendance(data);
+                refreshHistory();
+              }}
               existingRecords={attendanceRecords}
               isLoading={loading}
+
             />
           )}
 
-          {/* Empty State */}
-          {(!selectedClass || !selectedDate || !selectedSubject) && (
+          {/* Holiday Warning State */}
+          {selectedDate && holidayWarning.isHoliday && (
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center animate-in fade-in zoom-in duration-300">
+              <div className="bg-red-100 p-4 rounded-full mb-6 ring-8 ring-red-50">
+                <Calendar className="h-12 w-12 text-red-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                {holidayWarning.name}
+              </h3>
+              <p className="text-gray-500 max-w-md mb-8 text-lg">
+                <span className="text-sm mt-2 block text-gray-400">
+                  Sistem presensi dinonaktifkan untuk tanggal ini. Silakan pilih tanggal lain untuk melakukan presensi.
+                </span>
+              </p>
+            </div>
+          )}
+
+          {/* Empty State (Only show if NOT a holiday) */}
+          {(!selectedClass || !selectedDate || !selectedSubject) && !holidayWarning.isHoliday && (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Users className="h-16 w-16 text-muted-foreground mb-4" />
@@ -531,7 +930,7 @@ export const Attendance: React.FC = () => {
           )}
         </TabsContent>
 
-        <TabsContent value="statistics" className="space-y-6">
+        <TabsContent value="statistics" className="space-y-6" key={`stats-${refreshKey}`}>
           {/* Independent Filter for Statistics */}
           <Card>
             <CardHeader>
@@ -540,26 +939,62 @@ export const Attendance: React.FC = () => {
                   <Filter className="h-5 w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold text-gray-900">
+                  <CardTitle className="text-lg font-semibold text-gray-900">
                     Filter Statistik
                   </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground font-medium">
+                  <CardDescription className="text-sm text-muted-foreground">
                     Sesuaikan tampilan statistik berdasarkan kelas dan mata pelajaran
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Tahun Ajaran</label>
+                  <div className="relative">
+                    <select
+                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                      value={statsAcademicYear}
+                      onChange={(e) => setStatsAcademicYear(e.target.value)}
+                    >
+                      {ACADEMIC_YEARS.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Semester</label>
+                  <div className="relative">
+                    <select
+                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                      value={statsSemester}
+                      onChange={(e) => setStatsSemester(e.target.value)}
+                    >
+                      <option value="">Semua Semester</option>
+                      {SEMESTERS.map((sem) => (
+                        <option key={sem} value={sem}>
+                          {sem}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  </div>
+                </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Kelas</label>
                   <div className="relative">
                     <select
-                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
                       value={statsSelectedClass}
                       onChange={(e) => setStatsSelectedClass(e.target.value)}
                     >
-                      <option value="">Semua Kelas</option>
+                      {classes.length > 1 && <option value="">Semua Kelas</option>}
                       {classes.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name} ({c.studentCount} Siswa)
@@ -574,11 +1009,11 @@ export const Attendance: React.FC = () => {
                   <label className="text-sm font-medium">Mata Pelajaran</label>
                   <div className="relative">
                     <select
-                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
                       value={statsSelectedSubject}
                       onChange={(e) => setStatsSelectedSubject(e.target.value)}
                     >
-                      <option value="">Semua Mata Pelajaran</option>
+                      {statsAvailableSubjects.length > 1 && <option value="">Semua Mata Pelajaran</option>}
                       {statsAvailableSubjects.map((subject) => (
                         <option key={subject} value={subject}>
                           {subject}
@@ -596,34 +1031,81 @@ export const Attendance: React.FC = () => {
           <>
             <StatsCards
               stats={statsTabStats}
-              selectedClassName={statsSelectedClass ? statsClassData?.name : 'Semua Kelas'}
+              selectedClassName={statsSelectedClass ? statsClassData?.name : undefined}
             />
 
             <StatisticSection
               stats={statsTabStats}
               attendanceTrend={statsTabTrend}
-              previousDayChange={statsTabChange}
+              selectedClassName={statsSelectedClass ? statsClassData?.name : undefined}
+              selectedSubjectName={statsSelectedSubject || undefined}
+              attendanceRecords={statsAttendanceRecords}
+              filteredStudents={statsFilteredStudents}
+              academicYear={statsAcademicYear}
+              semester={statsSemester}
             />
           </>
         </TabsContent>
 
-        <TabsContent value="history" className="space-y-6">
+        <TabsContent value="history" className="space-y-6" key={`history-${refreshKey}`}>
           <HistorySection
-            recentRecords={recentRecords}
+            selectedClass={historySelectedClass}
+            setSelectedClass={setHistorySelectedClass}
+            selectedSubject={historySelectedSubject}
+            setSelectedSubject={setHistorySelectedSubject}
+            selectedStatus={historySelectedStatus}
+            setSelectedStatus={setHistorySelectedStatus}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             dateRange={dateRange}
             setDateRange={setDateRange}
+            setToday={setToday}
+            setThisWeek={setThisWeek}
+            setThisMonth={setThisMonth}
+            activeDateFilter={activeDateFilter}
+            academicYear={historyAcademicYear}
+            setAcademicYear={setHistoryAcademicYear}
+            semester={historySemester}
+            setSemester={setHistorySemester}
+            recentRecords={recentRecords}
+            totalRecordsCount={totalRecordsCount}
+            filterSummary={filterSummary}
             onViewDetails={openHistoryModal}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            setItemsPerPage={setItemsPerPage}
+            startIndex={startIndex}
+            endIndex={endIndex}
+            goToPage={goToPage}
+            nextPage={nextPage}
+            previousPage={previousPage}
+            classes={classes}
+            subjects={profile?.subjects || []}
+            isLoading={isHistoryLoading}
+            onEditRecord={handleEditFromHistory}
+            onDeleteRecord={deleteRecord}
+            onExportData={exportToCSV}
           />
         </TabsContent>
 
-        <TabsContent value="monthly" className="space-y-6">
-          <MonthlyRecap
-            selectedClassData={selectedClassData}
-            stats={stats}
+        <TabsContent value="reports" className="space-y-6">
+          <ReportsSection
+            classes={classes}
+            subjects={profile?.subjects || []}
+            onExport={(type, format, filters) => {
+              // Simulation of export
+              toast.info(`Sedang mengunduh Laporan ${type === 'monthly' ? 'Bulanan' : 'Semester'} (${format.toUpperCase()})...`);
+              console.log('Exporting report:', { type, format, filters });
+
+              // Simulate delay
+              setTimeout(() => {
+                toast.success('Laporan berhasil diunduh!');
+              }, 1500);
+            }}
           />
         </TabsContent>
+
       </Tabs>
 
       {/* History Detail Modal */}
@@ -631,6 +1113,29 @@ export const Attendance: React.FC = () => {
         isOpen={showHistoryModal}
         record={selectedHistoryRecord}
         onClose={closeHistoryModal}
+        onEdit={() => {
+          if (selectedHistoryRecord) {
+            closeHistoryModal();
+            handleEditFromHistory(selectedHistoryRecord);
+          }
+        }}
+      />
+
+      {/* Duplicate Confirmation Modal */}
+      <DuplicateConfirmModal
+        isOpen={showDuplicateModal}
+        existingRecord={duplicateRecord}
+        onEdit={handleDuplicateEdit}
+        onOverwrite={handleDuplicateOverwrite}
+        onCancel={handleDuplicateCancel}
+      />
+
+      {/* Unsaved Changes Dialog */}
+      <UnsavedChangesDialog
+        isOpen={showUnsavedModal}
+        onSave={handleUnsavedSave}
+        onDiscard={handleUnsavedDiscard}
+        onCancel={handleUnsavedCancel}
       />
     </div>
   );

@@ -30,7 +30,9 @@ import {
   BookOpen,
   MoreHorizontal,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  PieChart,
+  Percent
 } from 'lucide-react';
 
 interface AttendanceTableProps {
@@ -50,6 +52,8 @@ interface AttendanceTableProps {
   }[]) => Promise<void>;
   existingRecords?: AttendanceRecord[];
   isLoading?: boolean;
+  onUnsavedChanges?: (hasChanges: boolean) => void;
+  hasUnsavedChanges?: boolean;
 }
 
 interface StudentAttendanceData {
@@ -68,6 +72,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   onSave,
   existingRecords = [],
   isLoading = false,
+  onUnsavedChanges,
+  hasUnsavedChanges = false,
 }) => {
   const [attendanceData, setAttendanceData] = useState<Record<string, StudentAttendanceData>>({});
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,7 +82,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  // Removed internal hasUnsavedChanges state as it's now controlled by parent
   const [selectedStudentHistory, setSelectedStudentHistory] = useState<Student | null>(null);
   const [showHistory, setShowHistory] = useState(false);
 
@@ -86,8 +92,20 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
     return match ? match[1] : '';
   }, [selectedLessonHour]);
 
+  // Track the last initialized context to prevent unwanted resets
+  const initializedContextRef = React.useRef<string>('');
+  const currentContextKey = `${selectedClass}-${selectedDate}-${selectedSubject}-${lessonHourCode}`;
+
   // Initialize attendance data with existing records or default values
   React.useEffect(() => {
+    // Skip initialization if:
+    // 1. We have unsaved changes (user is editing)
+    // 2. AND the context (class/date/subject) hasn't changed
+    // This prevents the parent's re-render (triggered by onUnsavedChanges) from resetting our local state
+    if (hasUnsavedChanges && initializedContextRef.current === currentContextKey) {
+      return;
+    }
+
     const initialData: Record<string, StudentAttendanceData> = {};
 
     students.forEach(student => {
@@ -112,12 +130,13 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
     });
 
     setAttendanceData(initialData);
-  }, [students, existingRecords, selectedDate, selectedSubject, lessonHourCode]);
+    initializedContextRef.current = currentContextKey;
+  }, [students, existingRecords, selectedDate, selectedSubject, lessonHourCode, hasUnsavedChanges, currentContextKey]);
 
   // Reset save status when filters change
   React.useEffect(() => {
     setIsSaved(false);
-    setHasUnsavedChanges(false);
+    onUnsavedChanges?.(false);
   }, [selectedClass, selectedDate, selectedSubject, selectedLessonHour]);
 
   // Filter and paginate students
@@ -149,7 +168,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         status,
       },
     }));
-    setHasUnsavedChanges(true);
+    onUnsavedChanges?.(true);
     setIsSaved(false);
   };
 
@@ -161,7 +180,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         notes,
       },
     }));
-    setHasUnsavedChanges(true);
+    onUnsavedChanges?.(true);
     setIsSaved(false);
   };
 
@@ -196,7 +215,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
 
       // Update save status
       setIsSaved(true);
-      setHasUnsavedChanges(false);
+      onUnsavedChanges?.(false);
     } catch (error) {
       console.error('Error saving attendance:', error);
     } finally {
@@ -296,9 +315,9 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" >
       {/* Header with stats and actions */}
-      <Card>
+      < Card >
         <CardHeader>
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             <div className="flex items-center gap-3">
@@ -399,10 +418,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card >
 
       {/* Filters and Search */}
-      <Card>
+      < Card >
         <CardContent className="p-4">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
@@ -470,12 +489,12 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card >
 
 
 
       {/* Attendance Table */}
-      <Card>
+      < Card >
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -729,10 +748,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             </div>
           )}
         </CardContent>
-      </Card>
+      </Card >
 
       {/* Save Button - Between Table and Summary */}
-      <div className="flex justify-end">
+      < div className="flex justify-end" >
         <Button
           onClick={handleSave}
           disabled={isSaving || isLoading}
@@ -741,10 +760,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
           <Save className="h-4 w-4 mr-2" />
           <span>{isSaving ? 'Menyimpan...' : 'Simpan Presensi'}</span>
         </Button>
-      </div>
+      </div >
 
       {/* Summary Card */}
-      <Card>
+      < Card >
         <CardHeader className="pb-3">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
@@ -760,7 +779,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             {/* Composition Section */}
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Komposisi Kehadiran</span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <PieChart className="h-4 w-4" />
+                  <span>Komposisi Kehadiran</span>
+                </div>
                 <span className="font-medium">
                   {students.length} Siswa
                 </span>
@@ -814,13 +836,22 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             {/* Class Info */}
             <div className="space-y-2 text-sm border-l pl-6">
               <div className="grid grid-cols-2 gap-2">
-                <span className="text-muted-foreground">Kelas</span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Users className="h-4 w-4" />
+                  <span>Kelas</span>
+                </div>
                 <span className="font-medium text-right">{selectedClass}</span>
 
-                <span className="text-muted-foreground">Mapel</span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <BookOpen className="h-4 w-4" />
+                  <span>Mapel</span>
+                </div>
                 <span className="font-medium text-right truncate" title={selectedSubject}>{selectedSubject}</span>
 
-                <span className="text-muted-foreground">Tanggal</span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>Tanggal</span>
+                </div>
                 <span className="font-medium text-right">{formatDate(selectedDate, 'dd MMM yyyy')}</span>
               </div>
             </div>
@@ -828,13 +859,22 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             {/* Status Info */}
             <div className="space-y-2 text-sm border-l pl-6">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Status Simpan</span>
-                <Badge variant={existingRecords.length > 0 ? "default" : "secondary"} className="text-xs">
-                  {existingRecords.length > 0 ? 'Tersimpan' : 'Belum Disimpan'}
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Save className="h-4 w-4" />
+                  <span>Status Simpan</span>
+                </div>
+                <Badge
+                  variant={hasUnsavedChanges ? "destructive" : (existingRecords.length > 0 ? "default" : "secondary")}
+                  className="text-xs"
+                >
+                  {hasUnsavedChanges ? 'Perubahan Belum Disimpan' : (existingRecords.length > 0 ? 'Tersimpan' : 'Belum Disimpan')}
                 </Badge>
               </div>
               <div className="flex items-center justify-between mt-2">
-                <span className="text-muted-foreground">Kehadiran</span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Percent className="h-4 w-4" />
+                  <span>Kehadiran</span>
+                </div>
                 <span className="font-medium">
                   {((Object.values(attendanceData).filter(d => d.status === 'hadir').length / students.length) * 100).toFixed(0)}%
                 </span>
@@ -842,7 +882,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card >
     </div >
   );
 };

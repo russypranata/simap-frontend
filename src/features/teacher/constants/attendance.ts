@@ -39,3 +39,17 @@ export const ATTENDANCE_STATUS_LABELS = {
   izin: 'Izin',
   'tanpa-keterangan': 'Alpa',
 } as const;
+
+export const ACADEMIC_YEARS = [
+  '2025/2026',
+  '2024/2025',
+  '2023/2024',
+] as const;
+
+export const SEMESTERS = [
+  'Ganjil',
+  'Genap',
+] as const;
+
+export const ACTIVE_ACADEMIC_YEAR = ACADEMIC_YEARS[0]; // 2025/2026
+export const ACTIVE_SEMESTER = SEMESTERS[0]; // Ganjil

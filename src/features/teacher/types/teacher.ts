@@ -19,7 +19,7 @@ export interface TeacherClass {
   id: string;
   name: string;
   grade: string;
-  major: string;
+  major?: string;
   homeroomTeacher: string;
   studentCount: number;
   schedule: string[];
@@ -49,6 +49,8 @@ export interface AttendanceRecord {
   teacher: string;
   lessonHour: string; // e.g., '1-2', '3-4', etc.
   notes?: string;
+  academicYear: string;
+  semester: 'Ganjil' | 'Genap';
 }
 
 export interface TeachingJournal {
@@ -70,12 +72,30 @@ export interface TeachingJournal {
     permit: number;
     absent: number;
   };
+  academicYear: string;
+  semester: 'Ganjil' | 'Genap';
+  createdAt?: string;
+  updatedAt?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface Assignment {
   name: string;
   score: number;
   maxScore: number;
+}
+
+export interface Assignment {
+  name: string;
+  score: number;
+  maxScore: number;
+
+  // Moodle Integration Fields
+  source?: 'manual' | 'moodle';
+  moodleId?: string;
+  lastSyncedAt?: string;
+  isLocked?: boolean;
 }
 
 export interface Grade {
@@ -92,6 +112,11 @@ export interface Grade {
   average: number;
   grade: 'A' | 'B' | 'C' | 'D' | 'E';
   description: string;
+
+  // Moodle Integration Fields
+  moodleUserId?: string;
+  syncStatus?: 'synced' | 'modified' | 'error' | 'manual';
+  lastSync?: Date;
 }
 
 export interface Schedule {
@@ -155,4 +180,20 @@ export interface DashboardStats {
   };
   documentsSent: number;
   latestAnnouncements: number;
+}
+
+export interface RemediationNote {
+  id: string;
+  studentId: string;
+  studentName: string;
+  class: string;
+  subject: string;
+  semester: 'Ganjil' | 'Genap';
+  status: 'remedial' | 'enrichment';
+  score: number;
+  grade: 'A' | 'B' | 'C' | 'D' | 'E';
+  note: string;
+  actionPlan: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

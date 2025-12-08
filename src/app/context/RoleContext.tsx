@@ -12,6 +12,8 @@ interface RoleContextType {
   logout: () => void;
   isHomeroomTeacher: boolean;
   setIsHomeroomTeacher: (isHomeroom: boolean) => void;
+  isPiketTeacher: boolean;
+  setIsPiketTeacher: (isPiket: boolean) => void;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
@@ -31,15 +33,29 @@ interface RoleProviderProps {
 export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
   const [role, setRoleState] = useState<UserRole>('guru'); // Default to 'guru' for development
   const [isHomeroomTeacher, setIsHomeroomTeacher] = useState(true);
+  const [isPiketTeacher, setIsPiketTeacher] = useState(false);
 
   // Initialize role from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedRole = localStorage.getItem('userRole') as UserRole;
-      const savedHomeroom = localStorage.getItem('isHomeroomTeacher') === 'true';
+      const savedHomeroom = localStorage.getItem('isHomeroomTeacher');
+      const savedPiket = localStorage.getItem('isPiketTeacher');
       if (savedRole) {
         setRoleState(savedRole);
-        setIsHomeroomTeacher(savedHomeroom);
+        if (savedRole === 'guru') {
+          // Force true for guru to ensure Wali Kelas is visible
+          setIsHomeroomTeacher(true);
+          localStorage.setItem('isHomeroomTeacher', 'true');
+
+          // Initialize Piket role - Force true for demo/testing
+          const shouldBePiket = true; // savedPiket === 'true'; 
+          setIsPiketTeacher(shouldBePiket);
+          localStorage.setItem('isPiketTeacher', String(shouldBePiket));
+        } else {
+          setIsHomeroomTeacher(savedHomeroom === 'true');
+          setIsPiketTeacher(savedPiket === 'true');
+        }
       }
     }
   }, []);
@@ -55,6 +71,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
     }
     if (newRole === null) {
       setIsHomeroomTeacher(false);
+      setIsPiketTeacher(false);
     }
   };
 
@@ -62,10 +79,16 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
     setRole(loginRole);
     // For demo purposes, randomly set homeroom teacher status for teachers
     if (loginRole === 'guru') {
-      const isHomeroom = Math.random() > 0.5;
+      const isHomeroom = true; // Always true for development/demo
       setIsHomeroomTeacher(isHomeroom);
+
+      // Default to true for demo purposes for Piket
+      const isPiket = true;
+      setIsPiketTeacher(isPiket);
+
       if (typeof window !== 'undefined') {
         localStorage.setItem('isHomeroomTeacher', String(isHomeroom));
+        localStorage.setItem('isPiketTeacher', String(isPiket));
       }
     }
   };
@@ -73,9 +96,11 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
   const logout = () => {
     setRole(null);
     setIsHomeroomTeacher(false);
+    setIsPiketTeacher(false);
     if (typeof window !== 'undefined') {
       localStorage.removeItem('userRole');
       localStorage.removeItem('isHomeroomTeacher');
+      localStorage.removeItem('isPiketTeacher');
     }
   };
 
@@ -91,6 +116,8 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
         logout,
         isHomeroomTeacher,
         setIsHomeroomTeacher,
+        isPiketTeacher,
+        setIsPiketTeacher,
       }}
     >
       {children}

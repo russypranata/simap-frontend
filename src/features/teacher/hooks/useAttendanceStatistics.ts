@@ -51,52 +51,70 @@ export const useAttendanceStatistics = (
 
   const stats = useMemo(() => getAttendanceStats(), [attendanceRecords, filteredStudents, selectedDate]);
 
-  // Get dynamic attendance trend for the current week
-  const getAttendanceTrend = () => {
-    const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
-    const currentDate = new Date(selectedDate);
-    const weekStart = new Date(currentDate);
-    weekStart.setDate(currentDate.getDate() - currentDate.getDay() + 1);
+  // Get monthly attendance trend for the semester
+  const getMonthlyTrend = () => {
+    // Group records by month
+    const monthlyData: Record<string, { total: number; hadir: number; sakit: number; izin: number; tanpaKeterangan: number }> = {};
 
-    return days.map((day, index) => {
-      const date = new Date(weekStart);
-      date.setDate(weekStart.getDate() + index);
-      const dateStr = formatDate(date, 'yyyy-MM-dd');
+    attendanceRecords.forEach(record => {
+      // Extract month key (YYYY-MM)
+      const date = new Date(record.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
-      const dayRecords = attendanceRecords.filter(r => r.date === dateStr);
-      const hadir = dayRecords.filter(r => r.status === 'hadir').length;
-      const total = filteredStudents.length || dayRecords.length || 32;
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = { total: 0, hadir: 0, sakit: 0, izin: 0, tanpaKeterangan: 0 };
+      }
 
-      return { date: day, hadir, total, dateStr };
+      const status = record.status?.toLowerCase().trim();
+
+      monthlyData[monthKey].total += 1;
+      if (status === 'hadir' || status === 'present') monthlyData[monthKey].hadir += 1;
+      else if (status === 'sakit') monthlyData[monthKey].sakit += 1;
+      else if (status === 'izin') monthlyData[monthKey].izin += 1;
+      else if (status === 'tanpa-keterangan' || status === 'alpha') monthlyData[monthKey].tanpaKeterangan += 1;
+    });
+
+    // Convert to array and sort
+    const sortedMonths = Object.keys(monthlyData).sort();
+
+    // Map to chart format
+    return sortedMonths.map(monthKey => {
+      const [year, month] = monthKey.split('-');
+      const MONTH_NAMES = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+        'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'
+      ];
+      const FULL_MONTH_NAMES = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      ];
+      const monthIndex = parseInt(month) - 1;
+      const monthName = MONTH_NAMES[monthIndex];
+      const fullMonthName = FULL_MONTH_NAMES[monthIndex];
+
+      const data = monthlyData[monthKey];
+      const calculatePercentage = (count: number) => data.total > 0 ? parseFloat(((count / data.total) * 100).toFixed(1)) : 0;
+
+      return {
+        name: monthName,
+        fullName: fullMonthName,
+        percentage: calculatePercentage(data.hadir),
+        percentageSakit: calculatePercentage(data.sakit),
+        percentageIzin: calculatePercentage(data.izin),
+        percentageAlpha: calculatePercentage(data.tanpaKeterangan),
+        total: data.total,
+        hadir: data.hadir,
+        sakit: data.sakit,
+        izin: data.izin,
+        tanpaKeterangan: data.tanpaKeterangan
+      };
     });
   };
 
-  const attendanceTrend = useMemo(() => getAttendanceTrend(), [attendanceRecords, filteredStudents, selectedDate]);
-
-  // Calculate percentage change from previous day
-  const getPreviousDayChange = () => {
-    if (attendanceTrend.length < 2) return null;
-
-    const today = attendanceTrend[attendanceTrend.length - 1];
-    const yesterday = attendanceTrend[attendanceTrend.length - 2];
-
-    if (yesterday.total === 0) return null;
-
-    const todayPercentage = (today.hadir / today.total) * 100;
-    const yesterdayPercentage = (yesterday.hadir / yesterday.total) * 100;
-    const change = todayPercentage - yesterdayPercentage;
-
-    return {
-      value: Math.abs(change).toFixed(1),
-      isUp: change >= 0
-    };
-  };
-
-  const previousDayChange = useMemo(() => getPreviousDayChange(), [attendanceTrend]);
+  const attendanceTrend = useMemo(() => getMonthlyTrend(), [attendanceRecords]);
 
   return {
     stats,
     attendanceTrend,
-    previousDayChange,
   };
 };

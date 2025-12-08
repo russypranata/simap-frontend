@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTeacherData } from './useTeacherData';
 import { toast } from 'sonner';
+import { ACTIVE_ACADEMIC_YEAR, ACTIVE_SEMESTER } from '../constants/attendance';
 
 export const useAttendanceData = (selectedClass: string, selectedDate: string) => {
   const {
@@ -32,6 +33,8 @@ export const useAttendanceData = (selectedClass: string, selectedDate: string) =
     subject: string;
     notes?: string;
     lessonHour?: string;
+    academicYear?: string;
+    semester?: 'Ganjil' | 'Genap';
   }[]) => {
     try {
       await saveAttendance(attendanceData);
@@ -64,9 +67,30 @@ export const useAttendanceData = (selectedClass: string, selectedDate: string) =
       status: 'hadir' as const,
       subject: selectedSubject,
       notes: 'Marked all present',
+      academicYear: ACTIVE_ACADEMIC_YEAR, // Default active year
+      semester: ACTIVE_SEMESTER, // Default active semester
     }));
 
     await handleSaveAttendance(allPresentData);
+  };
+
+  const checkDuplicate = (
+    date: string,
+    className: string,
+    subject: string,
+    lessonHour?: string
+  ): { isDuplicate: boolean; existingRecord?: any } => {
+    const existing = attendanceRecords.find(
+      r => r.date === date &&
+        r.class === className &&
+        r.subject === subject &&
+        (!lessonHour || r.lessonHour === lessonHour)
+    );
+
+    return {
+      isDuplicate: !!existing,
+      existingRecord: existing
+    };
   };
 
   return {
@@ -79,6 +103,11 @@ export const useAttendanceData = (selectedClass: string, selectedDate: string) =
     setHasUnsavedChanges,
     handleSaveAttendance,
     handleMarkAllPresent,
+    checkDuplicate,
     clearError,
+    refresh: () => {
+      fetchStudents(selectedClass);
+      fetchAttendanceRecords(selectedClass);
+    }
   };
 };

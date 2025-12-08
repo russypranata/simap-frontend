@@ -32,16 +32,16 @@ export const JournalList: React.FC<JournalListProps> = ({
 }) => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3; // Show 3 items per page
+  const itemsPerPage = 6; // Show 6 items per page
 
   // Filter journals
   const filteredJournals = journals.filter(journal => {
     const matchesSearch = journal.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         journal.material.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         journal.topic.toLowerCase().includes(searchTerm.toLowerCase());
+      journal.material.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      journal.topic.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesClass = filterClass === 'all' || journal.class === filterClass;
     const matchesSubject = filterSubject === 'all' || journal.subject === filterSubject;
-    
+
     return matchesSearch && matchesClass && matchesSubject;
   });
 
@@ -79,7 +79,7 @@ export const JournalList: React.FC<JournalListProps> = ({
   const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
       // Show all pages
       for (let i = 1; i <= totalPages; i++) {
@@ -114,7 +114,7 @@ export const JournalList: React.FC<JournalListProps> = ({
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
@@ -122,7 +122,7 @@ export const JournalList: React.FC<JournalListProps> = ({
     <>
       {filteredJournals.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {currentJournals.map((journal) => (
               <JournalCard
                 key={journal.id}
@@ -133,14 +133,14 @@ export const JournalList: React.FC<JournalListProps> = ({
               />
             ))}
           </div>
-          
+
           {/* Pagination Controls */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6">
               <div className="text-sm text-muted-foreground">
                 Menampilkan {startIndex + 1}-{Math.min(endIndex, filteredJournals.length)} dari {filteredJournals.length} jurnal
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
@@ -152,7 +152,7 @@ export const JournalList: React.FC<JournalListProps> = ({
                   <ChevronLeft className="h-4 w-4" />
                   <span className="ml-1">Sebelumnya</span>
                 </Button>
-                
+
                 <div className="flex items-center space-x-1">
                   {getPageNumbers().map((page, index) => (
                     page === 'ellipsis' ? (
@@ -170,7 +170,7 @@ export const JournalList: React.FC<JournalListProps> = ({
                     )
                   ))}
                 </div>
-                
+
                 <Button
                   variant="outline"
                   size="sm"

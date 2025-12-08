@@ -164,10 +164,20 @@ export const SchedulePage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Jadwal Mengajar</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">
+            Jadwal <span className="text-primary">Mengajar</span>
+          </h1>
           <p className="text-muted-foreground">
             Kelola dan pantau jadwal mengajar Anda dengan mudah
           </p>
+          <div className="flex items-center gap-3 mt-4">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <Calendar className="h-4 w-4" />
+              <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
+            </div>
+            <div className="h-4 w-[1px] bg-border" />
+            <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
+          </div>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -195,22 +205,18 @@ export const SchedulePage: React.FC = () => {
       <ScheduleStatsCards stats={stats} />
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <ScheduleFilterSection
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filterClass={filterClass}
-            setFilterClass={setFilterClass}
-            filterSubject={filterSubject}
-            setFilterSubject={setFilterSubject}
-            classes={classes}
-            subjects={SUBJECTS}
-            onRefresh={handleRefresh}
-            onExport={handleExport}
-          />
-        </CardContent>
-      </Card>
+      <ScheduleFilterSection
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        filterClass={filterClass}
+        setFilterClass={setFilterClass}
+        filterSubject={filterSubject}
+        setFilterSubject={setFilterSubject}
+        classes={classes}
+        subjects={SUBJECTS}
+        onRefresh={handleRefresh}
+        onExport={handleExport}
+      />
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

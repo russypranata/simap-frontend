@@ -71,12 +71,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
         <>
           {/* Overlay for mobile sidebar */}
           {mobileSidebarOpen && (
-            <div 
+            <div
               className="fixed inset-0 z-40 bg-black/50 md:hidden"
               onClick={() => setMobileSidebarOpen(false)}
             />
           )}
-          
+
           {/* Mobile sidebar */}
           <aside
             className={cn(
@@ -119,7 +119,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
                   <Menu className="h-5 w-5" />
                 </Button>
               )}
-              
+
               <div className="flex-1">
                 <Navbar title={title} showNotifications={true} />
               </div>

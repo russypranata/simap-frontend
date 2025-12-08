@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,14 +10,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useTeacherData } from '../hooks/useTeacherData';
 import { GradeInputForm } from '../components/GradeInputForm';
+import { RemediationEnrichment } from '../components/RemediationEnrichment';
+import { MultiSelectDropdown } from '../components/MultiSelectDropdown';
 import type { Grade } from '../types/teacher';
 import { formatDate, formatTime, getRelativeTime } from '@/features/shared/utils/dateFormatter';
-import { 
-  Award, 
-  Calculator, 
-  Users, 
-  BookOpen, 
-  Search, 
+import {
+  Award,
+  Calculator,
+  Users,
+  Calendar,
+  BookOpen,
+  Search,
   Filter,
   Download,
   Upload,
@@ -36,8 +39,23 @@ import {
   Eye,
   Edit,
   Trash2,
-  Plus
+  Plus,
+  X,
+  GraduationCap
 } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 import { toast } from 'sonner';
 
 export const Grades: React.FC = () => {
@@ -61,19 +79,165 @@ export const Grades: React.FC = () => {
   const [activeTab, setActiveTab] = useState('input');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Mock subjects
-  const subjects = [
-    'Matematika',
-    'Fisika',
-    'Kimia',
-    'Biologi',
-    'Bahasa Indonesia',
-    'Bahasa Inggris',
-    'Sejarah',
-    'Geografi',
-    'Ekonomi',
-    'Sosiologi',
-  ];
+  // List tab filters (independent)
+  const [listAcademicYear, setListAcademicYear] = useState('2024/2025');
+  const [listSemester, setListSemester] = useState<'Ganjil' | 'Genap'>('Ganjil');
+  const [listSelectedClass, setListSelectedClass] = useState('all');
+  const [listSelectedSubject, setListSelectedSubject] = useState('all');
+
+  // Statistics tab filters (independent)
+  const [statsAcademicYear, setStatsAcademicYear] = useState('2025/2026');
+  const [statsSemester, setStatsSemester] = useState<'Ganjil' | 'Genap'>('Ganjil');
+  const [statsSelectedClasses, setStatsSelectedClasses] = useState<string[]>([]);
+  const [statsSelectedSubjects, setStatsSelectedSubjects] = useState<string[]>([]);
+
+  // Filtered grades for Daftar Nilai tab
+  const filteredGrades = useMemo(() => {
+    return grades.filter(grade => {
+      // Academic Year filter
+      if (grade.academicYear !== listAcademicYear) return false;
+
+      // Semester filter
+      if (grade.semester !== listSemester) return false;
+
+      // Class filter
+      if (listSelectedClass && listSelectedClass !== 'all') {
+        const selectedClassName = classes.find(c => c.id === listSelectedClass)?.name;
+        if (selectedClassName && grade.class !== selectedClassName) {
+          return false;
+        }
+      }
+
+      // Subject filter
+      if (listSelectedSubject && listSelectedSubject !== 'all' && grade.subject !== listSelectedSubject) {
+        return false;
+      }
+
+      // Grade filter
+      if (filterGrade !== 'all' && grade.grade !== filterGrade) {
+        return false;
+      }
+
+      // Search term filter
+      if (searchTerm && !grade.studentName.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [grades, listAcademicYear, listSemester, listSelectedClass, listSelectedSubject, filterGrade, searchTerm, classes]);
+
+  const selectedClassData = classes.find(c => c.id === selectedClass);
+  const filteredStudents = selectedClass ? students.filter(s => s.class === selectedClassData?.name) : [];
+
+  // Dynamic subjects based on selected class
+  const subjects = selectedClassData && 'subjects' in selectedClassData
+    ? (selectedClassData as any).subjects as string[]
+    : [];
+
+  // Get available subjects for stats (from selected classes or all)
+  const availableStatsSubjects = useMemo(() => {
+    if (statsSelectedClasses.length === 0) {
+      return Array.from(new Set(
+        classes.flatMap(c => 'subjects' in c ? (c as any).subjects : [])
+      ));
+    }
+    const subjects = statsSelectedClasses.flatMap(classId => {
+      const classData = classes.find(c => c.id === classId);
+      return classData && 'subjects' in classData ? (classData as any).subjects : [];
+    });
+    return Array.from(new Set(subjects));
+  }, [statsSelectedClasses, classes]);
+
+  // Filtered grades for statistics tab
+  const filteredGradesForStats = useMemo(() => {
+    return grades.filter(grade => {
+      const matchesSemester = grade.semester === statsSemester;
+      const matchesClass = statsSelectedClasses.length === 0 ||
+        statsSelectedClasses.some(classId => {
+          const classData = classes.find(c => c.id === classId);
+          return classData?.name === grade.class;
+        });
+      const matchesSubject = statsSelectedSubjects.length === 0 ||
+        statsSelectedSubjects.includes(grade.subject);
+      return matchesSemester && matchesClass && matchesSubject;
+    });
+  }, [grades, statsSemester, statsSelectedClasses, statsSelectedSubjects, classes]);
+
+  // Statistics calculations
+  const statsCalculations = useMemo(() => {
+    if (filteredGradesForStats.length === 0) {
+      return {
+        avgScore: 0,
+        maxScore: 0,
+        minScore: 0,
+        remedialCount: 0,
+        standardCount: 0,
+        enrichmentCount: 0,
+        gradeDistribution: { A: 0, B: 0, C: 0, D: 0, E: 0 },
+        totalStudents: 0,
+      };
+    }
+
+    const scores = filteredGradesForStats.map(g => g.average);
+    const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const maxScore = Math.max(...scores);
+    const minScore = Math.min(...scores);
+
+    const remedialCount = filteredGradesForStats.filter(g => g.average < 70).length;
+    const enrichmentCount = filteredGradesForStats.filter(g => g.average >= 85).length;
+    const standardCount = filteredGradesForStats.filter(g => g.average >= 70 && g.average < 85).length;
+
+    const gradeDistribution = {
+      A: filteredGradesForStats.filter(g => g.grade === 'A').length,
+      B: filteredGradesForStats.filter(g => g.grade === 'B').length,
+      C: filteredGradesForStats.filter(g => g.grade === 'C').length,
+      D: filteredGradesForStats.filter(g => g.grade === 'D').length,
+      E: filteredGradesForStats.filter(g => g.grade === 'E').length,
+    };
+
+    return {
+      avgScore,
+      maxScore,
+      minScore,
+      remedialCount,
+      standardCount,
+      enrichmentCount,
+      gradeDistribution,
+      totalStudents: filteredGradesForStats.length,
+    };
+  }, [filteredGradesForStats]);
+
+  // Class comparison data for bar chart
+  const classComparisonData = useMemo(() => {
+    if (filteredGradesForStats.length === 0) return [];
+
+    const classStats: Record<string, { total: number; count: number }> = {};
+
+    filteredGradesForStats.forEach(grade => {
+      if (!classStats[grade.class]) {
+        classStats[grade.class] = { total: 0, count: 0 };
+      }
+      classStats[grade.class].total += grade.average;
+      classStats[grade.class].count += 1;
+    });
+
+    return Object.entries(classStats)
+      .map(([className, stats]) => ({
+        class: className,
+        average: stats.total / stats.count,
+      }))
+      .sort((a, b) => b.average - a.average);
+  }, [filteredGradesForStats]);
+
+  // Category pie chart data
+  const categoryPieData = useMemo(() => {
+    return [
+      { name: 'Remedial', value: statsCalculations.remedialCount, color: '#ef4444' },
+      { name: 'Standar', value: statsCalculations.standardCount, color: '#3b82f6' },
+      { name: 'Pengayaan', value: statsCalculations.enrichmentCount, color: '#22c55e' },
+    ].filter(item => item.value > 0);
+  }, [statsCalculations]);
 
   useEffect(() => {
     if (classes.length > 0 && !selectedClass) {
@@ -82,10 +246,18 @@ export const Grades: React.FC = () => {
   }, [classes, selectedClass]);
 
   useEffect(() => {
-    if (subjects.length > 0 && !selectedSubject) {
-      setSelectedSubject(subjects[0]);
+    // Auto-select the first subject if:
+    // 1. No subject is selected
+    // 2. The currently selected subject is not in the new list (e.g. after changing class)
+    if (subjects.length > 0) {
+      if (!selectedSubject || !subjects.includes(selectedSubject)) {
+        setSelectedSubject(subjects[0]);
+      }
+    } else {
+      setSelectedSubject('');
     }
-  }, [selectedSubject]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(subjects), selectedSubject]);
 
   useEffect(() => {
     if (selectedClass) {
@@ -150,20 +322,19 @@ export const Grades: React.FC = () => {
     window.print();
   };
 
-  const selectedClassData = classes.find(c => c.id === selectedClass);
-  const filteredStudents = selectedClass ? students.filter(s => s.class === selectedClassData?.name) : [];
 
-  // Filter grades based on search and grade filter
-  const filteredGrades = grades.filter(grade => {
+
+  // Filter grades based on search and grade filter (for Input tab statistics)
+  const inputTabFilteredGrades = grades.filter(grade => {
     const matchesSearch = grade.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         grade.subject.toLowerCase().includes(searchTerm.toLowerCase());
+      grade.subject.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGrade = filterGrade === 'all' || grade.grade === filterGrade;
     return matchesSearch && matchesGrade;
   });
 
   // Calculate statistics
   const getGradeStatistics = () => {
-    if (filteredGrades.length === 0) {
+    if (inputTabFilteredGrades.length === 0) {
       return {
         totalStudents: 0,
         averageScore: 0,
@@ -176,24 +347,24 @@ export const Grades: React.FC = () => {
       };
     }
 
-    const scores = filteredGrades.map(g => g.average);
+    const scores = inputTabFilteredGrades.map(g => g.average);
     const averageScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
     const highestScore = Math.max(...scores);
     const lowestScore = Math.min(...scores);
-    
+
     const gradeDistribution = {
-      A: filteredGrades.filter(g => g.grade === 'A').length,
-      B: filteredGrades.filter(g => g.grade === 'B').length,
-      C: filteredGrades.filter(g => g.grade === 'C').length,
-      D: filteredGrades.filter(g => g.grade === 'D').length,
-      E: filteredGrades.filter(g => g.grade === 'E').length,
+      A: inputTabFilteredGrades.filter(g => g.grade === 'A').length,
+      B: inputTabFilteredGrades.filter(g => g.grade === 'B').length,
+      C: inputTabFilteredGrades.filter(g => g.grade === 'C').length,
+      D: inputTabFilteredGrades.filter(g => g.grade === 'D').length,
+      E: inputTabFilteredGrades.filter(g => g.grade === 'E').length,
     };
-    
-    const passCount = filteredGrades.filter(g => g.average >= 70).length;
-    const passRate = (passCount / filteredGrades.length) * 100;
+
+    const passCount = inputTabFilteredGrades.filter(g => g.average >= 70).length;
+    const passRate = (passCount / inputTabFilteredGrades.length) * 100;
 
     return {
-      totalStudents: filteredGrades.length,
+      totalStudents: inputTabFilteredGrades.length,
       averageScore: averageScore.toFixed(1),
       highestScore: highestScore.toFixed(1),
       lowestScore: lowestScore.toFixed(1),
@@ -272,154 +443,91 @@ export const Grades: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Nilai Siswa</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">
+            Nilai <span className="text-primary">Siswa</span>
+          </h1>
           <p className="text-muted-foreground">
             Kelola nilai siswa untuk setiap mata pelajaran
           </p>
+          <div className="flex items-center gap-3 mt-4">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <Calendar className="h-4 w-4" />
+              <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
+            </div>
+            <div className="h-4 w-[1px] bg-border" />
+            <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
+          </div>
         </div>
-        
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center space-x-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
-          </Button>
-          
-          <Button
-            variant="outline"
-            onClick={handlePrint}
-            className="flex items-center space-x-2"
-          >
-            <Printer className="h-4 w-4" />
-            <span>Cetak</span>
-          </Button>
+
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex items-center space-x-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center space-x-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={handlePrint}
+              className="flex items-center space-x-2"
+            >
+              <Printer className="h-4 w-4" />
+              <span>Cetak</span>
+            </Button>
+          </div>
+
+
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Siswa</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalStudents}</div>
-            <p className="text-xs text-muted-foreground">
-              {selectedClassData?.name || 'Pilih kelas'}
-            </p>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rata-rata Kelas</CardTitle>
-            <Calculator className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.averageScore}</div>
-            <p className="text-xs text-muted-foreground">
-              Skor rata-rata kelas
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tertinggi</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.highestScore}</div>
-            <p className="text-xs text-muted-foreground">
-              Skor tertinggi
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Terendah</CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.lowestScore}</div>
-            <p className="text-xs text-muted-foreground">
-              Skor terendah
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tingkat Kelulusan</CardTitle>
-            <CheckCircle className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.passRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              Siswa lulus (≥70)
-            </p>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="input">Input Nilai</TabsTrigger>
           <TabsTrigger value="list">Daftar Nilai</TabsTrigger>
           <TabsTrigger value="statistics">Statistik</TabsTrigger>
+          <TabsTrigger value="remediation">Remedial & Pengayaan</TabsTrigger>
         </TabsList>
 
         <TabsContent value="input" className="space-y-6">
           {/* Filters */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Filter className="h-5 w-5" />
-                <span>Filter Nilai</span>
-              </CardTitle>
-              <CardDescription>
-                Pilih kelas, mata pelajaran, dan semester untuk input nilai
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Filter className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Filter Nilai</CardTitle>
+                    <CardDescription>
+                      Pilih kelas, mata pelajaran, dan semester untuk input nilai
+                    </CardDescription>
+                  </div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="class">Kelas</Label>
-                  <Select value={selectedClass} onValueChange={setSelectedClass}>
+                  <Label>Tahun Ajaran</Label>
+                  <Select defaultValue="2025/2026">
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih kelas" />
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {classes.map((cls) => (
-                        <SelectItem key={cls.id} value={cls.id}>
-                          {cls.name} ({cls.studentCount} siswa)
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Mata Pelajaran</Label>
-                  <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih mata pelajaran" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {subjects.map((subject) => (
-                        <SelectItem key={subject} value={subject}>
-                          {subject}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="2025/2026">2025/2026</SelectItem>
+                      <SelectItem value="2024/2025">2024/2025</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -438,114 +546,340 @@ export const Grades: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="class">Kelas</Label>
+                  <Select value={selectedClass} onValueChange={setSelectedClass}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih kelas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {classes.map((cls) => (
+                        <SelectItem key={cls.id} value={cls.id}>
+                          {cls.name} ({cls.studentCount} siswa)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Mata Pelajaran</Label>
+                  <Select
+                    value={selectedSubject}
+                    onValueChange={setSelectedSubject}
+                    disabled={!selectedClass || subjects.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        !selectedClass
+                          ? "Pilih kelas terlebih dahulu"
+                          : subjects.length === 0
+                            ? "Tidak ada mata pelajaran"
+                            : subjects.length === 1
+                              ? subjects[0]
+                              : "Pilih mata pelajaran"
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subjects.map((subject) => (
+                        <SelectItem key={subject} value={subject}>
+                          {subject}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {
+                selectedClass && selectedSubject && selectedSemester && (
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      Menampilkan {filteredStudents.length} siswa untuk kelas {selectedClassData?.name} • {selectedSubject} • {selectedSemester}
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleExportData('excel')}
+                        className="flex items-center space-x-2"
+                      >
+                        <Download className="h-4 w-4" />
+                        <span>Export Excel</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleExportData('pdf')}
+                        className="flex items-center space-x-2"
+                      >
+                        <FileText className="h-4 w-4" />
+                        <span>Export PDF</span>
+                      </Button>
+                    </div>
+                  </div>
+                )
+              }
+            </CardContent >
+          </Card>
+
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Siswa</CardTitle>
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Users className="h-4 w-4 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary">{stats.totalStudents}</div>
+                <p className="text-xs text-muted-foreground">
+                  {selectedClassData?.name || 'Pilih kelas'}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Rata-rata Kelas</CardTitle>
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Calculator className="h-4 w-4 text-blue-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{stats.averageScore}</div>
+                <p className="text-xs text-muted-foreground">
+                  Skor rata-rata kelas
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Tertinggi</CardTitle>
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{stats.highestScore}</div>
+                <p className="text-xs text-muted-foreground">
+                  Skor tertinggi
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Terendah</CardTitle>
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <TrendingDown className="h-4 w-4 text-red-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">{stats.lowestScore}</div>
+                <p className="text-xs text-muted-foreground">
+                  Skor terendah
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Tingkat Kelulusan</CardTitle>
+                <div className="p-2 bg-indigo-100 rounded-lg">
+                  <CheckCircle className="h-4 w-4 text-indigo-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-indigo-600">{stats.passRate}%</div>
+                <p className="text-xs text-muted-foreground">
+                  Siswa lulus (≥70)
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Grade Input Form */}
+          {
+            selectedClass && selectedSubject && selectedSemester && filteredStudents.length > 0 && (
+              <GradeInputForm
+                students={filteredStudents}
+                selectedClass={selectedClassData?.name || ''}
+                selectedSubject={selectedSubject}
+                selectedSemester={selectedSemester}
+                onSave={handleSaveGrades}
+                existingGrades={grades}
+                isLoading={loading}
+              />
+            )
+          }
+
+          {/* Empty State */}
+          {
+            (!selectedClass || !selectedSubject || !selectedSemester) && (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Award className="h-16 w-16 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Pilih Filter untuk Memulai
+                  </h3>
+                  <p className="text-muted-foreground text-center max-w-md">
+                    Silakan pilih kelas, mata pelajaran, dan semester untuk mulai menginput nilai siswa.
+                  </p>
+                </CardContent>
+              </Card>
+            )
+          }
+
+          {/* No Students State */}
+          {
+            selectedClass && selectedSubject && selectedSemester && filteredStudents.length === 0 && (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Users className="h-16 w-16 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Tidak Ada Siswa
+                  </h3>
+                  <p className="text-muted-foreground text-center max-w-md">
+                    Tidak ada siswa yang ditemukan untuk kelas {selectedClassData?.name}.
+                  </p>
+                </CardContent>
+              </Card>
+            )
+          }
+        </TabsContent >
+
+        <TabsContent value="list" className="space-y-6">
+          {/* List Filters */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Filter className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold">Filter Daftar Nilai</CardTitle>
+                  <CardDescription>
+                    Filter data nilai berdasarkan kriteria tertentu
+                  </CardDescription>
+                </div>
+              </div>
+              {/* Active Filter Badges */}
+              {(listAcademicYear !== '2024/2025' || listSemester !== 'Ganjil' || listSelectedClass !== 'all' || listSelectedSubject !== 'all' || filterGrade !== 'all') && (
+                <div className="flex flex-wrap gap-2 mt-4">
+                  <Badge variant="outline" className="text-xs">
+                    📅 {listAcademicYear}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    📚 Semester {listSemester}
+                  </Badge>
+                  {listSelectedClass && listSelectedClass !== 'all' && (
+                    <Badge variant="outline" className="text-xs">
+                      🏫 {classes.find(c => c.id === listSelectedClass)?.name || 'Semua Kelas'}
+                    </Badge>
+                  )}
+                  {listSelectedSubject && listSelectedSubject !== 'all' && (
+                    <Badge variant="outline" className="text-xs">
+                      📖 {listSelectedSubject}
+                    </Badge>
+                  )}
+                  {filterGrade !== 'all' && (
+                    <Badge variant="outline" className="text-xs">
+                      🎯 Grade {filterGrade}
+                    </Badge>
+                  )}
+                  {searchTerm && (
+                    <Badge variant="outline" className="text-xs">
+                      🔍 "{searchTerm}"
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </CardHeader>
+            <CardContent>
+              {/* Filter Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
                   <Label>Tahun Ajaran</Label>
-                  <Select defaultValue="2024/2025">
+                  <Select value={listAcademicYear} onValueChange={setListAcademicYear}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="2024/2025">2024/2025</SelectItem>
                       <SelectItem value="2023/2024">2023/2024</SelectItem>
+                      <SelectItem value="2022/2023">2022/2023</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Semester</Label>
+                  <Select value={listSemester} onValueChange={(value: 'Ganjil' | 'Genap') => setListSemester(value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Ganjil">Ganjil</SelectItem>
+                      <SelectItem value="Genap">Genap</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Kelas</Label>
+                  <Select value={listSelectedClass} onValueChange={setListSelectedClass}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Semua Kelas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua Kelas</SelectItem>
+                      {classes.map((cls) => (
+                        <SelectItem key={cls.id} value={cls.id}>
+                          {cls.name} ({cls.studentCount} siswa)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Mata Pelajaran</Label>
+                  <Select value={listSelectedSubject} onValueChange={setListSelectedSubject}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Semua Mapel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua Mapel</SelectItem>
+                      {subjects.map((subject) => (
+                        <SelectItem key={subject} value={subject}>
+                          {subject}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              {selectedClass && selectedSubject && selectedSemester && (
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    Menampilkan {filteredStudents.length} siswa untuk kelas {selectedClassData?.name} • {selectedSubject} • {selectedSemester}
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleExportData('excel')}
-                      className="flex items-center space-x-2"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span>Export Excel</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleExportData('pdf')}
-                      className="flex items-center space-x-2"
-                    >
-                      <FileText className="h-4 w-4" />
-                      <span>Export PDF</span>
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Grade Input Form */}
-          {selectedClass && selectedSubject && selectedSemester && filteredStudents.length > 0 && (
-            <GradeInputForm
-              students={filteredStudents}
-              selectedClass={selectedClassData?.name || ''}
-              selectedSubject={selectedSubject}
-              selectedSemester={selectedSemester}
-              onSave={handleSaveGrades}
-              existingGrades={grades}
-              isLoading={loading}
-            />
-          )}
-
-          {/* Empty State */}
-          {(!selectedClass || !selectedSubject || !selectedSemester) && (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Award className="h-16 w-16 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Pilih Filter untuk Memulai
-                </h3>
-                <p className="text-muted-foreground text-center max-w-md">
-                  Silakan pilih kelas, mata pelajaran, dan semester untuk mulai menginput nilai siswa.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* No Students State */}
-          {selectedClass && selectedSubject && selectedSemester && filteredStudents.length === 0 && (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Users className="h-16 w-16 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Tidak Ada Siswa
-                </h3>
-                <p className="text-muted-foreground text-center max-w-md">
-                  Tidak ada siswa yang ditemukan untuk kelas {selectedClassData?.name}.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="list" className="space-y-6">
-          {/* List Filters */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col lg:flex-row gap-4">
+              {/* Search and Grade Filter Row */}
+              <div className="flex flex-col lg:flex-row gap-4 mt-4">
                 <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Cari berdasarkan nama siswa atau mata pelajaran..."
+                      placeholder="Cari berdasarkan nama siswa..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Select value={filterGrade} onValueChange={setFilterGrade}>
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-40">
                       <SelectValue placeholder="Filter grade" />
                     </SelectTrigger>
                     <SelectContent>
@@ -559,12 +893,12 @@ export const Grades: React.FC = () => {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-muted-foreground">
                   Menampilkan {filteredGrades.length} dari {grades.length} nilai
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"
@@ -593,13 +927,19 @@ export const Grades: React.FC = () => {
           {filteredGrades.length > 0 ? (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BookOpen className="h-5 w-5" />
-                  <span>Daftar Nilai Siswa</span>
-                </CardTitle>
-                <CardDescription>
-                  Daftar nilai siswa yang telah diinput
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg font-semibold">Daftar Nilai Siswa</CardTitle>
+                      <CardDescription>
+                        Daftar nilai siswa yang telah diinput
+                      </CardDescription>
+                    </div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -670,117 +1010,371 @@ export const Grades: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="statistics" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Grade Distribution */}
+          {/* Filters */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Filter className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Filter Statistik</CardTitle>
+                    <CardDescription>
+                      Pilih periode, kelas, dan mata pelajaran untuk analisis
+                    </CardDescription>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Tahun Ajaran</Label>
+                  <Select value={statsAcademicYear} onValueChange={setStatsAcademicYear}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2025/2026">2025/2026</SelectItem>
+                      <SelectItem value="2024/2025">2024/2025</SelectItem>
+                      <SelectItem value="2023/2024">2023/2024</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Semester</Label>
+                  <Select value={statsSemester} onValueChange={(value: any) => setStatsSemester(value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Ganjil">Ganjil</SelectItem>
+                      <SelectItem value="Genap">Genap</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Kelas</Label>
+                  <MultiSelectDropdown
+                    options={classes.map(cls => ({
+                      value: cls.id,
+                      label: `${cls.name} (${cls.studentCount} siswa)`
+                    }))}
+                    selected={statsSelectedClasses}
+                    onChange={setStatsSelectedClasses}
+                    placeholder="Semua Kelas"
+                  />
+                  {statsSelectedClasses.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {statsSelectedClasses.map(classId => {
+                        const classData = classes.find(c => c.id === classId);
+                        return (
+                          <Badge
+                            key={classId}
+                            className="flex items-center gap-1"
+                          >
+                            {classData?.name}
+                            <button
+                              onClick={() => setStatsSelectedClasses(prev => prev.filter(id => id !== classId))}
+                              className="ml-1 hover:bg-secondary-foreground/20 rounded-full"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Mata Pelajaran</Label>
+                  <MultiSelectDropdown
+                    options={availableStatsSubjects.map(subject => ({
+                      value: subject,
+                      label: subject
+                    }))}
+                    selected={statsSelectedSubjects}
+                    onChange={setStatsSelectedSubjects}
+                    placeholder="Semua Mapel"
+                  />
+                  {statsSelectedSubjects.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {statsSelectedSubjects.map(subject => (
+                        <Badge
+                          key={subject}
+                          className="flex items-center gap-1"
+                        >
+                          {subject}
+                          <button
+                            onClick={() => setStatsSelectedSubjects(prev => prev.filter(s => s !== subject))}
+                            className="ml-1 hover:bg-secondary-foreground/20 rounded-full"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Summary Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
-                  <span>Distribusi Nilai</span>
-                </CardTitle>
-                <CardDescription>
-                  Sebaran nilai siswa per grade
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Rata-rata Nilai</CardTitle>
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <TrendingUp className="h-4 w-4 text-blue-600" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {Object.entries(stats.gradeDistribution).map(([grade, count]) => {
-                    const percentage = stats.totalStudents > 0 ? (count / stats.totalStudents) * 100 : 0;
-                    const colorClass = getGradeColor(grade);
-                    
-                    return (
-                      <div key={grade} className="flex items-center space-x-4">
-                        <div className="w-12 text-center">
-                          <Badge className={colorClass}>{grade}</Badge>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                            <div className="flex-1 bg-muted rounded-full h-6">
-                              <div
-                                className={`h-6 rounded-full ${colorClass.split(' ')[1]}`}
-                                style={{ width: `${percentage}%` }}
-                              />
-                            </div>
-                            <span className="text-sm font-medium w-12 text-right">
-                              {count}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="w-12 text-sm text-muted-foreground text-right">
-                          {percentage.toFixed(1)}%
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="text-2xl font-bold text-blue-600">
+                  {statsCalculations.avgScore.toFixed(1)}
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {statsCalculations.totalStudents > 0
+                    ? `Dari ${statsCalculations.totalStudents} siswa${statsSelectedClasses.length > 0 || statsSelectedSubjects.length > 0 ? ' (filtered)' : ''}`
+                    : 'Belum ada data'}
+                </p>
               </CardContent>
             </Card>
 
-            {/* Performance Summary */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Target className="h-5 w-5" />
-                  <span>Ringkasan Performa</span>
-                </CardTitle>
-                <CardDescription>
-                  Statistik performa kelas
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Nilai Tertinggi</CardTitle>
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <Award className="h-4 w-4 text-green-600" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="text-center p-6 bg-muted/30 rounded-lg">
-                    <div className="text-4xl font-bold text-primary mb-2">
-                      {stats.averageScore}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Rata-rata Nilai Kelas
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-green-50 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <TrendingUp className="h-5 w-5 text-green-600" />
-                        <span className="text-sm font-medium">Tertinggi</span>
-                      </div>
-                      <div className="text-2xl font-bold text-green-600 mt-1">
-                        {stats.highestScore}
-                      </div>
-                    </div>
-                    
-                    <div className="p-4 bg-red-50 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <TrendingDown className="h-5 w-5 text-red-600" />
-                        <span className="text-sm font-medium">Terendah</span>
-                      </div>
-                      <div className="text-2xl font-bold text-red-600 mt-1">
-                        {stats.lowestScore}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-5 w-5 text-blue-600" />
-                      <span className="text-sm font-medium">Tingkat Kelulusan</span>
-                    </div>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <div className="flex-1 bg-muted rounded-full h-3">
-                        <div
-                          className="h-3 rounded-full bg-blue-500"
-                          style={{ width: `${stats.passRate}%` }}
-                        />
-                      </div>
-                      <span className="text-sm font-bold text-blue-600">
-                        {stats.passRate}%
-                      </span>
-                    </div>
-                  </div>
+                <div className="text-2xl font-bold text-green-600">
+                  {statsCalculations.maxScore.toFixed(1)}
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Prestasi terbaik
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Nilai Terendah</CardTitle>
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-orange-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">
+                  {statsCalculations.minScore.toFixed(1)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Perlu perhatian
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Perlu Remedial</CardTitle>
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <Users className="h-4 w-4 text-red-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
+                  {statsCalculations.remedialCount}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Nilai &lt; 70
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Standar</CardTitle>
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Users className="h-4 w-4 text-blue-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">
+                  {statsCalculations.standardCount}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Nilai 70 - 84
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pengayaan</CardTitle>
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <Users className="h-4 w-4 text-green-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {statsCalculations.enrichmentCount}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Nilai ≥ 85
+                </p>
               </CardContent>
             </Card>
           </div>
+
+          {/* Grade Distribution */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Distribusi Nilai</CardTitle>
+                    <CardDescription>
+                      Sebaran nilai siswa per grade{statsCalculations.totalStudents > 0 ? ` (${statsCalculations.totalStudents} siswa)` : ''}
+                    </CardDescription>
+                  </div>
+                </div>
+                {/* Filter Context Badges */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <Badge variant="outline" className="text-xs">
+                    📅 {statsAcademicYear}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    📚 Semester {statsSemester}
+                  </Badge>
+                  {statsSelectedClasses.length > 0 && (
+                    <Badge variant="outline" className="text-xs">
+                      🏫 {statsSelectedClasses.length === classes.length
+                        ? 'Semua Kelas'
+                        : statsSelectedClasses.length === 1
+                          ? classes.find(c => c.id === statsSelectedClasses[0])?.name
+                          : `${statsSelectedClasses.length} Kelas`}
+                    </Badge>
+                  )}
+                  {statsSelectedSubjects.length > 0 && (
+                    <Badge variant="outline" className="text-xs">
+                      📖 {statsSelectedSubjects.length === 1
+                        ? statsSelectedSubjects[0]
+                        : `${statsSelectedSubjects.length} Mapel`}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[350px] w-full">
+                {statsCalculations.totalStudents > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    {/* Prepare grade distribution data with percentages and colors */}
+                    {(() => {
+                      const total = statsCalculations.totalStudents;
+                      const gradeDistributionData = [
+                        { grade: 'A', count: statsCalculations.gradeDistribution.A, color: '#22c55e' },
+                        { grade: 'B', count: statsCalculations.gradeDistribution.B, color: '#3b82f6' },
+                        { grade: 'C', count: statsCalculations.gradeDistribution.C, color: '#eab308' },
+                        { grade: 'D', count: statsCalculations.gradeDistribution.D, color: '#f97316' },
+                        { grade: 'E', count: statsCalculations.gradeDistribution.E, color: '#ef4444' },
+                      ].map(item => ({
+                        ...item,
+                        percentage: total > 0 ? ((item.count / total) * 100).toFixed(1) : '0'
+                      }));
+
+                      return (
+                        <BarChart
+                          data={gradeDistributionData}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                          <XAxis
+                            dataKey="grade"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                            dy={10}
+                          />
+                          <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                          />
+                          <Tooltip
+                            cursor={{ fill: 'hsl(var(--muted)/0.2)' }}
+                            content={({ active, payload }) => {
+                              if (active && payload && payload.length) {
+                                const data = payload[0].payload;
+                                return (
+                                  <div className="bg-background/95 backdrop-blur-sm border rounded-lg p-3 shadow-xl">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: data.color }} />
+                                      <p className="font-semibold text-sm">Grade {data.grade}</p>
+                                    </div>
+                                    <p className="text-2xl font-bold font-mono">
+                                      {data.count} <span className="text-xs font-normal text-muted-foreground">siswa</span>
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {data.percentage}% dari total siswa
+                                    </p>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }}
+                          />
+                          <Bar
+                            dataKey="count"
+                            radius={[8, 8, 0, 0]}
+                            animationDuration={1500}
+                          >
+                            {gradeDistributionData.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={entry.color}
+                                strokeWidth={2}
+                              />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      );
+                    })()}
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center p-6 border-2 border-dashed rounded-lg border-muted/50 bg-muted/5">
+                    <div className="p-4 rounded-full bg-background shadow-sm mb-4 ring-1 ring-muted">
+                      <BarChart3 className="w-8 h-8 text-muted-foreground/50" />
+                    </div>
+                    <h3 className="text-lg font-medium text-foreground mb-2">
+                      Belum Ada Distribusi Nilai
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                      {statsSelectedClasses.length === 0 || statsSelectedSubjects.length === 0
+                        ? "Silakan pilih kelas dan mata pelajaran di atas untuk melihat analitik grafik"
+                        : "Tidak ada data nilai yang ditemukan untuk filter yang dipilih"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="remediation" className="space-y-6">
+          <RemediationEnrichment
+            grades={grades}
+            classes={classes}
+            onRefresh={handleRefresh}
+          />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Schedule } from '../../types/teacher';
 import {
@@ -10,7 +10,9 @@ import {
     Users,
     Circle,
     CheckCircle2,
-    AlertCircle
+
+    AlertCircle,
+    Calendar
 } from 'lucide-react';
 
 interface WeeklyScheduleGridProps {
@@ -127,12 +129,28 @@ export const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
     const today = getTodayDay();
 
     return (
-        <Card>
+        <Card className="gap-4 relative overflow-hidden">
+            <div className="absolute -right-6 -bottom-6 opacity-5 pointer-events-none">
+                <Calendar className="w-48 h-48 text-primary" />
+            </div>
+            <div className="absolute right-10 top-10 opacity-[0.03] pointer-events-none">
+                <Clock className="w-32 h-32 text-primary rotate-12" />
+            </div>
+            <div className="absolute -left-6 bottom-10 opacity-[0.04] pointer-events-none">
+                <BookOpen className="w-40 h-40 text-primary -rotate-12" />
+            </div>
             <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                    <Clock className="h-5 w-5" />
-                    <span>Jadwal Mengajar Mingguan</span>
-                </CardTitle>
+                <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                        <Clock className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                        <CardTitle className="text-lg font-semibold">Jadwal Mengajar Mingguan</CardTitle>
+                        <CardDescription>
+                            Lihat jadwal mengajar Anda dalam satu minggu
+                        </CardDescription>
+                    </div>
+                </div>
             </CardHeader>
             <CardContent>
                 <div className="overflow-x-auto">
@@ -196,8 +214,8 @@ export const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
                                                 <div
                                                     key={`${day}-${timeSlot}`}
                                                     className={`p-3 rounded-lg transition-all hover:shadow-md ${getSubjectColor(schedule.subject)} ${timeStatus === 'ongoing'
-                                                            ? `ring-2 ${getSubjectRingColor(schedule.subject)} ring-offset-1 scale-[1.02]`
-                                                            : ''
+                                                        ? `ring-2 ${getSubjectRingColor(schedule.subject)} ring-offset-1 scale-[1.02]`
+                                                        : ''
                                                         }`}
                                                 >
                                                     <div className="space-y-2">

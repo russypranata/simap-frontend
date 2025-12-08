@@ -27,99 +27,102 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats, selectedClassName
     : 0;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Total Siswa Card */}
-      <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
-        <CardHeader className="relative pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground pr-12">Total Siswa</CardTitle>
-          <div className="absolute top-4 right-4 p-2 rounded-lg bg-blue-50">
-            <Users className="h-4 w-4 text-blue-600" />
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Siswa</CardTitle>
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Users className="h-4 w-4 text-primary" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <div className="text-2xl font-bold text-primary">{stats.total}</div>
+          <p className="text-xs text-muted-foreground">
             Siswa terdaftar di {selectedClassName || 'semua kelas'}
           </p>
         </CardContent>
       </Card>
 
       {/* Total Data Card */}
-      <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
-        <CardHeader className="relative pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground pr-12">Total Data</CardTitle>
-          <div className="absolute top-4 right-4 p-2 rounded-lg bg-purple-50">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Data</CardTitle>
+          <div className="p-2 bg-purple-100 rounded-lg">
             <FileText className="h-4 w-4 text-purple-600" />
           </div>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-purple-600">{stats.totalRecords || 0}</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Data dari {sessionCount} pertemuan KBM
+          <p className="text-xs text-muted-foreground">
+            {selectedClassName
+              ? `Data dari ${sessionCount} pertemuan KBM`
+              : `Estimasi ${sessionCount} pertemuan per kelas`
+            }
           </p>
         </CardContent>
       </Card>
 
       {/* Hadir Card */}
-      <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
-        <CardHeader className="relative pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground pr-12">Hadir</CardTitle>
-          <div className="absolute top-4 right-4 p-2 rounded-lg bg-emerald-50">
-            <CheckCircle className="h-4 w-4 text-emerald-600" />
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Hadir</CardTitle>
+          <div className="p-2 bg-green-100 rounded-lg">
+            <CheckCircle className="h-4 w-4 text-green-600" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-emerald-600">{stats.hadir}</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Tingkat kehadiran {calculatePercentage(stats.hadir)}%
+          <div className="text-2xl font-bold text-green-600">{calculatePercentage(stats.hadir)}%</div>
+          <p className="text-xs text-muted-foreground">
+            {stats.hadir} siswa hadir
           </p>
         </CardContent>
       </Card>
 
       {/* Sakit Card */}
-      <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
-        <CardHeader className="relative pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground pr-12">Sakit</CardTitle>
-          <div className="absolute top-4 right-4 p-2 rounded-lg bg-yellow-50">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Sakit</CardTitle>
+          <div className="p-2 bg-yellow-100 rounded-lg">
             <AlertCircle className="h-4 w-4 text-yellow-600" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-yellow-600">{stats.sakit}</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Persentase sakit {calculatePercentage(stats.sakit)}%
+          <div className="text-2xl font-bold text-yellow-600">{calculatePercentage(stats.sakit)}%</div>
+          <p className="text-xs text-muted-foreground">
+            {stats.sakit} siswa sakit
           </p>
         </CardContent>
       </Card>
 
       {/* Izin Card */}
-      <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
-        <CardHeader className="relative pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground pr-12">Izin</CardTitle>
-          <div className="absolute top-4 right-4 p-2 rounded-lg bg-cyan-50">
-            <Clock className="h-4 w-4 text-cyan-600" />
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Izin</CardTitle>
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Clock className="h-4 w-4 text-blue-600" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-cyan-600">{stats.izin}</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Persentase izin {calculatePercentage(stats.izin)}%
+          <div className="text-2xl font-bold text-blue-600">{calculatePercentage(stats.izin)}%</div>
+          <p className="text-xs text-muted-foreground">
+            {stats.izin} siswa izin
           </p>
         </CardContent>
       </Card>
 
       {/* Alpa Card */}
-      <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
-        <CardHeader className="relative pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground pr-12">Alpa</CardTitle>
-          <div className="absolute top-4 right-4 p-2 rounded-lg bg-red-50">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Tanpa Keterangan</CardTitle>
+          <div className="p-2 bg-red-100 rounded-lg">
             <XCircle className="h-4 w-4 text-red-600" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-red-600">{stats.tanpaKeterangan}</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Persentase alpa {calculatePercentage(stats.tanpaKeterangan)}%
+          <div className="text-2xl font-bold text-red-600">{calculatePercentage(stats.tanpaKeterangan)}%</div>
+          <p className="text-xs text-muted-foreground">
+            {stats.tanpaKeterangan} siswa tanpa keterangan
           </p>
         </CardContent>
       </Card>

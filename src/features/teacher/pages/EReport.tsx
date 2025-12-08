@@ -12,11 +12,11 @@ import { useRole } from '@/app/context/RoleContext';
 import { useTeacherData } from '../hooks/useTeacherData';
 import type { EReport as EReportType } from '../types/teacher';
 import { formatDate, formatTime, getRelativeTime } from '@/features/shared/utils/dateFormatter';
-import { 
-  FileText, 
-  Download, 
-  Upload, 
-  Search, 
+import {
+  FileText,
+  Download,
+  Upload,
+  Search,
   Filter,
   RefreshCw,
   Eye,
@@ -89,11 +89,11 @@ export const EReport: React.FC = () => {
   // Filter E-Reports
   const filteredReports = ereports.filter(report => {
     const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.description.toLowerCase().includes(searchTerm.toLowerCase());
+      report.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesClass = selectedClass === 'all' || report.class === selectedClass;
     const matchesStatus = selectedStatus === 'all' || report.status === selectedStatus;
     const matchesType = selectedType === 'all' || report.type === selectedType;
-    
+
     return matchesSearch && matchesClass && matchesStatus && matchesType;
   });
 
@@ -106,7 +106,7 @@ export const EReport: React.FC = () => {
     const semester = ereports.filter(r => r.semester === 'Ganjil').length;
     const kenaikan = ereports.filter(r => r.type === 'kenaikan').length;
     const kelulusan = ereports.filter(r => r.type === 'kelulusan').length;
-    
+
     return {
       total,
       completed,
@@ -249,12 +249,22 @@ export const EReport: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">E-Rapor</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">
+            E-<span className="text-primary">Rapor</span>
+          </h1>
           <p className="text-muted-foreground">
             Kelola dan generate E-Rapor siswa secara digital
           </p>
+          <div className="flex items-center gap-3 mt-4">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <Calendar className="h-4 w-4" />
+              <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
+            </div>
+            <div className="h-4 w-[1px] bg-border" />
+            <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
+          </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
@@ -265,7 +275,7 @@ export const EReport: React.FC = () => {
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
           </Button>
-          
+
           <Button
             variant="outline"
             onClick={handlePrint}
@@ -430,18 +440,18 @@ export const EReport: React.FC = () => {
                       Tingkat Kelengkapan
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-green-50 rounded-lg">
                       <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
                       <div className="text-xs text-green-600">Selesai</div>
                     </div>
-                    
+
                     <div className="text-center p-4 bg-blue-50 rounded-lg">
                       <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
                       <div className="text-xs text-blue-600">Proses</div>
                     </div>
-                    
+
                     <div className="text-center p-4 bg-yellow-50 rounded-lg">
                       <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
                       <div className="text-xs text-yellow-600">Menunggu</div>
@@ -477,7 +487,7 @@ export const EReport: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className={`w-3 h-3 rounded-full ${getTypeColor('kenaikan')}`} />
@@ -490,7 +500,7 @@ export const EReport: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className={`w-3 h-3 rounded-full ${getTypeColor('kelulusan')}`} />
@@ -524,7 +534,7 @@ export const EReport: React.FC = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Select value={selectedClass} onValueChange={setSelectedClass}>
                     <SelectTrigger className="w-40">
@@ -537,7 +547,7 @@ export const EReport: React.FC = () => {
                       <SelectItem value="X IPA 3">X IPA 3</SelectItem>
                     </SelectContent>
                   </Select>
-                  
+
                   <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                     <SelectTrigger className="w-32">
                       <SelectValue placeholder="Filter status" />
@@ -549,7 +559,7 @@ export const EReport: React.FC = () => {
                       <SelectItem value="pending">Menunggu</SelectItem>
                     </SelectContent>
                   </Select>
-                  
+
                   <Select value={selectedType} onValueChange={setSelectedType}>
                     <SelectTrigger className="w-32">
                       <SelectValue placeholder="Filter jenis" />
@@ -563,12 +573,12 @@ export const EReport: React.FC = () => {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-muted-foreground">
                   Menampilkan {filteredReports.length} dari {ereports.length} E-Rapor
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"
@@ -712,18 +722,18 @@ export const EReport: React.FC = () => {
                       Tingkat Kelengkapan
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-green-50 rounded-lg">
                       <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
                       <div className="text-xs text-green-600">Selesai</div>
                     </div>
-                    
+
                     <div className="text-center p-4 bg-blue-50 rounded-lg">
                       <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
                       <div className="text-xs text-blue-600">Dalam Proses</div>
                     </div>
-                    
+
                     <div className="text-center p-4 bg-yellow-50 rounded-lg">
                       <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
                       <div className="text-xs text-yellow-600">Menunggu</div>
@@ -758,7 +768,7 @@ export const EReport: React.FC = () => {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className={`w-3 h-3 rounded-full ${getTypeColor('kenaikan')}`} />
@@ -771,7 +781,7 @@ export const EReport: React.FC = () => {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className={`w-3 h-3 rounded-full ${getTypeColor('kelulusan')}`} />
@@ -802,46 +812,46 @@ export const EReport: React.FC = () => {
               <CardContent>
                 <div className="space-y-3">
                   {['XII IPA 1', 'XI IPA 2', 'X IPA 3'].map((className) => {
-                  const classReports = ereports.filter(r => r.class === className);
-                  const totalStudents = classReports.reduce((sum, report) => sum + report.studentCount, 0);
-                  const completedStudents = classReports.reduce((sum, report) => sum + report.completedCount, 0);
-                  const completionRate = totalStudents > 0 ? (completedStudents / totalStudents) * 100 : 0;
-                  
-                  return (
-                    <div key={className} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                          <span className="text-primary-foreground font-bold text-xs">
-                            {className.split(' ')[0]}
-                          </span>
+                    const classReports = ereports.filter(r => r.class === className);
+                    const totalStudents = classReports.reduce((sum, report) => sum + report.studentCount, 0);
+                    const completedStudents = classReports.reduce((sum, report) => sum + report.completedCount, 0);
+                    const completionRate = totalStudents > 0 ? (completedStudents / totalStudents) * 100 : 0;
+
+                    return (
+                      <div key={className} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                            <span className="text-primary-foreground font-bold text-xs">
+                              {className.split(' ')[0]}
+                            </span>
+                          </div>
+                          <div>
+                            <div className="font-medium text-sm">{className}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {totalStudents} siswa
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="font-medium text-sm">{className}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {totalStudents} siswa
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <div className="text-sm font-medium">{completedStudents}</div>
+                            <div className="text-xs text-muted-foreground">
+                              dari {totalStudents}
+                            </div>
+                          </div>
+                          <div className="w-24 bg-muted rounded-full h-2">
+                            <div
+                              className="h-2 rounded-full bg-green-500"
+                              style={{ width: `${completionRate}%` }}
+                            />
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {completionRate.toFixed(1)}% selesai
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                          <div className="text-sm font-medium">{completedStudents}</div>
-                          <div className="text-xs text-muted-foreground">
-                            dari {totalStudents}
-                          </div>
-                        </div>
-                        <div className="w-24 bg-muted rounded-full h-2">
-                          <div
-                            className="h-2 rounded-full bg-green-500"
-                            style={{ width: `${completionRate}%` }}
-                          />
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {completionRate.toFixed(1)}% selesai
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -903,7 +913,7 @@ export const EReport: React.FC = () => {
               Lihat detail lengkap E-Rapor
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedReport && (
             <div className="space-y-6">
               {/* Header Information */}

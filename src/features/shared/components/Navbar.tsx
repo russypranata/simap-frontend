@@ -15,7 +15,8 @@ import {
 import { useRole } from "@/app/context/RoleContext";
 import { useTheme } from "@/app/context/ThemeContext";
 import { NotificationBell } from "./NotificationBell";
-import { Moon, Sun, User, LogOut, School } from "lucide-react";
+import { Moon, Sun, User, LogOut, School, Calendar } from "lucide-react";
+import { formatDate, getDayName } from "@/features/shared/utils/dateFormatter";
 
 interface NavbarProps {
   title?: string;
@@ -59,6 +60,20 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         <div className="flex items-center space-x-4">
+          <div className="hidden md:flex items-center gap-3">
+            <div className="p-2.5 bg-primary/10 rounded-lg">
+              <Calendar className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium">
+                Hari ini
+              </p>
+              <p className="text-sm font-medium text-foreground">
+                {getDayName(new Date())}, {formatDate(new Date())}
+              </p>
+            </div>
+          </div>
+
           {showNotifications && isAuthenticated && <NotificationBell />}
 
           <Button

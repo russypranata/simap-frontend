@@ -81,7 +81,58 @@ const mockAxios = {
 
     switch (url) {
       case '/teacher/attendance':
+        // Update mock data
+        const newRecords = data as any[];
+        newRecords.forEach(newRecord => {
+          const existingIndex = extendedMockAttendanceRecords.findIndex(
+            r => r.studentId === newRecord.studentId &&
+              r.date === newRecord.date &&
+              r.subject === newRecord.subject &&
+              r.lessonHour === newRecord.lessonHour
+          );
+
+          if (existingIndex >= 0) {
+            // Update existing
+            extendedMockAttendanceRecords[existingIndex] = {
+              ...extendedMockAttendanceRecords[existingIndex],
+              ...newRecord
+            };
+          } else {
+            // Add new
+            extendedMockAttendanceRecords.push({
+              id: Math.random().toString(36).substr(2, 9),
+              teacher: mockTeacher.name,
+              ...newRecord
+            });
+          }
+        });
         return { data: { success: true, message: 'Absensi berhasil disimpan' } as T };
+      case '/teacher/attendance/update':
+        const updateData = data as AttendanceRecord;
+        const updateIndex = extendedMockAttendanceRecords.findIndex(
+          r => r.studentId === updateData.studentId &&
+            r.date === updateData.date &&
+            r.subject === updateData.subject &&
+            r.lessonHour === updateData.lessonHour
+        );
+        if (updateIndex >= 0) {
+          extendedMockAttendanceRecords[updateIndex] = { ...extendedMockAttendanceRecords[updateIndex], ...updateData };
+          return { data: { success: true, message: 'Data presensi berhasil diperbarui' } as T };
+        }
+        return { data: { success: false, message: 'Data presensi tidak ditemukan' } as T };
+      case '/teacher/attendance/delete':
+        const deleteData = data as AttendanceRecord;
+        const deleteIndex = extendedMockAttendanceRecords.findIndex(
+          r => r.studentId === deleteData.studentId &&
+            r.date === deleteData.date &&
+            r.subject === deleteData.subject &&
+            r.lessonHour === deleteData.lessonHour
+        );
+        if (deleteIndex >= 0) {
+          extendedMockAttendanceRecords.splice(deleteIndex, 1);
+          return { data: { success: true, message: 'Data presensi berhasil dihapus' } as T };
+        }
+        return { data: { success: false, message: 'Data presensi tidak ditemukan' } as T };
       case '/teacher/journals':
         return { data: { success: true, message: 'Jurnal mengajar berhasil disimpan' } as T };
       case '/teacher/grades':
@@ -169,25 +220,71 @@ export const teacherApi = {
     status: 'hadir' | 'sakit' | 'izin' | 'tanpa-keterangan';
     subject: string;
     notes?: string;
+    academicYear?: string;
+    semester?: 'Ganjil' | 'Genap';
   }[]): Promise<{ success: boolean; message: string }> => {
     const response = await mockAxios.post<{ success: boolean; message: string }>('/teacher/attendance', data);
+    return response.data;
+  },
+
+  updateAttendanceRecord: async (data: AttendanceRecord): Promise<{ success: boolean; message: string }> => {
+    const response = await mockAxios.post<{ success: boolean; message: string }>('/teacher/attendance/update', data);
+    return response.data;
+  },
+
+  deleteAttendanceRecord: async (data: AttendanceRecord): Promise<{ success: boolean; message: string }> => {
+    const response = await mockAxios.post<{ success: boolean; message: string }>('/teacher/attendance/delete', data);
     return response.data;
   },
 
   // Teaching Journals
   getTeachingJournals: async (classId?: string, subject?: string): Promise<TeachingJournal[]> => {
     const response = await mockAxios.get<TeachingJournal[]>('/teacher/journals');
-    let filtered = response.data;
+    let journals = response.data;
+
+    // Get all attendance records to calculate dynamic stats
+    const attendanceResponse = await mockAxios.get<AttendanceRecord[]>('/teacher/attendance');
+    const allAttendance = attendanceResponse.data;
+
+    // Calculate dynamic attendance stats for each journal
+    journals = journals.map(journal => {
+      const journalAttendance = allAttendance.filter(record =>
+        record.class === journal.class &&
+        record.date === journal.date &&
+        record.subject === journal.subject &&
+        record.lessonHour === journal.lessonHour
+      );
+
+      if (journalAttendance.length > 0) {
+        const present = journalAttendance.filter(r => r.status === 'hadir').length;
+        const sick = journalAttendance.filter(r => r.status === 'sakit').length;
+        const permit = journalAttendance.filter(r => r.status === 'izin').length;
+        const absent = journalAttendance.filter(r => r.status === 'tanpa-keterangan').length;
+        const total = journalAttendance.length;
+
+        return {
+          ...journal,
+          attendance: {
+            total,
+            present,
+            sick,
+            permit,
+            absent
+          }
+        };
+      }
+      return journal;
+    });
 
     if (classId) {
-      filtered = filtered.filter(journal => journal.class === classId);
+      journals = journals.filter(journal => journal.class === classId);
     }
 
     if (subject) {
-      filtered = filtered.filter(journal => journal.subject === subject);
+      journals = journals.filter(journal => journal.subject === subject);
     }
 
-    return filtered;
+    return journals;
   },
 
   saveTeachingJournal: async (data: Omit<TeachingJournal, 'id'>): Promise<{ success: boolean; message: string }> => {
@@ -211,7 +308,14 @@ export const teacherApi = {
     let filtered = response.data;
 
     if (classId) {
-      filtered = filtered.filter(grade => grade.class === classId);
+      // Find class name from ID
+      const classData = mockClasses.find(c => c.id === classId);
+      if (classData) {
+        filtered = filtered.filter(grade => grade.class === classData.name);
+      } else {
+        // If class ID not found, return empty
+        filtered = [];
+      }
     }
 
     if (subject) {
@@ -300,5 +404,42 @@ export const teacherApi = {
     }
 
     return filtered.sort((a, b) => b.generatedDate.getTime() - a.generatedDate.getTime());
+  },
+
+  // Moodle Integration
+  fetchMoodleCourses: async (): Promise<{ id: string; fullname: string; shortname: string }[]> => {
+    // Mock Moodle courses
+    return [
+      { id: '101', fullname: 'Matematika XII A (2024/2025)', shortname: 'MATH12A' },
+      { id: '102', fullname: 'Fisika XII A (2024/2025)', shortname: 'PHYS12A' },
+      { id: '103', fullname: 'Biologi X B (2024/2025)', shortname: 'BIO10B' },
+    ];
+  },
+
+  fetchMoodleAssignments: async (courseId: string): Promise<{ id: string; name: string; maxScore: number }[]> => {
+    // Mock Moodle assignments based on course
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network
+    return [
+      { id: 'm1', name: 'Quiz 1: Aljabar', maxScore: 100 },
+      { id: 'm2', name: 'UTS Online', maxScore: 100 },
+      { id: 'm3', name: 'Tugas Proyek', maxScore: 100 },
+      { id: 'm4', name: 'UAS Online', maxScore: 100 },
+    ];
+  },
+
+  syncMoodleGrades: async (config: {
+    courseId: string;
+    mapping: Record<string, string>; // moodleAssignmentId -> simapColumnName (e.g., 'm1' -> 'assignment_0')
+    overwriteManual: boolean;
+  }): Promise<{ success: boolean; message: string; syncedCount: number }> => {
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing
+
+    // In a real app, this would fetch grades from Moodle and update the backend.
+    // Here we just simulate a success response.
+    return {
+      success: true,
+      message: 'Sinkronisasi dengan Moodle berhasil!',
+      syncedCount: 25
+    };
   },
 };

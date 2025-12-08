@@ -10,98 +10,77 @@ export const mockTeacher = {
   phone: '+62 812-3456-7890',
   role: 'guru' as const,
   isHomeroomTeacher: true,
-  homeroomClass: 'XII IPA 1',
-  subjects: ['Matematika', 'Fisika'],
+  homeroomClass: 'XII A',
+  subjects: ['Matematika', 'Fisika', 'Biologi'],
   joinDate: '2008-01-01',
   education: 'S1 Pendidikan Fisika',
   certification: 'Sertifikat Pendidik Profesional',
 };
 
-// Mock classes data - SYNCHRONIZED WITH extendedMockSchedule
-export const mockClasses: TeacherClass[] = [
-  // Kelas XII
+// Mock classes data - Classes taught by the teacher
+export const mockClasses: (TeacherClass & { subjects: string[] })[] = [
   {
     id: '1',
-    name: 'XII IPA 1',
+    name: 'XII A',
     grade: 'XII',
-    major: 'IPA',
-    homeroomTeacher: mockTeacher.name,
+    homeroomTeacher: mockTeacher.name, // Teacher is homeroom here
     studentCount: 32,
-    schedule: ['Senin', 'Rabu', 'Jumat'],
+    schedule: ['Senin', 'Kamis'],
+    subjects: ['Matematika'],
   },
   {
     id: '2',
-    name: 'XII IPA 2',
-    grade: 'XII',
-    major: 'IPA',
-    homeroomTeacher: 'Dewi Lestari, S.Pd.',
-    studentCount: 30, // Updated to 30
-    schedule: ['Selasa', 'Kamis'],
-  },
-  // Kelas XI
-  {
-    id: '4',
-    name: 'XI IPA 1',
+    name: 'XI A',
     grade: 'XI',
-    major: 'IPA',
     homeroomTeacher: 'Siti Aminah, S.Pd.',
-    studentCount: 28, // Updated to 28
-    schedule: ['Selasa', 'Jumat'],
+    studentCount: 28,
+    schedule: ['Selasa', 'Rabu', 'Jumat'],
+    subjects: ['Matematika', 'Fisika'],
   },
   {
-    id: '5',
-    name: 'XI IPA 2',
-    grade: 'XI',
-    major: 'IPA',
-    homeroomTeacher: 'Budi Hartono, S.Pd.',
-    studentCount: 28, // Updated to 28
-    schedule: ['Senin', 'Rabu'],
-  },
-  // Kelas X
-  {
-    id: '7',
-    name: 'X IPA 1',
+    id: '3',
+    name: 'X B',
     grade: 'X',
-    major: 'IPA',
-    homeroomTeacher: 'Hadi Pranoto, S.Pd.',
-    studentCount: 30, // Updated to 30
-    schedule: ['Selasa'],
-  },
-  {
-    id: '8',
-    name: 'X IPA 2',
-    grade: 'X',
-    major: 'IPA',
     homeroomTeacher: 'Lina Marlina, S.Pd.',
-    studentCount: 28, // Updated to 28
-    schedule: ['Rabu'],
+    studentCount: 30,
+    schedule: ['Rabu', 'Kamis'],
+    subjects: ['Biologi'],
   },
 ];
 
-// Helper to generate students for a class
+// Helper to generate students for a class with realistic names
 const generateStudents = (className: string, startId: number, count: number): Student[] => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: String(startId + i),
-    nis: String(10000 + startId + i),
-    name: `Siswa ${className} ${i + 1}`,
-    class: className,
-    gender: i % 2 === 0 ? 'L' : 'P',
-    birthDate: '2006-01-01',
-    address: 'Jl. Contoh No. 123',
-    phone: '08123456789',
-    parentsName: 'Orang Tua Siswa',
-    parentsPhone: '08123456789',
-  }));
+  const firstNames = ['Aditya', 'Bayu', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hana', 'Indra', 'Joko', 'Kartika', 'Lina', 'Maya', 'Nanda', 'Oscar', 'Putri', 'Rizky', 'Siti', 'Tono', 'Utami', 'Vina', 'Wahyu', 'Yudi', 'Zahra'];
+  const lastNames = ['Pratama', 'Santoso', 'Wijaya', 'Lestari', 'Saputra', 'Hidayat', 'Kusuma', 'Sari', 'Nugroho', 'Wibowo', 'Susanti', 'Rahmawati', 'Setiawan', 'Kurniawan', 'Pertiwi', 'Anggraini', 'Firmansyah', 'Hermawan', 'Mulyani', 'Suharto'];
+
+  return Array.from({ length: count }, (_, i) => {
+    const firstName = firstNames[(startId + i) % firstNames.length];
+    const lastName = lastNames[(startId + i) % lastNames.length];
+    const gender = ['Siti', 'Dewi', 'Citra', 'Gita', 'Hana', 'Kartika', 'Lina', 'Maya', 'Putri', 'Utami', 'Vina', 'Zahra'].includes(firstName) ? 'P' : 'L';
+
+    return {
+      id: String(startId + i),
+      nis: String(10000 + startId + i),
+      name: `${firstName} ${lastName}`,
+      class: className,
+      gender: gender,
+      birthDate: '2006-01-01',
+      address: 'Jl. Contoh No. 123',
+      phone: '08123456789',
+      parentsName: 'Orang Tua Siswa',
+      parentsPhone: '08123456789',
+    };
+  });
 };
 
 // Mock students data
 export const mockStudents: Student[] = [
-  // XII IPA 1 (Existing names kept for realism)
+  // XII A (Manual list + generated)
   {
     id: '1',
     nis: '12101',
     name: 'Ahmad Rizki Pratama',
-    class: 'XII IPA 1',
+    class: 'XII A',
     gender: 'L',
     birthDate: '2006-05-15',
     address: 'Jl. Merdeka No. 123, Jakarta',
@@ -113,7 +92,7 @@ export const mockStudents: Student[] = [
     id: '2',
     nis: '12102',
     name: 'Siti Nurhaliza',
-    class: 'XII IPA 1',
+    class: 'XII A',
     gender: 'P',
     birthDate: '2006-08-22',
     address: 'Jl. Sudirman No. 456, Jakarta',
@@ -125,7 +104,7 @@ export const mockStudents: Student[] = [
     id: '3',
     nis: '12103',
     name: 'Muhammad Fadli',
-    class: 'XII IPA 1',
+    class: 'XII A',
     gender: 'L',
     birthDate: '2006-12-10',
     address: 'Jl. Gatot Subroto No. 789, Jakarta',
@@ -137,7 +116,7 @@ export const mockStudents: Student[] = [
     id: '4',
     nis: '12104',
     name: 'Dewi Anggraini',
-    class: 'XII IPA 1',
+    class: 'XII A',
     gender: 'P',
     birthDate: '2006-03-18',
     address: 'Jl. Imam Bonjol No. 321, Jakarta',
@@ -149,7 +128,7 @@ export const mockStudents: Student[] = [
     id: '5',
     nis: '12105',
     name: 'Rudi Hermawan',
-    class: 'XII IPA 1',
+    class: 'XII A',
     gender: 'L',
     birthDate: '2006-07-25',
     address: 'Jl. Diponegoro No. 654, Jakarta',
@@ -157,121 +136,143 @@ export const mockStudents: Student[] = [
     parentsName: 'Ibu Hermawan',
     parentsPhone: '+62 813-7890-1234',
   },
-  {
-    id: '6',
-    nis: '12106',
-    name: 'Rina Kartika',
-    class: 'XII IPA 1',
-    gender: 'P',
-    birthDate: '2006-11-30',
-    address: 'Jl. Ahmad Yani No. 987, Jakarta',
-    phone: '+62 812-6789-0123',
-    parentsName: 'Bapak Kartika',
-    parentsPhone: '+62 813-8901-2345',
-  },
-  {
-    id: '7',
-    nis: '12107',
-    name: 'Budi Setiawan',
-    class: 'XII IPA 1',
-    gender: 'L',
-    birthDate: '2006-04-12',
-    address: 'Jl. Veteran No. 147, Jakarta',
-    phone: '+62 812-7890-1234',
-    parentsName: 'Ibu Setiawan',
-    parentsPhone: '+62 813-9012-3456',
-  },
-  {
-    id: '8',
-    nis: '12108',
-    name: 'Fitri Handayani',
-    class: 'XII IPA 1',
-    gender: 'P',
-    birthDate: '2006-09-05',
-    address: 'Jl. Pahlawan No. 258, Jakarta',
-    phone: '+62 812-8901-2345',
-    parentsName: 'Bapak Handayani',
-    parentsPhone: '+62 813-0123-4567',
-  },
-  {
-    id: '9',
-    nis: '12109',
-    name: 'Arif Rahman',
-    class: 'XII IPA 1',
-    gender: 'L',
-    birthDate: '2006-02-28',
-    address: 'Jl. Cendana No. 369, Jakarta',
-    phone: '+62 812-9012-3456',
-    parentsName: 'Ibu Rahman',
-    parentsPhone: '+62 813-1234-5678',
-  },
-  {
-    id: '10',
-    nis: '12110',
-    name: 'Maya Sari',
-    class: 'XII IPA 1',
-    gender: 'P',
-    birthDate: '2006-06-14',
-    address: 'Jl. Flamboyan No. 741, Jakarta',
-    phone: '+62 812-0123-4567',
-    parentsName: 'Bapak Sari',
-    parentsPhone: '+62 813-2345-6789',
-  },
-  // Generate remaining 22 students for XII IPA 1 (Total 32)
-  ...generateStudents('XII IPA 1', 11, 22),
+  ...generateStudents('XII A', 6, 26),
 
-  // Generate students for other classes
-  ...generateStudents('XII IPA 2', 200, 30),
-  ...generateStudents('XI IPA 1', 300, 28),
-  ...generateStudents('XI IPA 2', 400, 28),
-  ...generateStudents('X IPA 1', 500, 30),
-  ...generateStudents('X IPA 2', 550, 28),
-  // Empty classes
-  ...generateStudents('XII IPA 3', 250, 0),
-  ...generateStudents('XI IPA 3', 450, 0),
-  ...generateStudents('X IPA 3', 600, 0),
+  // Other Classes (A & B only)
+  ...generateStudents('XII B', 200, 30),
+  ...generateStudents('XI A', 300, 28),
+  ...generateStudents('XI B', 400, 28),
+  ...generateStudents('X A', 500, 30),
+  ...generateStudents('X B', 600, 30),
 ];
 
+// Helper to generate random grades
+const generateGrades = (
+  startId: number,
+  count: number,
+  className: string,
+  subject: string,
+  academicYear: string,
+  semester: 'Ganjil' | 'Genap'
+): Grade[] => {
+  const students = mockStudents.filter(s => s.class === className).slice(startId - 1, startId - 1 + count);
+
+  return students.map((student, index) => {
+    // Randomize scores slightly
+    const baseScore = 75 + Math.floor(Math.random() * 20); // 75-95
+    const midTerm = baseScore - 5 + Math.floor(Math.random() * 10);
+    const finalExam = baseScore - 5 + Math.floor(Math.random() * 10);
+    const assignmentScore = baseScore;
+
+    const average = (assignmentScore * 0.4) + (midTerm * 0.3) + (finalExam * 0.3);
+
+    let grade: 'A' | 'B' | 'C' | 'D' | 'E' = 'C';
+    let description = 'Cukup';
+
+    if (average >= 90) { grade = 'A'; description = 'Sangat Baik'; }
+    else if (average >= 80) { grade = 'B'; description = 'Baik'; }
+    else if (average >= 70) { grade = 'C'; description = 'Cukup'; }
+    else { grade = 'D'; description = 'Kurang'; }
+
+    return {
+      id: String(startId + index),
+      studentId: student.id,
+      studentName: student.name,
+      class: className,
+      subject: subject,
+      semester: semester,
+      academicYear: academicYear,
+      assignments: [
+        { name: 'Tugas 1', score: assignmentScore, maxScore: 100, source: 'manual' },
+        { name: 'Tugas 2', score: assignmentScore + (Math.random() > 0.5 ? 2 : -2), maxScore: 100, source: 'manual' },
+        { name: 'Tugas 3', score: assignmentScore + (Math.random() > 0.5 ? 3 : -3), maxScore: 100, source: 'manual' },
+      ],
+      midTerm,
+      finalExam,
+      average: Number(average.toFixed(1)),
+      grade,
+      description,
+      syncStatus: 'manual',
+    };
+  });
+};
+
+// Mock grades data
 // Mock grades data
 export const mockGrades: Grade[] = [
+  // 1. XII A - Matematika (Detailed Demo Data)
   {
     id: '1',
     studentId: '1',
     studentName: 'Ahmad Rizki Pratama',
-    class: 'XII IPA 1',
+    class: 'XII A',
     subject: 'Matematika',
     semester: 'Ganjil',
-    academicYear: '2024/2025',
+    academicYear: '2025/2026',
     assignments: [
-      { name: 'Tugas 1', score: 85, maxScore: 100 },
-      { name: 'Tugas 2', score: 90, maxScore: 100 },
-      { name: 'Tugas 3', score: 88, maxScore: 100 },
+      { name: 'Tugas 1', score: 85, maxScore: 100, source: 'manual' },
+      { name: 'Tugas 2', score: 90, maxScore: 100, source: 'manual' },
+      { name: 'Tugas 3', score: 88, maxScore: 100, source: 'manual' },
     ],
     midTerm: 87,
     finalExam: 92,
     average: 88.4,
     grade: 'A',
     description: 'Sangat Baik',
+    syncStatus: 'manual',
   },
   {
     id: '2',
     studentId: '2',
     studentName: 'Siti Nurhaliza',
-    class: 'XII IPA 1',
+    class: 'XII A',
     subject: 'Matematika',
     semester: 'Ganjil',
-    academicYear: '2024/2025',
+    academicYear: '2025/2026',
     assignments: [
-      { name: 'Tugas 1', score: 92, maxScore: 100 },
-      { name: 'Tugas 2', score: 95, maxScore: 100 },
-      { name: 'Tugas 3', score: 90, maxScore: 100 },
+      { name: 'Quiz 1: Aljabar', score: 95, maxScore: 100, source: 'moodle', moodleId: 'm1' },
+      { name: 'Tugas Proyek', score: 98, maxScore: 100, source: 'moodle', moodleId: 'm3' },
+      { name: 'Tugas 3', score: 92, maxScore: 100, source: 'manual' },
     ],
-    midTerm: 93,
+    midTerm: 95,
     finalExam: 96,
-    average: 93.2,
+    average: 95.2,
     grade: 'A',
     description: 'Sangat Baik',
+    syncStatus: 'synced',
+    lastSync: new Date('2025-08-20T10:00:00'),
   },
+  {
+    id: '3',
+    studentId: '3',
+    studentName: 'Muhammad Fadli',
+    class: 'XII A',
+    subject: 'Matematika',
+    semester: 'Ganjil',
+    academicYear: '2025/2026',
+    assignments: [
+      { name: 'Quiz 1: Aljabar', score: 75, maxScore: 100, source: 'moodle', moodleId: 'm1' },
+      { name: 'Tugas Proyek', score: 80, maxScore: 100, source: 'manual' },
+    ],
+    midTerm: 78,
+    finalExam: 82,
+    average: 78.5,
+    grade: 'B',
+    description: 'Baik',
+    syncStatus: 'modified',
+    lastSync: new Date('2025-08-19T09:00:00'),
+  },
+  // Generate remaining students for XII A - Matematika (Start from ID 4)
+  ...generateGrades(4, 29, 'XII A', 'Matematika', '2025/2026', 'Ganjil'),
+
+  // 2. XI A - Matematika
+  ...generateGrades(300, 28, 'XI A', 'Matematika', '2025/2026', 'Ganjil'),
+
+  // 3. XI A - Fisika
+  ...generateGrades(300, 28, 'XI A', 'Fisika', '2025/2026', 'Ganjil'),
+
+  // 4. X B - Biologi
+  ...generateGrades(600, 30, 'X B', 'Biologi', '2025/2026', 'Ganjil'),
 ];
 
 // Mock announcements
@@ -312,10 +313,10 @@ export const mockAnnouncements: Announcement[] = [
 export const mockDocuments: TeacherDocument[] = [
   {
     id: '1',
-    name: 'CP Matematika XII IPA 1',
+    name: 'CP Matematika XII A',
     type: 'CP',
-    description: 'Capaian Pembelajaran Matematika Kelas XII IPA 1',
-    fileName: 'cp-matematika-xii-ipa-1.pdf',
+    description: 'Capaian Pembelajaran Matematika Kelas XII A',
+    fileName: 'cp-matematika-xii-a.pdf',
     fileSize: 2456789,
     uploadDate: new Date('2024-01-05T09:00:00'),
     status: 'approved',
@@ -349,9 +350,9 @@ export const mockDocuments: TeacherDocument[] = [
 export const mockEReports: EReport[] = [
   {
     id: '1',
-    title: 'Rapor Siswa XII IPA 1 Semester Ganjil',
+    title: 'Rapor Siswa XII A Semester Ganjil',
     type: 'semester',
-    class: 'XII IPA 1',
+    class: 'XII A',
     semester: 'Ganjil',
     academicYear: '2024/2025',
     status: 'completed',
@@ -359,13 +360,13 @@ export const mockEReports: EReport[] = [
     dueDate: new Date('2024-01-15T23:59:59'),
     studentCount: 32,
     completedCount: 32,
-    description: 'Rapor semester ganjil untuk kelas XII IPA 1',
+    description: 'Rapor semester ganjil untuk kelas XII A',
   },
   {
     id: '2',
-    title: 'Rapor Siswa XI IPA 2 Semester Ganjil',
+    title: 'Rapor Siswa XI B Semester Ganjil',
     type: 'semester',
-    class: 'XI IPA 2',
+    class: 'XI B',
     semester: 'Ganjil',
     academicYear: '2024/2025',
     status: 'in_progress',
@@ -373,13 +374,13 @@ export const mockEReports: EReport[] = [
     dueDate: new Date('2024-01-20T23:59:59'),
     studentCount: 30,
     completedCount: 25,
-    description: 'Rapor semester ganjil untuk kelas XI IPA 2',
+    description: 'Rapor semester ganjil untuk kelas XI B',
   },
   {
     id: '3',
-    title: 'Rapor Siswa X IPA 1 Semester Ganjil',
+    title: 'Rapor Siswa X A Semester Ganjil',
     type: 'semester',
-    class: 'X IPA 1',
+    class: 'X A',
     semester: 'Ganjil',
     academicYear: '2024/2025',
     status: 'pending',
@@ -387,6 +388,6 @@ export const mockEReports: EReport[] = [
     dueDate: new Date('2024-01-25T23:59:59'),
     studentCount: 30,
     completedCount: 0,
-    description: 'Rapor semester ganjil untuk kelas X IPA 1',
+    description: 'Rapor semester ganjil untuk kelas X A',
   },
 ];

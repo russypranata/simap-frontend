@@ -7,9 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  RefreshCw, 
-  Save, 
+import {
+  RefreshCw,
+  Save,
   X,
   Calendar,
   Users,
@@ -31,7 +31,7 @@ interface JournalFormData {
   date: string;
   class: string;
   subject: string;
-  lessonHour: string[]; // Changed from string to string[] for multiple selection
+  lessonHour: string; // Changed from string[] to string for single selection
   material: string;
   topic: string;
   teachingMethod: string[];
@@ -73,7 +73,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
       date: new Date().toISOString().split('T')[0],
       class: '',
       subject: '',
-      lessonHour: [], // Initialize as empty array instead of empty string
+      lessonHour: '', // Initialize as empty string
       material: '',
       topic: '',
       teachingMethod: [],
@@ -103,38 +103,12 @@ export const JournalForm: React.FC<JournalFormProps> = ({
     }));
   };
 
-  // Handle multiple selection for lesson hours
-  const handleLessonHourChange = (value: string) => {
-    setFormData(prev => {
-      const currentHours = [...prev.lessonHour];
-      const index = currentHours.indexOf(value);
-      
-      if (index >= 0) {
-        // Remove if already selected
-        currentHours.splice(index, 1);
-      } else {
-        // Add if not selected
-        currentHours.push(value);
-      }
-      
-      return { ...prev, lessonHour: currentHours };
-    });
-  };
-
-  // Remove a selected lesson hour
-  const removeLessonHour = (hour: string) => {
-    setFormData(prev => ({
-      ...prev,
-      lessonHour: prev.lessonHour.filter(h => h !== hour)
-    }));
-  };
-
   // Handle multiple selection for teaching methods
   const handleTeachingMethodChange = (value: string) => {
     setFormData(prev => {
       const currentMethods = [...prev.teachingMethod];
       const index = currentMethods.indexOf(value);
-      
+
       if (index >= 0) {
         // Remove if already selected
         currentMethods.splice(index, 1);
@@ -142,7 +116,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
         // Add if not selected
         currentMethods.push(value);
       }
-      
+
       return { ...prev, teachingMethod: currentMethods };
     });
   };
@@ -152,7 +126,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
     setFormData(prev => {
       const currentMedia = [...prev.media];
       const index = currentMedia.indexOf(value);
-      
+
       if (index >= 0) {
         // Remove if already selected
         currentMedia.splice(index, 1);
@@ -160,7 +134,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
         // Add if not selected
         currentMedia.push(value);
       }
-      
+
       return { ...prev, media: currentMedia };
     });
   };
@@ -215,7 +189,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             max={new Date().toISOString().split('T')[0]}
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="class" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -234,7 +208,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             </SelectContent>
           </Select>
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="subject" className="flex items-center gap-2">
             <Book className="h-4 w-4" />
@@ -253,47 +227,31 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             </SelectContent>
           </Select>
         </div>
-        
-        {/* Add lesson hour field */}
+
+        {/* Lesson hour field - Single Selection */}
         <div className="space-y-2">
           <Label htmlFor="lessonHour" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             Jam Pelajaran *
           </Label>
-          <Select onValueChange={handleLessonHourChange}>
+          <Select
+            value={formData.lessonHour}
+            onValueChange={(value) => handleInputChange('lessonHour', value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Pilih jam pelajaran" />
             </SelectTrigger>
             <SelectContent>
               {LESSON_HOURS.map((hour) => (
-                <SelectItem 
-                  key={hour} 
+                <SelectItem
+                  key={hour}
                   value={hour}
-                  disabled={formData.lessonHour.includes(hour)}
                 >
                   {hour}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          
-          {/* Display selected hours as tags */}
-          {formData.lessonHour.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.lessonHour.map((hour) => (
-                <Badge key={hour} className="flex items-center gap-1 pl-3 pr-1 py-1 bg-[#FACC15] text-white font-bold border border-white/20">
-                  {hour}
-                  <button 
-                    type="button" 
-                    onClick={() => removeLessonHour(hour)}
-                    className="ml-1 hover:bg-white/10 rounded-full p-0.5"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
@@ -312,7 +270,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             rows={4}
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="topic" className="flex items-center gap-2">
             <Lightbulb className="h-4 w-4" />
@@ -341,8 +299,8 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             </SelectTrigger>
             <SelectContent>
               {teachingMethods.map((method) => (
-                <SelectItem 
-                  key={method} 
+                <SelectItem
+                  key={method}
                   value={method}
                   disabled={formData.teachingMethod.includes(method)}
                 >
@@ -351,15 +309,15 @@ export const JournalForm: React.FC<JournalFormProps> = ({
               ))}
             </SelectContent>
           </Select>
-          
+
           {/* Display selected methods as tags */}
           {formData.teachingMethod.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {formData.teachingMethod.map((method) => (
                 <Badge key={method} className="flex items-center gap-1 pl-3 pr-1 py-1 bg-[#FACC15] text-white font-bold border border-white/20">
                   {method}
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => removeTeachingMethod(method)}
                     className="ml-1 hover:bg-white/10 rounded-full p-0.5"
                   >
@@ -370,7 +328,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="media" className="flex items-center gap-2">
             <Monitor className="h-4 w-4" />
@@ -382,8 +340,8 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             </SelectTrigger>
             <SelectContent>
               {mediaOptions.map((media) => (
-                <SelectItem 
-                  key={media} 
+                <SelectItem
+                  key={media}
                   value={media}
                   disabled={formData.media.includes(media)}
                 >
@@ -392,15 +350,15 @@ export const JournalForm: React.FC<JournalFormProps> = ({
               ))}
             </SelectContent>
           </Select>
-          
+
           {/* Display selected media as tags */}
           {formData.media.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {formData.media.map((media) => (
                 <Badge key={media} className="flex items-center gap-1 pl-3 pr-1 py-1 bg-[#FACC15] text-white font-bold border border-white/20">
                   {media}
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => removeMedia(media)}
                     className="ml-1 hover:bg-white/10 rounded-full p-0.5"
                   >

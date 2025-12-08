@@ -71,10 +71,10 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
               <Filter className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-base font-semibold text-gray-900">
+              <CardTitle className="text-lg font-semibold text-gray-900">
                 Filter Presensi
               </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground font-medium">
+              <CardDescription className="text-sm text-muted-foreground">
                 Pilih kelas, tanggal, dan mata pelajaran untuk mengelola presensi
               </CardDescription>
             </div>
@@ -110,6 +110,22 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 value={selectedDate}
                 onChange={(e) => { setSelectedDate(e.target.value); onFilterChange(); }}
                 max={formatDate(new Date(), 'yyyy-MM-dd')}
+                min={(() => {
+                  // Logic to determine start of current semester
+                  // Odd Semester: Starts July 1st
+                  // Even Semester: Starts January 1st
+                  const today = new Date();
+                  const currentYear = today.getFullYear();
+                  const currentMonth = today.getMonth(); // 0-11
+
+                  let minDate;
+                  if (currentMonth >= 6) { // July onwards (Odd Semester)
+                    minDate = `${currentYear}-07-01`;
+                  } else { // January to June (Even Semester)
+                    minDate = `${currentYear}-01-01`;
+                  }
+                  return minDate;
+                })()}
               />
             </div>
 

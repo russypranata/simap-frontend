@@ -7,17 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TeachingJournal } from '@/features/teacher/types/teacher';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Calendar, 
-  Users, 
-  BookOpen, 
-  Clock, 
-  Target, 
-  Award, 
-  FileText, 
-  UserCheck, 
+import {
+  ArrowLeft,
+  Edit,
+  Calendar,
+  Users,
+  BookOpen,
+  Clock,
+  Target,
+  Award,
+  FileText,
+  UserCheck,
   Activity,
   StickyNote
 } from 'lucide-react';
@@ -86,10 +86,19 @@ export const JournalViewPage: React.FC<JournalViewPageProps> = ({ journal }) => 
       {/* Journal Details Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Detail Jurnal</CardTitle>
-          <CardDescription>
-            Informasi lengkap tentang entri jurnal mengajar ini
-          </CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              <FileText className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg font-semibold text-gray-900">
+                Detail Jurnal
+              </CardTitle>
+              <CardDescription className="text-sm text-muted-foreground">
+                Informasi lengkap tentang entri jurnal mengajar ini
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -118,7 +127,14 @@ export const JournalViewPage: React.FC<JournalViewPageProps> = ({ journal }) => 
               <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
               <div>
                 <Label className="text-sm font-bold text-muted-foreground">Jam Pelajaran</Label>
-                <p className="text-sm mt-1">{journal.lessonHour}</p>
+                <p className="text-sm mt-1">
+                  {journal.lessonHour}
+                  {(journal.startTime && journal.endTime) && (
+                    <span className="text-muted-foreground ml-1">
+                      ({journal.startTime} - {journal.endTime})
+                    </span>
+                  )}
+                </p>
               </div>
             </div>
           </div>
@@ -132,7 +148,7 @@ export const JournalViewPage: React.FC<JournalViewPageProps> = ({ journal }) => 
                   <p className="text-sm mt-1">{journal.material}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-3">
                 <BookOpen className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
@@ -140,7 +156,7 @@ export const JournalViewPage: React.FC<JournalViewPageProps> = ({ journal }) => 
                   <p className="text-sm mt-1">{journal.topic}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-3">
                 <Activity className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
@@ -149,7 +165,7 @@ export const JournalViewPage: React.FC<JournalViewPageProps> = ({ journal }) => 
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
                 <Award className="h-5 w-5 text-muted-foreground mt-0.5" />
@@ -158,7 +174,7 @@ export const JournalViewPage: React.FC<JournalViewPageProps> = ({ journal }) => 
                   <p className="text-sm mt-1">{formatTeachingMethods(journal.teachingMethod)}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-3">
                 <FileText className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
@@ -166,7 +182,7 @@ export const JournalViewPage: React.FC<JournalViewPageProps> = ({ journal }) => 
                   <p className="text-sm mt-1">{formatMedia(journal.media)}</p>
                 </div>
               </div>
-              
+
               {journal.notes && (
                 <div className="flex items-start space-x-3">
                   <StickyNote className="h-5 w-5 text-muted-foreground mt-0.5" />
@@ -208,6 +224,28 @@ export const JournalViewPage: React.FC<JournalViewPageProps> = ({ journal }) => 
               </div>
             </div>
           </div>
+
+          {/* Metadata Footer */}
+          {(journal.createdAt || journal.updatedAt) && (
+            <div className="pt-4 mt-4 border-t text-xs text-muted-foreground flex flex-col sm:flex-row justify-between gap-2">
+              {journal.createdAt && (
+                <div className="flex items-center gap-1">
+                  <span>Dibuat pada:</span>
+                  <span className="font-medium">
+                    {formatDate(journal.createdAt, 'dd MMMM yyyy, HH:mm')}
+                  </span>
+                </div>
+              )}
+              {journal.updatedAt && (
+                <div className="flex items-center gap-1">
+                  <span>Terakhir diperbarui:</span>
+                  <span className="font-medium">
+                    {formatDate(journal.updatedAt, 'dd MMMM yyyy, HH:mm')}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 

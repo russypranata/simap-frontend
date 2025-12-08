@@ -184,15 +184,15 @@ export const DailyScheduleCalendar: React.FC<DailyScheduleCalendarProps> = ({
         <Card className="border-none shadow-none bg-transparent">
             {/* Header Navigation */}
             <div className="flex items-center justify-between mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                        <CalendarIcon className="h-6 w-6" />
+                <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                        <CalendarIcon className="h-5 w-5" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900">
+                        <h2 className="text-base font-semibold text-gray-900">
                             {formatDate(selectedDate, 'EEEE, dd MMMM yyyy')}
                         </h2>
-                        <p className="text-sm text-muted-foreground font-medium">
+                        <p className="text-xs text-muted-foreground font-medium">
                             {groupedSchedules.length} Sesi Mengajar
                         </p>
                     </div>
@@ -266,9 +266,6 @@ export const DailyScheduleCalendar: React.FC<DailyScheduleCalendarProps> = ({
                                             ? "bg-white border-primary shadow-lg shadow-primary/5 ring-1 ring-primary/10"
                                             : "bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300"
                                     )}>
-                                        {/* Card Accent Strip */}
-                                        <div className={cn("h-1 w-full", styles.bg.replace('bg-', 'bg-gradient-to-r from-').replace('100', '500').concat(' to-transparent opacity-80'))} />
-
                                         <div className="p-4">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex gap-3 flex-1">

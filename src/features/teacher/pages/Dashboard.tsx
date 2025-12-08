@@ -80,9 +80,8 @@ const StatCard: React.FC<StatCardProps> = ({
           <div className="text-2xl font-bold text-foreground">{value}</div>
           {trend && (
             <div
-              className={`flex items-center text-xs ${
-                trend.isUp ? "text-green-600" : "text-red-600"
-              }`}
+              className={`flex items-center text-xs ${trend.isUp ? "text-green-600" : "text-red-600"
+                }`}
             >
               {trend.isUp ? (
                 <ArrowUp className="h-3 w-3 mr-1" />
@@ -115,24 +114,21 @@ const ScheduleItem: React.FC<ScheduleItemProps> = ({
 
   return (
     <div
-      className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${
-        isCurrent
+      className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${isCurrent
           ? "bg-primary/10 border-primary/30"
           : isPast
-          ? "bg-muted/30 border-muted"
-          : "bg-background hover:bg-muted/50"
-      }`}
+            ? "bg-muted/30 border-muted"
+            : "bg-background hover:bg-muted/50"
+        }`}
     >
       <div className="flex items-center space-x-4">
         <div
-          className={`p-2 rounded-lg ${
-            isCurrent ? "bg-primary/20" : "bg-muted"
-          }`}
+          className={`p-2 rounded-lg ${isCurrent ? "bg-primary/20" : "bg-muted"
+            }`}
         >
           <Clock
-            className={`h-4 w-4 ${
-              isCurrent ? "text-primary" : "text-muted-foreground"
-            }`}
+            className={`h-4 w-4 ${isCurrent ? "text-primary" : "text-muted-foreground"
+              }`}
           />
         </div>
         <div>
@@ -335,9 +331,8 @@ export const TeacherDashboard: React.FC = () => {
     },
     {
       title: "Status Absensi",
-      value: `${dashboardStats?.attendanceStatus.present || 0}/${
-        dashboardStats?.attendanceStatus.total || 0
-      }`,
+      value: `${dashboardStats?.attendanceStatus.present || 0}/${dashboardStats?.attendanceStatus.total || 0
+        }`,
       description: "Siswa hadir hari ini",
       icon: UserCheck,
       color: "text-emerald-600",
@@ -366,8 +361,8 @@ export const TeacherDashboard: React.FC = () => {
 
   const attendancePercentage = dashboardStats?.attendanceStatus.total
     ? (dashboardStats.attendanceStatus.present /
-        dashboardStats.attendanceStatus.total) *
-      100
+      dashboardStats.attendanceStatus.total) *
+    100
     : 0;
 
   // Mock recent activities
@@ -419,12 +414,22 @@ export const TeacherDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header without Profile */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard Guru</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">
+            Dashboard <span className="text-primary">Guru</span>
+          </h1>
           <p className="text-muted-foreground">
-            {getDayName(new Date())}, {formatDate(new Date())}
+            Ringkasan aktivitas pembelajaran dan administrasi
           </p>
+          <div className="flex items-center gap-3 mt-4">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <Calendar className="h-4 w-4" />
+              <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
+            </div>
+            <div className="h-4 w-[1px] bg-border" />
+            <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
+          </div>
         </div>
       </div>
 

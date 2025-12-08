@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { 
-  Calendar, 
-  Book, 
-  Users, 
-  FileText, 
+import {
+  Calendar,
+  Book,
+  Users,
+  FileText,
   Download,
   BarChart3,
   PieChart,
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { TeachingJournal } from '@/features/teacher/types/teacher';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
+import { LESSON_HOURS } from '@/features/teacher/constants/attendance';
 
 interface JournalReportsProps {
   journals: TeachingJournal[];
@@ -26,10 +27,10 @@ interface JournalReportsProps {
   subjects: string[];
 }
 
-export const JournalReports: React.FC<JournalReportsProps> = ({ 
-  journals, 
+export const JournalReports: React.FC<JournalReportsProps> = ({
+  journals,
   classes,
-  subjects 
+  subjects
 }) => {
   const [reportType, setReportType] = useState('journal');
   const [selectedClass, setSelectedClass] = useState('all');
@@ -70,7 +71,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
     // Note: In a real implementation, you would filter based on the academic year and semester
     // For now, we'll just pass through all journals as we don't have academic year/semester data in the mock data
     // In a real app, you would have academic year and semester properties in your journal data
-    
+
     // Apply filters based on report type
     switch (reportType) {
       case 'journal':
@@ -79,16 +80,16 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           (!selectedDate || journal.date === selectedDate) &&
           (selectedClass === 'all' || journal.class === selectedClass) &&
           (selectedSubject === 'all' || journal.subject === selectedSubject) &&
-          (selectedLessonHour === 'all' || journal.lessonHour.includes(selectedLessonHour))
+          (selectedLessonHour === 'all' || journal.lessonHour === selectedLessonHour)
         );
-      
+
       case 'daily':
         // Rekap Harian: Tanggal → (Kelas optional)
         return (
           (!selectedDate || journal.date === selectedDate) &&
           (selectedClass === 'all' || journal.class === selectedClass)
         );
-      
+
       case 'weekly':
         // Rekap Mingguan: Minggu/Rentang Tanggal → (Kelas optional)
         const journalDate = new Date(journal.date);
@@ -99,7 +100,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           inDateRange &&
           (selectedClass === 'all' || journal.class === selectedClass)
         );
-      
+
       case 'monthly':
         // Rekap Bulanan: Bulan → (Kelas optional)
         const journalDateMonthly = new Date(journal.date);
@@ -107,7 +108,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           journalDateMonthly.getMonth() + 1 === selectedMonth &&
           (selectedClass === 'all' || journal.class === selectedClass)
         );
-      
+
       case 'subject':
         // Rekap per Mapel: Mapel → Kelas → Rentang Waktu
         const journalDateSubject = new Date(journal.date);
@@ -119,7 +120,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           (selectedClass === 'all' || journal.class === selectedClass) &&
           inDateRangeSubject
         );
-      
+
       case 'class':
         // Rekap per Kelas: Kelas → Rentang Waktu
         const journalDateClass = new Date(journal.date);
@@ -130,7 +131,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           (selectedClass === 'all' || journal.class === selectedClass) &&
           inDateRangeClass
         );
-      
+
       default:
         return true;
     }
@@ -148,7 +149,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           subject: journal.subject,
           lessonHour: journal.lessonHour
         }));
-      
+
       case 'daily':
         // Group by date
         const dailyGrouped: Record<string, TeachingJournal[]> = {};
@@ -165,7 +166,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           count: journals.length,
           journals
         })).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      
+
       case 'weekly':
         // Group by week
         const weeklyGrouped: Record<string, TeachingJournal[]> = {};
@@ -176,7 +177,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
           startOfWeek.setDate(diff);
           startOfWeek.setHours(0, 0, 0, 0);
-          
+
           const weekKey = formatDate(startOfWeek, 'yyyy-MM-dd');
           if (!weeklyGrouped[weekKey]) {
             weeklyGrouped[weekKey] = [];
@@ -187,7 +188,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
         return Object.entries(weeklyGrouped).map(([weekStart, journals]) => {
           const weekEnd = new Date(weekStart);
           weekEnd.setDate(weekEnd.getDate() + 6);
-          
+
           return {
             weekStart,
             weekEnd: formatDate(weekEnd, 'yyyy-MM-dd'),
@@ -195,14 +196,14 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             journals
           };
         }).sort((a, b) => new Date(b.weekStart).getTime() - new Date(a.weekStart).getTime());
-      
+
       case 'monthly':
         // Group by month
         const monthlyGrouped: Record<string, TeachingJournal[]> = {};
         filteredJournals.forEach(journal => {
           const date = new Date(journal.date);
           const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-          
+
           if (!monthlyGrouped[monthKey]) {
             monthlyGrouped[monthKey] = [];
           }
@@ -212,7 +213,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
         return Object.entries(monthlyGrouped).map(([month, journals]) => {
           const [year, monthNum] = month.split('-');
           const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('id-ID', { month: 'long' });
-          
+
           return {
             month: `${monthName} ${year}`,
             year: parseInt(year),
@@ -221,7 +222,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             journals
           };
         }).sort((a, b) => b.year - a.year || b.monthNum - a.monthNum);
-      
+
       case 'subject':
         // Group by subject
         const subjectGrouped: Record<string, TeachingJournal[]> = {};
@@ -238,7 +239,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           count: journals.length,
           journals
         })).sort((a, b) => b.count - a.count);
-      
+
       case 'class':
         // Group by class
         const classGrouped: Record<string, TeachingJournal[]> = {};
@@ -255,7 +256,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           count: journals.length,
           journals
         })).sort((a, b) => b.count - a.count);
-      
+
       default:
         return [];
     }
@@ -299,7 +300,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -313,7 +314,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -327,7 +328,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -370,7 +371,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Semester</label>
               <Select value={semester} onValueChange={(value) => setSemester(value as 'Ganjil' | 'Genap')}>
@@ -415,7 +416,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                   onChange={(e) => setSelectedDate(e.target.value)}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Kelas</label>
                 <Select value={selectedClass} onValueChange={setSelectedClass}>
@@ -432,7 +433,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Mata Pelajaran</label>
                 <Select value={selectedSubject} onValueChange={setSelectedSubject}>
@@ -449,7 +450,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Jam Pelajaran</label>
                 <Select value={selectedLessonHour} onValueChange={setSelectedLessonHour}>
@@ -458,10 +459,11 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Semua Jam Pelajaran</SelectItem>
-                    <SelectItem value="1">Jam Pelajaran 1</SelectItem>
-                    <SelectItem value="2">Jam Pelajaran 2</SelectItem>
-                    <SelectItem value="3">Jam Pelajaran 3</SelectItem>
-                    <SelectItem value="4">Jam Pelajaran 4</SelectItem>
+                    {LESSON_HOURS.map((hour) => (
+                      <SelectItem key={hour} value={hour}>
+                        {hour}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -479,7 +481,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                   onChange={(e) => setSelectedDate(e.target.value)}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Kelas (Opsional)</label>
                 <Select value={selectedClass} onValueChange={setSelectedClass}>
@@ -508,19 +510,19 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                     type="date"
                     className="rounded-md border border-input bg-background px-3 py-2 text-sm h-10"
                     value={dateRange.start}
-                    onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
                     placeholder="Tanggal Mulai"
                   />
                   <input
                     type="date"
                     className="rounded-md border border-input bg-background px-3 py-2 text-sm h-10"
                     value={dateRange.end}
-                    onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
                     placeholder="Tanggal Akhir"
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Kelas (Opsional)</label>
                 <Select value={selectedClass} onValueChange={setSelectedClass}>
@@ -564,7 +566,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-medium text-foreground">Kelas (Opsional)</label>
                 <Select value={selectedClass} onValueChange={setSelectedClass}>
@@ -602,7 +604,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Kelas</label>
                 <Select value={selectedClass} onValueChange={setSelectedClass}>
@@ -619,7 +621,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Rentang Waktu</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -627,14 +629,14 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                     type="date"
                     className="rounded-md border border-input bg-background px-3 py-2 text-sm h-10"
                     value={dateRange.start}
-                    onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
                     placeholder="Tanggal Mulai"
                   />
                   <input
                     type="date"
                     className="rounded-md border border-input bg-background px-3 py-2 text-sm h-10"
                     value={dateRange.end}
-                    onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
                     placeholder="Tanggal Akhir"
                   />
                 </div>
@@ -660,7 +662,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Rentang Waktu</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -668,14 +670,14 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                     type="date"
                     className="rounded-md border border-input bg-background px-3 py-2 text-sm h-10"
                     value={dateRange.start}
-                    onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
                     placeholder="Tanggal Mulai"
                   />
                   <input
                     type="date"
                     className="rounded-md border border-input bg-background px-3 py-2 text-sm h-10"
                     value={dateRange.end}
-                    onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
                     placeholder="Tanggal Akhir"
                   />
                 </div>
@@ -764,7 +766,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                     </tbody>
                   </table>
                 )}
-                
+
                 {reportType === 'daily' && (
                   <table className="w-full">
                     <thead className="bg-muted">
@@ -798,7 +800,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                     </tbody>
                   </table>
                 )}
-                
+
                 {reportType === 'weekly' && (
                   <table className="w-full">
                     <thead className="bg-muted">
@@ -834,7 +836,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                     </tbody>
                   </table>
                 )}
-                
+
                 {reportType === 'monthly' && (
                   <table className="w-full">
                     <thead className="bg-muted">
@@ -868,7 +870,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                     </tbody>
                   </table>
                 )}
-                
+
                 {reportType === 'subject' && (
                   <table className="w-full">
                     <thead className="bg-muted">
@@ -888,21 +890,18 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                             </span>
                           </td>
                           <td className="py-3 px-4">
-                            <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                              {item.journals.slice(0, 3).map((journal: TeachingJournal, idx: number) => (
-                                <li key={idx} className="truncate max-w-xs">{journal.class} - {formatDate(new Date(journal.date), 'dd MMM yyyy')}</li>
-                              ))}
-                              {item.journals.length > 3 && (
-                                <li className="text-xs text-muted-foreground">+{item.journals.length - 3} jurnal lainnya</li>
+                            <div className="text-sm text-muted-foreground">
+                              {item.journals.length > 0 && (
+                                <span>Terakhir: {formatDate(new Date(item.journals[0].date), 'dd MMM yyyy')}</span>
                               )}
-                            </ul>
+                            </div>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 )}
-                
+
                 {reportType === 'class' && (
                   <table className="w-full">
                     <thead className="bg-muted">
@@ -917,19 +916,16 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
                         <tr key={index} className="hover:bg-muted/50">
                           <td className="py-3 px-4 font-medium">{item.className}</td>
                           <td className="py-3 px-4">
-                            <span className="inline-flex items-center rounded-full bg-cyan-100 px-2.5 py-0.5 text-xs font-medium text-cyan-800">
+                            <span className="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800">
                               {item.count}
                             </span>
                           </td>
                           <td className="py-3 px-4">
-                            <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                              {item.journals.slice(0, 3).map((journal: TeachingJournal, idx: number) => (
-                                <li key={idx} className="truncate max-w-xs">{journal.subject} - {formatDate(new Date(journal.date), 'dd MMM yyyy')}</li>
-                              ))}
-                              {item.journals.length > 3 && (
-                                <li className="text-xs text-muted-foreground">+{item.journals.length - 3} jurnal lainnya</li>
+                            <div className="text-sm text-muted-foreground">
+                              {item.journals.length > 0 && (
+                                <span>Terakhir: {formatDate(new Date(item.journals[0].date), 'dd MMM yyyy')}</span>
                               )}
-                            </ul>
+                            </div>
                           </td>
                         </tr>
                       ))}

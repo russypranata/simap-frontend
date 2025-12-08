@@ -49,14 +49,14 @@ interface JournalEditPageProps {
 
 export const JournalEditPage: React.FC<JournalEditPageProps> = ({ journal }) => {
   const router = useRouter();
-  
+
   const {
     loading,
     error,
     classes,
     updateTeachingJournal,
   } = useTeacherData();
-  
+
   const [isSaving, setIsSaving] = useState(false);
   const [localClasses, setLocalClasses] = useState<TeacherClass[]>(mockClasses);
 
@@ -87,7 +87,7 @@ export const JournalEditPage: React.FC<JournalEditPageProps> = ({ journal }) => 
     try {
       // Fetch attendance records directly from API
       const records = await teacherApi.getAttendanceRecords(classId, date);
-      
+
       // Calculate statistics
       return calculateAttendanceStats(records || []);
     } catch (error) {
@@ -102,16 +102,14 @@ export const JournalEditPage: React.FC<JournalEditPageProps> = ({ journal }) => 
       date: journal.date,
       class: journal.class,
       subject: journal.subject,
-      lessonHour: Array.isArray(journal.lessonHour) 
-        ? journal.lessonHour 
-        : journal.lessonHour ? [journal.lessonHour] : [], // Fix lessonHour to be an array
+      lessonHour: journal.lessonHour, // Use as string directly
       material: journal.material,
       topic: journal.topic,
-      teachingMethod: Array.isArray(journal.teachingMethod) 
-        ? journal.teachingMethod 
+      teachingMethod: Array.isArray(journal.teachingMethod)
+        ? journal.teachingMethod
         : journal.teachingMethod ? [journal.teachingMethod] : [],
-      media: Array.isArray(journal.media) 
-        ? journal.media 
+      media: Array.isArray(journal.media)
+        ? journal.media
         : journal.media ? [journal.media] : [],
       evaluation: journal.evaluation,
       notes: journal.notes,
@@ -156,7 +154,7 @@ export const JournalEditPage: React.FC<JournalEditPageProps> = ({ journal }) => 
                 Informasi Penting
               </p>
               <p className="text-sm text-blue-700 mt-1">
-                Pastikan semua informasi yang Anda masukkan akurat dan terkini. 
+                Pastikan semua informasi yang Anda masukkan akurat dan terkini.
                 Data jurnal mengajar akan digunakan untuk pelaporan dan evaluasi proses pembelajaran.
               </p>
             </div>

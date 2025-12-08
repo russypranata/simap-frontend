@@ -1,5 +1,5 @@
-import { TeacherDashboard } from '@/features/teacher/pages/Dashboard';
+import { Announcements } from '@/features/teacher/pages/Announcements';
 
 export default function AnnouncementsPage() {
-  return <TeacherDashboard />; // Will be implemented later
+  return <Announcements />;
 }

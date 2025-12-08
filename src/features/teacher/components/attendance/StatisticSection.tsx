@@ -1,15 +1,28 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import {
-  PieChart,
   BarChart3,
-  TrendingUp,
-  TrendingDown,
-  CheckCircle,
-  XCircle
+  Calendar,
+  Users,
+  BookOpen,
 } from 'lucide-react';
+import { LowAttendanceList } from './LowAttendanceList';
+import {
+  ComposedChart,
+  Line,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 
 interface StatisticSectionProps {
   stats: {
@@ -22,87 +35,272 @@ interface StatisticSectionProps {
     percentage: string;
   };
   attendanceTrend: Array<{
-    date: string;
-    hadir: number;
+    name: string;
+    fullName?: string;
+    percentage: number;
+    percentageSakit: number;
+    percentageIzin: number;
+    percentageAlpha: number;
     total: number;
-    dateStr: string;
+    hadir: number;
+    sakit: number;
+    izin: number;
+    tanpaKeterangan: number;
   }>;
-  previousDayChange: {
-    value: string;
-    isUp: boolean;
-  } | null;
+
+  selectedClassName?: string;
+  selectedSubjectName?: string;
+  attendanceRecords: any[];
+  filteredStudents: any[];
+  academicYear?: string;
+  semester?: string;
 }
 
 export const StatisticSection: React.FC<StatisticSectionProps> = ({
   stats,
-  attendanceTrend,
-  previousDayChange,
+  attendanceTrend = [],
+  selectedClassName,
+  selectedSubjectName,
+  attendanceRecords,
+  filteredStudents,
+  academicYear,
+  semester,
 }) => {
+  // Chart Series Toggles
+  const [showPresent, setShowPresent] = useState(true);
+  const [showSick, setShowSick] = useState(true);
+  const [showPermit, setShowPermit] = useState(true);
+  const [showAlpha, setShowAlpha] = useState(true);
+
+  const FilterBadges = () => (
+    <div className="flex flex-wrap gap-2 mt-3">
+      {academicYear && (
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+          <Calendar className="h-3 w-3" />
+          {academicYear}
+        </Badge>
+      )}
+      {semester ? (
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+          <Calendar className="h-3 w-3" />
+          {semester}
+        </Badge>
+      ) : (
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+          <Calendar className="h-3 w-3" />
+          Satu Tahun Ajaran
+        </Badge>
+      )}
+      {selectedClassName ? (
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+          <Users className="h-3 w-3" />
+          {selectedClassName}
+        </Badge>
+      ) : (
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+          <Users className="h-3 w-3" />
+          Semua Kelas
+        </Badge>
+      )}
+      {selectedSubjectName ? (
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+          <BookOpen className="h-3 w-3" />
+          {selectedSubjectName}
+        </Badge>
+      ) : (
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+          <BookOpen className="h-3 w-3" />
+          Semua Mata Pelajaran
+        </Badge>
+      )}
+    </div>
+  );
+
+  // Calculate dynamic width for scrollable chart
+  const minChartWidth = attendanceTrend.length > 6 ? attendanceTrend.length * 60 : '100%';
+
   return (
-    <>
-      {/* Pie Chart Card */}
+    <div className="space-y-6">
+      {/* Unified Analysis Chart */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <PieChart className="h-5 w-5" />
-            <span>Distribusi Kehadiran</span>
-          </CardTitle>
-          <CardDescription>
-            Proporsi kehadiran vs ketidakhadiran semester ini
-          </CardDescription>
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                <BarChart3 className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-semibold text-gray-900">
+                  Analisis Tren Kehadiran Bulanan
+                </CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Grafik persentase kehadiran, sakit, izin, dan alpha setiap bulan
+                </CardDescription>
+                <FilterBadges />
+              </div>
+            </div>
+
+            {/* Series Toggles */}
+            <div className="flex flex-wrap items-center gap-4 p-2 bg-muted/30 rounded-lg border border-border/50">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="showPresent"
+                  checked={showPresent}
+                  onCheckedChange={(c) => setShowPresent(!!c)}
+                  className="data-[state=checked]:bg-white data-[state=checked]:text-green-600 data-[state=checked]:border-green-600"
+                />
+                <Label htmlFor="showPresent" className="text-sm font-medium text-green-600 cursor-pointer">Hadir</Label>
+              </div>
+              <div className="h-4 w-px bg-border" />
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="showSick"
+                  checked={showSick}
+                  onCheckedChange={(c) => setShowSick(!!c)}
+                  className="data-[state=checked]:bg-white data-[state=checked]:text-amber-600 data-[state=checked]:border-amber-600"
+                />
+                <Label htmlFor="showSick" className="text-sm font-medium text-amber-600 cursor-pointer">Sakit</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="showPermit"
+                  checked={showPermit}
+                  onCheckedChange={(c) => setShowPermit(!!c)}
+                  className="data-[state=checked]:bg-white data-[state=checked]:text-blue-600 data-[state=checked]:border-blue-600"
+                />
+                <Label htmlFor="showPermit" className="text-sm font-medium text-blue-600 cursor-pointer">Izin</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="showAlpha"
+                  checked={showAlpha}
+                  onCheckedChange={(c) => setShowAlpha(!!c)}
+                  className="data-[state=checked]:bg-white data-[state=checked]:text-red-600 data-[state=checked]:border-red-600"
+                />
+                <Label htmlFor="showAlpha" className="text-sm font-medium text-red-600 cursor-pointer">Alpha</Label>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center">
-            <div className="text-center">
-              <div className="relative inline-flex items-center justify-center">
-                <svg className="w-48 h-48">
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="80"
-                    fill="none"
-                    stroke="#22c55e"
-                    strokeWidth="32"
-                    strokeDasharray={`${(stats.hadir / stats.totalRecords) * 502.4} 502.4`}
-                    transform="rotate(-90 96 96)"
-                  />
-                  <circle
-                    cx="96"
-                    cy="96"
-                    r="80"
-                    fill="none"
-                    stroke="#ef4444"
-                    strokeWidth="32"
-                    strokeDasharray={`${((stats.totalRecords - stats.hadir) / stats.totalRecords) * 502.4} 502.4`}
-                    strokeDashoffset={`-${(stats.hadir / stats.totalRecords) * 502.4}`}
-                    transform="rotate(-90 96 96)"
-                  />
-                </svg>
-                <div className="absolute">
-                  <div className="text-3xl font-bold">{stats.percentage}%</div>
-                  <div className="text-xs text-muted-foreground">Hadir</div>
-                </div>
-              </div>
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                  <span className="text-sm">Hadir: {stats.hadir}</span>
-                </div>
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-                  <span className="text-sm">Tidak Hadir: {stats.totalRecords - stats.hadir}</span>
-                </div>
-              </div>
-              {previousDayChange && (
-                <div className="mt-4 flex items-center justify-center space-x-1 text-sm">
-                  {previousDayChange.isUp ? (
-                    <TrendingUp className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4 text-red-600" />
-                  )}
-                  <span className={previousDayChange.isUp ? 'text-green-600' : 'text-red-600'}>
-                    {previousDayChange.isUp ? '+' : '-'}{previousDayChange.value}% dari kemarin
-                  </span>
+          <style>{`
+            .recharts-wrapper,
+            .recharts-surface,
+            .recharts-layer {
+              outline: none !important;
+            }
+            .recharts-wrapper:focus,
+            .recharts-wrapper:focus-visible {
+              outline: none !important;
+            }
+            /* Target any SVG elements inside */
+            svg:focus {
+              outline: none !important;
+            }
+          `}</style>
+          <div className="w-full overflow-x-auto pb-4">
+            <div className="h-[350px] outline-none focus:outline-none" style={{ minWidth: typeof minChartWidth === 'number' ? `${minChartWidth}px` : minChartWidth }}>
+              {attendanceTrend.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%" className="outline-none focus:outline-none">
+                  <ComposedChart
+                    data={attendanceTrend}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
+                    className="outline-none focus:outline-none"
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      dy={10}
+                      interval={0}
+                    />
+                    <YAxis
+                      width={40}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      domain={[0, 100]}
+                      unit="%"
+                    />
+                    <Tooltip
+                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                      cursor={{ fill: '#f3f4f6' }}
+                      labelFormatter={(label, payload) => {
+                        if (payload && payload.length > 0) {
+                          return payload[0].payload.fullName || label;
+                        }
+                        return label;
+                      }}
+                      formatter={(value: number, name: string, props: any) => {
+                        const data = props.payload;
+                        let count = 0;
+                        if (name === 'Hadir (%)') count = data.hadir;
+                        else if (name === 'Sakit (%)') count = data.sakit;
+                        else if (name === 'Izin (%)') count = data.izin;
+                        else if (name === 'Alpha (%)') count = data.tanpaKeterangan;
+
+                        return [`${value}% (${count} Siswa)`, name.replace(' (%)', '')];
+                      }}
+                    />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+
+                    {/* Absence Lines - All on same axis */}
+                    {showSick && (
+                      <Line
+                        type="monotone"
+                        dataKey="percentageSakit"
+                        name="Sakit (%)"
+                        stroke="#f59e0b"
+                        strokeWidth={2}
+                        dot={{ r: 3, fill: '#f59e0b', strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={{ r: 5, fill: '#f59e0b', strokeWidth: 0 }}
+                      />
+                    )}
+                    {showPermit && (
+                      <Line
+                        type="monotone"
+                        dataKey="percentageIzin"
+                        name="Izin (%)"
+                        stroke="#2563eb"
+                        strokeWidth={2}
+                        dot={{ r: 3, fill: '#2563eb', strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={{ r: 5, fill: '#2563eb', strokeWidth: 0 }}
+                      />
+                    )}
+                    {showAlpha && (
+                      <Line
+                        type="monotone"
+                        dataKey="percentageAlpha"
+                        name="Alpha (%)"
+                        stroke="#ef4444"
+                        strokeWidth={2}
+                        dot={{ r: 3, fill: '#ef4444', strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={{ r: 5, fill: '#ef4444', strokeWidth: 0 }}
+                      />
+                    )}
+
+                    {/* Presence Line */}
+                    {showPresent && (
+                      <Line
+                        type="monotone"
+                        dataKey="percentage"
+                        name="Hadir (%)"
+                        stroke="#22c55e"
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: '#22c55e', strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={{ r: 6, fill: '#22c55e', strokeWidth: 0 }}
+                      />
+                    )}
+                  </ComposedChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-2">
+                  <div className="p-3 bg-muted rounded-full">
+                    <BarChart3 className="h-6 w-6 opacity-50" />
+                  </div>
+                  <p className="text-sm font-medium">Belum ada data statistik</p>
                 </div>
               )}
             </div>
@@ -110,97 +308,16 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Weekly Trend */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <BarChart3 className="h-5 w-5" />
-              <span>Trend Kehadiran Mingguan</span>
-            </CardTitle>
-            <CardDescription>
-              Persentase kehadiran siswa minggu ini
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {attendanceTrend.map((day, index) => {
-                const percentage = (day.hadir / day.total) * 100;
-                return (
-                  <div key={index} className="flex items-center space-x-4">
-                    <div className="w-16 text-sm font-medium">{day.date}</div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex-1 bg-muted rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${percentage >= 90 ? 'bg-green-500' :
-                              percentage >= 75 ? 'bg-yellow-500' : 'bg-red-500'
-                              }`}
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                        <span className="text-sm font-medium w-12 text-right">
-                          {percentage.toFixed(0)}%
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-sm text-muted-foreground w-16 text-right">
-                      {day.hadir}/{day.total}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Attendance Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5" />
-              <span>Ringkasan Presensi</span>
-            </CardTitle>
-            <CardDescription>
-              Statistik presensi semester ini
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="text-center p-6 bg-muted/30 rounded-lg">
-                <div className="text-4xl font-bold text-primary mb-2">
-                  {stats.percentage}%
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Tingkat Kehadiran Semester Ini
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-sm font-medium">Hadir</span>
-                  </div>
-                  <div className="text-2xl font-bold text-green-600 mt-1">
-                    {stats.hadir}
-                  </div>
-                </div>
-
-                <div className="p-4 bg-red-50 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <XCircle className="h-5 w-5 text-red-600" />
-                    <span className="text-sm font-medium">Tidak Hadir</span>
-                  </div>
-                  <div className="text-2xl font-bold text-red-600 mt-1">
-                    {stats.sakit + stats.izin + stats.tanpaKeterangan}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </>
+      {/* Low Attendance List (Full Width) */}
+      <LowAttendanceList
+        attendanceRecords={attendanceRecords}
+        filteredStudents={filteredStudents}
+        threshold={80}
+        selectedClassName={selectedClassName}
+        selectedSubjectName={selectedSubjectName}
+        academicYear={academicYear}
+        semester={semester}
+      />
+    </div>
   );
 };
