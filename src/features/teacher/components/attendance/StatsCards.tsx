@@ -29,7 +29,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats, selectedClassName
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Total Siswa Card */}
-      <Card>
+      <Card className="bg-primary/5 border-primary/20">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Siswa</CardTitle>
           <div className="p-2 bg-primary/10 rounded-lg">
@@ -45,7 +45,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats, selectedClassName
       </Card>
 
       {/* Total Data Card */}
-      <Card>
+      <Card className="bg-purple-50 border-purple-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Data</CardTitle>
           <div className="p-2 bg-purple-100 rounded-lg">
@@ -64,7 +64,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats, selectedClassName
       </Card>
 
       {/* Hadir Card */}
-      <Card>
+      <Card className="bg-green-50 border-green-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Hadir</CardTitle>
           <div className="p-2 bg-green-100 rounded-lg">
@@ -80,7 +80,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats, selectedClassName
       </Card>
 
       {/* Sakit Card */}
-      <Card>
+      <Card className="bg-yellow-50 border-yellow-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Sakit</CardTitle>
           <div className="p-2 bg-yellow-100 rounded-lg">
@@ -96,7 +96,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats, selectedClassName
       </Card>
 
       {/* Izin Card */}
-      <Card>
+      <Card className="bg-blue-50 border-blue-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Izin</CardTitle>
           <div className="p-2 bg-blue-100 rounded-lg">
@@ -112,7 +112,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats, selectedClassName
       </Card>
 
       {/* Alpa Card */}
-      <Card>
+      <Card className="bg-red-50 border-red-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Tanpa Keterangan</CardTitle>
           <div className="p-2 bg-red-100 rounded-lg">

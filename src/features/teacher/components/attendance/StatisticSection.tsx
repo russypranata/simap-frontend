@@ -75,40 +75,40 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
   const FilterBadges = () => (
     <div className="flex flex-wrap gap-2 mt-3">
       {academicYear && (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
           <Calendar className="h-3 w-3" />
           {academicYear}
         </Badge>
       )}
       {semester ? (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
           <Calendar className="h-3 w-3" />
           {semester}
         </Badge>
       ) : (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
           <Calendar className="h-3 w-3" />
           Satu Tahun Ajaran
         </Badge>
       )}
       {selectedClassName ? (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
           <Users className="h-3 w-3" />
           {selectedClassName}
         </Badge>
       ) : (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
           <Users className="h-3 w-3" />
           Semua Kelas
         </Badge>
       )}
       {selectedSubjectName ? (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
           <BookOpen className="h-3 w-3" />
           {selectedSubjectName}
         </Badge>
       ) : (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50">
+        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
           <BookOpen className="h-3 w-3" />
           Semua Mata Pelajaran
         </Badge>

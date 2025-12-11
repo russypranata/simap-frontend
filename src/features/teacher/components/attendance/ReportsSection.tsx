@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Download, Calendar, BookOpen, Printer } from 'lucide-react';
+import { FileText, Download, Calendar, BookOpen, Printer, Eye } from 'lucide-react';
 import { ACADEMIC_YEARS, SEMESTERS } from '../../constants/attendance';
 import { TeacherClass } from '../../types/teacher';
+import { ReportPreviewDialog } from './ReportPreviewDialog';
 
 interface ReportsSectionProps {
     classes: TeacherClass[];
@@ -31,6 +32,9 @@ export const ReportsSection: React.FC<ReportsSectionProps> = ({
     const [semesterSubject, setSemesterSubject] = useState<string>('');
     const [semesterAcademicYear, setSemesterAcademicYear] = useState<string>(ACADEMIC_YEARS[0]);
     const [semesterValue, setSemesterValue] = useState<string>(SEMESTERS[0]);
+
+    // Preview Dialog State
+    const [previewData, setPreviewData] = useState<any>(null);
 
     const months = [
         { value: '0', label: 'Januari' },
@@ -134,12 +138,33 @@ export const ReportsSection: React.FC<ReportsSectionProps> = ({
                     <div className="pt-4 flex gap-3 mt-auto">
                         <Button
                             className="flex-1 gap-2"
+                            variant="secondary"
+                            disabled={!monthlyClass || !monthlySubject}
+                            onClick={() => {
+                                const className = classes.find(c => c.id === monthlyClass)?.name || '';
+                                setPreviewData({
+                                    type: 'monthly',
+                                    filters: {
+                                        classId: monthlyClass,
+                                        className,
+                                        subject: monthlySubject,
+                                        month: monthlyMonth,
+                                        year: monthlyYear
+                                    }
+                                });
+                            }}
+                        >
+                            <Eye className="h-4 w-4" />
+                            Preview
+                        </Button>
+                        <Button
+                            className="flex-1 gap-2"
                             variant="outline"
                             disabled={!monthlyClass || !monthlySubject}
                             onClick={() => onExport('monthly', 'pdf', { classId: monthlyClass, subject: monthlySubject, month: monthlyMonth, year: monthlyYear })}
                         >
                             <Printer className="h-4 w-4" />
-                            Cetak PDF
+                            PDF
                         </Button>
                         <Button
                             className="flex-1 gap-2"
@@ -147,7 +172,7 @@ export const ReportsSection: React.FC<ReportsSectionProps> = ({
                             onClick={() => onExport('monthly', 'excel', { classId: monthlyClass, subject: monthlySubject, month: monthlyMonth, year: monthlyYear })}
                         >
                             <Download className="h-4 w-4" />
-                            Download Excel
+                            Excel
                         </Button>
                     </div>
                 </CardContent>
@@ -234,12 +259,33 @@ export const ReportsSection: React.FC<ReportsSectionProps> = ({
                     <div className="pt-4 flex gap-3 mt-auto">
                         <Button
                             className="flex-1 gap-2"
+                            variant="secondary"
+                            disabled={!semesterClass || !semesterSubject}
+                            onClick={() => {
+                                const className = classes.find(c => c.id === semesterClass)?.name || '';
+                                setPreviewData({
+                                    type: 'semester',
+                                    filters: {
+                                        classId: semesterClass,
+                                        className,
+                                        subject: semesterSubject,
+                                        academicYear: semesterAcademicYear,
+                                        semester: semesterValue
+                                    }
+                                });
+                            }}
+                        >
+                            <Eye className="h-4 w-4" />
+                            Preview
+                        </Button>
+                        <Button
+                            className="flex-1 gap-2"
                             variant="outline"
                             disabled={!semesterClass || !semesterSubject}
                             onClick={() => onExport('semester', 'pdf', { classId: semesterClass, subject: semesterSubject, academicYear: semesterAcademicYear, semester: semesterValue })}
                         >
                             <Printer className="h-4 w-4" />
-                            Cetak PDF
+                            PDF
                         </Button>
                         <Button
                             className="flex-1 gap-2"
@@ -247,11 +293,24 @@ export const ReportsSection: React.FC<ReportsSectionProps> = ({
                             onClick={() => onExport('semester', 'excel', { classId: semesterClass, subject: semesterSubject, academicYear: semesterAcademicYear, semester: semesterValue })}
                         >
                             <Download className="h-4 w-4" />
-                            Download Excel
+                            Excel
                         </Button>
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Preview Dialog */}
+            {previewData && (
+                <ReportPreviewDialog
+                    isOpen={true}
+                    onClose={() => setPreviewData(null)}
+                    type={previewData.type}
+                    filters={previewData.filters}
+                    onExport={(format) => {
+                        onExport(previewData.type, format, previewData.filters);
+                    }}
+                />
+            )}
         </div>
     );
 };

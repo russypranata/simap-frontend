@@ -22,8 +22,68 @@ import {
   Clipboard,
   MessageSquare,
   Clock,
-  BookOpen
+  BookOpen,
+  Plus,
+  Check,
+  ChevronsUpDown
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+
+const DUMMY_MATERIALS = [
+  {
+    id: '1',
+    title: 'Aljabar Linear',
+    learningObjectives: [
+      'Memahami konsep dasar matriks dan vektor',
+      'Menyelesaikan sistem persamaan linear dengan metode eliminasi',
+      'Menghitung determinan dan invers matriks',
+      'Memahami konsep transformasi linear'
+    ]
+  },
+  {
+    id: '2',
+    title: 'Statistika & Peluang',
+    learningObjectives: [
+      'Menyajikan data dalam bentuk tabel dan diagram',
+      'Menghitung ukuran pemusatan data (Mean, Median, Modus)',
+      'Menghitung ukuran penyebaran data',
+      'Memahami konsep peluang kejadian majemuk'
+    ]
+  },
+  {
+    id: '3',
+    title: 'Geometri Dimensi Tiga',
+    learningObjectives: [
+      'Mendeskripsikan jarak dalam ruang',
+      'Menghitung jarak antar titik dalam ruang',
+      'Menghitung jarak titik ke garis dalam ruang',
+      'Menghitung jarak titik ke bidang dalam ruang'
+    ]
+  },
+  {
+    id: '4',
+    title: 'Trigonometri',
+    learningObjectives: [
+      'Memahami satuan ukuran sudut',
+      'Menentukan nilai perbandingan trigonometri',
+      'Menerapkan aturan sinus dan cosinus',
+      'Menyelesaikan masalah luas segitiga'
+    ]
+  }
+];
 import { TeacherClass } from '@/features/teacher/types/teacher';
 import { SUBJECTS, LESSON_HOURS } from '@/features/teacher/constants/attendance';
 
@@ -33,6 +93,7 @@ interface JournalFormData {
   subject: string;
   lessonHour: string; // Changed from string[] to string for single selection
   material: string;
+  learningObjective: string;
   topic: string;
   teachingMethod: string[];
   media: string[];
@@ -75,6 +136,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
       subject: '',
       lessonHour: '', // Initialize as empty string
       material: '',
+      learningObjective: '',
       topic: '',
       teachingMethod: [],
       media: [],
@@ -89,6 +151,17 @@ export const JournalForm: React.FC<JournalFormProps> = ({
       },
     }
   );
+
+  const [customMethod, setCustomMethod] = useState('');
+  const [customMedia, setCustomMedia] = useState('');
+  const [showCustomMethodInput, setShowCustomMethodInput] = useState(false);
+  const [showCustomMediaInput, setShowCustomMediaInput] = useState(false);
+
+  // States for search filters
+  const [openMaterial, setOpenMaterial] = useState(false);
+  const [openTp, setOpenTp] = useState(false);
+
+  const availableTPs = DUMMY_MATERIALS.find(m => m.title === formData.material)?.learningObjectives || [];
 
   const handleInputChange = (field: keyof JournalFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -155,6 +228,30 @@ export const JournalForm: React.FC<JournalFormProps> = ({
     }));
   };
 
+  // Add custom teaching method
+  const addCustomMethod = () => {
+    if (customMethod.trim() && !formData.teachingMethod.includes(customMethod.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        teachingMethod: [...prev.teachingMethod, customMethod.trim()]
+      }));
+      setCustomMethod('');
+      setShowCustomMethodInput(false);
+    }
+  };
+
+  // Add custom media
+  const addCustomMedia = () => {
+    if (customMedia.trim() && !formData.media.includes(customMedia.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        media: [...prev.media, customMedia.trim()]
+      }));
+      setCustomMedia('');
+      setShowCustomMediaInput(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
@@ -162,19 +259,8 @@ export const JournalForm: React.FC<JournalFormProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Academic Year and Semester Information as Badges */}
-      <div className="flex flex-wrap gap-2">
-        <Badge className="bg-[#1E3A8A] text-white px-3 py-1 text-sm font-medium flex items-center gap-1">
-          <Calendar className="h-4 w-4" />
-          2024/2025
-        </Badge>
-        <Badge className="bg-[#1E3A8A] text-white px-3 py-1 text-sm font-medium flex items-center gap-1">
-          <BookOpen className="h-4 w-4" />
-          Ganjil
-        </Badge>
-      </div>
-
       {/* Basic Information */}
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="space-y-2">
           <Label htmlFor="date" className="flex items-center gap-2">
@@ -257,33 +343,126 @@ export const JournalForm: React.FC<JournalFormProps> = ({
 
       {/* Material and Topic */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Material Dropdown */}
         <div className="space-y-2">
-          <Label htmlFor="material" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
+          <Label className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
             Materi Pembelajaran *
           </Label>
-          <Textarea
-            id="material"
-            placeholder="Masukkan materi pembelajaran"
-            value={formData.material}
-            onChange={(e) => handleInputChange('material', e.target.value)}
-            rows={4}
-          />
+          <Popover open={openMaterial} onOpenChange={setOpenMaterial}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openMaterial}
+                className="w-full justify-between"
+              >
+                <span className="truncate text-left font-normal">
+                  {formData.material ? formData.material : "Pilih materi..."}
+                </span>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+              <Command>
+                <CommandInput placeholder="Cari materi..." />
+                <CommandList>
+                  <CommandEmpty>Materi tidak ditemukan.</CommandEmpty>
+                  <CommandGroup>
+                    {DUMMY_MATERIALS.map((material) => (
+                      <CommandItem
+                        key={material.id}
+                        value={material.title}
+                        onSelect={(currentValue) => {
+                          handleInputChange('material', currentValue === formData.material ? "" : currentValue);
+                          // Reset TP when material changes
+                          handleInputChange('learningObjective', "");
+                          setOpenMaterial(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4 shrink-0",
+                            formData.material === material.title ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {material.title}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
+        {/* TP Dropdown (Dependent) */}
         <div className="space-y-2">
-          <Label htmlFor="topic" className="flex items-center gap-2">
-            <Lightbulb className="h-4 w-4" />
-            Kegiatan Pembelajaran *
+          <Label className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Tujuan Pembelajaran *
           </Label>
-          <Textarea
-            id="topic"
-            placeholder="Masukkan kegiatan pembelajaran"
-            value={formData.topic}
-            onChange={(e) => handleInputChange('topic', e.target.value)}
-            rows={4}
-          />
+          <Popover open={openTp} onOpenChange={setOpenTp}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openTp}
+                disabled={!formData.material}
+                className="w-full justify-between"
+              >
+                <span className="truncate text-left font-normal">
+                  {formData.learningObjective
+                    ? formData.learningObjective
+                    : "Pilih tujuan pembelajaran..."}
+                </span>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+              <Command>
+                <CommandInput placeholder="Cari TP..." />
+                <CommandList>
+                  <CommandEmpty>TP tidak ditemukan.</CommandEmpty>
+                  <CommandGroup>
+                    {availableTPs.map((tp) => (
+                      <CommandItem
+                        key={tp}
+                        value={tp}
+                        onSelect={(currentValue) => {
+                          handleInputChange('learningObjective', currentValue === formData.learningObjective ? "" : currentValue);
+                          setOpenTp(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4 shrink-0",
+                            formData.learningObjective === tp ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {tp}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="topic" className="flex items-center gap-2">
+          <Lightbulb className="h-4 w-4" />
+          Kegiatan Pembelajaran *
+        </Label>
+        <Textarea
+          id="topic"
+          placeholder="Masukkan kegiatan pembelajaran"
+          value={formData.topic}
+          onChange={(e) => handleInputChange('topic', e.target.value)}
+          rows={4}
+        />
       </div>
 
       {/* Teaching Method and Media */}
@@ -293,33 +472,77 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             <Monitor className="h-4 w-4" />
             Metode Mengajar
           </Label>
-          <Select onValueChange={handleTeachingMethodChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Pilih metode mengajar" />
-            </SelectTrigger>
-            <SelectContent>
-              {teachingMethods.map((method) => (
-                <SelectItem
-                  key={method}
-                  value={method}
-                  disabled={formData.teachingMethod.includes(method)}
-                >
-                  {method}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Select onValueChange={handleTeachingMethodChange}>
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Pilih metode mengajar" />
+              </SelectTrigger>
+              <SelectContent>
+                {teachingMethods.map((method) => (
+                  <SelectItem
+                    key={method}
+                    value={method}
+                    disabled={formData.teachingMethod.includes(method)}
+                  >
+                    {method}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {!showCustomMethodInput && (
+              <Button
+                type="button"
+                size="icon"
+                onClick={() => setShowCustomMethodInput(true)}
+                className="shrink-0 bg-primary hover:bg-primary/90 text-white"
+                title="Tambah metode kustom"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Custom method input */}
+          {showCustomMethodInput && (
+            <div className="flex gap-2 mt-2">
+              <Input
+                placeholder="Masukkan metode kustom"
+                value={customMethod}
+                onChange={(e) => setCustomMethod(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomMethod())}
+              />
+              <Button
+                type="button"
+                size="sm"
+                onClick={addCustomMethod}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShowCustomMethodInput(false);
+                  setCustomMethod('');
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
 
           {/* Display selected methods as tags */}
           {formData.teachingMethod.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {formData.teachingMethod.map((method) => (
-                <Badge key={method} className="flex items-center gap-1 pl-3 pr-1 py-1 bg-[#FACC15] text-white font-bold border border-white/20">
+                <Badge key={method} className="flex items-center gap-1 pl-3 pr-1 py-1 bg-primary/10 text-primary border border-primary/20">
                   {method}
                   <button
                     type="button"
                     onClick={() => removeTeachingMethod(method)}
-                    className="ml-1 hover:bg-white/10 rounded-full p-0.5"
+                    className="ml-1 hover:bg-primary/20 rounded-full p-0.5"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -334,33 +557,77 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             <Monitor className="h-4 w-4" />
             Media Pembelajaran
           </Label>
-          <Select onValueChange={handleMediaChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Pilih media pembelajaran" />
-            </SelectTrigger>
-            <SelectContent>
-              {mediaOptions.map((media) => (
-                <SelectItem
-                  key={media}
-                  value={media}
-                  disabled={formData.media.includes(media)}
-                >
-                  {media}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Select onValueChange={handleMediaChange}>
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Pilih media pembelajaran" />
+              </SelectTrigger>
+              <SelectContent>
+                {mediaOptions.map((media) => (
+                  <SelectItem
+                    key={media}
+                    value={media}
+                    disabled={formData.media.includes(media)}
+                  >
+                    {media}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {!showCustomMediaInput && (
+              <Button
+                type="button"
+                size="icon"
+                onClick={() => setShowCustomMediaInput(true)}
+                className="shrink-0 bg-primary hover:bg-primary/90 text-white"
+                title="Tambah media kustom"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Custom media input */}
+          {showCustomMediaInput && (
+            <div className="flex gap-2 mt-2">
+              <Input
+                placeholder="Masukkan media kustom"
+                value={customMedia}
+                onChange={(e) => setCustomMedia(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomMedia())}
+              />
+              <Button
+                type="button"
+                size="sm"
+                onClick={addCustomMedia}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShowCustomMediaInput(false);
+                  setCustomMedia('');
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
 
           {/* Display selected media as tags */}
           {formData.media.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {formData.media.map((media) => (
-                <Badge key={media} className="flex items-center gap-1 pl-3 pr-1 py-1 bg-[#FACC15] text-white font-bold border border-white/20">
+                <Badge key={media} className="flex items-center gap-1 pl-3 pr-1 py-1 bg-primary/10 text-primary border border-primary/20">
                   {media}
                   <button
                     type="button"
                     onClick={() => removeMedia(media)}
-                    className="ml-1 hover:bg-white/10 rounded-full p-0.5"
+                    className="ml-1 hover:bg-primary/20 rounded-full p-0.5"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -373,90 +640,64 @@ export const JournalForm: React.FC<JournalFormProps> = ({
 
       {/* Attendance */}
       <div>
-        <Label className="flex items-center gap-2">
+        <Label className="flex items-center gap-2 mb-3">
           <UserCheck className="h-4 w-4" />
-          Absensi Siswa
+          Rekapitulasi Absensi Siswa
         </Label>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-2">
-          <div className="space-y-2">
-            <Label htmlFor="total" className="text-xs flex items-center gap-1">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex flex-col items-center justify-center space-y-1">
+            <span className="text-xs font-medium text-primary/80 uppercase tracking-wider flex items-center gap-1">
               <Users className="h-3 w-3" />
-              Total Siswa
-            </Label>
-            <Input
-              id="total"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={formData.attendance.total}
-              onChange={(e) => handleAttendanceChange('total', e.target.value)}
-              readOnly={true}
-              className="bg-muted cursor-not-allowed"
-            />
+              Total
+            </span>
+            <span className="text-2xl font-bold text-primary">
+              {formData.attendance.total}
+            </span>
+            <span className="text-[10px] text-primary/60">Siswa</span>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="present" className="text-xs flex items-center gap-1">
+
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex flex-col items-center justify-center space-y-1">
+            <span className="text-xs font-medium text-emerald-600 uppercase tracking-wider flex items-center gap-1">
               <UserCheck className="h-3 w-3" />
               Hadir
-            </Label>
-            <Input
-              id="present"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={formData.attendance.present}
-              onChange={(e) => handleAttendanceChange('present', e.target.value)}
-              readOnly={true}
-              className="bg-muted cursor-not-allowed"
-            />
+            </span>
+            <span className="text-2xl font-bold text-emerald-700">
+              {formData.attendance.present}
+            </span>
+            <span className="text-[10px] text-emerald-500">Siswa</span>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="sick" className="text-xs flex items-center gap-1">
+
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex flex-col items-center justify-center space-y-1">
+            <span className="text-xs font-medium text-yellow-600 uppercase tracking-wider flex items-center gap-1">
               <MessageSquare className="h-3 w-3" />
               Sakit
-            </Label>
-            <Input
-              id="sick"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={formData.attendance.sick}
-              onChange={(e) => handleAttendanceChange('sick', e.target.value)}
-              readOnly={true}
-              className="bg-muted cursor-not-allowed"
-            />
+            </span>
+            <span className="text-2xl font-bold text-yellow-700">
+              {formData.attendance.sick}
+            </span>
+            <span className="text-[10px] text-yellow-500">Siswa</span>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="permit" className="text-xs flex items-center gap-1">
+
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex flex-col items-center justify-center space-y-1">
+            <span className="text-xs font-medium text-blue-600 uppercase tracking-wider flex items-center gap-1">
               <Clipboard className="h-3 w-3" />
               Izin
-            </Label>
-            <Input
-              id="permit"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={formData.attendance.permit}
-              onChange={(e) => handleAttendanceChange('permit', e.target.value)}
-              readOnly={true}
-              className="bg-muted cursor-not-allowed"
-            />
+            </span>
+            <span className="text-2xl font-bold text-blue-700">
+              {formData.attendance.permit}
+            </span>
+            <span className="text-[10px] text-blue-500">Siswa</span>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="absent" className="text-xs flex items-center gap-1">
+
+          <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 flex flex-col items-center justify-center space-y-1">
+            <span className="text-xs font-medium text-rose-600 uppercase tracking-wider flex items-center gap-1">
               <X className="h-3 w-3" />
               Alpa
-            </Label>
-            <Input
-              id="absent"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={formData.attendance.absent}
-              onChange={(e) => handleAttendanceChange('absent', e.target.value)}
-              readOnly={true}
-              className="bg-muted cursor-not-allowed"
-            />
+            </span>
+            <span className="text-2xl font-bold text-rose-700">
+              {formData.attendance.absent}
+            </span>
+            <span className="text-[10px] text-rose-500">Siswa</span>
           </div>
         </div>
       </div>
@@ -465,7 +706,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
       <div className="space-y-2">
         <Label htmlFor="evaluation" className="flex items-center gap-2">
           <FileSearch className="h-4 w-4" />
-          Evaluasi Pembelajaran
+          Asesmen
         </Label>
         <Textarea
           id="evaluation"
@@ -510,6 +751,6 @@ export const JournalForm: React.FC<JournalFormProps> = ({
           )}
         </Button>
       </div>
-    </div>
+    </div >
   );
 };

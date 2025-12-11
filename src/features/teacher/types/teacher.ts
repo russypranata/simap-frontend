@@ -60,6 +60,8 @@ export interface TeachingJournal {
   subject: string;
   lessonHour: string;
   material: string;
+  learningObjective?: string;
+
   topic: string;
   teachingMethod: string;
   media: string;

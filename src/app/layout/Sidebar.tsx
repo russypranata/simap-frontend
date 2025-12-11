@@ -27,6 +27,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  Globe,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -36,6 +37,7 @@ interface SidebarItem {
   badge?: string;
   condition?: boolean;
   subItems?: SidebarItem[];
+  isExternal?: boolean;
 }
 
 // Sidebar context to share collapsed state
@@ -134,9 +136,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       title: "Guru Piket",
-      href: "/piket",
+      href: "/picket",
       icon: Users,
       condition: isPiketTeacher,
+
     },
     {
       title: "Administrasi",
@@ -148,6 +151,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       href: "/announcements",
       icon: Megaphone,
       badge: "3",
+    },
+    {
+      title: "Aplikasi Eksternal",
+      href: "/external-apps",
+      icon: Globe,
     },
     {
       title: "Profil",
@@ -240,20 +248,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         {item.subItems!.map((subItem) => {
                           const isSubActive = pathname === subItem.href;
                           const SubIcon = subItem.icon;
+
+                          const ButtonContent = (
+                            <Button
+                              variant="ghost"
+                              className={cn(
+                                "w-full justify-start h-9 pl-12 pr-3 text-sm mb-1",
+                                isSubActive
+                                  ? "text-primary font-medium bg-primary/5"
+                                  : "text-foreground hover:bg-muted/50"
+                              )}
+                            >
+                              <SubIcon className={cn("h-4 w-4 mr-3", isSubActive ? "text-primary" : "opacity-70")} />
+                              <span className="flex-1 text-left truncate">{subItem.title}</span>
+                            </Button>
+                          );
+
+                          if (subItem.isExternal) {
+                            return (
+                              <a
+                                key={subItem.href}
+                                href={subItem.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block"
+                              >
+                                {ButtonContent}
+                              </a>
+                            );
+                          }
+
                           return (
                             <Link key={subItem.href} href={subItem.href}>
-                              <Button
-                                variant="ghost"
-                                className={cn(
-                                  "w-full justify-start h-9 pl-12 pr-3 text-sm mb-1",
-                                  isSubActive
-                                    ? "text-primary font-medium bg-primary/5"
-                                    : "text-foreground hover:bg-muted/50"
-                                )}
-                              >
-                                <SubIcon className={cn("h-4 w-4 mr-3", isSubActive ? "text-primary" : "opacity-70")} />
-                                <span className="flex-1 text-left truncate">{subItem.title}</span>
-                              </Button>
+                              {ButtonContent}
                             </Link>
                           )
                         })}
@@ -262,29 +289,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   )
                 }
 
+                const ButtonContent = (
+                  <Button
+                    variant={isActive ? "secondary" : "ghost"}
+                    className={cn(
+                      "w-full justify-start mb-1",
+                      collapsed ? "h-10 w-10 p-0" : "h-10 px-3",
+                      isActive &&
+                      "bg-primary text-primary-foreground hover:bg-primary/90"
+                    )}
+                  >
+                    <Icon className={cn("h-4 w-4", !collapsed && "mr-3")} />
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1 text-left">{item.title}</span>
+                        {item.badge && (
+                          <Badge variant="secondary" className="ml-auto">
+                            {item.badge}
+                          </Badge>
+                        )}
+                      </>
+                    )}
+                  </Button>
+                );
+
                 return (
                   <Link key={item.href} href={item.href}>
-                    <Button
-                      variant={isActive ? "secondary" : "ghost"}
-                      className={cn(
-                        "w-full justify-start mb-1",
-                        collapsed ? "h-10 w-10 p-0" : "h-10 px-3",
-                        isActive &&
-                        "bg-primary text-primary-foreground hover:bg-primary/90"
-                      )}
-                    >
-                      <Icon className={cn("h-4 w-4", !collapsed && "mr-3")} />
-                      {!collapsed && (
-                        <>
-                          <span className="flex-1 text-left">{item.title}</span>
-                          {item.badge && (
-                            <Badge variant="secondary" className="ml-auto">
-                              {item.badge}
-                            </Badge>
-                          )}
-                        </>
-                      )}
-                    </Button>
+                    {ButtonContent}
                   </Link>
                 );
               })}

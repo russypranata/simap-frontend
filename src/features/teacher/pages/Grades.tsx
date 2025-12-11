@@ -39,7 +39,7 @@ import {
   Eye,
   Edit,
   Trash2,
-  Plus,
+  Pencil,
   X,
   GraduationCap
 } from 'lucide-react';
@@ -492,11 +492,35 @@ export const Grades: React.FC = () => {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="input">Input Nilai</TabsTrigger>
-          <TabsTrigger value="list">Daftar Nilai</TabsTrigger>
-          <TabsTrigger value="statistics">Statistik</TabsTrigger>
-          <TabsTrigger value="remediation">Remedial & Pengayaan</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted/50 rounded-xl mb-6">
+          <TabsTrigger
+            value="input"
+            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+          >
+            <Pencil className="h-4 w-4" />
+            Input Nilai
+          </TabsTrigger>
+          <TabsTrigger
+            value="list"
+            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+          >
+            <BookOpen className="h-4 w-4" />
+            Daftar Nilai
+          </TabsTrigger>
+          <TabsTrigger
+            value="statistics"
+            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            Statistik
+          </TabsTrigger>
+          <TabsTrigger
+            value="remediation"
+            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+          >
+            <Users className="h-4 w-4" />
+            Remedial & Pengayaan
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="input" className="space-y-6">
@@ -1001,7 +1025,7 @@ export const Grades: React.FC = () => {
                     : 'Belum ada data nilai yang diinput. Mulai dengan menginput nilai pada tab Input Nilai.'}
                 </p>
                 <Button onClick={() => setActiveTab('input')}>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Pencil className="h-4 w-4 mr-2" />
                   Input Nilai
                 </Button>
               </CardContent>

@@ -42,6 +42,7 @@ export const TeacherDocuments = () => {
                         documentTypes={[
                             "Capaian Pembelajaran (CP)",
                             "Alur Tujuan Pembelajaran (ATP)",
+                            "Tujuan Pembelajaran (TP)",
                             "Modul Ajar",
                             "Program Tahunan (PROTA)",
                             "Program Semester (PROSEM)",

@@ -104,6 +104,8 @@ export const JournalEditPage: React.FC<JournalEditPageProps> = ({ journal }) => 
       subject: journal.subject,
       lessonHour: journal.lessonHour, // Use as string directly
       material: journal.material,
+      learningObjective: journal.learningObjective || '',
+
       topic: journal.topic,
       teachingMethod: Array.isArray(journal.teachingMethod)
         ? journal.teachingMethod

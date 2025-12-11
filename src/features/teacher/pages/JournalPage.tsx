@@ -20,11 +20,12 @@ import { LESSON_HOURS } from '@/features/teacher/constants/attendance';
 import {
     BookOpen,
     Plus,
-    Printer,
     RefreshCw,
     Grid,
     List as ListIcon,
     Calendar,
+    BarChart3,
+    FileText,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -250,9 +251,7 @@ export const JournalPage: React.FC = () => {
         toast.success(`Data jurnal berhasil diunduh dalam format ${format.toUpperCase()}!`);
     };
 
-    const handlePrint = () => {
-        window.print();
-    };
+
 
     // HIERARCHICAL FILTER LOGIC
     const filteredJournals = teachingJournals.filter(journal => {
@@ -358,26 +357,38 @@ export const JournalPage: React.FC = () => {
                         <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
                     </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                    <Button variant="outline" onClick={handlePrint} className="flex items-center space-x-2">
-                        <Printer className="h-4 w-4" />
-                        <span>Cetak</span>
-                    </Button>
-                    <Button className="flex items-center space-x-2" onClick={() => router.push('/journal/new')}>
-                        <Plus className="h-4 w-4" />
-                        <span>Tambah Jurnal Baru</span>
-                    </Button>
-                </div>
+                <Button className="flex items-center space-x-2" onClick={() => router.push('/journal/new')}>
+                    <Plus className="h-4 w-4" />
+                    <span>Tambah Jurnal Baru</span>
+                </Button>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="list">Daftar Jurnal</TabsTrigger>
-                    <TabsTrigger value="statistics">Statistik</TabsTrigger>
-                    <TabsTrigger value="reports">Laporan</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 rounded-xl mb-6">
+                    <TabsTrigger
+                        value="list"
+                        className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+                    >
+                        <BookOpen className="h-4 w-4" />
+                        Daftar Jurnal
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="statistics"
+                        className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+                    >
+                        <BarChart3 className="h-4 w-4" />
+                        Statistik
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="reports"
+                        className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+                    >
+                        <FileText className="h-4 w-4" />
+                        Laporan
+                    </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="list" className="space-y-6">
+                <TabsContent value="list" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
                     <JournalStatsCards stats={stats} />
 
                     <div className="flex justify-end">
@@ -445,7 +456,7 @@ export const JournalPage: React.FC = () => {
                     )}
                 </TabsContent>
 
-                <TabsContent value="statistics" className="space-y-6">
+                <TabsContent value="statistics" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
                     <JournalStatistics
                         journals={teachingJournals}
                         subjects={SUBJECTS}
@@ -455,7 +466,7 @@ export const JournalPage: React.FC = () => {
                     />
                 </TabsContent>
 
-                <TabsContent value="reports" className="space-y-6">
+                <TabsContent value="reports" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
                     <JournalReports
                         journals={teachingJournals}
                         classes={classes}

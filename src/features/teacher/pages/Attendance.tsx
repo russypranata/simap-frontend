@@ -21,7 +21,6 @@ import {
   EditAttendanceView,
   DuplicateConfirmModal,
   UnsavedChangesDialog,
-  ReportsSection,
   DailySummary
 } from '../components/attendance';
 import { SUBJECTS, LESSON_HOURS, ACADEMIC_YEARS, SEMESTERS } from '../constants/attendance';
@@ -750,7 +749,7 @@ export const Attendance: React.FC = () => {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div>
           <h1 className="text-3xl font-bold text-foreground tracking-tight">
-            Presensi <span className="text-primary">Siswa</span>
+            Presensi Mapel <span className="text-primary">Siswa</span>
           </h1>
           <p className="text-muted-foreground">
             Kelola presensi siswa untuk setiap mata pelajaran
@@ -780,22 +779,27 @@ export const Attendance: React.FC = () => {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="attendance" className="gap-2">
+        <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 rounded-xl mb-6">
+          <TabsTrigger
+            value="attendance"
+            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+          >
             <ClipboardCheck className="h-4 w-4" />
             Presensi
           </TabsTrigger>
-          <TabsTrigger value="statistics" className="gap-2">
+          <TabsTrigger
+            value="statistics"
+            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+          >
             <BarChart3 className="h-4 w-4" />
             Statistik
           </TabsTrigger>
-          <TabsTrigger value="history" className="gap-2">
+          <TabsTrigger
+            value="history"
+            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+          >
             <Clock className="h-4 w-4" />
             Riwayat
-          </TabsTrigger>
-          <TabsTrigger value="reports" className="gap-2">
-            <FileText className="h-4 w-4" />
-            Laporan
           </TabsTrigger>
         </TabsList>
 
@@ -1089,22 +1093,7 @@ export const Attendance: React.FC = () => {
           />
         </TabsContent>
 
-        <TabsContent value="reports" className="space-y-6">
-          <ReportsSection
-            classes={classes}
-            subjects={profile?.subjects || []}
-            onExport={(type, format, filters) => {
-              // Simulation of export
-              toast.info(`Sedang mengunduh Laporan ${type === 'monthly' ? 'Bulanan' : 'Semester'} (${format.toUpperCase()})...`);
-              console.log('Exporting report:', { type, format, filters });
 
-              // Simulate delay
-              setTimeout(() => {
-                toast.success('Laporan berhasil diunduh!');
-              }, 1500);
-            }}
-          />
-        </TabsContent>
 
       </Tabs>
 

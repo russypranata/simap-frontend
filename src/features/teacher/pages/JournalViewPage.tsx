@@ -160,7 +160,7 @@ export const JournalViewPage: React.FC<JournalViewPageProps> = ({ journal }) => 
               <div className="flex items-start space-x-3">
                 <Activity className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <Label className="text-sm font-bold text-muted-foreground">Evaluasi Pembelajaran</Label>
+                  <Label className="text-sm font-bold text-muted-foreground">Asesmen</Label>
                   <p className="text-sm mt-1">{journal.evaluation}</p>
                 </div>
               </div>
