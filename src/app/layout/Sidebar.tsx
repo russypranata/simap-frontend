@@ -152,11 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Megaphone,
       badge: "3",
     },
-    {
-      title: "Aplikasi Eksternal",
-      href: "/external-apps",
-      icon: Globe,
-    },
+
     {
       title: "Profil",
       href: "/profile",
