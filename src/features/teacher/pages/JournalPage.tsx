@@ -14,6 +14,7 @@ import {
     JournalReports,
     JournalStatsCards,
 } from '@/features/teacher/components/journal';
+import { Attendance } from './Attendance';
 import { TeachingJournal } from '@/features/teacher/types/teacher';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
 import { LESSON_HOURS } from '@/features/teacher/constants/attendance';
@@ -26,6 +27,7 @@ import {
     Calendar,
     BarChart3,
     FileText,
+    ClipboardCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -364,13 +366,20 @@ export const JournalPage: React.FC = () => {
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 rounded-xl mb-6">
+                <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted/50 rounded-xl mb-6">
                     <TabsTrigger
                         value="list"
                         className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
                     >
                         <BookOpen className="h-4 w-4" />
                         Daftar Jurnal
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="attendance"
+                        className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+                    >
+                        <ClipboardCheck className="h-4 w-4" />
+                        Presensi Siswa
                     </TabsTrigger>
                     <TabsTrigger
                         value="statistics"
@@ -454,6 +463,10 @@ export const JournalPage: React.FC = () => {
                             onDelete={handleDeleteJournal}
                         />
                     )}
+                </TabsContent>
+
+                <TabsContent value="attendance" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
+                    <Attendance isEmbedded={true} />
                 </TabsContent>
 
                 <TabsContent value="statistics" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">

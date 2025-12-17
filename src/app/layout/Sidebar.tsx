@@ -28,6 +28,7 @@ import {
   ChevronRight,
   ChevronDown,
   Globe,
+  ClipboardList,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -91,11 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       href: "/dashboard",
       icon: LayoutDashboard,
     },
-    {
-      title: "Presensi Siswa",
-      href: "/attendance",
-      icon: Users,
-    },
+
     {
       title: "Jurnal Mengajar",
       href: "/journal",
@@ -112,27 +109,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Calendar,
     },
     {
+      title: "Catatan Perilaku",
+      href: "/student-behavior",
+      icon: ClipboardList,
+    },
+    {
       title: "Wali Kelas",
       href: "/homeroom", // Parent href
       icon: Home,
       condition: isHomeroomTeacher,
-      subItems: [
-        {
-          title: "Dashboard Walas",
-          href: "/homeroom",
-          icon: LayoutDashboard,
-        },
-        {
-          title: "E-Rapor",
-          href: "/ereport",
-          icon: FileText,
-        },
-        {
-          title: "Administrasi Walas",
-          href: "/homeroom/administration",
-          icon: FileText,
-        },
-      ]
     },
     {
       title: "Guru Piket",
@@ -152,7 +137,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Megaphone,
       badge: "3",
     },
-
     {
       title: "Profil",
       href: "/profile",

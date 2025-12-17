@@ -246,24 +246,28 @@ Object.entries(dateScheduleMap).forEach(([date, day]) => {
         const absentCount = totalStudents - presentCount - sickCount - permitCount;
 
         // Sample materials by subject
-        const materials: Record<string, { material: string, topic: string }> = {
+        const materials: Record<string, { material: string, topic: string, learningObjective: string }> = {
             'Matematika': {
                 material: 'Turunan Fungsi',
-                topic: 'Turunan fungsi aljabar dan trigonometri'
+                topic: 'Turunan fungsi aljabar dan trigonometri',
+                learningObjective: 'Siswa dapat menentukan turunan fungsi aljabar menggunakan sifat-sifat turunan'
             },
             'Fisika': {
                 material: 'Hukum Newton',
-                topic: 'Hukum Newton I, II, dan III serta aplikasinya'
+                topic: 'Hukum Newton I, II, dan III serta aplikasinya',
+                learningObjective: 'Siswa dapat menerapkan Hukum Newton dalam menyelesaikan permasalahan gerak lurus'
             },
             'Biologi': {
                 material: 'Sel dan Jaringan',
-                topic: 'Struktur dan fungsi sel tumbuhan dan hewan'
+                topic: 'Struktur dan fungsi sel tumbuhan dan hewan',
+                learningObjective: 'Siswa dapat membedakan struktur dan fungsi sel hewan dan sel tumbuhan'
             },
         };
 
         const subjectMaterial = materials[group.subject] || {
             material: `Materi ${group.subject}`,
-            topic: `Topik ${group.subject}`
+            topic: `Topik ${group.subject}`,
+            learningObjective: `Siswa dapat memahami konsep dasar ${group.subject}`
         };
 
         // Manually assign semester for mock data testing
@@ -280,6 +284,7 @@ Object.entries(dateScheduleMap).forEach(([date, day]) => {
             lessonHour: group.lessonHour,
             material: subjectMaterial.material,
             topic: subjectMaterial.topic,
+            learningObjective: subjectMaterial.learningObjective,
             teachingMethod: 'Ceramah, Diskusi, Latihan Soal',
             media: 'Papan tulis, LCD, Modul',
             evaluation: 'Tugas individu dan diskusi kelompok',

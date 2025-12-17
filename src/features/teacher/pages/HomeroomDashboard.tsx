@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HomeroomOverview } from "@/features/teacher/components/homeroom/HomeroomOverview";
 import { HomeroomStudents } from "@/features/teacher/components/homeroom/HomeroomStudents";
 import { HomeroomAttendance } from "@/features/teacher/components/homeroom/HomeroomAttendance";
+import { EReport } from "@/features/teacher/components/homeroom/HomeroomEReport";
 import { HomeroomGrades } from "@/features/teacher/components/homeroom/HomeroomGrades";
 import { GraduationCap } from "lucide-react";
 
@@ -30,12 +31,13 @@ export const HomeroomDashboard = () => {
             </div>
 
             <Tabs defaultValue="overview" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-6 mb-8">
                     <TabsTrigger value="overview">Ringkasan</TabsTrigger>
                     <TabsTrigger value="students">Data Siswa</TabsTrigger>
                     <TabsTrigger value="attendance">Presensi</TabsTrigger>
                     <TabsTrigger value="grades">Nilai</TabsTrigger>
                     <TabsTrigger value="schedule">Jadwal</TabsTrigger>
+                    <TabsTrigger value="ereport">E-Rapor</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-4">
@@ -55,11 +57,16 @@ export const HomeroomDashboard = () => {
                 </TabsContent>
 
                 <TabsContent value="schedule" className="space-y-4">
-                    <div className="h-[400px] flex items-center justify-center border-2 border-dashed rounded-lg">
-                        <p className="text-muted-foreground">
-                            Fitur Jadwal Kelas akan segera hadir
-                        </p>
+                    <div className="h-[400px] flex items-center justify-center border-2 border-dashed rounded-lg bg-gray-50/50">
+                        <div className="text-center">
+                            <p className="text-muted-foreground font-medium">Jadwal Pelajaran Kelas XII A</p>
+                            <p className="text-sm text-muted-foreground mt-1">Fitur ini akan segera tersedia</p>
+                        </div>
                     </div>
+                </TabsContent>
+
+                <TabsContent value="ereport" className="space-y-4">
+                    <EReport />
                 </TabsContent>
             </Tabs>
         </div>

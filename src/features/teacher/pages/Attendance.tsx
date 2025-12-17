@@ -44,7 +44,11 @@ import { toast } from 'sonner';
 
 import { useSearchParams } from 'next/navigation';
 
-export const Attendance: React.FC = () => {
+interface AttendanceProps {
+  isEmbedded?: boolean;
+}
+
+export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) => {
   // const { toast } = useToast(); // Removed shadcn toast
   const router = useRouter();
   const { loading, error, classes, profile, schedule, clearError } = useTeacherData();
@@ -747,22 +751,33 @@ export const Attendance: React.FC = () => {
       )}
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">
-            Presensi Mapel <span className="text-primary">Siswa</span>
-          </h1>
-          <p className="text-muted-foreground">
-            Kelola presensi siswa untuk setiap mata pelajaran
-          </p>
-          <div className="flex items-center gap-3 mt-4">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-              <Calendar className="h-4 w-4" />
-              <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
+        {!isEmbedded ? (
+          <div>
+            <h1 className="text-3xl font-bold text-foreground tracking-tight">
+              Presensi Mapel <span className="text-primary">Siswa</span>
+            </h1>
+            <p className="text-muted-foreground">
+              Kelola presensi siswa untuk setiap mata pelajaran
+            </p>
+            <div className="flex items-center gap-3 mt-4">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                <Calendar className="h-4 w-4" />
+                <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
+              </div>
+              <div className="h-4 w-[1px] bg-border" />
+              <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
             </div>
-            <div className="h-4 w-[1px] bg-border" />
-            <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
           </div>
-        </div>
+        ) : (
+          <div>
+            <h2 className="text-2xl font-bold text-foreground tracking-tight">
+              Presensi <span className="text-primary">Siswa</span>
+            </h2>
+            <p className="text-muted-foreground">
+              Kelola kehadiran siswa untuk setiap mata pelajaran
+            </p>
+          </div>
+        )}
 
         <div className="flex items-center space-x-2">
           <Button

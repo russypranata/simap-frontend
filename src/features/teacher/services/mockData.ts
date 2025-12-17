@@ -48,15 +48,17 @@ export const mockClasses: (TeacherClass & { subjects: string[] })[] = [
   },
 ];
 
+const maleNames = ['Aditya', 'Bayu', 'Eko', 'Fajar', 'Indra', 'Joko', 'Nanda', 'Oscar', 'Rizky', 'Tono', 'Wahyu', 'Yudi', 'Budi', 'Dimas', 'Gilang', 'Hendra', 'Arif', 'Bambang', 'Candra', 'Dedi'];
+const femaleNames = ['Citra', 'Dewi', 'Gita', 'Hana', 'Kartika', 'Lina', 'Maya', 'Putri', 'Siti', 'Utami', 'Vina', 'Zahra', 'Anita', 'Dina', 'Rina', 'Tari', 'Wulan', 'Yulia', 'Nisa', 'Reri'];
+const lastNames = ['Pratama', 'Santoso', 'Wijaya', 'Lestari', 'Saputra', 'Hidayat', 'Kusuma', 'Sari', 'Nugroho', 'Wibowo', 'Susanti', 'Rahmawati', 'Setiawan', 'Kurniawan', 'Pertiwi', 'Anggraini', 'Firmansyah', 'Hermawan', 'Mulyani', 'Suharto'];
+
 // Helper to generate students for a class with realistic names
-const generateStudents = (className: string, startId: number, count: number): Student[] => {
-  const firstNames = ['Aditya', 'Bayu', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hana', 'Indra', 'Joko', 'Kartika', 'Lina', 'Maya', 'Nanda', 'Oscar', 'Putri', 'Rizky', 'Siti', 'Tono', 'Utami', 'Vina', 'Wahyu', 'Yudi', 'Zahra'];
-  const lastNames = ['Pratama', 'Santoso', 'Wijaya', 'Lestari', 'Saputra', 'Hidayat', 'Kusuma', 'Sari', 'Nugroho', 'Wibowo', 'Susanti', 'Rahmawati', 'Setiawan', 'Kurniawan', 'Pertiwi', 'Anggraini', 'Firmansyah', 'Hermawan', 'Mulyani', 'Suharto'];
+const generateStudents = (className: string, startId: number, count: number, gender: 'L' | 'P'): Student[] => {
+  const selectedFirstNames = gender === 'L' ? maleNames : femaleNames;
 
   return Array.from({ length: count }, (_, i) => {
-    const firstName = firstNames[(startId + i) % firstNames.length];
+    const firstName = selectedFirstNames[(startId + i) % selectedFirstNames.length];
     const lastName = lastNames[(startId + i) % lastNames.length];
-    const gender = ['Siti', 'Dewi', 'Citra', 'Gita', 'Hana', 'Kartika', 'Lina', 'Maya', 'Putri', 'Utami', 'Vina', 'Zahra'].includes(firstName) ? 'P' : 'L';
 
     return {
       id: String(startId + i),
@@ -75,11 +77,11 @@ const generateStudents = (className: string, startId: number, count: number): St
 
 // Mock students data
 export const mockStudents: Student[] = [
-  // XII A (Manual list + generated)
+  // XII A - Male Class
   {
     id: '1',
     nis: '12101',
-    name: 'Ahmad Rizki Pratama',
+    name: 'Ahmad Rizky Pratama',
     class: 'XII A',
     gender: 'L',
     birthDate: '2006-05-15',
@@ -91,13 +93,13 @@ export const mockStudents: Student[] = [
   {
     id: '2',
     nis: '12102',
-    name: 'Siti Nurhaliza',
+    name: 'Budi Santoso',
     class: 'XII A',
-    gender: 'P',
+    gender: 'L',
     birthDate: '2006-08-22',
     address: 'Jl. Sudirman No. 456, Jakarta',
     phone: '+62 812-2345-6789',
-    parentsName: 'Ibu Siti Aminah',
+    parentsName: 'Bapak Santoso',
     parentsPhone: '+62 813-4567-8901',
   },
   {
@@ -115,13 +117,13 @@ export const mockStudents: Student[] = [
   {
     id: '4',
     nis: '12104',
-    name: 'Dewi Anggraini',
+    name: 'Dimas Anggara',
     class: 'XII A',
-    gender: 'P',
+    gender: 'L',
     birthDate: '2006-03-18',
     address: 'Jl. Imam Bonjol No. 321, Jakarta',
     phone: '+62 812-4567-8901',
-    parentsName: 'Bapak Anggraini',
+    parentsName: 'Bapak Anggara',
     parentsPhone: '+62 813-6789-0123',
   },
   {
@@ -133,17 +135,25 @@ export const mockStudents: Student[] = [
     birthDate: '2006-07-25',
     address: 'Jl. Diponegoro No. 654, Jakarta',
     phone: '+62 812-5678-9012',
-    parentsName: 'Ibu Hermawan',
+    parentsName: 'Bapak Hermawan',
     parentsPhone: '+62 813-7890-1234',
   },
-  ...generateStudents('XII A', 6, 26),
+  ...generateStudents('XII A', 6, 26, 'L'),
 
-  // Other Classes (A & B only)
-  ...generateStudents('XII B', 200, 30),
-  ...generateStudents('XI A', 300, 28),
-  ...generateStudents('XI B', 400, 28),
-  ...generateStudents('X A', 500, 30),
-  ...generateStudents('X B', 600, 30),
+  // XII B - Female Class
+  ...generateStudents('XII B', 200, 30, 'P'),
+
+  // XI A - Male Class
+  ...generateStudents('XI A', 300, 28, 'L'),
+
+  // XI B - Female Class
+  ...generateStudents('XI B', 400, 28, 'P'),
+
+  // X A - Male Class
+  ...generateStudents('X A', 500, 30, 'L'),
+
+  // X B - Female Class
+  ...generateStudents('X B', 600, 30, 'P'),
 ];
 
 // Helper to generate random grades

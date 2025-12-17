@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Eye, Download, Calendar, BookOpen, Printer } from 'lucide-react';
 import { TeacherClass } from '../../types/teacher';
+import { JournalReportPreview } from './JournalReportPreview';
 
 const ACADEMIC_YEARS = ['2023/2024', '2024/2025', '2025/2026'];
 const SEMESTERS = ['Ganjil', 'Genap'];
@@ -34,6 +35,12 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
   const [semesterAcademicYear, setSemesterAcademicYear] = useState<string>(ACADEMIC_YEARS[ACADEMIC_YEARS.length - 1]);
   const [semesterValue, setSemesterValue] = useState<string>(SEMESTERS[0]);
 
+  // Preview State
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewType, setPreviewType] = useState<'monthly' | 'semester'>('monthly');
+  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [previewFilters, setPreviewFilters] = useState<any>({});
+
   const months = [
     { value: '0', label: 'Januari' },
     { value: '1', label: 'Februari' },
@@ -55,11 +62,80 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
     (new Date().getFullYear() - 2).toString(),
   ];
 
+  const filterJournals = (type: 'monthly' | 'semester') => {
+    let filtered = [...journals];
+
+    if (type === 'monthly') {
+      // Filter by Month & Year
+      filtered = filtered.filter(j => {
+        const d = new Date(j.date);
+        return d.getMonth().toString() === monthlyMonth &&
+          d.getFullYear().toString() === monthlyYear;
+      });
+
+      // Optional Filters
+      if (monthlyClass !== 'all') {
+        filtered = filtered.filter(j => j.class === monthlyClass);
+      }
+      if (monthlySubject !== 'all') {
+        filtered = filtered.filter(j => j.subject === monthlySubject);
+      }
+    } else {
+      // Filter by Semester & Academic Year
+      filtered = filtered.filter(j =>
+        j.semester === semesterValue &&
+        j.academicYear === semesterAcademicYear
+      );
+
+      // Optional Filters
+      if (semesterClass !== 'all') {
+        filtered = filtered.filter(j => j.class === semesterClass);
+      }
+      if (semesterSubject !== 'all') {
+        filtered = filtered.filter(j => j.subject === semesterSubject);
+      }
+    }
+
+    return filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  };
+
+  const handlePreview = (type: 'monthly' | 'semester') => {
+    const data = filterJournals(type);
+
+    setPreviewType(type);
+    setPreviewData(data);
+    setPreviewFilters(type === 'monthly' ? {
+      month: monthlyMonth,
+      year: monthlyYear,
+      classId: monthlyClass,
+      subject: monthlySubject
+    } : {
+      academicYear: semesterAcademicYear,
+      semester: semesterValue,
+      classId: semesterClass,
+      subject: semesterSubject
+    });
+
+    setShowPreview(true);
+  };
+
   const handleExport = (type: 'monthly' | 'semester', format: 'pdf' | 'excel', filters: any) => {
     // Simulation of export
     console.log('Exporting journal report:', { type, format, filters });
     alert(`Mengunduh Laporan Jurnal ${type === 'monthly' ? 'Bulanan' : 'Semester'} (${format.toUpperCase()})...`);
   };
+
+  if (showPreview) {
+    return (
+      <JournalReportPreview
+        type={previewType}
+        data={previewData}
+        classes={classes}
+        filters={previewFilters}
+        onClose={() => setShowPreview(false)}
+      />
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -146,9 +222,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             <Button
               className="flex-1 gap-2"
               variant="secondary"
-              onClick={() => {
-                alert('Preview belum diimplementasikan');
-              }}
+              onClick={() => handlePreview('monthly')}
             >
               <Eye className="h-4 w-4" />
               Preview
@@ -267,9 +341,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             <Button
               className="flex-1 gap-2"
               variant="secondary"
-              onClick={() => {
-                alert('Preview belum diimplementasikan');
-              }}
+              onClick={() => handlePreview('semester')}
             >
               <Eye className="h-4 w-4" />
               Preview

@@ -27,7 +27,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Calendar as CalendarIcon, Plus, Search } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Search, Edit, History as HistoryIcon } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -102,10 +102,17 @@ export default function DailyPicketJournal() {
                 {/* Input Form Section */}
                 <Card className="md:col-span-1 h-fit">
                     <CardHeader>
-                        <CardTitle>Catat Aktivitas</CardTitle>
-                        <CardDescription>
-                            Isi formulir untuk menambahkan catatan piket baru.
-                        </CardDescription>
+                        <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <Edit className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-semibold">Catat Aktivitas</CardTitle>
+                                <CardDescription>
+                                    Isi formulir untuk menambahkan catatan piket baru.
+                                </CardDescription>
+                            </div>
+                        </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
@@ -204,42 +211,53 @@ export default function DailyPicketJournal() {
                 {/* List Section */}
                 <Card className="md:col-span-2">
                     <CardHeader>
-                        <CardTitle>Riwayat Jurnal Piket</CardTitle>
-                        <CardDescription>
-                            Daftar catatan aktivitas piket yang telah dimasukkan.
-                        </CardDescription>
+                        <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <HistoryIcon className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-semibold">Riwayat Jurnal Piket</CardTitle>
+                                <CardDescription>
+                                    Daftar catatan aktivitas piket yang telah dimasukkan.
+                                </CardDescription>
+                            </div>
+                        </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex items-center space-x-2 mb-4">
+                        <div className="flex items-center space-x-2 mb-6">
                             <div className="relative flex-1">
-                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input placeholder="Cari catatan..." className="pl-8" />
+                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input placeholder="Cari catatan..." className="pl-9" />
                             </div>
                         </div>
 
-                        <div className="rounded-md border">
+                        <div className="rounded-md border overflow-hidden">
                             <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Waktu</TableHead>
-                                        <TableHead>Kegiatan</TableHead>
-                                        <TableHead>Lokasi</TableHead>
-                                        <TableHead>Catatan</TableHead>
-                                        <TableHead>Status</TableHead>
+                                <TableHeader className="bg-muted/50">
+                                    <TableRow className="hover:bg-transparent border-b">
+                                        <TableHead className="w-[50px] p-4 text-center font-medium text-sm text-foreground">No</TableHead>
+                                        <TableHead className="w-[120px] p-4 font-medium text-sm text-foreground">Waktu</TableHead>
+                                        <TableHead className="w-[180px] p-4 font-medium text-sm text-foreground">Kegiatan</TableHead>
+                                        <TableHead className="w-[150px] p-4 font-medium text-sm text-foreground">Lokasi</TableHead>
+                                        <TableHead className="p-4 font-medium text-sm text-foreground">Catatan</TableHead>
+                                        <TableHead className="w-[120px] p-4 font-medium text-sm text-foreground text-center">Status</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {journals.map((journal) => (
-                                        <TableRow key={journal.id}>
-                                            <TableCell className="font-medium whitespace-nowrap">
+                                    {journals.map((journal, index) => (
+                                        <TableRow key={journal.id} className="hover:bg-muted/50 transition-colors border-b">
+                                            <TableCell className="p-4 text-center font-medium text-sm">
+                                                {index + 1}
+                                            </TableCell>
+                                            <TableCell className="p-4 font-medium whitespace-nowrap text-sm">
                                                 {format(journal.date, "dd MMM yyyy", { locale: id })}
                                             </TableCell>
-                                            <TableCell>{journal.activity}</TableCell>
-                                            <TableCell>{journal.location}</TableCell>
-                                            <TableCell className="max-w-[300px] truncate">
+                                            <TableCell className="p-4 text-sm font-medium">{journal.activity}</TableCell>
+                                            <TableCell className="p-4 text-sm text-muted-foreground">{journal.location}</TableCell>
+                                            <TableCell className="p-4 text-sm text-muted-foreground max-w-[300px] truncate">
                                                 {journal.description}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="p-4 text-center">
                                                 <Badge
                                                     variant={
                                                         journal.status === "Use Action" || journal.status === "Perlu Tindakan"
@@ -248,6 +266,7 @@ export default function DailyPicketJournal() {
                                                                 ? "destructive"
                                                                 : "secondary"
                                                     }
+                                                    className="font-normal"
                                                 >
                                                     {journal.status}
                                                 </Badge>
@@ -256,8 +275,14 @@ export default function DailyPicketJournal() {
                                     ))}
                                     {journals.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                                Belum ada data jurnal hari ini.
+                                            <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                                                <div className="flex flex-col items-center justify-center gap-2">
+                                                    <div className="p-3 bg-muted rounded-full">
+                                                        <Search className="h-6 w-6 text-muted-foreground" />
+                                                    </div>
+                                                    <p className="font-medium">Belum ada data jurnal hari ini</p>
+                                                    <p className="text-sm">Silakan tambahkan catatan aktivitas piket baru.</p>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     )}
