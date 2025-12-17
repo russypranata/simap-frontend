@@ -41,6 +41,15 @@ import {
     Clock,
     FileSpreadsheet,
     UserRound,
+    Facebook,
+    Instagram,
+    Youtube,
+    MapPin,
+    Phone,
+    Mail,
+    ExternalLink,
+    Monitor,
+    Library,
 } from 'lucide-react';
 
 // --- Data Constants ---
@@ -113,61 +122,135 @@ const FEATURES = [
     },
 ];
 
-const TESTIMONIALS = [
+
+
+
+
+const ROLES = [
     {
-        id: 1,
-        name: 'Ahmad Fauzi',
-        role: 'Kepala Sekolah',
-        content:
-            'SIMAP telah merevolusi sistem administrasi kami. Pengelolaan data siswa menjadi lebih terstruktur.',
-        rating: 5,
+        id: 'guru_mapel',
+        title: 'Guru Mapel',
+        description:
+            'Pengelola pembelajaran & penilaian. Presensi mapel, jurnal, nilai (formatif/sumatif), & administrasi (ATP).',
+        icon: BookOpen,
+        color: 'bg-blue-50 text-blue-600',
+        borderColor: 'group-hover:border-blue-200',
+        gradient: 'from-blue-500/10 to-transparent',
     },
     {
-        id: 2,
-        name: 'Siti Nurhaliza',
-        role: 'Wali Kelas XI',
-        content:
-            'Fitur e-rapor dan absensi digital sangat membantu dalam pekerjaan sehari-hari.',
-        rating: 5,
+        id: 'guru_piket',
+        title: 'Guru Piket',
+        description:
+            'Garda kedisiplinan. Mencatat kehadiran pagi, keterlambatan, & monitoring sholat siswa.',
+        icon: Clock,
+        color: 'bg-orange-50 text-orange-600',
+        borderColor: 'group-hover:border-orange-200',
+        gradient: 'from-orange-500/10 to-transparent',
     },
     {
-        id: 3,
-        name: 'Budi Santoso',
-        role: 'Orang Tua Siswa',
-        content:
-            'Saya sangat terbantu dengan sistem informasi yang transparan. Bisa pantau anak real-time.',
-        rating: 4,
+        id: 'walas',
+        title: 'Wali Kelas',
+        description:
+            'Orang tua di sekolah. Monitoring track record siswa, kehadiran, & penanganan masalah kelas.',
+        icon: UserRound,
+        color: 'bg-emerald-50 text-emerald-600',
+        borderColor: 'group-hover:border-emerald-200',
+        gradient: 'from-emerald-500/10 to-transparent',
+    },
+    {
+        id: 'ekskul',
+        title: 'Pembina Ekskul',
+        description:
+            'Mengembangkan bakat minat. Presensi & pengajuan kegiatan ekstrakurikuler siswa.',
+        icon: Star,
+        color: 'bg-violet-50 text-violet-600',
+        borderColor: 'group-hover:border-violet-200',
+        gradient: 'from-violet-500/10 to-transparent',
+    },
+    {
+        id: 'mutamayizin',
+        title: 'PJ Mutamayizin',
+        description:
+            'Pengelola program unggulan. Manajemen data prestasi & kegiatan siswa juara.',
+        icon: Sparkles,
+        color: 'bg-pink-50 text-pink-600',
+        borderColor: 'group-hover:border-pink-200',
+        gradient: 'from-pink-500/10 to-transparent',
+    },
+    {
+        id: 'siswa',
+        title: 'Siswa',
+        description:
+            'End-user aktif. Pantau nilai, pelanggaran, e-rapor, & track record pribadi secara mandiri.',
+        icon: User,
+        color: 'bg-cyan-50 text-cyan-600',
+        borderColor: 'group-hover:border-cyan-200',
+        gradient: 'from-cyan-500/10 to-transparent',
+    },
+    {
+        id: 'kepala_sekolah',
+        title: 'Kepala Sekolah',
+        description:
+            'pimpinan sekolah. Monitoring kinerja sekolah, persetujuan, & evaluasi guru.',
+        icon: GraduationCap,
+        color: 'bg-indigo-50 text-indigo-600',
+        borderColor: 'group-hover:border-indigo-200',
+        gradient: 'from-indigo-500/10 to-transparent',
+    },
+    {
+        id: 'admin',
+        title: 'Administrator',
+        description:
+            'Teknis & Data. Manajemen user, database siswa/guru, & konfigurasi sistem sekolah.',
+        icon: Shield,
+        color: 'bg-slate-50 text-slate-700',
+        borderColor: 'group-hover:border-slate-300',
+        gradient: 'from-slate-500/10 to-transparent',
+    },
+    {
+        id: 'orang_tua',
+        title: 'Orang Tua',
+        description:
+            'Partner Sekolah. Monitoring kehadiran, nilai, & perkembangan karakter anak secara real-time.',
+        icon: Users,
+        color: 'bg-teal-50 text-teal-600',
+        borderColor: 'group-hover:border-teal-200',
+        gradient: 'from-teal-500/10 to-transparent',
     },
 ];
 
-const STATS = [
+const RELATED_APPS = [
     {
-        value: '1200+',
-        label: 'Total Pengguna',
-        description: 'Guru, siswa, dan orang tua',
-        icon: Users,
-        color: 'primary',
+        id: 'lms',
+        name: 'E-Learning (LMS)',
+        description: 'Platform pembelajaran daring berbasis Moodle. Akses materi, tugas, dan kuis secara online.',
+        icon: Monitor,
+        url: 'https://lms.fityankuburaya.sch.id/',
+        color: 'bg-orange-50 text-orange-600',
     },
     {
-        value: '98%',
-        label: 'Tingkat Kepuasan',
-        description: 'Berdasarkan survei',
-        icon: Star,
-        color: 'secondary',
+        id: 'website',
+        name: 'Website Resmi',
+        description: 'Portal informasi utama sekolah. Berita, profil, dan agenda kegiatan terbaru.',
+        icon: Globe,
+        url: '#',
+        color: 'bg-blue-50 text-blue-600',
     },
     {
-        value: '250+',
-        label: 'Siswa Aktif',
-        description: 'Menggunakan setiap hari',
-        icon: Users,
-        color: 'primary',
+        id: 'ppdb',
+        name: 'PPDB Online',
+        description: 'Sistem Penerimaan Peserta Didik Baru. Pendaftaran dan seleksi siswa baru.',
+        icon: FileSpreadsheet,
+        url: '#',
+        color: 'bg-green-50 text-green-600',
     },
     {
-        value: '70%',
-        label: 'Efisiensi Waktu',
-        description: 'Hemat waktu admin',
-        icon: Clock,
-        color: 'secondary',
+        id: 'library',
+        name: 'Perpustakaan Digital',
+        description: 'Akses koleksi buku digital dan katalog perpustakaan sekolah.',
+        icon: Library,
+        url: '#',
+        color: 'bg-purple-50 text-purple-600',
     },
 ];
 
@@ -195,19 +278,14 @@ const HeroSection = ({ onLoginClick }: { onLoginClick: () => void }) => (
         <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-16 sm:px-6 lg:px-8 z-10 w-full">
             <div className="grid items-center gap-12 lg:grid-cols-2">
                 <div className="text-center lg:text-left space-y-8">
-                    <div className="inline-flex items-center rounded-full border border-secondary/30 bg-secondary/10 px-4 py-2 text-sm font-semibold text-secondary-foreground backdrop-blur-sm shadow-sm">
-                        <span className="flex h-2 w-2 rounded-full bg-secondary mr-2 animate-pulse"></span>
-                        Platform Pendidikan Digital Terdepan
-                    </div>
-
-                    <h1 className="text-4xl text-slate-900 font-extrabold tracking-tight sm:text-5xl lg:text-7xl leading-[1.1]">
-                        Transformasi
-                        <span className="block text-primary">
-                            Pendidikan Digital
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
+                        Sistem Informasi{' '}
+                        <span className="text-primary block mt-2">
+                            Manajemen Administrasi Pendidikan
                         </span>
                     </h1>
 
-                    <p className="text-xl text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                    <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
                         Solusi terpadu manajemen sekolah modern. Kelola
                         administrasi, pembelajaran, dan kolaborasi dalam satu
                         platform yang{' '}
@@ -225,23 +303,21 @@ const HeroSection = ({ onLoginClick }: { onLoginClick: () => void }) => (
                         <Button
                             size="lg"
                             onClick={onLoginClick}
-                            className="bg-primary hover:bg-blue-700 text-white font-bold h-14 px-8 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-1"
+                            className="bg-primary hover:bg-blue-700 text-white font-bold h-12 px-6 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-1"
                         >
                             Mulai Sekarang
-                            <ArrowRight className="ml-2 h-5 w-5" />
                         </Button>
                         <Button
                             variant="outline"
                             size="lg"
-                            className="h-14 px-8 rounded-xl font-semibold border-slate-200 hover:bg-slate-50 text-slate-700"
+                            className="h-12 px-6 rounded-xl font-semibold border-slate-200 hover:bg-slate-50 text-slate-700"
                             asChild
                         >
                             <a
-                                href="https://moodle.codebois.xyz/login"
+                                href="https://lms.fityankuburaya.sch.id/login/index.php"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                <Play className="mr-2 h-5 w-5 fill-current" />
                                 E-Learning
                             </a>
                         </Button>
@@ -249,41 +325,17 @@ const HeroSection = ({ onLoginClick }: { onLoginClick: () => void }) => (
                 </div>
 
                 <div className="hidden lg:block relative">
-                    <div className="relative rounded-3xl overflow-hidden shadow-2xl border-8 border-white bg-slate-100">
+                    <div className="relative rounded-3xl overflow-hidden shadow-2xl border-8 border-white bg-slate-100 max-w-[92%] mx-auto">
                         <img
                             src="/assets/illustrations/education-illustration.webp"
                             alt="Dashboard Preview"
                             className="w-full h-auto object-cover transform transition-transform hover:scale-105 duration-700"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent pointer-events-none"></div>
-
-                        {/* Floating Cards */}
-                        <div className="absolute bottom-8 left-8 right-8 flex gap-4">
-                            <div className="flex-1 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-slate-200 flex items-center gap-3">
-                                <div className="p-2.5 bg-blue-100 rounded-lg text-primary">
-                                    <GraduationCap className="h-6 w-6" />
-                                </div>
-                                <div>
-                                    <p className="font-bold text-slate-900 text-sm">
-                                        Siswa
-                                    </p>
-                                    <p className="text-xs text-slate-500">
-                                        Data Terpusat
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex-1 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-slate-200 flex items-center gap-3">
-                                <div className="p-2.5 bg-yellow-100 rounded-lg text-yellow-700">
-                                    <TrendingUp className="h-6 w-6" />
-                                </div>
-                                <div>
-                                    <p className="font-bold text-slate-900 text-sm">
-                                        Statistik
-                                    </p>
-                                    <p className="text-xs text-slate-500">
-                                        Real-time Update
-                                    </p>
-                                </div>
+                        <div className="absolute bottom-6 left-6 z-10">
+                            <div className="inline-flex items-center rounded-full border border-white/20 bg-white/90 px-4 py-2 text-sm font-bold text-primary shadow-lg backdrop-blur-md">
+                                <span className="flex h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+                                Platform Pendidikan Digital Terdepan
                             </div>
                         </div>
                     </div>
@@ -297,52 +349,42 @@ const HeroSection = ({ onLoginClick }: { onLoginClick: () => void }) => (
     </section>
 );
 
-const StatsSection = () => (
-    <section className="py-20 bg-slate-50">
+const RolesSection = () => (
+    <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-                <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl mb-4">
-                    Angka yang Membuktikan
+            <div className="text-center mb-16">
+                <span className="text-primary font-semibold tracking-wider uppercase text-sm">
+                    Ekosistem Sekolah
+                </span>
+                <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">
+                    Peran Pengguna & Klasifikasi
                 </h2>
-                <p className="text-lg text-slate-600">
-                    Transformasi digital yang telah dirasakan oleh ribuan
-                    pengguna di lingkungan sekolah kami.
+                <p className="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
+                    Setiap elemen sekolah memiliki peran spesifik yang saling
+                    terintegrasi dalam satu sistem
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {STATS.map((stat, idx) => (
+            <div className="flex flex-wrap justify-center gap-6">
+                {ROLES.map((role) => (
                     <div
-                        key={idx}
-                        className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                        key={role.id}
+                        className={`group relative p-8 rounded-3xl border border-slate-100 bg-white shadow-sm hover:shadow-xl transition-all duration-300 ${role.borderColor} w-full md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] flex flex-col`}
                     >
-                        <div
-                            className={`
-                            w-14 h-14 rounded-xl flex items-center justify-center mb-6 text-white shadow-lg
-                            ${
-                                stat.color === 'primary'
-                                    ? 'bg-primary'
-                                    : 'bg-secondary text-secondary-foreground'
-                            }
-                        `}
-                        >
-                            <stat.icon className="h-7 w-7" />
+
+                        <div className="relative z-10 flex-1 flex flex-col">
+                            <div
+                                className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 duration-300 ${role.color}`}
+                            >
+                                <role.icon className="h-7 w-7" />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-3">
+                                {role.title}
+                            </h3>
+                            <p className="text-slate-600 leading-relaxed text-sm">
+                                {role.description}
+                            </p>
                         </div>
-                        <h3
-                            className={`text-4xl font-bold mb-2 ${
-                                stat.color === 'primary'
-                                    ? 'text-primary'
-                                    : 'text-yellow-600'
-                            }`}
-                        >
-                            {stat.value}
-                        </h3>
-                        <p className="font-semibold text-slate-900 text-lg mb-1">
-                            {stat.label}
-                        </p>
-                        <p className="text-slate-500 text-sm">
-                            {stat.description}
-                        </p>
                     </div>
                 ))}
             </div>
@@ -375,11 +417,10 @@ const FeaturesSection = () => (
                         <div
                             className={`
                             w-14 h-14 rounded-xl mb-6 flex items-center justify-center transition-transform group-hover:scale-110
-                            ${
-                                feature.color === 'yellow'
+                            ${feature.color === 'yellow'
                                     ? 'bg-yellow-100 text-yellow-600'
                                     : 'bg-blue-100 text-primary'
-                            }
+                                }
                         `}
                         >
                             <feature.icon className="h-7 w-7" />
@@ -399,11 +440,10 @@ const FeaturesSection = () => (
                                     className="flex items-center text-sm text-slate-600"
                                 >
                                     <div
-                                        className={`w-2 h-2 rounded-full mr-3 ${
-                                            feature.color === 'yellow'
-                                                ? 'bg-secondary'
-                                                : 'bg-primary'
-                                        }`}
+                                        className={`w-2 h-2 rounded-full mr-3 ${feature.color === 'yellow'
+                                            ? 'bg-secondary'
+                                            : 'bg-primary'
+                                            }`}
                                     ></div>
                                     {item}
                                 </li>
@@ -416,53 +456,51 @@ const FeaturesSection = () => (
     </section>
 );
 
-const TestimonialsSection = () => (
-    <section id="testimoni" className="py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+
+
+const RelatedAppsSection = () => (
+    <section id="related-apps" className="py-24 bg-slate-50 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-                    Dipercaya Komunitas
+                <span className="text-primary font-semibold tracking-wider uppercase text-sm">
+                    Ekosistem Digital
+                </span>
+                <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">
+                    Aplikasi Terkait
                 </h2>
-                <p className="mt-4 text-lg text-slate-600">
-                    Apa kata mereka tentang pengalaman menggunakan SIMAP
+                <p className="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
+                    Akses mudah ke berbagai platform digital pendukung kegiatan pendidikan di SMAIT Al-Fityan
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {TESTIMONIALS.map((testi) => (
-                    <div
-                        key={testi.id}
-                        className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {RELATED_APPS.map((app) => (
+                    <a
+                        key={app.id}
+                        href={app.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
                     >
-                        <div className="flex gap-1 mb-6">
-                            {[...Array(5)].map((_, i) => (
-                                <Star
-                                    key={i}
-                                    className={`h-5 w-5 ${
-                                        i < testi.rating
-                                            ? 'text-secondary fill-secondary'
-                                            : 'text-slate-200'
-                                    }`}
-                                />
-                            ))}
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${app.color} bg-opacity-20`}>
+                            <app.icon className="h-6 w-6" />
                         </div>
-                        <blockquote className="mb-6 text-slate-700 leading-relaxed italic">
-                            "{testi.content}"
-                        </blockquote>
-                        <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-blue-100 text-primary flex items-center justify-center font-bold text-lg">
-                                {testi.name[0]}
-                            </div>
-                            <div>
-                                <div className="font-bold text-slate-900">
-                                    {testi.name}
-                                </div>
-                                <div className="text-sm text-slate-500">
-                                    {testi.role}
-                                </div>
-                            </div>
+
+                        <div className="flex-1">
+                            <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-primary transition-colors flex items-center gap-2">
+                                {app.name}
+                                <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                {app.description}
+                            </p>
                         </div>
-                    </div>
+
+                        <div className="mt-4 flex items-center text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+                            Akses Sekarang <ArrowRight className="ml-1 h-4 w-4" />
+                        </div>
+                    </a>
                 ))}
             </div>
         </div>
@@ -752,11 +790,10 @@ export const WelcomeScreen: React.FC = () => {
         <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-primary/20 selection:text-primary">
             {/* Header / Nav */}
             <header
-                className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-                    scrolled
-                        ? 'bg-white/90 backdrop-blur-md shadow-sm'
-                        : 'bg-transparent'
-                }`}
+                className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled
+                    ? 'bg-white/90 backdrop-blur-md shadow-sm'
+                    : 'bg-transparent'
+                    }`}
             >
                 <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-20 items-center justify-between">
@@ -776,14 +813,14 @@ export const WelcomeScreen: React.FC = () => {
                                     SIMAP
                                 </h1>
                                 <p className="text-xs text-slate-500 font-medium">
-                                    SMAIT Al-Fityan
+                                    SMAIT Al-Fityan Kubu Raya
                                 </p>
                             </div>
                         </div>
 
                         {/* Desktop Menu */}
                         <div className="hidden md:flex items-center gap-8">
-                            {['Beranda', 'Fitur', 'Testimoni', 'Tentang'].map(
+                            {['Beranda', 'Fitur', 'Tentang'].map(
                                 (item) => (
                                     <button
                                         key={item}
@@ -823,7 +860,7 @@ export const WelcomeScreen: React.FC = () => {
                 {/* Mobile Menu Content */}
                 {isMobileMenuOpen && (
                     <div className="md:hidden bg-white border-b p-4 space-y-4 shadow-lg animate-in slide-in-from-top-5">
-                        {['Beranda', 'Fitur', 'Testimoni', 'Tentang'].map(
+                        {['Beranda', 'Fitur', 'Tentang'].map(
                             (item) => (
                                 <button
                                     key={item}
@@ -852,76 +889,199 @@ export const WelcomeScreen: React.FC = () => {
 
             <main>
                 <HeroSection onLoginClick={() => setShowLogin(true)} />
-                <StatsSection />
+                <RolesSection />
                 <FeaturesSection />
-                <TestimonialsSection />
+                <RelatedAppsSection />
                 <AboutSection />
             </main>
 
-            <footer className="bg-slate-50 py-12 border-t border-slate-200">
+            <footer className="bg-slate-900 text-slate-400 py-16 border-t border-slate-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid md:grid-cols-4 gap-8 mb-8">
-                        <div className="col-span-1 md:col-span-2">
-                            <div className="flex items-center gap-2 mb-4">
-                                <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center text-white">
-                                    <School className="h-5 w-5" />
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                        {/* Brand Section */}
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 bg-gradient-to-br from-primary to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-900/20">
+                                    <School className="h-6 w-6" />
                                 </div>
-                                <span className="font-bold text-xl">SIMAP</span>
+                                <div>
+                                    <span className="font-bold text-2xl text-white tracking-tight">
+                                        SIMAP
+                                    </span>
+                                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">
+                                        SMAIT Al-Fityan Kubu Raya
+                                    </p>
+                                </div>
                             </div>
-                            <p className="text-slate-500 max-w-sm">
+                            <p className="text-slate-400 leading-relaxed text-sm">
                                 Platform sistem informasi manajemen sekolah
-                                terpadu untuk efisiensi dan transparansi
-                                pendidikan.
+                                terpadu. Mewujudkan pendidikan digital yang
+                                efisien, transparan, dan terintegrasi.
                             </p>
+                            <div className="flex items-start gap-3 text-sm text-slate-400">
+                                <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                                <span>
+                                    Jl. Raya Sungai Kakap, Pal 9, <br />
+                                    Kubu Raya, Kalimantan Barat
+                                </span>
+                            </div>
                         </div>
+
+                        {/* Features Links */}
                         <div>
-                            <h4 className="font-bold mb-4">Tautan</h4>
-                            <ul className="space-y-2 text-sm text-slate-500">
+                            <h4 className="font-bold text-white text-lg mb-6">
+                                Fitur Utama
+                            </h4>
+                            <ul className="space-y-4 text-sm">
                                 <li>
-                                    <a href="#" className="hover:text-primary">
-                                        Beranda
+                                    <a
+                                        href="#"
+                                        className="hover:text-primary transition-colors flex items-center gap-2"
+                                    >
+                                        <div className="w-1.5 h-1.5 rounded-full bg-primary/50"></div>
+                                        Manajemen Siswa
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" className="hover:text-primary">
-                                        Fitur
+                                    <a
+                                        href="#"
+                                        className="hover:text-primary transition-colors flex items-center gap-2"
+                                    >
+                                        <div className="w-1.5 h-1.5 rounded-full bg-primary/50"></div>
+                                        Absensi Digital
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" className="hover:text-primary">
-                                        Kontak
+                                    <a
+                                        href="#"
+                                        className="hover:text-primary transition-colors flex items-center gap-2"
+                                    >
+                                        <div className="w-1.5 h-1.5 rounded-full bg-primary/50"></div>
+                                        E-Rapor & Penilaian
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="#"
+                                        className="hover:text-primary transition-colors flex items-center gap-2"
+                                    >
+                                        <div className="w-1.5 h-1.5 rounded-full bg-primary/50"></div>
+                                        Monitoring Pelanggaran
                                     </a>
                                 </li>
                             </ul>
                         </div>
+
+                        {/* Quick Links */}
                         <div>
-                            <h4 className="font-bold mb-4">Hubungi Kami</h4>
-                            <p className="text-sm text-slate-500 mb-2">
-                                info@alfityan.sch.id
-                            </p>
-                            <p className="text-sm text-slate-500">
-                                (021) 1234-5678
-                            </p>
+                            <h4 className="font-bold text-white text-lg mb-6">
+                                Tautan Cepat
+                            </h4>
+                            <ul className="space-y-4 text-sm">
+                                <li>
+                                    <a
+                                        href="#"
+                                        className="hover:text-white transition-colors"
+                                    >
+                                        Beranda
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="#"
+                                        className="hover:text-white transition-colors"
+                                    >
+                                        Tentang Sekolah
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="#"
+                                        className="hover:text-white transition-colors"
+                                    >
+                                        Informasi PPDB
+                                    </a>
+                                </li>
+                                <li>
+                                    <button
+                                        onClick={() => setShowLogin(true)}
+                                        className="hover:text-white transition-colors text-left"
+                                    >
+                                        Portal Login
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Contact & Social */}
+                        <div>
+                            <h4 className="font-bold text-white text-lg mb-6">
+                                Terhubung
+                            </h4>
+                            <div className="space-y-4 mb-8">
+                                <a
+                                    href="mailto:info@alfityan.sch.id"
+                                    className="flex items-center gap-3 text-sm hover:text-white transition-colors"
+                                >
+                                    <div className="h-8 w-8 rounded-lg bg-slate-800 flex items-center justify-center text-primary">
+                                        <Mail className="h-4 w-4" />
+                                    </div>
+                                    info@alfityan.sch.id
+                                </a>
+                                <a
+                                    href="tel:02112345678"
+                                    className="flex items-center gap-3 text-sm hover:text-white transition-colors"
+                                >
+                                    <div className="h-8 w-8 rounded-lg bg-slate-800 flex items-center justify-center text-primary">
+                                        <Phone className="h-4 w-4" />
+                                    </div>
+                                    (021) 1234-5678
+                                </a>
+                            </div>
+                            <div className="flex gap-3">
+                                {[Facebook, Instagram, Youtube].map(
+                                    (Icon, i) => (
+                                        <a
+                                            key={i}
+                                            href="#"
+                                            className="h-10 w-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition-all duration-300 hover:-translate-y-1"
+                                        >
+                                            <Icon className="h-5 w-5" />
+                                        </a>
+                                    )
+                                )}
+                            </div>
                         </div>
                     </div>
-                    <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+
+                    <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                         <p className="text-sm text-slate-500">
-                            © {new Date().getFullYear()} SIMAP SMAIT Al-Fityan.
-                            All rights reserved.
+                            © {new Date().getFullYear()} SIMAP SMAIT Al-Fityan
+                            Kubu Raya. All rights reserved.
                         </p>
-                        <div className="flex gap-4">
-                            {/* Social icons could go here */}
+                        <div className="flex gap-6 text-sm">
+                            <a
+                                href="#"
+                                className="text-slate-500 hover:text-white transition-colors"
+                            >
+                                Privacy Policy
+                            </a>
+                            <a
+                                href="#"
+                                className="text-slate-500 hover:text-white transition-colors"
+                            >
+                                Terms of Service
+                            </a>
                         </div>
                     </div>
                 </div>
             </footer>
 
             <div
-                className={`fixed right-6 bottom-6 z-40 transition-all duration-500 ${
-                    scrolled
-                        ? 'opacity-100 translate-y-0'
-                        : 'opacity-0 translate-y-10'
-                }`}
+                className={`fixed right-6 bottom-6 z-40 transition-all duration-500 ${scrolled
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-10'
+                    }`}
             >
                 <Button
                     onClick={() =>
