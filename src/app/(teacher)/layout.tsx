@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MainLayout } from '@/app/layout/MainLayout';
+import { TeacherLayout } from '@/features/teacher/components/TeacherLayout';
 import { useRole } from '@/app/context/RoleContext';
 
-export default function TeacherLayout({
+export default function TeacherRouteLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -30,6 +30,9 @@ export default function TeacherLayout({
         case 'orang_tua':
           router.push('/parent/dashboard');
           break;
+        case 'pembina_ekskul':
+          router.push('/extracurricular-advisor/dashboard');
+          break;
         default:
           router.push('/');
       }
@@ -41,5 +44,5 @@ export default function TeacherLayout({
     return null;
   }
 
-  return <MainLayout>{children}</MainLayout>;
+  return <TeacherLayout>{children}</TeacherLayout>;
 }

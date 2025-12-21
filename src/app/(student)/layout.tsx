@@ -2,9 +2,10 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { StudentLayout } from '@/features/student/components/StudentLayout';
 import { useRole } from '@/app/context/RoleContext';
 
-export default function StudentLayout({
+export default function StudentRouteLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -20,13 +21,16 @@ export default function StudentLayout({
       // Redirect to appropriate dashboard based on role
       switch (role) {
         case 'guru':
-          router.push('/dashboard');
+          router.push('/teacher/dashboard');
           break;
         case 'admin':
           router.push('/admin/dashboard');
           break;
         case 'orang_tua':
           router.push('/parent/dashboard');
+          break;
+        case 'pembina_ekskul':
+          router.push('/extracurricular-advisor/dashboard');
           break;
         default:
           router.push('/');
@@ -39,10 +43,5 @@ export default function StudentLayout({
     return null;
   }
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Student Dashboard (Coming Soon)</h1>
-      {children}
-    </div>
-  );
+  return <StudentLayout>{children}</StudentLayout>;
 }

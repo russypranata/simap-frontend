@@ -29,6 +29,9 @@ import {
   ChevronDown,
   Globe,
   ClipboardList,
+  Star,
+  CheckCircle,
+  Award,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -86,63 +89,143 @@ export const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
-  const menuItems: SidebarItem[] = [
+  const teacherMenuItems: SidebarItem[] = [
     {
       title: "Dashboard",
-      href: "/dashboard",
+      href: "/teacher/dashboard",
       icon: LayoutDashboard,
     },
-
     {
       title: "Jurnal Mengajar",
-      href: "/journal",
+      href: "/teacher/journal",
       icon: BookOpen,
     },
     {
       title: "Nilai Siswa",
-      href: "/grades",
+      href: "/teacher/grades",
       icon: GraduationCap,
     },
     {
       title: "Jadwal Mengajar",
-      href: "/schedule",
+      href: "/teacher/schedule",
       icon: Calendar,
     },
     {
       title: "Catatan Perilaku",
-      href: "/student-behavior",
+      href: "/teacher/student-behavior",
       icon: ClipboardList,
     },
     {
       title: "Wali Kelas",
-      href: "/homeroom", // Parent href
+      href: "/teacher/homeroom",
       icon: Home,
       condition: isHomeroomTeacher,
     },
     {
       title: "Guru Piket",
-      href: "/picket",
+      href: "/teacher/picket",
       icon: Users,
       condition: isPiketTeacher,
-
     },
     {
       title: "Administrasi",
-      href: "/documents",
+      href: "/teacher/documents",
       icon: FileText,
     },
     {
       title: "Pengumuman",
-      href: "/announcements",
+      href: "/teacher/announcements",
       icon: Megaphone,
       badge: "3",
     },
     {
       title: "Profil",
-      href: "/profile",
+      href: "/teacher/profile",
       icon: User,
     },
   ];
+
+  const studentMenuItems: SidebarItem[] = [
+    {
+      title: "Dashboard",
+      href: "/student/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Jadwal Pelajaran",
+      href: "/student/schedule",
+      icon: Calendar,
+    },
+    {
+      title: "Nilai & Rapor",
+      href: "/student/grades",
+      icon: GraduationCap,
+    },
+    {
+      title: "Tugas & PR",
+      href: "/student/assignments",
+      icon: FileText,
+      badge: "3"
+    },
+    {
+      title: "Perpustakaan",
+      href: "/student/library",
+      icon: BookOpen,
+    },
+    {
+      title: "Pengumuman",
+      href: "/student/announcements",
+      icon: Megaphone,
+    },
+    {
+      title: "Profil Saya",
+      href: "/student/profile",
+      icon: User,
+    },
+  ];
+
+  const extracurricularMenuItems: SidebarItem[] = [
+    {
+      title: "Dashboard",
+      href: "/extracurricular-advisor/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Kelola Anggota",
+      href: "/extracurricular-advisor/members",
+      icon: Users,
+    },
+    {
+      title: "Presensi Kegiatan",
+      href: "/extracurricular-advisor/attendance",
+      icon: CheckCircle,
+    },
+    {
+      title: "Jadwal Kegiatan",
+      href: "/extracurricular-advisor/schedule",
+      icon: Calendar,
+    },
+    {
+      title: "Prestasi",
+      href: "/extracurricular-advisor/achievements",
+      icon: Award,
+    },
+    {
+      title: "Pengumuman",
+      href: "/extracurricular-advisor/announcements",
+      icon: Megaphone,
+    },
+    {
+      title: "Profil",
+      href: "/extracurricular-advisor/profile",
+      icon: User,
+    },
+  ];
+
+  const menuItems =
+    role === 'siswa' ? studentMenuItems :
+      role === 'pembina_ekskul' ? extracurricularMenuItems :
+        teacherMenuItems;
 
   const filteredMenuItems = menuItems.filter(
     (item) => item.condition !== false // Only include items where condition is not false
@@ -192,7 +275,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="pl-2 pr-4 py-2 space-y-1">
             <nav>
               {filteredMenuItems.map((item) => {
-                const isActive = pathname === item.href || (pathname === "/" && item.href === "/dashboard");
+                const isActive = pathname === item.href || (pathname === "/" && (
+                  role === 'siswa' ? item.href === "/student/dashboard" :
+                    role === 'pembina_ekskul' ? item.href === "/extracurricular-advisor/dashboard" :
+                      item.href === "/teacher/dashboard"
+                ));
                 const Icon = item.icon;
                 const hasSubItems = item.subItems && item.subItems.length > 0;
                 const isSubmenuOpen = openSubmenus.includes(item.href);
