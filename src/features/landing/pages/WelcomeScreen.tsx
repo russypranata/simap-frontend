@@ -7,7 +7,6 @@ import {
     RolesSection,
     FeaturesSection,
     RelatedAppsSection,
-    AboutSection,
     LandingHeader,
     LandingFooter,
     ScrollToTopButton,
@@ -69,7 +68,6 @@ export const WelcomeScreen: React.FC = () => {
                 <RolesSection />
                 <FeaturesSection />
                 <RelatedAppsSection />
-                <AboutSection />
             </main>
 
             <LandingFooter onLoginClick={handleLoginClick} />
