@@ -18,6 +18,7 @@ import {
     ChevronRight,
     ChevronDown,
 } from "lucide-react";
+import { useSidebarContext } from "./BaseLayout";
 
 export interface SidebarItem {
     title: string;
@@ -42,7 +43,7 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
     defaultDashboardHref,
     className,
 }) => {
-    const [collapsed, setCollapsed] = useState(false);
+    const { collapsed, setCollapsed } = useSidebarContext();
     const pathname = usePathname();
     const [openSubmenus, setOpenSubmenus] = useState<string[]>([]);
 

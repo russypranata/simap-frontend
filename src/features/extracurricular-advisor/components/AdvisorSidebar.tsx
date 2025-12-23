@@ -8,7 +8,6 @@ import {
     Users,
     CheckCircle,
     Calendar,
-    Award,
     Megaphone,
     User,
 } from "lucide-react";
@@ -36,11 +35,6 @@ export const AdvisorSidebar: React.FC = () => {
             title: "Jadwal Kegiatan",
             href: "/extracurricular-advisor/schedule",
             icon: Calendar,
-        },
-        {
-            title: "Prestasi",
-            href: "/extracurricular-advisor/achievements",
-            icon: Award,
         },
         {
             title: "Pengumuman",
