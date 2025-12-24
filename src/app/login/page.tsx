@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -33,6 +34,8 @@ import {
     UserRound,
     Star,
     Sparkles,
+    PanelRightClose,
+    PanelRightOpen,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -45,6 +48,7 @@ export default function LoginPage() {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
 
     const [view, setView] = useState<'login' | 'forgot_password'>('login');
     const [forgotPasswordData, setForgotPasswordData] = useState({ email: '' });
@@ -158,7 +162,7 @@ export default function LoginPage() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm"
+                        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm"
                     >
                         {/* Spiral Flow Spinner */}
                         <motion.div
@@ -288,7 +292,25 @@ export default function LoginPage() {
             </AnimatePresence>
 
             {/* Left Side - Form Container */}
-            <div className="w-full lg:w-1/2 flex flex-col bg-white h-screen overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] relative">
+            <motion.div
+                layout
+                className={`flex flex-col bg-white h-screen overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] relative transition-all duration-500 ease-in-out ${isRightPanelOpen ? 'w-full lg:w-1/2' : 'w-full'}`}
+            >
+                {/* Toggle Right Panel Button */}
+                <button
+                    onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
+                    className={`absolute top-6 right-6 z-50 p-2.5 rounded-full shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 ${isRightPanelOpen
+                        ? 'bg-white text-slate-600 hover:text-blue-600 border border-slate-200'
+                        : 'bg-blue-600 text-white hover:bg-blue-700 border-2 border-blue-500'
+                        }`}
+                    title={isRightPanelOpen ? "Tutup Panel Informasi" : "Buka Panel Informasi"}
+                >
+                    {isRightPanelOpen ? (
+                        <PanelRightClose className="w-5 h-5" />
+                    ) : (
+                        <PanelRightOpen className="w-5 h-5" />
+                    )}
+                </button>
 
                 {/* Background Decorations */}
                 <div className="absolute top-10 left-10 text-slate-900/[0.03] pointer-events-none -z-0">
@@ -495,147 +517,174 @@ export default function LoginPage() {
                                 </div>
                             </form>
                         </motion.div>
-                    )}      <div className="mt-8 text-center">
+                    )}
+
+                    <div className="mt-8 text-center">
                         <p className="text-slate-400 text-xs font-medium">
                             &copy; 2025 SMAIT Al-Fityan Kubu Raya. All rights reserved.
                         </p>
                     </div>
                 </div>
 
+            </motion.div>
 
-            </div>
+            <AnimatePresence mode="wait">
+                {isRightPanelOpen && (
+                    <>
+                        {/* Geometric Divider - Modern & Clean */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 h-[80%] w-[2px] flex-col items-center justify-center pointer-events-none select-none"
+                        >
+                            {/* Top Fade Line */}
+                            <div className="w-full flex-1 bg-gradient-to-b from-transparent via-slate-200 to-blue-300"></div>
 
-            {/* Geometric Divider - Modern & Clean */}
-            <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 h-[80%] w-[2px] flex-col items-center justify-center pointer-events-none select-none">
-                {/* Top Fade Line */}
-                <div className="w-full flex-1 bg-gradient-to-b from-transparent via-slate-200 to-blue-300"></div>
+                            {/* Center Decor */}
+                            <div className="py-4 flex flex-col items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
+                                <div className="w-3 h-3 rotate-45 border-2 border-yellow-400 bg-white shadow-sm"></div>
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
+                            </div>
 
-                {/* Center Decor */}
-                <div className="py-4 flex flex-col items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
-                    <div className="w-3 h-3 rotate-45 border-2 border-yellow-400 bg-white shadow-sm"></div>
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
-                </div>
+                            {/* Bottom Fade Line */}
+                            <div className="w-full flex-1 bg-gradient-to-b from-blue-300 via-slate-200 to-transparent"></div>
+                        </motion.div>
 
-                {/* Bottom Fade Line */}
-                <div className="w-full flex-1 bg-gradient-to-b from-blue-300 via-slate-200 to-transparent"></div>
-            </div>
+                        {/* Right Side - Image/Background */}
+                        <motion.div
+                            initial={{ width: 0, opacity: 0 }}
+                            animate={{ width: "50%", opacity: 1 }}
+                            exit={{ width: 0, opacity: 0 }}
+                            transition={{ duration: 0.5, ease: "easeInOut" }}
+                            className="hidden lg:flex relative bg-gradient-to-b from-white to-slate-50 overflow-hidden items-center justify-center"
+                        >
+                            <div className="min-w-[50vw] h-full relative flex items-center justify-center"> {/* Container to prevent content squishing during transition */}
+                                {/* Background Image - Optimized with Next.js Image */}
+                                <div className="absolute inset-0">
+                                    <Image
+                                        src="/assets/illustrations/sketch-al-fityan.png"
+                                        alt="Sketch Al-Fityan Background"
+                                        fill
+                                        className="object-cover object-center"
+                                        priority
+                                        quality={90}
+                                    />
+                                </div>
 
-            {/* Right Side - Image/Background */}
-            <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-b from-white to-slate-50 overflow-hidden items-center justify-center">
-                {/* Background Image */}
-                <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: "url('/assets/illustrations/sketch-al-fityan.png')" }}
-                />
-
-                {/* White Overlay - lighter to show sketch */}
-                <div className="absolute inset-0 bg-white/85" />
+                                {/* White Overlay - lighter to show sketch */}
+                                <div className="absolute inset-0 bg-white/85" />
 
 
 
-                <div className="relative z-10 w-full max-w-2xl px-8 py-6 flex flex-col justify-center lg:h-full">
-                    {/* Header - Left Aligned with Yellow Accent */}
-                    <div className="mb-5 space-y-1.5">
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-yellow-50 border border-yellow-200 mb-3">
-                            <Sparkles className="w-4 h-4 text-yellow-600" />
-                            <span className="text-xs font-semibold text-yellow-700">
-                                Smart Login System
-                            </span>
-                        </div>
-                        <h2 className="text-3xl font-extrabold text-slate-900 leading-tight">
-                            <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
-                                Akses Otomatis
-                            </span>
-                            {' '}
-                            <span className="text-slate-900">Berdasarkan Role</span>
-                        </h2>
-                        <div className="flex gap-3 items-start mt-2.5">
-                            {/* Yellow Divider */}
-                            <div className="w-0.5 h-12 bg-yellow-500 rounded-full flex-shrink-0"></div>
+                                <div className="relative z-10 w-full max-w-2xl px-8 py-6 flex flex-col justify-center lg:h-full">
+                                    {/* Header - Left Aligned with Yellow Accent */}
+                                    <div className="mb-5 space-y-1.5">
+                                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-yellow-50 border border-yellow-200 mb-3">
+                                            <Sparkles className="w-4 h-4 text-yellow-600" />
+                                            <span className="text-xs font-semibold text-yellow-700">
+                                                Smart Login System
+                                            </span>
+                                        </div>
+                                        <h2 className="text-3xl font-extrabold text-slate-900 leading-tight">
+                                            <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
+                                                Akses Otomatis
+                                            </span>
+                                            {' '}
+                                            <span className="text-slate-900">Berdasarkan Role</span>
+                                        </h2>
+                                        <div className="flex gap-3 items-start mt-2.5">
+                                            {/* Yellow Divider */}
+                                            <div className="w-0.5 h-12 bg-yellow-500 rounded-full flex-shrink-0"></div>
 
-                            {/* Description Text */}
-                            <p className="text-sm text-slate-600 leading-relaxed">
-                                Sistem akan{' '}
-                                <span className="font-semibold text-yellow-600">mendeteksi role Anda secara otomatis</span>{' '}
-                                dan mengarahkan ke dashboard yang sesuai
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Role Cards - Creative Non-Card Design */}
-                    <div className="grid grid-cols-3 gap-3">
-                        {[
-                            { name: 'Guru Mapel', icon: BookOpen, color: 'bg-blue-50 text-blue-700', borderColor: 'border-blue-200', gradient: 'from-blue-600/20 to-transparent' },
-                            { name: 'Guru Piket', icon: Clock, color: 'bg-orange-50 text-orange-700', borderColor: 'border-orange-200', gradient: 'from-orange-600/20 to-transparent' },
-                            { name: 'Wali Kelas', icon: UserRound, color: 'bg-emerald-50 text-emerald-700', borderColor: 'border-emerald-200', gradient: 'from-emerald-600/20 to-transparent' },
-                            { name: 'Pembina Ekskul', icon: Star, color: 'bg-violet-50 text-violet-700', borderColor: 'border-violet-200', gradient: 'from-violet-600/20 to-transparent' },
-                            { name: 'PJ Mutamayizin', icon: Sparkles, color: 'bg-pink-50 text-pink-700', borderColor: 'border-pink-200', gradient: 'from-pink-600/20 to-transparent' },
-                            { name: 'Siswa', icon: User, color: 'bg-cyan-50 text-cyan-700', borderColor: 'border-cyan-200', gradient: 'from-cyan-600/20 to-transparent' },
-                            { name: 'Kepala Sekolah', icon: GraduationCap, color: 'bg-indigo-50 text-indigo-700', borderColor: 'border-indigo-200', gradient: 'from-indigo-600/20 to-transparent' },
-                            { name: 'Administrator', icon: Shield, color: 'bg-slate-50 text-slate-700', borderColor: 'border-slate-200', gradient: 'from-slate-600/20 to-transparent' },
-                            { name: 'Orang Tua', icon: Users, color: 'bg-teal-50 text-teal-700', borderColor: 'border-teal-200', gradient: 'from-teal-600/20 to-transparent' },
-                        ].map((role, i) => (
-                            <motion.div
-                                key={role.name}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.05 * i, duration: 0.4 }}
-                                className="group relative pt-5"
-                            >
-                                {/* Floating Background Blob */}
-                                <div className={`absolute -inset-2 ${role.color.split(' ')[0]} rounded-xl blur-xl opacity-0 group-hover:opacity-30 transition-all duration-500 group-hover:scale-110`}></div>
-
-                                {/* Main Content Container - Colored Background */}
-                                <div className={`relative h-full backdrop-blur-sm ${role.color.split(' ')[0]} border ${role.borderColor} rounded-xl overflow-visible transition-all duration-500 group-hover:scale-105 group-hover:-translate-y-1 shadow-sm group-hover:shadow-md`}>
-                                    {/* Gradient Overlay */}
-                                    <div className={`absolute inset-0 bg-gradient-to-br ${role.gradient} opacity-30 group-hover:opacity-50 transition-opacity duration-500 rounded-xl`}></div>
-
-                                    {/* Floating Icon - Outside the box */}
-                                    <div className="absolute -top-5 left-2.5 z-20">
-                                        <div className="relative">
-                                            {/* Icon Glow */}
-                                            <div className={`absolute inset-0 ${role.color.split(' ')[0]} rounded-lg blur-lg opacity-0 group-hover:opacity-50 transition-all duration-300 scale-150`}></div>
-                                            {/* Icon Container */}
-                                            <div className={`relative w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 ${role.color} border ${role.borderColor} bg-white shadow-sm`}>
-                                                <role.icon className="h-5 w-5" />
-                                            </div>
+                                            {/* Description Text */}
+                                            <p className="text-sm text-slate-600 leading-relaxed">
+                                                Sistem akan{' '}
+                                                <span className="font-semibold text-yellow-600">mendeteksi role Anda secara otomatis</span>{' '}
+                                                dan mengarahkan ke dashboard yang sesuai
+                                            </p>
                                         </div>
                                     </div>
 
-                                    {/* Content */}
-                                    <div className="relative z-10 pt-8 pb-3 px-2.5">
-                                        {/* Title with Underline Accent */}
-                                        <div className="mb-1.5">
-                                            <h3 className="text-[11px] font-medium text-slate-900 mb-0.5 group-hover:text-blue-700 transition-colors duration-300 leading-tight tracking-wide">
-                                                {role.name}
-                                            </h3>
-                                            <div className={`h-1 w-6 rounded-full ${role.color.split(' ')[1].replace('text', 'bg')} group-hover:w-10 transition-all duration-300`}></div>
-                                        </div>
+                                    {/* Role Cards - Creative Non-Card Design */}
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {[
+                                            { name: 'Guru Mapel', icon: BookOpen, color: 'bg-blue-50 text-blue-700', borderColor: 'border-blue-200', gradient: 'from-blue-600/20 to-transparent' },
+                                            { name: 'Guru Piket', icon: Clock, color: 'bg-orange-50 text-orange-700', borderColor: 'border-orange-200', gradient: 'from-orange-600/20 to-transparent' },
+                                            { name: 'Wali Kelas', icon: UserRound, color: 'bg-emerald-50 text-emerald-700', borderColor: 'border-emerald-200', gradient: 'from-emerald-600/20 to-transparent' },
+                                            { name: 'Pembina Ekskul', icon: Star, color: 'bg-violet-50 text-violet-700', borderColor: 'border-violet-200', gradient: 'from-violet-600/20 to-transparent' },
+                                            { name: 'PJ Mutamayizin', icon: Sparkles, color: 'bg-pink-50 text-pink-700', borderColor: 'border-pink-200', gradient: 'from-pink-600/20 to-transparent' },
+                                            { name: 'Siswa', icon: User, color: 'bg-cyan-50 text-cyan-700', borderColor: 'border-cyan-200', gradient: 'from-cyan-600/20 to-transparent' },
+                                            { name: 'Kepala Sekolah', icon: GraduationCap, color: 'bg-indigo-50 text-indigo-700', borderColor: 'border-indigo-200', gradient: 'from-indigo-600/20 to-transparent' },
+                                            { name: 'Administrator', icon: Shield, color: 'bg-slate-50 text-slate-700', borderColor: 'border-slate-200', gradient: 'from-slate-600/20 to-transparent' },
+                                            { name: 'Orang Tua', icon: Users, color: 'bg-teal-50 text-teal-700', borderColor: 'border-teal-200', gradient: 'from-teal-600/20 to-transparent' },
+                                        ].map((role, i) => (
+                                            <motion.div
+                                                key={role.name}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: 0.05 * i, duration: 0.4 }}
+                                                className="group relative pt-5"
+                                            >
+                                                {/* Floating Background Blob */}
+                                                <div className={`absolute -inset-2 ${role.color.split(' ')[0]} rounded-xl blur-xl opacity-0 group-hover:opacity-30 transition-all duration-500 group-hover:scale-110`}></div>
 
-                                        {/* Decorative Corner Element */}
-                                        <div className="absolute bottom-0 right-0 w-12 h-12 opacity-20 group-hover:opacity-40 transition-opacity duration-500 overflow-hidden rounded-xl">
-                                            <div className={`absolute inset-0 ${role.color.split(' ')[0]} rounded-tl-full`}></div>
-                                        </div>
+                                                {/* Main Content Container - Colored Background */}
+                                                <div className={`relative h-full backdrop-blur-sm ${role.color.split(' ')[0]} border ${role.borderColor} rounded-xl overflow-visible transition-all duration-500 group-hover:scale-105 group-hover:-translate-y-1 shadow-sm group-hover:shadow-md`}>
+                                                    {/* Gradient Overlay */}
+                                                    <div className={`absolute inset-0 bg-gradient-to-br ${role.gradient} opacity-30 group-hover:opacity-50 transition-opacity duration-500 rounded-xl`}></div>
 
-                                        {/* Floating Dots Decoration */}
-                                        <div className="absolute top-1.5 right-1.5 flex gap-0.5 opacity-50 group-hover:opacity-80 transition-opacity duration-300">
-                                            <div className={`w-1 h-1 rounded-full ${role.color.split(' ')[1].replace('text', 'bg')}`}></div>
-                                            <div className={`w-1 h-1 rounded-full ${role.color.split(' ')[1].replace('text', 'bg')}`}></div>
-                                            <div className={`w-1 h-1 rounded-full ${role.color.split(' ')[1].replace('text', 'bg')}`}></div>
-                                        </div>
-                                    </div>
+                                                    {/* Floating Icon - Outside the box */}
+                                                    <div className="absolute -top-5 left-2.5 z-20">
+                                                        <div className="relative">
+                                                            {/* Icon Glow */}
+                                                            <div className={`absolute inset-0 ${role.color.split(' ')[0]} rounded-lg blur-lg opacity-0 group-hover:opacity-50 transition-all duration-300 scale-150`}></div>
+                                                            {/* Icon Container */}
+                                                            <div className={`relative w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 ${role.color} border ${role.borderColor} bg-white shadow-sm`}>
+                                                                <role.icon className="h-5 w-5" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-                                    {/* Shimmer Effect on Hover */}
-                                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-xl overflow-hidden">
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                                    {/* Content */}
+                                                    <div className="relative z-10 pt-8 pb-3 px-2.5">
+                                                        {/* Title with Underline Accent */}
+                                                        <div className="mb-1.5">
+                                                            <h3 className="text-[11px] font-medium text-slate-900 mb-0.5 group-hover:text-blue-700 transition-colors duration-300 leading-tight tracking-wide">
+                                                                {role.name}
+                                                            </h3>
+                                                            <div className={`h-1 w-6 rounded-full ${role.color.split(' ')[1].replace('text', 'bg')} group-hover:w-10 transition-all duration-300`}></div>
+                                                        </div>
+
+                                                        {/* Decorative Corner Element */}
+                                                        <div className="absolute bottom-0 right-0 w-12 h-12 opacity-20 group-hover:opacity-40 transition-opacity duration-500 overflow-hidden rounded-xl">
+                                                            <div className={`absolute inset-0 ${role.color.split(' ')[0]} rounded-tl-full`}></div>
+                                                        </div>
+
+                                                        {/* Floating Dots Decoration */}
+                                                        <div className="absolute top-1.5 right-1.5 flex gap-0.5 opacity-50 group-hover:opacity-80 transition-opacity duration-300">
+                                                            <div className={`w-1 h-1 rounded-full ${role.color.split(' ')[1].replace('text', 'bg')}`}></div>
+                                                            <div className={`w-1 h-1 rounded-full ${role.color.split(' ')[1].replace('text', 'bg')}`}></div>
+                                                            <div className={`w-1 h-1 rounded-full ${role.color.split(' ')[1].replace('text', 'bg')}`}></div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Shimmer Effect on Hover */}
+                                                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-xl overflow-hidden">
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ))}
                                     </div>
                                 </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
+                            </div> {/* End of inner container */}
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+        </div >
     );
 }

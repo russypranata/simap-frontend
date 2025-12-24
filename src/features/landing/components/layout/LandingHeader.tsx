@@ -99,7 +99,7 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({
                         <div className="ml-4 pl-4 border-l border-slate-200">
                             <Button
                                 onClick={onLoginClick}
-                                className="relative overflow-hidden rounded-xl px-6 h-11 font-bold bg-gradient-to-r from-primary to-blue-700 hover:from-blue-700 hover:to-primary shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+                                className="relative overflow-hidden rounded-xl px-6 h-11 font-bold bg-primary hover:bg-blue-700 transition-all duration-300 hover:scale-105"
                             >
                                 <LogIn className="w-4 h-4 mr-2" />
                                 <span className="relative z-10">Masuk Portal</span>
@@ -147,7 +147,7 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({
                         <div className="pt-4">
                             <Button
                                 onClick={onLoginClick}
-                                className="w-full h-12 rounded-xl font-bold bg-gradient-to-r from-primary to-blue-700 shadow-lg"
+                                className="w-full h-12 rounded-xl font-bold bg-primary hover:bg-blue-700"
                             >
                                 <LogIn className="w-4 h-4 mr-2" />
                                 Masuk Portal

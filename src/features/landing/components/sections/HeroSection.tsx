@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Rocket, BookOpen, Sparkles } from 'lucide-react';
 
@@ -45,10 +46,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoginClick }) => {
         >
             {/* Background Elements */}
             <div className="absolute inset-0 z-0">
-                <div
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                    style={{ backgroundImage: "url('/assets/hero.webp')" }}
-                ></div>
+                <Image
+                    src="/assets/hero.webp"
+                    alt="Hero Background"
+                    fill
+                    className="object-cover object-center"
+                    priority
+                    quality={85}
+                />
                 <div className="absolute inset-0 bg-white/80"></div>
             </div>
 
@@ -79,7 +84,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoginClick }) => {
                                 <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
                                     Manajemen{' '}
                                 </span>
-                                <span className="bg-gradient-to-r from-blue-800 via-blue-600 to-blue-400 bg-clip-text text-transparent">
+                                <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
                                     Administrasi{' '}
                                 </span>
                                 <span className="bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">
@@ -153,11 +158,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoginClick }) => {
                                             transformOrigin: 'top center',
                                         }}
                                     >
-                                        <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border-2 border-white bg-white">
-                                            <img
+                                        <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border-2 border-white bg-white relative">
+                                            <Image
                                                 src={slide.image}
                                                 alt={slide.alt}
-                                                className="w-full h-full object-cover"
+                                                fill
+                                                className="object-cover"
+                                                priority={index === 0} // Priority load only the first/active slide
+                                                sizes="(max-width: 768px) 100vw, 480px"
                                             />
                                         </div>
                                     </div>

@@ -303,8 +303,7 @@ export const ExtracurricularAttendance: React.FC = () => {
     };
 
     const getClassBadgeColor = (className: string) => {
-        // Use dark blue (donker) color for all classes
-        return "bg-blue-900 text-white border-blue-800";
+        return "bg-blue-50 text-blue-800 border-blue-200";
     };
 
     // Filter members based on search and status
@@ -410,17 +409,17 @@ export const ExtracurricularAttendance: React.FC = () => {
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Hadir Hari Ini
+                            Kehadiran Pertemuan Lalu
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-2xl font-bold text-green-600">
-                                    {presentCount}
+                                    {mockAttendanceHistory[0].present}
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                    Dari {mockMembers.length} anggota
+                                    {formatDate(mockAttendanceHistory[0].date)}
                                 </p>
                             </div>
                             <div className="p-3 bg-green-100 rounded-full">
@@ -433,17 +432,17 @@ export const ExtracurricularAttendance: React.FC = () => {
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Persentase Kehadiran
+                            Rata-rata Kehadiran
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-2xl font-bold text-primary">
-                                    {percentage}%
+                                    {mockAttendanceHistory[0].percentage}%
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                    Tingkat kehadiran
+                                    Semester ini
                                 </p>
                             </div>
                             <div className="p-3 bg-purple-100 rounded-full">
@@ -456,7 +455,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Kegiatan Bulan Ini
+                            Pertemuan Bulan Ini
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -464,7 +463,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                             <div>
                                 <p className="text-2xl font-bold">12</p>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                    Total kegiatan
+                                    Total pertemuan
                                 </p>
                             </div>
                             <div className="p-3 bg-yellow-100 rounded-full">
@@ -507,7 +506,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                             <SelectValue placeholder={
                                 <div className="flex items-center gap-2">
                                     <History className="h-4 w-4" />
-                                    <span>Riwayat</span>
+                                    <span>Riwayat Presensi</span>
                                 </div>
                             }>
                                 {activeTab === "history" && (
@@ -515,12 +514,12 @@ export const ExtracurricularAttendance: React.FC = () => {
                                         {historyType === "students" ? (
                                             <>
                                                 <Users className="h-4 w-4 text-inherit" />
-                                                <span>Riwayat Siswa</span>
+                                                <span>Riwayat Presensi Siswa</span>
                                             </>
                                         ) : (
                                             <>
                                                 <CheckCircle className="h-4 w-4 text-inherit" />
-                                                <span>Riwayat Pembina</span>
+                                                <span>Riwayat Presensi Pembina</span>
                                             </>
                                         )}
                                     </div>
@@ -531,13 +530,13 @@ export const ExtracurricularAttendance: React.FC = () => {
                             <SelectItem value="students">
                                 <div className="flex items-center gap-2">
                                     <Users className="h-4 w-4" />
-                                    <span>Riwayat Siswa</span>
+                                    <span>Riwayat Presensi Siswa</span>
                                 </div>
                             </SelectItem>
                             <SelectItem value="advisor">
                                 <div className="flex items-center gap-2">
                                     <CheckCircle className="h-4 w-4" />
-                                    <span>Riwayat Pembina</span>
+                                    <span>Riwayat Presensi Pembina</span>
                                 </div>
                             </SelectItem>
                         </SelectContent>
