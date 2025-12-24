@@ -29,6 +29,14 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
     Table,
     TableBody,
     TableCell,
@@ -49,7 +57,14 @@ import {
     Star,
     CheckCircle,
     XCircle,
+    MoreHorizontal,
+    Edit,
+    Eye,
+    Activity,
+    Trophy,
+    AlertCircle,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
 
 // Mock Data
@@ -95,7 +110,13 @@ const mockMembers = [
 
 export const ExtracurricularMembers: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedClass, setSelectedClass] = useState("all");
+    // Filter untuk Dialog Tambah
+    const [selectedDialogClass, setSelectedDialogClass] = useState("all");
+
+    // Filter untuk Tabel Utama (BARU)
+    const [mainClassFilter, setMainClassFilter] = useState("all");
+    const [mainStatusFilter, setMainStatusFilter] = useState("all");
+
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
     const [members, setMembers] = useState(mockMembers);
@@ -113,7 +134,7 @@ export const ExtracurricularMembers: React.FC = () => {
             student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             student.nis.includes(searchQuery);
         const matchesClass =
-            selectedClass === "all" || student.class === selectedClass;
+            selectedDialogClass === "all" || student.class === selectedDialogClass;
         return matchesSearch && matchesClass;
     });
 
@@ -121,7 +142,11 @@ export const ExtracurricularMembers: React.FC = () => {
         const matchesSearch =
             member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             member.nis.includes(searchQuery);
-        return matchesSearch;
+
+        const matchesClass = mainClassFilter === "all" || member.class === mainClassFilter;
+        const matchesStatus = mainStatusFilter === "all" || member.status === mainStatusFilter;
+
+        return matchesSearch && matchesClass && matchesStatus;
     });
 
     const handleSelectStudent = (studentId: number) => {
@@ -172,8 +197,9 @@ export const ExtracurricularMembers: React.FC = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                            Kelola <span className="text-primary">Anggota Ekskul</span>
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Kelola </span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Anggota Ekskul</span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
                             <Users className="h-5 w-5" />
@@ -182,6 +208,18 @@ export const ExtracurricularMembers: React.FC = () => {
                     <p className="text-muted-foreground mt-1">
                         Daftarkan dan kelola anggota ekstrakurikuler Pramuka
                     </p>
+                    <div className="flex items-center gap-3 mt-4">
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                            <Calendar className="h-4 w-4" />
+                            <span className="text-sm font-semibold">
+                                Tahun Ajaran 2025/2026
+                            </span>
+                        </div>
+                        <div className="h-4 w-[1px] bg-border" />
+                        <span className="text-sm font-medium text-blue-800">
+                            Semester Ganjil
+                        </span>
+                    </div>
                 </div>
                 <div className="flex items-center gap-3">
                     <Button variant="outline" size="sm">
@@ -293,7 +331,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                                 className="pl-9"
                                             />
                                         </div>
-                                        <Select value={selectedClass} onValueChange={setSelectedClass}>
+                                        <Select value={selectedDialogClass} onValueChange={setSelectedDialogClass}>
                                             <SelectTrigger className="w-[180px]">
                                                 <SelectValue placeholder="Filter Kelas" />
                                             </SelectTrigger>
@@ -376,7 +414,7 @@ export const ExtracurricularMembers: React.FC = () => {
                 </div>
             </div>
 
-            {/* Stats */}
+            {/* Insight Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card>
                     <CardHeader className="pb-2">
@@ -385,47 +423,75 @@ export const ExtracurricularMembers: React.FC = () => {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{members.length}</div>
-                        <p className="text-xs text-muted-foreground mt-1">Anggota aktif</p>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-2xl font-bold">{members.length}</p>
+                                <p className="text-xs text-muted-foreground mt-1">Siswa terdaftar</p>
+                            </div>
+                            <div className="p-3 bg-blue-100 rounded-full">
+                                <Users className="h-6 w-6 text-blue-600" />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Kelas X
+                            Rata-rata Kehadiran
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">
-                            {members.filter((m) => m.class.startsWith("X")).length}
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-2xl font-bold">
+                                    {Math.round(members.reduce((acc, curr) => acc + curr.attendance, 0) / (members.length || 1))}%
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">Tingkat partisipasi</p>
+                            </div>
+                            <div className="p-3 bg-green-100 rounded-full">
+                                <Activity className="h-6 w-6 text-green-600" />
+                            </div>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">Siswa</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Kelas XI
+                            Siswa Rajin
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">
-                            {members.filter((m) => m.class.startsWith("XI")).length}
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-2xl font-bold">
+                                    {members.filter((m) => m.attendance >= 90).length}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">Kehadiran &gt; 90%</p>
+                            </div>
+                            <div className="p-3 bg-amber-100 rounded-full">
+                                <Trophy className="h-6 w-6 text-amber-600" />
+                            </div>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">Siswa</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Kelas XII
+                            Perlu Perhatian
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">
-                            {members.filter((m) => m.class.startsWith("XII")).length}
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-2xl font-bold">
+                                    {members.filter((m) => m.attendance < 75).length}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">Kehadiran &lt; 75%</p>
+                            </div>
+                            <div className="p-3 bg-red-100 rounded-full">
+                                <AlertCircle className="h-6 w-6 text-red-600" />
+                            </div>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">Siswa</p>
                     </CardContent>
                 </Card>
             </div>
@@ -433,19 +499,24 @@ export const ExtracurricularMembers: React.FC = () => {
             {/* Members Table */}
             <Card>
                 <CardHeader>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                            <Users className="h-5 w-5" />
+                        </div>
                         <div>
-                            <CardTitle>Daftar Anggota</CardTitle>
-                            <CardDescription>
+                            <CardTitle className="text-lg font-semibold text-gray-900">
+                                Daftar Anggota
+                            </CardTitle>
+                            <CardDescription className="text-sm text-muted-foreground">
                                 Kelola dan pantau anggota ekstrakurikuler
                             </CardDescription>
                         </div>
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {/* Search */}
-                    <div className="mb-4">
-                        <div className="relative">
+                    {/* Toolbar */}
+                    <div className="flex flex-col md:flex-row gap-4 mb-6">
+                        <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Cari nama atau NIS anggota..."
@@ -453,6 +524,34 @@ export const ExtracurricularMembers: React.FC = () => {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="pl-9"
                             />
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                            <Select value={mainClassFilter} onValueChange={setMainClassFilter}>
+                                <SelectTrigger className="w-full sm:w-[180px]">
+                                    <Filter className="h-4 w-4 mr-2" />
+                                    <SelectValue placeholder="Kelas" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Semua Kelas</SelectItem>
+                                    <SelectItem value="X A">X A</SelectItem>
+                                    <SelectItem value="X B">X B</SelectItem>
+                                    <SelectItem value="XI A">XI A</SelectItem>
+                                    <SelectItem value="XI B">XI B</SelectItem>
+                                    <SelectItem value="XII A">XII A</SelectItem>
+                                    <SelectItem value="XII B">XII B</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Select value={mainStatusFilter} onValueChange={setMainStatusFilter}>
+                                <SelectTrigger className="w-full sm:w-[180px]">
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    <SelectValue placeholder="Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Semua Status</SelectItem>
+                                    <SelectItem value="active">Aktif</SelectItem>
+                                    <SelectItem value="inactive">Tidak Aktif</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
 
@@ -478,7 +577,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                         </TableCell>
                                         <TableCell className="font-medium">{member.name}</TableCell>
                                         <TableCell>
-                                            <Badge variant="outline">{member.class}</Badge>
+                                            <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">{member.class}</Badge>
                                         </TableCell>
                                         <TableCell>
                                             {formatDate(new Date(member.joinDate), "dd MMM yyyy")}
@@ -491,10 +590,10 @@ export const ExtracurricularMembers: React.FC = () => {
                                                 <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
                                                     <div
                                                         className={`h-full ${member.attendance >= 90
-                                                                ? "bg-green-500"
-                                                                : member.attendance >= 75
-                                                                    ? "bg-amber-500"
-                                                                    : "bg-red-500"
+                                                            ? "bg-green-500"
+                                                            : member.attendance >= 75
+                                                                ? "bg-amber-500"
+                                                                : "bg-red-500"
                                                             }`}
                                                         style={{ width: `${member.attendance}%` }}
                                                     />
@@ -503,9 +602,12 @@ export const ExtracurricularMembers: React.FC = () => {
                                         </TableCell>
                                         <TableCell>
                                             <Badge
-                                                variant={
-                                                    member.status === "active" ? "default" : "secondary"
-                                                }
+                                                className={cn(
+                                                    "border",
+                                                    member.status === "active"
+                                                        ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                                                        : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                                                )}
                                             >
                                                 {member.status === "active" ? (
                                                     <>
@@ -521,9 +623,27 @@ export const ExtracurricularMembers: React.FC = () => {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="ghost" size="sm">
-                                                Detail
-                                            </Button>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <span className="sr-only">Buka menu</span>
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                                                    <DropdownMenuItem>
+                                                        <Eye className="mr-2 h-4 w-4" /> Detail Siswa
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem>
+                                                        <Edit className="mr-2 h-4 w-4" /> Edit Data
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem className="text-red-600">
+                                                        <Trash2 className="mr-2 h-4 w-4" /> Hapus Anggota
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </TableCell>
                                     </TableRow>
                                 ))}

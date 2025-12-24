@@ -5,6 +5,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -228,18 +239,51 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="p-2 border-t shrink-0">
-                <Button
-                    variant="ghost"
-                    onClick={onLogout}
-                    className={cn(
-                        "w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50",
-                        collapsed ? "h-10 w-10 p-0" : "h-10 px-3"
-                    )}
-                >
-                    <LogOut className={cn("h-4 w-4", !collapsed && "mr-3")} />
-                    {!collapsed && <span>Keluar</span>}
-                </Button>
+            <div className="p-3 border-t shrink-0">
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                                "w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-100/50 transition-all",
+                                collapsed ? "h-10 w-10 p-0 justify-center" : "h-10 px-3 bg-red-50/30"
+                            )}
+                        >
+                            <LogOut className={cn("h-4 w-4", !collapsed && "mr-3")} />
+                            {!collapsed && <span className="font-bold">Keluar Aplikasi</span>}
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="max-w-[420px] p-0 overflow-hidden border-none shadow-xl">
+                        <div className="flex flex-col sm:flex-row h-full">
+                            <div className="w-full sm:w-24 bg-red-50 flex items-center justify-center p-6 sm:p-0">
+                                <div className="p-3 bg-red-100 rounded-2xl rotate-3">
+                                    <LogOut className="h-8 w-8 text-red-600" />
+                                </div>
+                            </div>
+                            <div className="flex-1 p-6 sm:p-8 bg-card">
+                                <AlertDialogHeader className="text-left space-y-3">
+                                    <AlertDialogTitle className="text-xl font-bold">
+                                        Akhiri Sesi?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription className="text-left leading-relaxed">
+                                        Sesi Anda saat ini akan segera diakhiri. Mohon pastikan seluruh data dan perubahan pekerjaan Anda telah tersimpan dengan aman sebelum melanjutkan untuk keluar dari aplikasi.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter className="mt-8 gap-3 sm:space-x-0 sm:justify-end">
+                                    <AlertDialogCancel className="border-0 bg-muted hover:bg-muted/80 h-11 rounded-xl px-5">
+                                        Batal
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={onLogout}
+                                        className="bg-red-600 hover:bg-red-700 text-white h-11 rounded-xl px-6"
+                                    >
+                                        Ya, Keluar
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </div>
+                        </div>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </div>
     );

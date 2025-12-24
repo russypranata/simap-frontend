@@ -345,8 +345,9 @@ export const ExtracurricularAttendance: React.FC = () => {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                 <div>
                     <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                            Presensi <span className="text-primary">Ekstrakurikuler Pramuka</span>
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Ekstrakurikuler Pramuka</span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
                             <CheckCircle className="h-5 w-5" />
@@ -356,14 +357,14 @@ export const ExtracurricularAttendance: React.FC = () => {
                         Kelola presensi anggota dan kegiatan ekstrakurikuler Pramuka
                     </p>
                     <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                             <Calendar className="h-4 w-4" />
                             <span className="text-sm font-semibold">
                                 Tahun Ajaran 2025/2026
                             </span>
                         </div>
                         <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-muted-foreground text-sm font-medium text-primary">
+                        <span className="text-sm font-medium text-blue-800">
                             Semester Ganjil
                         </span>
                     </div>
