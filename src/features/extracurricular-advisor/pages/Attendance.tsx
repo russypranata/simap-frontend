@@ -43,6 +43,8 @@ import {
     ChevronLeft,
     ChevronRight,
     History,
+    Award,
+    TrendingUp,
     ChevronDown,
     Eye,
     ChevronsLeft,
@@ -585,8 +587,28 @@ export const ExtracurricularAttendance: React.FC = () => {
                 </TabsList>
 
                 <TabsContent value="attendance" className="space-y-6">
-                    {/* Statistics Cards */}
-                    <Card>
+                    <Card className="overflow-hidden p-0">
+                        {/* Header Section with Decorative Pattern */}
+                        <div className="bg-blue-800 p-5 relative overflow-hidden">
+                            {/* Decorative Geometric Pattern */}
+                            <div className="absolute inset-0 opacity-10">
+                                <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
+                                <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
+                            </div>
+
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                                        <Award className="h-7 w-7 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold text-white">Statistik Kehadiran</h2>
+                                        <p className="text-blue-100 text-sm">Ringkasan performa kehadiran semester ini</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <CardContent className="p-0">
                             <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x">
                                 {/* Total Anggota */}
@@ -614,7 +636,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                         mockAttendanceHistory[0].percentage >= 90 ? "bg-green-100" :
                                             mockAttendanceHistory[0].percentage >= 75 ? "bg-yellow-100" : "bg-red-100"
                                     )}>
-                                        <CheckCircle className={cn(
+                                        <TrendingUp className={cn(
                                             "h-5 w-5",
                                             mockAttendanceHistory[0].percentage >= 90 ? "text-green-600" :
                                                 mockAttendanceHistory[0].percentage >= 75 ? "text-yellow-600" : "text-red-600"
@@ -824,87 +846,63 @@ export const ExtracurricularAttendance: React.FC = () => {
                                                             </Badge>
                                                         </td>
                                                         <td className="p-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="flex items-center space-x-2">
-                                                                    <input
-                                                                        type="radio"
-                                                                        id={`hadir-${member.id}`}
-                                                                        name={`status-${member.id}`}
-                                                                        value="hadir"
-                                                                        checked={status === "hadir"}
-                                                                        onChange={() =>
-                                                                            handleStatusChange(member.id, "hadir")
-                                                                        }
-                                                                        className="h-4 w-4 text-green-600"
-                                                                    />
-                                                                    <Label
-                                                                        htmlFor={`hadir-${member.id}`}
-                                                                        className="flex items-center gap-1.5 cursor-pointer text-sm font-medium"
-                                                                    >
-                                                                        <CheckCircle className="h-4 w-4 text-green-500" />
-                                                                        Hadir
-                                                                    </Label>
-                                                                </div>
-                                                                <div className="flex items-center space-x-2">
-                                                                    <input
-                                                                        type="radio"
-                                                                        id={`sakit-${member.id}`}
-                                                                        name={`status-${member.id}`}
-                                                                        value="sakit"
-                                                                        checked={status === "sakit"}
-                                                                        onChange={() =>
-                                                                            handleStatusChange(member.id, "sakit")
-                                                                        }
-                                                                        className="h-4 w-4 text-yellow-600"
-                                                                    />
-                                                                    <Label
-                                                                        htmlFor={`sakit-${member.id}`}
-                                                                        className="flex items-center gap-1.5 cursor-pointer text-sm font-medium"
-                                                                    >
-                                                                        <AlertCircle className="h-4 w-4 text-yellow-500" />
-                                                                        Sakit
-                                                                    </Label>
-                                                                </div>
-                                                                <div className="flex items-center space-x-2">
-                                                                    <input
-                                                                        type="radio"
-                                                                        id={`izin-${member.id}`}
-                                                                        name={`status-${member.id}`}
-                                                                        value="izin"
-                                                                        checked={status === "izin"}
-                                                                        onChange={() =>
-                                                                            handleStatusChange(member.id, "izin")
-                                                                        }
-                                                                        className="h-4 w-4 text-blue-600"
-                                                                    />
-                                                                    <Label
-                                                                        htmlFor={`izin-${member.id}`}
-                                                                        className="flex items-center gap-1.5 cursor-pointer text-sm font-medium"
-                                                                    >
-                                                                        <Clock className="h-4 w-4 text-blue-500" />
-                                                                        Izin
-                                                                    </Label>
-                                                                </div>
-                                                                <div className="flex items-center space-x-2">
-                                                                    <input
-                                                                        type="radio"
-                                                                        id={`alpa-${member.id}`}
-                                                                        name={`status-${member.id}`}
-                                                                        value="alpa"
-                                                                        checked={status === "alpa"}
-                                                                        onChange={() =>
-                                                                            handleStatusChange(member.id, "alpa")
-                                                                        }
-                                                                        className="h-4 w-4 text-red-600"
-                                                                    />
-                                                                    <Label
-                                                                        htmlFor={`alpa-${member.id}`}
-                                                                        className="flex items-center gap-1.5 cursor-pointer text-sm font-medium"
-                                                                    >
-                                                                        <XCircle className="h-4 w-4 text-red-500" />
-                                                                        Alpa
-                                                                    </Label>
-                                                                </div>
+                                                            <div className="flex items-center gap-1">
+                                                                <Button
+                                                                    variant={status === "hadir" ? "default" : "outline"}
+                                                                    size="sm"
+                                                                    onClick={() => handleStatusChange(member.id, "hadir")}
+                                                                    className={cn(
+                                                                        "h-8 px-2 text-xs",
+                                                                        status === "hadir"
+                                                                            ? "bg-green-600 hover:bg-green-700 text-white"
+                                                                            : "text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
+                                                                    )}
+                                                                >
+                                                                    <CheckCircle className="mr-1 h-3 w-3" />
+                                                                    Hadir
+                                                                </Button>
+                                                                <Button
+                                                                    variant={status === "sakit" ? "default" : "outline"}
+                                                                    size="sm"
+                                                                    onClick={() => handleStatusChange(member.id, "sakit")}
+                                                                    className={cn(
+                                                                        "h-8 px-2 text-xs",
+                                                                        status === "sakit"
+                                                                            ? "bg-yellow-600 hover:bg-yellow-700 text-white"
+                                                                            : "text-yellow-600 border-yellow-200 hover:bg-yellow-50 hover:text-yellow-700"
+                                                                    )}
+                                                                >
+                                                                    <AlertCircle className="mr-1 h-3 w-3" />
+                                                                    Sakit
+                                                                </Button>
+                                                                <Button
+                                                                    variant={status === "izin" ? "default" : "outline"}
+                                                                    size="sm"
+                                                                    onClick={() => handleStatusChange(member.id, "izin")}
+                                                                    className={cn(
+                                                                        "h-8 px-2 text-xs",
+                                                                        status === "izin"
+                                                                            ? "bg-blue-600 hover:bg-blue-700 text-white"
+                                                                            : "text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                                                    )}
+                                                                >
+                                                                    <Clock className="mr-1 h-3 w-3" />
+                                                                    Izin
+                                                                </Button>
+                                                                <Button
+                                                                    variant={status === "alpa" ? "default" : "outline"}
+                                                                    size="sm"
+                                                                    onClick={() => handleStatusChange(member.id, "alpa")}
+                                                                    className={cn(
+                                                                        "h-8 px-2 text-xs",
+                                                                        status === "alpa"
+                                                                            ? "bg-red-600 hover:bg-red-700 text-white"
+                                                                            : "text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                                                                    )}
+                                                                >
+                                                                    <XCircle className="mr-1 h-3 w-3" />
+                                                                    Alpa
+                                                                </Button>
                                                             </div>
                                                         </td>
                                                         <td className="p-4 text-center">
@@ -913,9 +911,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                                                     {status.charAt(0).toUpperCase() + status.slice(1)}
                                                                 </Badge>
                                                             ) : (
-                                                                <Badge className="bg-slate-100 text-slate-500 border-slate-300">
-                                                                    Belum Diisi
-                                                                </Badge>
+                                                                <span className="text-muted-foreground text-sm italic">Belum diisi</span>
                                                             )}
                                                         </td>
                                                     </tr>
