@@ -7,8 +7,6 @@ import {
     LayoutDashboard,
     Users,
     CheckCircle,
-    Calendar,
-    Megaphone,
     User,
 } from "lucide-react";
 
@@ -30,16 +28,6 @@ export const AdvisorSidebar: React.FC = () => {
             title: "Presensi Kegiatan",
             href: "/extracurricular-advisor/attendance",
             icon: CheckCircle,
-        },
-        {
-            title: "Jadwal Kegiatan",
-            href: "/extracurricular-advisor/schedule",
-            icon: Calendar,
-        },
-        {
-            title: "Pengumuman",
-            href: "/extracurricular-advisor/announcements",
-            icon: Megaphone,
         },
         {
             title: "Profil",

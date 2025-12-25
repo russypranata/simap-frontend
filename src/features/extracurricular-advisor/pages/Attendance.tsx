@@ -124,11 +124,51 @@ const mockAttendanceHistory = [
     },
     {
         id: 3,
-        date: "2025-12-01",
+        date: "2025-12-06",
         activity: "Persiapan Lomba",
         present: 38,
         total: 45,
         percentage: 84,
+    },
+    {
+        id: 4,
+        date: "2025-11-29",
+        activity: "Latihan Rutin",
+        present: 43,
+        total: 45,
+        percentage: 96,
+    },
+    {
+        id: 5,
+        date: "2025-11-22",
+        activity: "Latihan Rutin",
+        present: 41,
+        total: 45,
+        percentage: 91,
+    },
+    {
+        id: 6,
+        date: "2025-11-15",
+        activity: "Outbound",
+        present: 44,
+        total: 45,
+        percentage: 98,
+    },
+    {
+        id: 7,
+        date: "2025-11-08",
+        activity: "Latihan Rutin",
+        present: 39,
+        total: 45,
+        percentage: 87,
+    },
+    {
+        id: 8,
+        date: "2025-11-01",
+        activity: "Kemah",
+        present: 45,
+        total: 45,
+        percentage: 100,
     },
 ];
 
@@ -146,7 +186,7 @@ const mockAdvisorAttendanceHistory = [
         date: "2025-12-13",
         tutorName: "Ahmad Fauzi, S.Pd",
         startTime: "14:00",
-        endTime: "16:00",
+        endTime: "16:30",
         status: "hadir",
     },
     {
@@ -155,6 +195,46 @@ const mockAdvisorAttendanceHistory = [
         tutorName: "Ahmad Fauzi, S.Pd",
         startTime: "14:00",
         endTime: "16:00",
+        status: "hadir",
+    },
+    {
+        id: 4,
+        date: "2025-11-29",
+        tutorName: "Ahmad Fauzi, S.Pd",
+        startTime: "14:00",
+        endTime: "15:30",
+        status: "hadir",
+    },
+    {
+        id: 5,
+        date: "2025-11-22",
+        tutorName: "Ahmad Fauzi, S.Pd",
+        startTime: "14:00",
+        endTime: "16:00",
+        status: "hadir",
+    },
+    {
+        id: 6,
+        date: "2025-11-15",
+        tutorName: "Ahmad Fauzi, S.Pd",
+        startTime: "08:00",
+        endTime: "17:00",
+        status: "hadir",
+    },
+    {
+        id: 7,
+        date: "2025-11-08",
+        tutorName: "Ahmad Fauzi, S.Pd",
+        startTime: "14:00",
+        endTime: "16:00",
+        status: "hadir",
+    },
+    {
+        id: 8,
+        date: "2025-11-01",
+        tutorName: "Ahmad Fauzi, S.Pd",
+        startTime: "07:00",
+        endTime: "18:00",
         status: "hadir",
     },
 ];
@@ -331,6 +411,57 @@ export const ExtracurricularAttendance: React.FC = () => {
 
     const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
 
+    // Filter history based on search term and date range
+    const filteredStudentHistory = React.useMemo(() => {
+        return mockAttendanceHistory.filter((record) => {
+            // Filter by search term (activity name)
+            const matchesSearch = historySearchTerm === "" ||
+                record.activity.toLowerCase().includes(historySearchTerm.toLowerCase());
+
+            // Filter by date range
+            let matchesDateRange = true;
+            if (historyDateRange.from && historyDateRange.to) {
+                const recordDate = new Date(record.date);
+                const fromDate = new Date(historyDateRange.from);
+                const toDate = new Date(historyDateRange.to);
+                matchesDateRange = recordDate >= fromDate && recordDate <= toDate;
+            } else if (historyDateRange.from) {
+                const recordDate = new Date(record.date);
+                const fromDate = new Date(historyDateRange.from);
+                matchesDateRange = recordDate >= fromDate;
+            } else if (historyDateRange.to) {
+                const recordDate = new Date(record.date);
+                const toDate = new Date(historyDateRange.to);
+                matchesDateRange = recordDate <= toDate;
+            }
+
+            return matchesSearch && matchesDateRange;
+        });
+    }, [historySearchTerm, historyDateRange]);
+
+    const filteredAdvisorHistory = React.useMemo(() => {
+        return mockAdvisorAttendanceHistory.filter((record) => {
+            // Filter by date range
+            let matchesDateRange = true;
+            if (historyDateRange.from && historyDateRange.to) {
+                const recordDate = new Date(record.date);
+                const fromDate = new Date(historyDateRange.from);
+                const toDate = new Date(historyDateRange.to);
+                matchesDateRange = recordDate >= fromDate && recordDate <= toDate;
+            } else if (historyDateRange.from) {
+                const recordDate = new Date(record.date);
+                const fromDate = new Date(historyDateRange.from);
+                matchesDateRange = recordDate >= fromDate;
+            } else if (historyDateRange.to) {
+                const recordDate = new Date(record.date);
+                const toDate = new Date(historyDateRange.to);
+                matchesDateRange = recordDate <= toDate;
+            }
+
+            return matchesDateRange;
+        });
+    }, [historyDateRange]);
+
     const presentCount = Array.from(attendanceRecords.values()).filter(
         (r) => r.status === "hadir"
     ).length;
@@ -382,97 +513,6 @@ export const ExtracurricularAttendance: React.FC = () => {
                         <span>Refresh</span>
                     </Button>
                 </div>
-            </div>
-
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Total Anggota
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-2xl font-bold">{mockMembers.length}</p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Anggota aktif
-                                </p>
-                            </div>
-                            <div className="p-3 bg-blue-100 rounded-full">
-                                <Users className="h-6 w-6 text-blue-600" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Kehadiran Pertemuan Lalu
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-2xl font-bold text-green-600">
-                                    {mockAttendanceHistory[0].present}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {formatDate(mockAttendanceHistory[0].date)}
-                                </p>
-                            </div>
-                            <div className="p-3 bg-green-100 rounded-full">
-                                <CheckCircle className="h-6 w-6 text-green-600" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Rata-rata Kehadiran
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-2xl font-bold text-primary">
-                                    {mockAttendanceHistory[0].percentage}%
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Semester ini
-                                </p>
-                            </div>
-                            <div className="p-3 bg-purple-100 rounded-full">
-                                <Clock className="h-6 w-6 text-purple-600" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Pertemuan Bulan Ini
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-2xl font-bold">12</p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Total pertemuan
-                                </p>
-                            </div>
-                            <div className="p-3 bg-yellow-100 rounded-full">
-                                <Calendar className="h-6 w-6 text-yellow-600" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
 
             {/* Tabs */}
@@ -545,6 +585,61 @@ export const ExtracurricularAttendance: React.FC = () => {
                 </TabsList>
 
                 <TabsContent value="attendance" className="space-y-6">
+                    {/* Statistics Cards */}
+                    <Card>
+                        <CardContent className="p-0">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x">
+                                {/* Total Anggota */}
+                                <div className="p-4 text-center">
+                                    <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
+                                        <Users className="h-5 w-5 text-blue-600" />
+                                    </div>
+                                    <p className="text-2xl font-bold text-gray-900">{mockMembers.length}</p>
+                                    <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Anggota</p>
+                                </div>
+
+                                {/* Hadir Pertemuan Lalu */}
+                                <div className="p-4 text-center">
+                                    <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
+                                        <CheckCircle className="h-5 w-5 text-green-600" />
+                                    </div>
+                                    <p className="text-2xl font-bold text-green-600">{mockAttendanceHistory[0].present}</p>
+                                    <p className="text-xs font-medium text-muted-foreground mt-0.5">Hadir Terakhir</p>
+                                </div>
+
+                                {/* Rata-rata Kehadiran */}
+                                <div className="p-4 text-center">
+                                    <div className={cn(
+                                        "inline-flex p-2.5 rounded-full mb-2",
+                                        mockAttendanceHistory[0].percentage >= 90 ? "bg-green-100" :
+                                            mockAttendanceHistory[0].percentage >= 75 ? "bg-yellow-100" : "bg-red-100"
+                                    )}>
+                                        <CheckCircle className={cn(
+                                            "h-5 w-5",
+                                            mockAttendanceHistory[0].percentage >= 90 ? "text-green-600" :
+                                                mockAttendanceHistory[0].percentage >= 75 ? "text-yellow-600" : "text-red-600"
+                                        )} />
+                                    </div>
+                                    <p className={cn(
+                                        "text-2xl font-bold",
+                                        mockAttendanceHistory[0].percentage >= 90 ? "text-green-600" :
+                                            mockAttendanceHistory[0].percentage >= 75 ? "text-yellow-600" : "text-red-600"
+                                    )}>{mockAttendanceHistory[0].percentage}%</p>
+                                    <p className="text-xs font-medium text-muted-foreground mt-0.5">Kehadiran</p>
+                                </div>
+
+                                {/* Pertemuan Bulan Ini */}
+                                <div className="p-4 text-center">
+                                    <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
+                                        <Calendar className="h-5 w-5 text-purple-600" />
+                                    </div>
+                                    <p className="text-2xl font-bold text-purple-600">12</p>
+                                    <p className="text-xs font-medium text-muted-foreground mt-0.5">Pertemuan</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
                     {/* Filter Section */}
                     <Card>
                         <CardHeader>
@@ -818,7 +913,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                                                     {status.charAt(0).toUpperCase() + status.slice(1)}
                                                                 </Badge>
                                                             ) : (
-                                                                <Badge className="bg-slate-100 text-slate-600 border-slate-200">
+                                                                <Badge className="bg-slate-100 text-slate-500 border-slate-300">
                                                                     Belum Diisi
                                                                 </Badge>
                                                             )}
@@ -1072,7 +1167,7 @@ export const ExtracurricularAttendance: React.FC = () => {
 
                     {/* Info Card */}
                     <Card className="bg-blue-50 border-blue-200">
-                        <CardContent className="p-4">
+                        <CardContent className="pt-2 pb-2 px-4">
                             <div className="flex items-start gap-3">
                                 <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                                 <div className="space-y-1">
@@ -1105,9 +1200,18 @@ export const ExtracurricularAttendance: React.FC = () => {
                                     </CardDescription>
                                 </div>
                                 <div className="ml-auto">
-                                    <Button variant="outline" size="sm" className="gap-2">
-                                        <FileDown className="h-4 w-4" />
-                                        Export CSV
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-2"
+                                        onClick={() => {
+                                            setHistoryDateRange({ from: "", to: "" });
+                                            setHistorySearchTerm("");
+                                            setActiveDateFilter(null);
+                                        }}
+                                    >
+                                        <RefreshCw className="h-4 w-4" />
+                                        Reset Filter
                                     </Button>
                                 </div>
                             </div>
@@ -1146,19 +1250,21 @@ export const ExtracurricularAttendance: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-medium">Cari</Label>
-                                        <div className="relative">
-                                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            <input
-                                                type="text"
-                                                placeholder={historyType === "students" ? "Cari kegiatan..." : "Cari tutor..."}
-                                                value={historySearchTerm}
-                                                onChange={(e) => setHistorySearchTerm(e.target.value)}
-                                                className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                                            />
+                                    {historyType === "students" && (
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-medium">Cari</Label>
+                                            <div className="relative">
+                                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Cari kegiatan..."
+                                                    value={historySearchTerm}
+                                                    onChange={(e) => setHistorySearchTerm(e.target.value)}
+                                                    className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
 
                                 {/* Row 2: Date Filters */}
@@ -1249,22 +1355,47 @@ export const ExtracurricularAttendance: React.FC = () => {
                                 </div>
 
                                 {/* Summary Badge */}
-                                <div className="flex flex-wrap items-center gap-2 text-sm bg-muted/50 p-2 rounded-lg border">
-                                    <span className="font-medium text-muted-foreground mr-1">
-                                        Total: {historyType === "students" ? mockAttendanceHistory.length : mockAdvisorAttendanceHistory.length}
-                                    </span>
-                                </div>
+                                <Badge variant="outline" className="gap-2 px-3 py-1.5 text-sm font-medium">
+                                    <History className="h-4 w-4" />
+                                    {historyType === "students" ? filteredStudentHistory.length : filteredAdvisorHistory.length} Riwayat
+                                </Badge>
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
-                                <ArrowDownUp className="h-4 w-4" />
-                                <span>Data yang tertampil diurutkan dari yang terbaru</span>
-                            </div>
-
                             <div className="space-y-3">
-                                {historyType === "students" ? (
-                                    mockAttendanceHistory.map((record) => (
+                                {/* Empty State */}
+                                {((historyType === "students" && filteredStudentHistory.length === 0) ||
+                                    (historyType === "advisor" && filteredAdvisorHistory.length === 0)) ? (
+                                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                                        <div className="p-4 rounded-full bg-muted mb-4">
+                                            <Calendar className="h-8 w-8 text-muted-foreground" />
+                                        </div>
+                                        <h3 className="text-lg font-medium text-gray-900 mb-1">
+                                            Tidak ada riwayat ditemukan
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground max-w-sm">
+                                            {historyDateRange.from || historyDateRange.to
+                                                ? "Tidak ada data riwayat pada rentang tanggal yang dipilih. Coba ubah filter tanggal."
+                                                : historySearchTerm
+                                                    ? `Tidak ada kegiatan dengan nama "${historySearchTerm}". Coba kata kunci lain.`
+                                                    : "Belum ada riwayat presensi yang tersimpan."}
+                                        </p>
+                                        {(historyDateRange.from || historyDateRange.to || historySearchTerm) && (
+                                            <Button
+                                                size="sm"
+                                                className="mt-4 bg-blue-800 hover:bg-blue-900 text-white"
+                                                onClick={() => {
+                                                    setHistoryDateRange({ from: "", to: "" });
+                                                    setHistorySearchTerm("");
+                                                    setActiveDateFilter(null);
+                                                }}
+                                            >
+                                                Reset Filter
+                                            </Button>
+                                        )}
+                                    </div>
+                                ) : historyType === "students" ? (
+                                    filteredStudentHistory.map((record) => (
                                         <div key={record.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-4">
                                             <div className="flex items-start md:items-center space-x-4">
                                                 <div className="p-2 rounded-full bg-blue-100 text-blue-600 mt-1 md:mt-0">
@@ -1308,7 +1439,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    mockAdvisorAttendanceHistory.map((record) => {
+                                    filteredAdvisorHistory.map((record) => {
                                         // Calculate duration
                                         const start = new Date(`2000-01-01 ${record.startTime}`);
                                         const end = new Date(`2000-01-01 ${record.endTime}`);
@@ -1341,15 +1472,6 @@ export const ExtracurricularAttendance: React.FC = () => {
                                                             Hadir
                                                         </Badge>
                                                     </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <Button
-                                                            size="sm"
-                                                            title="Edit"
-                                                            className="bg-blue-500 hover:bg-blue-600 text-white border-0"
-                                                        >
-                                                            <Edit className="h-4 w-4" />
-                                                        </Button>
-                                                    </div>
                                                 </div>
                                             </div>
                                         );
@@ -1361,7 +1483,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                             <div className="flex items-center justify-between pt-4 border-t mt-4">
                                 <div className="flex items-center gap-4">
                                     <div className="text-sm text-muted-foreground">
-                                        Menampilkan 1 sampai {historyType === "students" ? mockAttendanceHistory.length : mockAdvisorAttendanceHistory.length} dari {historyType === "students" ? mockAttendanceHistory.length : mockAdvisorAttendanceHistory.length} data
+                                        Menampilkan 1 sampai {historyType === "students" ? filteredStudentHistory.length : filteredAdvisorHistory.length} dari {historyType === "students" ? filteredStudentHistory.length : filteredAdvisorHistory.length} data
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm text-muted-foreground">Baris:</span>
