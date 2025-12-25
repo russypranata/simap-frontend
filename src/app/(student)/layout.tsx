@@ -10,11 +10,14 @@ export default function StudentRouteLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { role, isAuthenticated } = useRole();
+  const { role, isAuthenticated, isLoading } = useRole();
   const router = useRouter();
 
   // Role-based auth guard
   useEffect(() => {
+    // Wait for loading to complete before checking auth
+    if (isLoading) return;
+
     if (!isAuthenticated) {
       router.push('/');
     } else if (role !== 'siswa') {
@@ -32,14 +35,17 @@ export default function StudentRouteLayout({
         case 'pembina_ekskul':
           router.push('/extracurricular-advisor/dashboard');
           break;
+        case 'pj_mutamayizin':
+          router.push('/mutamayizin-coordinator/dashboard');
+          break;
         default:
           router.push('/');
       }
     }
-  }, [isAuthenticated, role, router]);
+  }, [isAuthenticated, role, router, isLoading]);
 
-  // Show nothing while redirecting
-  if (!isAuthenticated || role !== 'siswa') {
+  // Show nothing while initializing or redirecting
+  if (isLoading || !isAuthenticated || role !== 'siswa') {
     return null;
   }
 

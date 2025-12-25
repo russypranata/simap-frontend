@@ -10,11 +10,14 @@ export default function TeacherRouteLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { role, isAuthenticated } = useRole();
+  const { role, isAuthenticated, isLoading } = useRole();
   const router = useRouter();
 
   // Role-based auth guard
   useEffect(() => {
+    // Wait for loading to complete before checking auth
+    if (isLoading) return;
+
     if (!isAuthenticated) {
       // Redirect to home if not authenticated
       router.push('/');
@@ -33,14 +36,17 @@ export default function TeacherRouteLayout({
         case 'pembina_ekskul':
           router.push('/extracurricular-advisor/dashboard');
           break;
+        case 'pj_mutamayizin':
+          router.push('/mutamayizin-coordinator/dashboard');
+          break;
         default:
           router.push('/');
       }
     }
-  }, [isAuthenticated, role, router]);
+  }, [isAuthenticated, role, router, isLoading]);
 
-  // Show nothing while redirecting
-  if (!isAuthenticated || role !== 'guru') {
+  // Show nothing while initializing or redirecting
+  if (isLoading || !isAuthenticated || role !== 'guru') {
     return null;
   }
 

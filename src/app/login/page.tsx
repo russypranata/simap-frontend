@@ -71,6 +71,9 @@ export default function LoginPage() {
             case 'pembina_ekskul':
                 router.push('/extracurricular-advisor/dashboard');
                 break;
+            case 'pj_mutamayizin':
+                router.push('/mutamayizin-coordinator/dashboard');
+                break;
             default:
                 router.push('/teacher/dashboard');
         }
@@ -112,6 +115,10 @@ export default function LoginPage() {
             } else if (loginData.username === 'pembina' && loginData.password === '123') {
                 login('pembina_ekskul');
                 handleLoginNavigation('pembina_ekskul');
+                return;
+            } else if (loginData.username === 'mutamayizin' && loginData.password === '123') {
+                login('pj_mutamayizin');
+                handleLoginNavigation('pj_mutamayizin');
                 return;
             }
 

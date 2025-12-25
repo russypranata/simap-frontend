@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AdvisorLayout } from '@/features/extracurricular-advisor/components/AdvisorLayout';
+import { MutamayizinLayout } from '@/features/mutamayizin/components/MutamayizinLayout';
 import { useRole } from '@/app/context/RoleContext';
 
-export default function ExtracurricularAdvisorRouteLayout({
+export default function MutamayizinCoordinatorRouteLayout({
     children,
 }: {
     children: React.ReactNode;
@@ -19,9 +19,8 @@ export default function ExtracurricularAdvisorRouteLayout({
         if (isLoading) return;
 
         if (!isAuthenticated) {
-            // Redirect to home if not authenticated
             router.push('/');
-        } else if (role !== 'pembina_ekskul') {
+        } else if (role !== 'pj_mutamayizin') {
             // Redirect to appropriate dashboard based on role
             switch (role) {
                 case 'guru':
@@ -36,8 +35,8 @@ export default function ExtracurricularAdvisorRouteLayout({
                 case 'orang_tua':
                     router.push('/parent/dashboard');
                     break;
-                case 'pj_mutamayizin':
-                    router.push('/mutamayizin-coordinator/dashboard');
+                case 'pembina_ekskul':
+                    router.push('/extracurricular-advisor/dashboard');
                     break;
                 default:
                     router.push('/');
@@ -45,10 +44,10 @@ export default function ExtracurricularAdvisorRouteLayout({
         }
     }, [isAuthenticated, role, router, isLoading]);
 
-    // Show nothing while initializing or redirecting
-    if (isLoading || !isAuthenticated || role !== 'pembina_ekskul') {
+    // Show loading or nothing while initializing
+    if (isLoading || !isAuthenticated || role !== 'pj_mutamayizin') {
         return null;
     }
 
-    return <AdvisorLayout>{children}</AdvisorLayout>;
+    return <MutamayizinLayout>{children}</MutamayizinLayout>;
 }

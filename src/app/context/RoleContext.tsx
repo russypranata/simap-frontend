@@ -2,12 +2,13 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type UserRole = 'guru' | 'siswa' | 'admin' | 'orang_tua' | 'pembina_ekskul' | null;
+export type UserRole = 'guru' | 'siswa' | 'admin' | 'orang_tua' | 'pembina_ekskul' | 'pj_mutamayizin' | null;
 
 interface RoleContextType {
   role: UserRole;
   setRole: (role: UserRole) => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (role: UserRole) => void;
   logout: () => void;
   isHomeroomTeacher: boolean;
@@ -31,9 +32,10 @@ interface RoleProviderProps {
 }
 
 export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
-  const [role, setRoleState] = useState<UserRole>('guru'); // Default to 'guru' for development
-  const [isHomeroomTeacher, setIsHomeroomTeacher] = useState(true);
+  const [role, setRoleState] = useState<UserRole>(null);
+  const [isHomeroomTeacher, setIsHomeroomTeacher] = useState(false);
   const [isPiketTeacher, setIsPiketTeacher] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Initialize role from localStorage on mount
   useEffect(() => {
@@ -57,6 +59,8 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
           setIsPiketTeacher(savedPiket === 'true');
         }
       }
+      // Set loading to false after localStorage is read
+      setIsLoading(false);
     }
   }, []);
 
@@ -112,6 +116,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
         role,
         setRole,
         isAuthenticated,
+        isLoading,
         login,
         logout,
         isHomeroomTeacher,
