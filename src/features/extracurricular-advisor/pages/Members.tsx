@@ -104,7 +104,7 @@ export const ExtracurricularMembers: React.FC = () => {
 
     // Form state for adding members
     const [formData, setFormData] = useState({
-        academicYear: "2024/2025",
+        academicYear: "2025/2026",
         semester: "Ganjil",
         startDate: formatDate(new Date(), "yyyy-MM-dd"),
         notes: "",
@@ -171,7 +171,7 @@ export const ExtracurricularMembers: React.FC = () => {
         setSelectedStudents([]);
         setIsAddDialogOpen(false);
         setFormData({
-            academicYear: "2024/2025",
+            academicYear: "2025/2026",
             semester: "Ganjil",
             startDate: formatDate(new Date(), "yyyy-MM-dd"),
             notes: "",
@@ -218,7 +218,7 @@ export const ExtracurricularMembers: React.FC = () => {
                     <div className="flex items-center gap-3 mt-4">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                             <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Tahun Ajaran 2024/2025</span>
+                            <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
                         </div>
                         <div className="h-4 w-[1px] bg-border" />
                         <span className="text-sm font-medium text-blue-800">
@@ -257,7 +257,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="2024/2025">2024/2025</SelectItem>
+                                                <SelectItem value="2025/2026">2025/2026</SelectItem>
                                                 <SelectItem value="2023/2024">2023/2024</SelectItem>
                                             </SelectContent>
                                         </Select>

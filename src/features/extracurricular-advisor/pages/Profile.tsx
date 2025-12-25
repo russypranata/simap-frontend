@@ -22,19 +22,19 @@ import {
 
 // Mock data untuk Extracurricular Advisor
 const mockProfileData = {
-    name: "Budi Santoso, S.Pd",
-    email: "budi.santoso@alfityan.sch.id",
+    name: "Ahmad Fauzi, S.Pd",
+    email: "ahmad.fauzi@alfityan.sch.id",
     phone: "+62 812-3456-7890",
     role: "Pembina Ekstrakurikuler",
     profilePicture: "",
     address: "Jl. Pendidikan No. 123, Gowa, Sulawesi Selatan",
     joinDate: "15 Juli 2020",
     nip: "198505152010011001",
-    extracurricular: "Paskibra",
+    extracurricular: "Pramuka",
     totalMembers: 45,
     activeMembers: 42,
-    achievements: 12,
-    attendanceRate: 92,
+    totalMeetings: 12,
+    avgStudentAttendance: 91,
 };
 
 export const ExtracurricularAdvisorProfile: React.FC = () => {
@@ -56,21 +56,27 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                        Profil <span className="text-primary">Saya</span>
-                    </h1>
-                    <p className="text-muted-foreground">
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Profil </span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Saya</span>
+                        </h1>
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                            <User className="h-5 w-5" />
+                        </div>
+                    </div>
+                    <p className="text-muted-foreground mt-1">
                         Kelola informasi profil dan pengaturan akun Anda
                     </p>
                     <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                             <Calendar className="h-4 w-4" />
                             <span className="text-sm font-semibold">
                                 Tahun Ajaran 2025/2026
                             </span>
                         </div>
                         <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-muted-foreground text-sm font-medium text-primary">
+                        <span className="text-sm font-medium text-blue-800">
                             Semester Ganjil
                         </span>
                     </div>
@@ -224,12 +230,12 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
 
                         <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
                             <div className="p-2 rounded-full bg-yellow-100">
-                                <Award className="h-5 w-5 text-yellow-600" />
+                                <Calendar className="h-5 w-5 text-yellow-600" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">Prestasi</p>
+                                <p className="text-xs text-muted-foreground">Total Pertemuan</p>
                                 <p className="text-lg font-semibold">
-                                    {mockProfileData.achievements}
+                                    {mockProfileData.totalMeetings}
                                 </p>
                             </div>
                         </div>
@@ -239,9 +245,9 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 <Star className="h-5 w-5 text-purple-600" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">Tingkat Kehadiran</p>
+                                <p className="text-xs text-muted-foreground">Kehadiran Siswa</p>
                                 <p className="text-lg font-semibold">
-                                    {mockProfileData.attendanceRate}%
+                                    {mockProfileData.avgStudentAttendance}%
                                 </p>
                             </div>
                         </div>
