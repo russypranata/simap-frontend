@@ -107,137 +107,126 @@ const mockMembers = [
     { id: 45, nis: "2022045", name: "Qonita Rahmawati", class: "X A" },
 ];
 
-const mockAttendanceHistory = [
+const unifiedAttendanceHistory = [
     {
         id: 1,
         date: "2025-12-20",
-        activity: "Latihan Rutin",
-        present: 42,
-        total: 45,
-        percentage: 93,
+        studentStats: {
+            present: 42,
+            total: 45,
+            percentage: 93,
+        },
+        advisorStats: {
+            tutorName: "Ahmad Fauzi, S.Pd",
+            startTime: "14:00",
+            endTime: "16:00",
+            status: "hadir",
+        }
     },
     {
         id: 2,
         date: "2025-12-13",
-        activity: "Lomba Internal",
-        present: 40,
-        total: 45,
-        percentage: 89,
+        studentStats: {
+            present: 40,
+            total: 45,
+            percentage: 89,
+        },
+        advisorStats: {
+            tutorName: "Ahmad Fauzi, S.Pd",
+            startTime: "14:00",
+            endTime: "16:30",
+            status: "hadir",
+        }
     },
     {
         id: 3,
         date: "2025-12-06",
-        activity: "Persiapan Lomba",
-        present: 38,
-        total: 45,
-        percentage: 84,
+        studentStats: {
+            present: 38,
+            total: 45,
+            percentage: 84,
+        },
+        advisorStats: {
+            tutorName: "Ahmad Fauzi, S.Pd",
+            startTime: "14:00",
+            endTime: "16:00",
+            status: "hadir",
+        }
     },
     {
         id: 4,
         date: "2025-11-29",
-        activity: "Latihan Rutin",
-        present: 43,
-        total: 45,
-        percentage: 96,
+        studentStats: {
+            present: 43,
+            total: 45,
+            percentage: 96,
+        },
+        advisorStats: {
+            tutorName: "Ahmad Fauzi, S.Pd",
+            startTime: "14:00",
+            endTime: "15:30",
+            status: "hadir",
+        }
     },
     {
         id: 5,
         date: "2025-11-22",
-        activity: "Latihan Rutin",
-        present: 41,
-        total: 45,
-        percentage: 91,
+        studentStats: {
+            present: 41,
+            total: 45,
+            percentage: 91,
+        },
+        advisorStats: {
+            tutorName: "Ahmad Fauzi, S.Pd",
+            startTime: "14:00",
+            endTime: "16:00",
+            status: "hadir",
+        }
     },
     {
         id: 6,
         date: "2025-11-15",
-        activity: "Outbound",
-        present: 44,
-        total: 45,
-        percentage: 98,
+        studentStats: {
+            present: 44,
+            total: 45,
+            percentage: 98,
+        },
+        advisorStats: {
+            tutorName: "Ahmad Fauzi, S.Pd",
+            startTime: "08:00",
+            endTime: "17:00",
+            status: "hadir",
+        }
     },
     {
         id: 7,
         date: "2025-11-08",
-        activity: "Latihan Rutin",
-        present: 39,
-        total: 45,
-        percentage: 87,
+        studentStats: {
+            present: 39,
+            total: 45,
+            percentage: 87,
+        },
+        advisorStats: {
+            tutorName: "Ahmad Fauzi, S.Pd",
+            startTime: "14:00",
+            endTime: "16:00",
+            status: "hadir",
+        }
     },
     {
         id: 8,
         date: "2025-11-01",
-        activity: "Kemah",
-        present: 45,
-        total: 45,
-        percentage: 100,
-    },
-];
-
-const mockAdvisorAttendanceHistory = [
-    {
-        id: 1,
-        date: "2025-12-20",
-        tutorName: "Ahmad Fauzi, S.Pd",
-        startTime: "14:00",
-        endTime: "16:00",
-        status: "hadir",
-    },
-    {
-        id: 2,
-        date: "2025-12-13",
-        tutorName: "Ahmad Fauzi, S.Pd",
-        startTime: "14:00",
-        endTime: "16:30",
-        status: "hadir",
-    },
-    {
-        id: 3,
-        date: "2025-12-06",
-        tutorName: "Ahmad Fauzi, S.Pd",
-        startTime: "14:00",
-        endTime: "16:00",
-        status: "hadir",
-    },
-    {
-        id: 4,
-        date: "2025-11-29",
-        tutorName: "Ahmad Fauzi, S.Pd",
-        startTime: "14:00",
-        endTime: "15:30",
-        status: "hadir",
-    },
-    {
-        id: 5,
-        date: "2025-11-22",
-        tutorName: "Ahmad Fauzi, S.Pd",
-        startTime: "14:00",
-        endTime: "16:00",
-        status: "hadir",
-    },
-    {
-        id: 6,
-        date: "2025-11-15",
-        tutorName: "Ahmad Fauzi, S.Pd",
-        startTime: "08:00",
-        endTime: "17:00",
-        status: "hadir",
-    },
-    {
-        id: 7,
-        date: "2025-11-08",
-        tutorName: "Ahmad Fauzi, S.Pd",
-        startTime: "14:00",
-        endTime: "16:00",
-        status: "hadir",
-    },
-    {
-        id: 8,
-        date: "2025-11-01",
-        tutorName: "Ahmad Fauzi, S.Pd",
-        startTime: "07:00",
-        endTime: "18:00",
-        status: "hadir",
+        studentStats: {
+            present: 45,
+            total: 45,
+            percentage: 100,
+        },
+        advisorStats: {
+            tutorName: "Ahmad Fauzi, S.Pd",
+            startTime: "07:00",
+            endTime: "18:00",
+            status: "hadir",
+        }
     },
 ];
 
@@ -273,9 +262,8 @@ export const ExtracurricularAttendance: React.FC = () => {
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
 
-    // Active tab and history type state
+    // Active tab state
     const [activeTab, setActiveTab] = useState("attendance");
-    const [historyType, setHistoryType] = useState<"students" | "advisor">("students");
 
     // History Filter State
     const [historyAcademicYear, setHistoryAcademicYear] = useState("2025/2026");
@@ -317,13 +305,57 @@ export const ExtracurricularAttendance: React.FC = () => {
     };
 
     const handleSaveAttendance = () => {
+        // 1. Validate Date
+        if (!selectedDate) {
+            toast.error("Tanggal belum diisi", {
+                description: "Silakan pilih tanggal pelaksanaan kegiatan terlebih dahulu untuk melanjutkan.",
+                icon: <XCircle className="h-5 w-5 !text-red-600" />,
+                className: "!bg-red-50 !border-red-200 !text-red-800",
+            });
+            return;
+        }
+
+        // 2. Validate Tutor Time
+        if (!startTime || !endTime) {
+            toast.error("Waktu kegiatan tidak lengkap", {
+                description: "Mohon lengkapi jam mulai dan jam selesai kegiatan.",
+                icon: <XCircle className="h-5 w-5 !text-red-600" />,
+                className: "!bg-red-50 !border-red-200 !text-red-800",
+            });
+            return;
+        }
+
+        // 3. Validate Student Attendance (Must fill ALL)
+        const totalMembers = mockMembers.length;
+        const filledRecords = attendanceRecords.size;
+
+        if (filledRecords < totalMembers) {
+            const missingCount = totalMembers - filledRecords;
+            toast.error("Data presensi belum lengkap", {
+                description: `Masih ada ${missingCount} siswa yang belum ditandai statusnya. Mohon lengkapi semua data siswa.`,
+                icon: <XCircle className="h-5 w-5 !text-red-600" />,
+                className: "!bg-red-50 !border-red-200 !text-red-800",
+            });
+            return;
+        }
+
         const presentCount = Array.from(attendanceRecords.values()).filter(
             (r) => r.status === "hadir"
         ).length;
 
-        toast.success(
-            `Presensi berhasil disimpan! ${presentCount} dari ${mockMembers.length} siswa hadir`
-        );
+        // Success Toast matching Teacher Role style (Standard Sonner)
+        // Using description to show details cleanly
+        toast.success("Presensi Berhasil Disimpan", {
+            description: `Tanggal: ${formatDate(selectedDate, "dd MMMM yyyy")} • Hadir: ${presentCount}/${totalMembers} • Waktu: ${startTime}-${endTime}`,
+            duration: 5000,
+            icon: <CheckCircle className="h-5 w-5 !text-green-600" />,
+            className: "!bg-green-50 !border-green-200 !text-green-800",
+        });
+
+        // Reset form
+        setAttendanceRecords(new Map());
+        setStartTime("");
+        setEndTime("");
     };
 
     const handleRefresh = () => {
@@ -341,22 +373,6 @@ export const ExtracurricularAttendance: React.FC = () => {
         }, 500);
     };
 
-    const handleSaveAdvisorAttendance = () => {
-
-        if (!startTime || !endTime) {
-            toast.error("Silakan isi waktu mulai dan selesai!");
-            return;
-        }
-
-        // Mengisi form otomatis berarti hadir
-        toast.success(
-            "Presensi pembina berhasil disimpan! Status: Hadir"
-        );
-
-        // Reset form (tutorName tetap karena readonly)
-        setStartTime("");
-        setEndTime("");
-    };
 
     const getStatusIcon = (status: AttendanceStatus) => {
         switch (status) {
@@ -365,7 +381,7 @@ export const ExtracurricularAttendance: React.FC = () => {
             case "sakit":
                 return <Heart className="h-5 w-5 text-yellow-600" />;
             case "izin":
-                return <AlertCircle className="h-5 w-5 text-blue-600" />;
+                return <Clock className="h-5 w-5 text-sky-600" />;
             case "alpa":
                 return <XCircle className="h-5 w-5 text-red-600" />;
         }
@@ -378,7 +394,7 @@ export const ExtracurricularAttendance: React.FC = () => {
             case "sakit":
                 return "bg-yellow-100 text-yellow-700 border-yellow-200";
             case "izin":
-                return "bg-blue-100 text-blue-700 border-blue-200";
+                return "bg-sky-100 text-sky-700 border-sky-200";
             case "alpa":
                 return "bg-red-100 text-red-700 border-red-200";
         }
@@ -413,36 +429,8 @@ export const ExtracurricularAttendance: React.FC = () => {
 
     const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
 
-    // Filter history based on search term and date range
-    const filteredStudentHistory = React.useMemo(() => {
-        return mockAttendanceHistory.filter((record) => {
-            // Filter by search term (activity name)
-            const matchesSearch = historySearchTerm === "" ||
-                record.activity.toLowerCase().includes(historySearchTerm.toLowerCase());
-
-            // Filter by date range
-            let matchesDateRange = true;
-            if (historyDateRange.from && historyDateRange.to) {
-                const recordDate = new Date(record.date);
-                const fromDate = new Date(historyDateRange.from);
-                const toDate = new Date(historyDateRange.to);
-                matchesDateRange = recordDate >= fromDate && recordDate <= toDate;
-            } else if (historyDateRange.from) {
-                const recordDate = new Date(record.date);
-                const fromDate = new Date(historyDateRange.from);
-                matchesDateRange = recordDate >= fromDate;
-            } else if (historyDateRange.to) {
-                const recordDate = new Date(record.date);
-                const toDate = new Date(historyDateRange.to);
-                matchesDateRange = recordDate <= toDate;
-            }
-
-            return matchesSearch && matchesDateRange;
-        });
-    }, [historySearchTerm, historyDateRange]);
-
-    const filteredAdvisorHistory = React.useMemo(() => {
-        return mockAdvisorAttendanceHistory.filter((record) => {
+    const filteredHistory = React.useMemo(() => {
+        return unifiedAttendanceHistory.filter((record) => {
             // Filter by date range
             let matchesDateRange = true;
             if (historyDateRange.from && historyDateRange.to) {
@@ -517,6 +505,84 @@ export const ExtracurricularAttendance: React.FC = () => {
                 </div>
             </div>
 
+            {/* Stats Cards - Global for all tabs */}
+            <Card className="overflow-hidden p-0">
+                {/* Header Section with Decorative Pattern */}
+                <div className="bg-blue-800 p-5 relative overflow-hidden">
+                    {/* Decorative Geometric Pattern */}
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
+                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                                <Award className="h-7 w-7 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-white">Statistik Kehadiran</h2>
+                                <p className="text-blue-100 text-sm">Ringkasan performa kehadiran semester ini</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <CardContent className="p-0">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x">
+                        {/* Total Anggota */}
+                        <div className="p-4 text-center">
+                            <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
+                                <Users className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <p className="text-2xl font-bold text-blue-600">{mockMembers.length}</p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Anggota</p>
+                        </div>
+
+                        {/* Hadir Pertemuan Lalu */}
+                        <div className="p-4 text-center">
+                            <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                            </div>
+                            <p className="text-2xl font-bold text-green-600">{unifiedAttendanceHistory[0].studentStats.present}</p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Hadir Terakhir</p>
+                        </div>
+
+                        {/* Rata-rata Kehadiran */}
+                        <div className="p-4 text-center">
+                            <div className={cn(
+                                "inline-flex p-2.5 rounded-full mb-2",
+                                unifiedAttendanceHistory[0].studentStats.percentage >= 90 ? "bg-green-100" :
+                                    unifiedAttendanceHistory[0].studentStats.percentage >= 75 ? "bg-yellow-100" : "bg-red-100"
+                            )}>
+                                <TrendingUp className={cn(
+                                    "h-5 w-5",
+                                    unifiedAttendanceHistory[0].studentStats.percentage >= 90 ? "text-green-600" :
+                                        unifiedAttendanceHistory[0].studentStats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
+                                )} />
+                            </div>
+                            <p className={cn(
+                                "text-2xl font-bold",
+                                unifiedAttendanceHistory[0].studentStats.percentage >= 90 ? "text-green-600" :
+                                    unifiedAttendanceHistory[0].studentStats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
+                            )}>
+                                {unifiedAttendanceHistory[0].studentStats.percentage}%
+                            </p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Rata-rata</p>
+                        </div>
+
+                        {/* Tanggal Pertemuan Terakhir */}
+                        <div className="p-4 text-center">
+                            <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
+                                <Calendar className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <p className="text-2xl font-bold text-purple-600">12</p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Pertemuan</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                 <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1.5 gap-1">
@@ -528,172 +594,199 @@ export const ExtracurricularAttendance: React.FC = () => {
                         Presensi Hari Ini
                     </TabsTrigger>
                     <TabsTrigger
-                        value="advisor"
+                        value="history"
                         className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=active]:hover:bg-blue-900 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
                     >
-                        <Users className="h-4 w-4 mr-2" />
-                        Presensi Pembina
+                        <History className="h-4 w-4 mr-2" />
+                        Riwayat Presensi
                     </TabsTrigger>
-                    {/* Dropdown for History Selection */}
-                    <Select
-                        value={activeTab === "history" ? historyType : ""}
-                        onValueChange={(value: "students" | "advisor") => {
-                            setHistoryType(value);
-                            setActiveTab("history");
-                        }}
-                    >
-                        <SelectTrigger className={`inline-flex items-center justify-center whitespace-nowrap rounded-full pl-6 pr-3 h-9 py-2 text-sm font-medium border-0 focus:ring-0 focus:ring-offset-0 w-auto transition-all outline-none shadow-none ${activeTab === "history"
-                            ? "bg-blue-800 text-white hover:bg-blue-900 [&_svg:not([class*='text-'])]:text-white [&_svg:not([class*='text-'])]:opacity-100"
-                            : "bg-transparent text-muted-foreground hover:text-foreground"
-                            }`}>
-                            <SelectValue placeholder={
-                                <div className="flex items-center gap-2">
-                                    <History className="h-4 w-4" />
-                                    <span>Riwayat Presensi</span>
-                                </div>
-                            }>
-                                {activeTab === "history" && (
-                                    <div className="flex items-center gap-2">
-                                        {historyType === "students" ? (
-                                            <>
-                                                <Users className="h-4 w-4 text-inherit" />
-                                                <span>Riwayat Presensi Siswa</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <CheckCircle className="h-4 w-4 text-inherit" />
-                                                <span>Riwayat Presensi Pembina</span>
-                                            </>
-                                        )}
-                                    </div>
-                                )}
-                            </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="students">
-                                <div className="flex items-center gap-2">
-                                    <Users className="h-4 w-4" />
-                                    <span>Riwayat Presensi Siswa</span>
-                                </div>
-                            </SelectItem>
-                            <SelectItem value="advisor">
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle className="h-4 w-4" />
-                                    <span>Riwayat Presensi Pembina</span>
-                                </div>
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
                 </TabsList>
 
+
                 <TabsContent value="attendance" className="space-y-6">
-                    <Card className="overflow-hidden p-0">
-                        {/* Header Section with Decorative Pattern */}
-                        <div className="bg-blue-800 p-5 relative overflow-hidden">
-                            {/* Decorative Geometric Pattern */}
-                            <div className="absolute inset-0 opacity-10">
-                                <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
-                                <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
-                            </div>
-
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                                        <Award className="h-7 w-7 text-white" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-xl font-bold text-white">Statistik Kehadiran</h2>
-                                        <p className="text-blue-100 text-sm">Ringkasan performa kehadiran semester ini</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <CardContent className="p-0">
-                            <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x">
-                                {/* Total Anggota */}
-                                <div className="p-4 text-center">
-                                    <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
-                                        <Users className="h-5 w-5 text-blue-600" />
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-900">{mockMembers.length}</p>
-                                    <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Anggota</p>
-                                </div>
-
-                                {/* Hadir Pertemuan Lalu */}
-                                <div className="p-4 text-center">
-                                    <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
-                                        <CheckCircle className="h-5 w-5 text-green-600" />
-                                    </div>
-                                    <p className="text-2xl font-bold text-green-600">{mockAttendanceHistory[0].present}</p>
-                                    <p className="text-xs font-medium text-muted-foreground mt-0.5">Hadir Terakhir</p>
-                                </div>
-
-                                {/* Rata-rata Kehadiran */}
-                                <div className="p-4 text-center">
-                                    <div className={cn(
-                                        "inline-flex p-2.5 rounded-full mb-2",
-                                        mockAttendanceHistory[0].percentage >= 90 ? "bg-green-100" :
-                                            mockAttendanceHistory[0].percentage >= 75 ? "bg-yellow-100" : "bg-red-100"
-                                    )}>
-                                        <TrendingUp className={cn(
-                                            "h-5 w-5",
-                                            mockAttendanceHistory[0].percentage >= 90 ? "text-green-600" :
-                                                mockAttendanceHistory[0].percentage >= 75 ? "text-yellow-600" : "text-red-600"
-                                        )} />
-                                    </div>
-                                    <p className={cn(
-                                        "text-2xl font-bold",
-                                        mockAttendanceHistory[0].percentage >= 90 ? "text-green-600" :
-                                            mockAttendanceHistory[0].percentage >= 75 ? "text-yellow-600" : "text-red-600"
-                                    )}>{mockAttendanceHistory[0].percentage}%</p>
-                                    <p className="text-xs font-medium text-muted-foreground mt-0.5">Kehadiran</p>
-                                </div>
-
-                                {/* Pertemuan Bulan Ini */}
-                                <div className="p-4 text-center">
-                                    <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
-                                        <Calendar className="h-5 w-5 text-purple-600" />
-                                    </div>
-                                    <p className="text-2xl font-bold text-purple-600">12</p>
-                                    <p className="text-xs font-medium text-muted-foreground mt-0.5">Pertemuan</p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Filter Section */}
+                    {/* Date Selector - Improved */}
+                    {/* Date Selector - Improved Consistency */}
                     <Card>
                         <CardHeader>
                             <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                                    <Filter className="h-5 w-5" />
+                                    <Calendar className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg font-semibold text-gray-900">
-                                        Filter Presensi
+                                    <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                        Tanggal Kegiatan
+                                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-normal">
+                                            Wajib Diisi
+                                        </Badge>
                                     </CardTitle>
                                     <CardDescription className="text-sm text-muted-foreground">
-                                        Pilih tanggal dan filter data presensi
+                                        Pilih tanggal kegiatan untuk memulai pencatatan presensi
                                     </CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex flex-col lg:flex-row gap-4">
-                                <div className="flex items-center space-x-2">
-                                    <Label htmlFor="date" className="text-sm whitespace-nowrap">
-                                        Tanggal:
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="attendance-date" className="text-sm font-medium">
+                                        Pilih Tanggal
                                     </Label>
                                     <Input
-                                        id="date"
+                                        id="attendance-date"
                                         type="date"
                                         value={selectedDate}
                                         onChange={(e) => setSelectedDate(e.target.value)}
-                                        className="w-40"
+                                        className="h-11"
                                     />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Tahun Ajaran & Semester</Label>
+                                    <div className="flex items-center gap-3 h-11 px-3 bg-muted/30 rounded-md border text-sm text-muted-foreground">
+                                        <span>Tahun Ajaran 2025/2026 - Ganjil</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
 
+                    {/* Pembina Info & Time Section */}
+                    {/* Pembina Info & Time Section - Improved Consistency */}
+                    <Card>
+                        <CardHeader>
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                    <Clock className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                        Presensi Pembina & Waktu
+                                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-normal">
+                                            Wajib Diisi
+                                        </Badge>
+                                    </CardTitle>
+                                    <CardDescription className="text-sm text-muted-foreground">
+                                        Konfirmasi kehadiran Anda sebagai pembina dan tentukan waktu pelaksanaan kegiatan
+                                    </CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Left: Tutor Info */}
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="tutor-name" className="text-sm font-semibold text-gray-900">
+                                            Nama Tutor/Pembina
+                                        </Label>
+                                        <Input
+                                            id="tutor-name"
+                                            value={tutorName}
+                                            readOnly
+                                            className="h-11 bg-muted/50"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="type-eskul" className="text-sm font-semibold text-gray-900">
+                                            Jenis Ekstrakurikuler
+                                        </Label>
+                                        <Input
+                                            id="type-eskul"
+                                            value="Pramuka"
+                                            readOnly
+                                            className="h-11 bg-muted/50"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Right: Time Fields */}
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="start-time" className="text-sm font-semibold text-gray-900">
+                                            Waktu Mulai <span className="text-red-500">*</span>
+                                        </Label>
+                                        <div className="relative">
+                                            <Clock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                                            <Input
+                                                id="start-time"
+                                                type="time"
+                                                value={startTime}
+                                                onChange={(e) => setStartTime(e.target.value)}
+                                                className="h-11 pl-10"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="end-time" className="text-sm font-semibold text-gray-900">
+                                            Waktu Selesai <span className="text-red-500">*</span>
+                                        </Label>
+                                        <div className="relative">
+                                            <Clock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                                            <Input
+                                                id="end-time"
+                                                type="time"
+                                                value={endTime}
+                                                onChange={(e) => setEndTime(e.target.value)}
+                                                className="h-11 pl-10"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+
+                    {/* Attendance Table */}
+                    <Card>
+                        <CardHeader>
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                        <Users className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg font-semibold text-gray-900">
+                                            Daftar Anggota ({filteredMembers.length})
+                                        </CardTitle>
+                                        <CardDescription className="text-sm text-muted-foreground">
+                                            Catat status kehadiran (Hadir, Sakit, Izin, Alpa) untuk setiap anggota
+                                        </CardDescription>
+                                    </div>
+                                </div>
+
+                                {/* Attendance Stats in Header */}
+                                <div className="flex items-center gap-3 bg-muted/30 px-3 py-2 rounded-lg border">
+                                    <div className="flex items-center gap-2">
+                                        <Users className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-sm font-medium text-foreground">
+                                            <span className="text-green-600 font-semibold">{presentCount}</span>
+                                            <span className="text-muted-foreground mx-1">/</span>
+                                            <span className="font-semibold">{mockMembers.length}</span>
+                                            <span className="text-muted-foreground ml-1">hadir</span>
+                                        </span>
+                                    </div>
+                                    <div className="h-4 w-[1px] bg-border" />
+                                    <Badge
+                                        variant="outline"
+                                        className={`font-semibold ${percentage >= 90
+                                            ? 'bg-green-50 text-green-700 border-green-200'
+                                            : percentage >= 75
+                                                ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                : 'bg-red-50 text-red-700 border-red-200'
+                                            }`}
+                                    >
+                                        {percentage}%
+                                    </Badge>
+                                </div>
+                            </div>
+                        </CardHeader>
+
+                        {/* Toolbar - Search & Filters */}
+                        <div className="px-6 py-4 border-b">
+                            <div className="flex flex-col lg:flex-row gap-4">
+                                {/* Search Input */}
                                 <div className="flex-1">
                                     <div className="relative">
                                         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -715,33 +808,23 @@ export const ExtracurricularAttendance: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center space-x-2">
-                                    <Label htmlFor="status-filter" className="text-sm whitespace-nowrap">
-                                        Status:
-                                    </Label>
-                                    <Select
-                                        value={statusFilter}
-                                        onValueChange={(value) =>
-                                            setStatusFilter(value as "all" | AttendanceStatus)
-                                        }
-                                    >
-                                        <SelectTrigger className="w-32">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">Semua</SelectItem>
-                                            <SelectItem value="hadir">Hadir</SelectItem>
-                                            <SelectItem value="sakit">Sakit</SelectItem>
-                                            <SelectItem value="izin">Izin</SelectItem>
-                                            <SelectItem value="alpa">Alpa</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                                {/* Status Filter */}
+                                <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                                    <SelectTrigger className="w-full lg:w-40">
+                                        <SelectValue placeholder="Semua Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Semua Status</SelectItem>
+                                        <SelectItem value="hadir">Hadir</SelectItem>
+                                        <SelectItem value="sakit">Sakit</SelectItem>
+                                        <SelectItem value="izin">Izin</SelectItem>
+                                        <SelectItem value="alpa">Alpa</SelectItem>
+                                    </SelectContent>
+                                </Select>
 
-                                <div className="flex items-center space-x-2">
-                                    <Label htmlFor="items-per-page" className="text-sm whitespace-nowrap">
-                                        Tampilkan:
-                                    </Label>
+                                {/* Items per page */}
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-muted-foreground whitespace-nowrap">Show:</span>
                                     <Select
                                         value={itemsPerPage.toString()}
                                         onValueChange={(value) => {
@@ -749,7 +832,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                             setCurrentPage(1);
                                         }}
                                     >
-                                        <SelectTrigger className="w-20">
+                                        <SelectTrigger className="w-24">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -758,38 +841,13 @@ export const ExtracurricularAttendance: React.FC = () => {
                                             <SelectItem value="25">25</SelectItem>
                                             <SelectItem value="50">50</SelectItem>
                                             <SelectItem value="100">100</SelectItem>
+                                            <SelectItem value={mockMembers.length.toString()}>Semua</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="flex items-center justify-between mt-4">
-                                <div className="text-sm text-muted-foreground">
-                                    Menampilkan {paginatedMembers.length} dari {filteredMembers.length}{" "}
-                                    anggota
-                                    {searchTerm && ` (hasil pencarian: "${searchTerm}")`}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Attendance Table */}
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                                    <Users className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg font-semibold text-gray-900">
-                                        Daftar Anggota
-                                    </CardTitle>
-                                    <CardDescription className="text-sm text-muted-foreground">
-                                        Tandai kehadiran untuk setiap anggota ekstrakurikuler
-                                    </CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
                         <CardContent className="p-0">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
@@ -848,59 +906,91 @@ export const ExtracurricularAttendance: React.FC = () => {
                                                         <td className="p-4">
                                                             <div className="flex items-center gap-1">
                                                                 <Button
-                                                                    variant={status === "hadir" ? "default" : "outline"}
+                                                                    variant="outline"
                                                                     size="sm"
                                                                     onClick={() => handleStatusChange(member.id, "hadir")}
                                                                     className={cn(
-                                                                        "h-8 px-2 text-xs",
+                                                                        "h-8 px-2 text-xs transition-all",
                                                                         status === "hadir"
-                                                                            ? "bg-green-600 hover:bg-green-700 text-white"
+                                                                            ? "bg-green-50 text-green-700 border-green-200 font-medium"
                                                                             : "text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
                                                                     )}
                                                                 >
-                                                                    <CheckCircle className="mr-1 h-3 w-3" />
+                                                                    <div className={cn(
+                                                                        "mr-1.5 flex items-center justify-center rounded-full transition-colors",
+                                                                        status === "hadir" ? "bg-green-600 p-0.5" : "bg-transparent"
+                                                                    )}>
+                                                                        <CheckCircle className={cn(
+                                                                            "h-3 w-3",
+                                                                            status === "hadir" ? "text-white" : "currentColor"
+                                                                        )} />
+                                                                    </div>
                                                                     Hadir
                                                                 </Button>
                                                                 <Button
-                                                                    variant={status === "sakit" ? "default" : "outline"}
+                                                                    variant="outline"
                                                                     size="sm"
                                                                     onClick={() => handleStatusChange(member.id, "sakit")}
                                                                     className={cn(
-                                                                        "h-8 px-2 text-xs",
+                                                                        "h-8 px-2 text-xs transition-all",
                                                                         status === "sakit"
-                                                                            ? "bg-yellow-600 hover:bg-yellow-700 text-white"
+                                                                            ? "bg-yellow-50 text-yellow-700 border-yellow-200 font-medium"
                                                                             : "text-yellow-600 border-yellow-200 hover:bg-yellow-50 hover:text-yellow-700"
                                                                     )}
                                                                 >
-                                                                    <AlertCircle className="mr-1 h-3 w-3" />
+                                                                    <div className={cn(
+                                                                        "mr-1.5 flex items-center justify-center rounded-full transition-colors",
+                                                                        status === "sakit" ? "bg-yellow-600 p-0.5" : "bg-transparent"
+                                                                    )}>
+                                                                        <AlertCircle className={cn(
+                                                                            "h-3 w-3",
+                                                                            status === "sakit" ? "text-white" : "currentColor"
+                                                                        )} />
+                                                                    </div>
                                                                     Sakit
                                                                 </Button>
                                                                 <Button
-                                                                    variant={status === "izin" ? "default" : "outline"}
+                                                                    variant="outline"
                                                                     size="sm"
                                                                     onClick={() => handleStatusChange(member.id, "izin")}
                                                                     className={cn(
-                                                                        "h-8 px-2 text-xs",
+                                                                        "h-8 px-2 text-xs transition-all",
                                                                         status === "izin"
-                                                                            ? "bg-blue-600 hover:bg-blue-700 text-white"
-                                                                            : "text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                                                            ? "bg-sky-50 text-sky-700 border-sky-200 font-medium"
+                                                                            : "text-sky-600 border-sky-200 hover:bg-sky-50 hover:text-sky-700"
                                                                     )}
                                                                 >
-                                                                    <Clock className="mr-1 h-3 w-3" />
+                                                                    <div className={cn(
+                                                                        "mr-1.5 flex items-center justify-center rounded-full transition-colors",
+                                                                        status === "izin" ? "bg-sky-600 p-0.5" : "bg-transparent"
+                                                                    )}>
+                                                                        <Clock className={cn(
+                                                                            "h-3 w-3",
+                                                                            status === "izin" ? "text-white" : "currentColor"
+                                                                        )} />
+                                                                    </div>
                                                                     Izin
                                                                 </Button>
                                                                 <Button
-                                                                    variant={status === "alpa" ? "default" : "outline"}
+                                                                    variant="outline"
                                                                     size="sm"
                                                                     onClick={() => handleStatusChange(member.id, "alpa")}
                                                                     className={cn(
-                                                                        "h-8 px-2 text-xs",
+                                                                        "h-8 px-2 text-xs transition-all",
                                                                         status === "alpa"
-                                                                            ? "bg-red-600 hover:bg-red-700 text-white"
+                                                                            ? "bg-red-50 text-red-700 border-red-200 font-medium"
                                                                             : "text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
                                                                     )}
                                                                 >
-                                                                    <XCircle className="mr-1 h-3 w-3" />
+                                                                    <div className={cn(
+                                                                        "mr-1.5 flex items-center justify-center rounded-full transition-colors",
+                                                                        status === "alpa" ? "bg-red-600 p-0.5" : "bg-transparent"
+                                                                    )}>
+                                                                        <XCircle className={cn(
+                                                                            "h-3 w-3",
+                                                                            status === "alpa" ? "text-white" : "currentColor"
+                                                                        )} />
+                                                                    </div>
                                                                     Alpa
                                                                 </Button>
                                                             </div>
@@ -924,29 +1014,19 @@ export const ExtracurricularAttendance: React.FC = () => {
 
                             {/* Footer: Summary & Actions */}
                             <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 mt-4 bg-muted/20">
-                                {/* Left: Summary */}
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-2">
-                                        <Users className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-sm font-medium text-foreground">
-                                            <span className="text-green-600 font-semibold">{presentCount}</span>
-                                            <span className="text-muted-foreground mx-1">/</span>
-                                            <span className="font-semibold">{mockMembers.length}</span>
-                                            <span className="text-muted-foreground ml-1">hadir</span>
-                                        </span>
-                                    </div>
-                                    <div className="h-4 w-[1px] bg-border" />
-                                    <Badge
-                                        variant="outline"
-                                        className={`font-semibold ${percentage >= 90
-                                            ? 'bg-green-50 text-green-700 border-green-200'
-                                            : percentage >= 75
-                                                ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                                : 'bg-red-50 text-red-700 border-red-200'
-                                            }`}
-                                    >
-                                        {percentage}% Kehadiran
-                                    </Badge>
+                                {/* Left: Pagination Info */}
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <span>Menampilkan</span>
+                                    <span className="font-medium text-foreground">
+                                        {filteredMembers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
+                                    </span>
+                                    <span>-</span>
+                                    <span className="font-medium text-foreground">
+                                        {Math.min(currentPage * itemsPerPage, filteredMembers.length)}
+                                    </span>
+                                    <span>dari</span>
+                                    <span className="font-medium text-foreground">{filteredMembers.length}</span>
+                                    <span>data</span>
                                 </div>
 
                                 {/* Right: Pagination & Action Buttons */}
@@ -1030,281 +1110,114 @@ export const ExtracurricularAttendance: React.FC = () => {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="advisor" className="space-y-6">
-                    {/* Advisor Attendance Form */}
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                                    <CheckCircle className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg font-semibold text-gray-900">
-                                        Form Presensi Pembina
-                                    </CardTitle>
-                                    <CardDescription className="text-sm text-muted-foreground">
-                                        Lengkapi informasi kehadiran dan kegiatan hari ini
-                                    </CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            {/* Tutor Name - Readonly */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="tutor-name" className="text-sm font-semibold text-gray-900">
-                                        Nama Tutor Ekstrakurikuler <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Input
-                                        id="tutor-name"
-                                        value={tutorName}
-                                        readOnly
-                                        className="h-12 bg-slate-50 cursor-not-allowed"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="type-eskul" className="text-sm font-semibold text-gray-900">
-                                        Jenis Ekstrakurikuler <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Input
-                                        id="type-eskul"
-                                        value="Pramuka"
-                                        readOnly
-                                        className="h-12 bg-slate-50 cursor-not-allowed"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Date and Time - Responsive Row */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {/* Date */}
-                                <div className="space-y-2 md:col-span-2 lg:col-span-1">
-                                    <Label htmlFor="advisor-date" className="text-sm font-semibold text-gray-900">
-                                        Tanggal <span className="text-red-500">*</span>
-                                    </Label>
-                                    <div className="relative">
-                                        <Calendar className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
-                                        <Input
-                                            id="advisor-date"
-                                            type="date"
-                                            value={selectedDate}
-                                            onChange={(e) => setSelectedDate(e.target.value)}
-                                            className="h-12 pl-10"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Start Time */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="start-time" className="text-sm font-semibold text-gray-900">
-                                        Waktu Mulai <span className="text-red-500">*</span>
-                                    </Label>
-                                    <div className="relative">
-                                        <Clock className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
-                                        <Input
-                                            id="start-time"
-                                            type="time"
-                                            value={startTime}
-                                            onChange={(e) => setStartTime(e.target.value)}
-                                            className="h-12 pl-10"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* End Time */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="end-time" className="text-sm font-semibold text-gray-900">
-                                        Waktu Selesai <span className="text-red-500">*</span>
-                                    </Label>
-                                    <div className="relative">
-                                        <Clock className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
-                                        <Input
-                                            id="end-time"
-                                            type="time"
-                                            value={endTime}
-                                            onChange={(e) => setEndTime(e.target.value)}
-                                            className="h-12 pl-10"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Info Badge - Mengisi form = Hadir */}
-                            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                                <p className="text-sm text-green-800">
-                                    <span className="font-semibold">Status: Hadir.</span> Dengan mengisi form presensi ini, Anda otomatis tercatat hadir.
-                                </p>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setStartTime("");
-                                        setEndTime("");
-                                    }}
-                                    className="flex items-center gap-2"
-                                >
-                                    <RefreshCw className="h-4 w-4" />
-                                    Reset Form
-                                </Button>
-                                <Button
-                                    onClick={handleSaveAdvisorAttendance}
-                                    className="flex items-center gap-2 bg-blue-800 text-white hover:bg-blue-900 hover:text-white"
-                                >
-                                    <Save className="h-4 w-4" />
-                                    Simpan Presensi Pembina
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Info Card */}
-                    <Card className="bg-blue-50 border-blue-200">
-                        <CardContent className="pt-2 pb-2 px-4">
-                            <div className="flex items-start gap-3">
-                                <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                                <div className="space-y-1">
-                                    <p className="text-sm font-semibold text-blue-900">Informasi Penting</p>
-                                    <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
-                                        <li>Pastikan mengisi presensi siswa terlebih dahulu sebelum mengisi presensi pembina</li>
-                                        <li>Presensi pembina harus diisi setiap kali ada kegiatan ekstrakurikuler</li>
-                                        <li>Waktu mulai dan selesai akan digunakan untuk perhitungan jam kegiatan</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
 
                 <TabsContent value="history" className="space-y-6">
-                    {/* Enhanced Filter Section */}
+                    {/* Riwayat Kegiatan - Unified Card with Filters */}
                     <Card>
                         <CardHeader>
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                                    <Filter className="h-5 w-5" />
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                        <History className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-lg font-semibold text-gray-900">
+                                            Riwayat Kegiatan
+                                        </CardTitle>
+                                        <CardDescription className="text-sm text-muted-foreground">
+                                            Riwayat kegiatan dan presensi lengkap tahun ajaran ini
+                                        </CardDescription>
+                                    </div>
                                 </div>
-                                <div>
-                                    <CardTitle className="text-lg font-semibold text-gray-900">
-                                        Filter Riwayat
-                                    </CardTitle>
-                                    <CardDescription className="text-sm text-muted-foreground">
-                                        Sesuaikan tampilan riwayat berdasarkan kriteria
-                                    </CardDescription>
-                                </div>
-                                <div className="ml-auto">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="gap-2"
-                                        onClick={() => {
-                                            setHistoryDateRange({ from: "", to: "" });
-                                            setHistorySearchTerm("");
-                                            setActiveDateFilter(null);
-                                        }}
-                                    >
-                                        <RefreshCw className="h-4 w-4" />
-                                        Reset Filter
-                                    </Button>
-                                </div>
+
+                                {/* Summary Badge */}
+                                <Badge variant="outline" className="gap-2 px-3 py-1.5 text-sm font-medium">
+                                    <History className="h-4 w-4" />
+                                    {filteredHistory.length} Riwayat
+                                </Badge>
                             </div>
                         </CardHeader>
-                        <CardContent>
+
+                        {/* Toolbar - Filters */}
+                        <div className="px-6 py-4 bg-muted/20">
                             <div className="space-y-4">
-                                {/* Row 1: Academic Year, Semester, Search */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-medium">Tahun Ajaran</Label>
-                                        <div className="relative">
-                                            <select
-                                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                                                value={historyAcademicYear}
-                                                onChange={(e) => setHistoryAcademicYear(e.target.value)}
-                                            >
-                                                <option value="2025/2026">2025/2026</option>
-                                                <option value="2024/2025">2024/2025</option>
-                                            </select>
-                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-medium">Semester</Label>
-                                        <div className="relative">
-                                            <select
-                                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                                                value={historySemester}
-                                                onChange={(e) => setHistorySemester(e.target.value)}
-                                            >
-                                                <option value="Ganjil">Ganjil</option>
-                                                <option value="Genap">Genap</option>
-                                            </select>
-                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                        </div>
-                                    </div>
-
-                                    {historyType === "students" && (
-                                        <div className="space-y-2">
-                                            <Label className="text-sm font-medium">Cari</Label>
+                                {/* Row 1: Academic Year, Semester, Reset Button */}
+                                <div className="flex flex-col lg:flex-row gap-4 items-end">
+                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="space-y-1.5">
+                                            <Label className="text-sm font-medium">Tahun Ajaran</Label>
                                             <div className="relative">
-                                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Cari kegiatan..."
-                                                    value={historySearchTerm}
-                                                    onChange={(e) => setHistorySearchTerm(e.target.value)}
-                                                    className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                                                />
+                                                <select
+                                                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                                                    value={historyAcademicYear}
+                                                    onChange={(e) => setHistoryAcademicYear(e.target.value)}
+                                                >
+                                                    <option value="2025/2026">2025/2026</option>
+                                                    <option value="2024/2025">2024/2025</option>
+                                                </select>
+                                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                             </div>
                                         </div>
-                                    )}
-                                </div>
 
-                                {/* Row 2: Date Filters */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-medium">Filter Cepat</Label>
-                                        <div className="flex items-center gap-2 h-10">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className={cn(
-                                                    "h-9 text-xs flex-1",
-                                                    activeDateFilter === 'today' && "bg-blue-800 text-white hover:bg-blue-900 hover:text-white"
-                                                )}
-                                                onClick={setToday}
-                                            >
-                                                Hari Ini
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className={cn(
-                                                    "h-9 text-xs flex-1",
-                                                    activeDateFilter === 'week' && "bg-blue-800 text-white hover:bg-blue-900 hover:text-white"
-                                                )}
-                                                onClick={setThisWeek}
-                                            >
-                                                Minggu Ini
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className={cn(
-                                                    "h-9 text-xs flex-1",
-                                                    activeDateFilter === 'month' && "bg-blue-800 text-white hover:bg-blue-900 hover:text-white"
-                                                )}
-                                                onClick={setThisMonth}
-                                            >
-                                                Bulan Ini
-                                            </Button>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-sm font-medium">Semester</Label>
+                                            <div className="relative">
+                                                <select
+                                                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                                                    value={historySemester}
+                                                    onChange={(e) => setHistorySemester(e.target.value)}
+                                                >
+                                                    <option value="Ganjil">Ganjil</option>
+                                                    <option value="Genap">Genap</option>
+                                                </select>
+                                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <Label className="text-sm font-medium">Filter Cepat</Label>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className={cn(
+                                                        "h-10 text-xs flex-1",
+                                                        activeDateFilter === 'today' && "bg-blue-800 text-white hover:bg-blue-900 hover:text-white"
+                                                    )}
+                                                    onClick={setToday}
+                                                >
+                                                    Hari Ini
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className={cn(
+                                                        "h-10 text-xs flex-1",
+                                                        activeDateFilter === 'week' && "bg-blue-800 text-white hover:bg-blue-900 hover:text-white"
+                                                    )}
+                                                    onClick={setThisWeek}
+                                                >
+                                                    Minggu Ini
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className={cn(
+                                                        "h-10 text-xs flex-1",
+                                                        activeDateFilter === 'month' && "bg-blue-800 text-white hover:bg-blue-900 hover:text-white"
+                                                    )}
+                                                    onClick={setThisMonth}
+                                                >
+                                                    Bulan Ini
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div className="space-y-2">
+                                {/* Row 2: Date Range & Reset */}
+                                <div className="flex flex-col sm:flex-row gap-4 items-end">
+                                    <div className="flex-1 space-y-1.5">
                                         <Label className="text-sm font-medium">Rentang Tanggal</Label>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div className="relative">
@@ -1325,43 +1238,27 @@ export const ExtracurricularAttendance: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-2 h-10"
+                                        onClick={() => {
+                                            setHistoryDateRange({ from: "", to: "" });
+                                            setHistorySearchTerm("");
+                                            setActiveDateFilter(null);
+                                        }}
+                                    >
+                                        <RefreshCw className="h-4 w-4" />
+                                        Reset Filter
+                                    </Button>
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
 
-                    {/* Records List */}
-                    <Card>
-                        <CardHeader>
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                                        {historyType === "students" ? <History className="h-5 w-5" /> : <CheckCircle className="h-5 w-5" />}
-                                    </div>
-                                    <div>
-                                        <CardTitle className="text-lg font-semibold text-gray-900">
-                                            {historyType === "students" ? "Riwayat Presensi Siswa" : "Riwayat Presensi Pembina"}
-                                        </CardTitle>
-                                        <CardDescription className="text-sm text-muted-foreground">
-                                            {historyType === "students"
-                                                ? "Daftar presensi kegiatan ekstrakurikuler sebelumnya"
-                                                : "Daftar presensi kehadiran pembina ekstrakurikuler"}
-                                        </CardDescription>
-                                    </div>
-                                </div>
-
-                                {/* Summary Badge */}
-                                <Badge variant="outline" className="gap-2 px-3 py-1.5 text-sm font-medium">
-                                    <History className="h-4 w-4" />
-                                    {historyType === "students" ? filteredStudentHistory.length : filteredAdvisorHistory.length} Riwayat
-                                </Badge>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
+                        <CardContent className="pt-6">
                             <div className="space-y-3">
                                 {/* Empty State */}
-                                {((historyType === "students" && filteredStudentHistory.length === 0) ||
-                                    (historyType === "advisor" && filteredAdvisorHistory.length === 0)) ? (
+                                {((filteredHistory.length === 0)) ? (
                                     <div className="flex flex-col items-center justify-center py-12 text-center">
                                         <div className="p-4 rounded-full bg-muted mb-4">
                                             <Calendar className="h-8 w-8 text-muted-foreground" />
@@ -1390,55 +1287,11 @@ export const ExtracurricularAttendance: React.FC = () => {
                                             </Button>
                                         )}
                                     </div>
-                                ) : historyType === "students" ? (
-                                    filteredStudentHistory.map((record) => (
-                                        <div key={record.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-4">
-                                            <div className="flex items-start md:items-center space-x-4">
-                                                <div className="p-2 rounded-full bg-blue-100 text-blue-600 mt-1 md:mt-0">
-                                                    <Calendar className="h-4 w-4" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-gray-900">
-                                                        {formatDate(record.date, "dd MMMM yyyy")}
-                                                    </p>
-
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto">
-                                                <div className="text-right">
-                                                    <Badge
-                                                        className={
-                                                            record.percentage >= 90
-                                                                ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
-                                                                : record.percentage >= 75
-                                                                    ? "bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-200"
-                                                                    : "bg-red-100 text-red-700 border-red-200 hover:bg-red-200"
-                                                        }
-                                                    >
-                                                        {record.percentage}% Kehadiran
-                                                    </Badge>
-                                                    <p className="text-xs text-muted-foreground mt-1">
-                                                        <span className="font-medium text-green-600">{record.present}</span>/{record.total} Hadir
-                                                    </p>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <Button
-                                                        size="sm"
-                                                        title="Lihat Detail"
-                                                        className="bg-blue-800 hover:bg-blue-900 text-white border-0"
-                                                        onClick={() => router.push(`/extracurricular-advisor/attendance/${record.id}`)}
-                                                    >
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
                                 ) : (
-                                    filteredAdvisorHistory.map((record) => {
+                                    filteredHistory.map((record) => {
                                         // Calculate duration
-                                        const start = new Date(`2000-01-01 ${record.startTime}`);
-                                        const end = new Date(`2000-01-01 ${record.endTime}`);
+                                        const start = new Date(`2000-01-01 ${record.advisorStats.startTime}`);
+                                        const end = new Date(`2000-01-01 ${record.advisorStats.endTime}`);
                                         const durationMs = end.getTime() - start.getTime();
                                         const hours = Math.floor(durationMs / (1000 * 60 * 60));
                                         const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -1446,28 +1299,74 @@ export const ExtracurricularAttendance: React.FC = () => {
 
                                         return (
                                             <div key={record.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-4">
-                                                <div className="flex items-start md:items-center space-x-4">
-                                                    <div className="p-2 rounded-full bg-green-100 text-green-600 mt-1 md:mt-0">
-                                                        <CheckCircle className="h-4 w-4" />
+                                                {/* Left: Date & Activity */}
+                                                <div className="flex items-start md:items-center space-x-4 min-w-[200px]">
+                                                    <div className="p-2 rounded-full bg-blue-100 text-blue-600 mt-1 md:mt-0">
+                                                        <Calendar className="h-5 w-5" />
                                                     </div>
                                                     <div>
-                                                        <p className="font-medium text-gray-900">{record.tutorName}</p>
-                                                        <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                                                            <span>{formatDate(record.date, "dd MMMM yyyy")}</span>
-                                                            <span className="text-muted-foreground">•</span>
-                                                            <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{record.startTime} - {record.endTime}</span>
+                                                        <p className="font-medium text-gray-900">
+                                                            {formatDate(record.date, "dd MMMM yyyy")}
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto">
-                                                    <div className="text-right flex items-center gap-3">
-                                                        <Badge variant="outline" className="font-medium">
-                                                            Durasi: {duration}
-                                                        </Badge>
-                                                        <Badge className="bg-green-100 text-green-700 border-green-200 hover:bg-green-200">
-                                                            Hadir
-                                                        </Badge>
+
+                                                {/* Middle: Student Stats */}
+                                                <div className="flex flex-col md:flex-row gap-4 md:gap-8 flex-1 md:justify-center">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-1.5 rounded-full bg-muted text-muted-foreground hidden md:block">
+                                                            <Users className="h-4 w-4" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-sm font-medium text-gray-700">Kehadiran Siswa</span>
+                                                                <Badge
+                                                                    className={
+                                                                        record.studentStats.percentage >= 90
+                                                                            ? "bg-green-100 text-green-700 border-green-200"
+                                                                            : record.studentStats.percentage >= 75
+                                                                                ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+                                                                                : "bg-red-100 text-red-700 border-red-200"
+                                                                    }
+                                                                >
+                                                                    {record.studentStats.percentage}%
+                                                                </Badge>
+                                                            </div>
+                                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                                                <span className="font-medium text-green-600">{record.studentStats.present}</span>
+                                                                <span className="mx-0.5">/</span>
+                                                                <span>{record.studentStats.total}</span> Anggota Hadir
+                                                            </p>
+                                                        </div>
                                                     </div>
+
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-1.5 rounded-full bg-green-100 text-green-600 hidden md:block">
+                                                            <CheckCircle className="h-4 w-4" />
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-sm font-medium text-gray-700 block">Status Pembina</span>
+                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                <Badge className="bg-blue-100 text-blue-700 border-blue-200 font-normal text-[10px] px-1.5 h-5">
+                                                                    {record.advisorStats.startTime} - {record.advisorStats.endTime}
+                                                                </Badge>
+                                                                <span className="text-xs text-muted-foreground">({duration})</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Right: Actions */}
+                                                <div className="flex items-center justify-end">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                                                        onClick={() => router.push(`/extracurricular-advisor/attendance/${record.id}`)}
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                        Detail
+                                                    </Button>
                                                 </div>
                                             </div>
                                         );
@@ -1479,7 +1378,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                             <div className="flex items-center justify-between pt-4 border-t mt-4">
                                 <div className="flex items-center gap-4">
                                     <div className="text-sm text-muted-foreground">
-                                        Menampilkan 1 sampai {historyType === "students" ? filteredStudentHistory.length : filteredAdvisorHistory.length} dari {historyType === "students" ? filteredStudentHistory.length : filteredAdvisorHistory.length} data
+                                        Menampilkan {filteredHistory.length === 0 ? 0 : 1}-{filteredHistory.length} dari {filteredHistory.length} data
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm text-muted-foreground">Baris:</span>
