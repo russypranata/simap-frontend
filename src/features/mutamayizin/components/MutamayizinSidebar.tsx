@@ -5,6 +5,8 @@ import { SidebarBase, SidebarItem } from "@/features/shared/components/SidebarBa
 import { useRole } from "@/app/context/RoleContext";
 import {
     LayoutDashboard,
+    Award,
+    CalendarCheck,
     User,
 } from "lucide-react";
 
@@ -16,6 +18,16 @@ export const MutamayizinSidebar: React.FC = () => {
             title: "Dashboard",
             href: "/mutamayizin-coordinator/dashboard",
             icon: LayoutDashboard,
+        },
+        {
+            title: "Prestasi",
+            href: "/mutamayizin-coordinator/achievements",
+            icon: Award,
+        },
+        {
+            title: "Presensi Ekskul",
+            href: "/mutamayizin-coordinator/attendance",
+            icon: CalendarCheck,
         },
         {
             title: "Profil",

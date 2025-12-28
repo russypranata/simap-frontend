@@ -143,8 +143,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                                         <Link href="/profile" className="block outline-none">
                                             <DropdownMenuItem className="p-3 my-0.5 cursor-pointer rounded-lg focus:bg-accent group">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-50 group-data-[highlighted]:bg-blue-600 transition-colors">
-                                                        <User className="h-4 w-4 text-blue-600 group-data-[highlighted]:text-white" />
+                                                    <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-50 text-blue-600 group-focus:bg-blue-200 transition-colors">
+                                                        <User className="h-4 w-4" />
                                                     </div>
                                                     <div className="flex flex-col space-y-0.5">
                                                         <span className="text-sm font-semibold group-data-[highlighted]:text-accent-foreground">Profil Saya</span>
