@@ -159,7 +159,7 @@ const ROLES = [
     },
     {
         id: 'ekskul',
-        title: 'Pembina Ekskul',
+        title: 'Tutor Ekskul',
         description:
             'Mengembangkan bakat minat. Presensi & pengajuan kegiatan ekstrakurikuler siswa.',
         icon: Star,

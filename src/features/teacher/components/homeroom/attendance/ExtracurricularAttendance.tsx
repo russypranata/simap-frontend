@@ -36,7 +36,7 @@ interface ExtracurricularRecap {
     totalHadir: number;
     totalPertemuan: number;
     nilai: string;
-    catatanPembina: string;
+    catatanTutor: string;
     verified: boolean;
 }
 
@@ -77,7 +77,7 @@ export const ExtracurricularAttendance = () => {
                 totalHadir: Math.floor(Math.random() * 12) + 8,
                 totalPertemuan: 20,
                 nilai: i % 3 === 0 ? "A" : i % 3 === 1 ? "B" : "C",
-                catatanPembina: "Siswa aktif dan disiplin dalam kegiatan.",
+                catatanTutor: "Siswa aktif dan disiplin dalam kegiatan.",
                 verified: i % 2 === 0
             },
             activeEskuls: [

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
     Card,
     CardContent,
@@ -262,8 +262,17 @@ export const ExtracurricularAttendance: React.FC = () => {
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
 
-    // Active tab state
-    const [activeTab, setActiveTab] = useState("attendance");
+    // Active tab state - read from URL query parameter
+    const searchParams = useSearchParams();
+    const tabFromUrl = searchParams.get("tab");
+    const [activeTab, setActiveTab] = useState(tabFromUrl === "history" ? "history" : "attendance");
+
+    // Update active tab when URL changes
+    useEffect(() => {
+        if (tabFromUrl === "history") {
+            setActiveTab("history");
+        }
+    }, [tabFromUrl]);
 
     // History Filter State
     const [historyAcademicYear, setHistoryAcademicYear] = useState("2025/2026");
@@ -649,8 +658,8 @@ export const ExtracurricularAttendance: React.FC = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Pembina Info & Time Section */}
-                    {/* Pembina Info & Time Section - Improved Consistency */}
+                    {/* Tutor Info & Time Section */}
+                    {/* Tutor Info & Time Section - Improved Consistency */}
                     <Card>
                         <CardHeader>
                             <div className="flex items-center gap-3">
@@ -659,13 +668,13 @@ export const ExtracurricularAttendance: React.FC = () => {
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                        Presensi Pembina & Waktu
+                                        Presensi Tutor & Waktu
                                         <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-normal">
                                             Wajib Diisi
                                         </Badge>
                                     </CardTitle>
                                     <CardDescription className="text-sm text-muted-foreground">
-                                        Konfirmasi kehadiran Anda sebagai pembina dan tentukan waktu pelaksanaan kegiatan
+                                        Konfirmasi kehadiran Anda sebagai tutor dan tentukan waktu pelaksanaan kegiatan
                                     </CardDescription>
                                 </div>
                             </div>
@@ -676,7 +685,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="tutor-name" className="text-sm font-semibold text-gray-900">
-                                            Nama Tutor/Pembina
+                                            Nama Tutor
                                         </Label>
                                         <Input
                                             id="tutor-name"
@@ -1130,132 +1139,144 @@ export const ExtracurricularAttendance: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* Summary Badge */}
-                                <Badge variant="outline" className="gap-2 px-3 py-1.5 text-sm font-medium">
-                                    <History className="h-4 w-4" />
-                                    {filteredHistory.length} Riwayat
-                                </Badge>
+                                {/* Actions & Summary */}
+                                <div className="flex items-center gap-2">
+                                    {(historyDateRange.from || historyDateRange.to || activeDateFilter) && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 px-2 text-sm text-muted-foreground hover:text-red-600 hover:bg-red-50"
+                                            onClick={() => {
+                                                setHistoryDateRange({ from: "", to: "" });
+                                                setHistorySearchTerm("");
+                                                setActiveDateFilter(null);
+                                            }}
+                                        >
+                                            <XCircle className="h-4 w-4 mr-1" />
+                                            Reset
+                                        </Button>
+                                    )}
+                                    <Badge variant="outline" className="text-sm bg-blue-50 text-blue-700 border-blue-200">
+                                        {filteredHistory.length} Riwayat
+                                    </Badge>
+                                </div>
                             </div>
                         </CardHeader>
 
                         {/* Toolbar - Filters */}
                         <div className="px-6 py-4 bg-muted/20">
-                            <div className="space-y-4">
-                                {/* Row 1: Academic Year, Semester, Reset Button */}
-                                <div className="flex flex-col lg:flex-row gap-4 items-end">
-                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="space-y-1.5">
-                                            <Label className="text-sm font-medium">Tahun Ajaran</Label>
-                                            <div className="relative">
-                                                <select
-                                                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                                                    value={historyAcademicYear}
-                                                    onChange={(e) => setHistoryAcademicYear(e.target.value)}
-                                                >
-                                                    <option value="2025/2026">2025/2026</option>
-                                                    <option value="2024/2025">2024/2025</option>
-                                                </select>
-                                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                            </div>
+                            <div className="flex flex-col space-y-4">
+                                {/* Top Row: Main Filter Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
+                                    {/* Year */}
+                                    <div className="lg:col-span-3 space-y-2">
+                                        <Label className="text-sm font-medium">Tahun Ajaran</Label>
+                                        <div className="relative">
+                                            <select
+                                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-8 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                                                value={historyAcademicYear}
+                                                onChange={(e) => setHistoryAcademicYear(e.target.value)}
+                                            >
+                                                <option value="2025/2026">2025/2026</option>
+                                                <option value="2024/2025">2024/2025</option>
+                                            </select>
+                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                         </div>
+                                    </div>
 
-                                        <div className="space-y-1.5">
-                                            <Label className="text-sm font-medium">Semester</Label>
-                                            <div className="relative">
-                                                <select
-                                                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                                                    value={historySemester}
-                                                    onChange={(e) => setHistorySemester(e.target.value)}
-                                                >
-                                                    <option value="Ganjil">Ganjil</option>
-                                                    <option value="Genap">Genap</option>
-                                                </select>
-                                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                            </div>
+                                    {/* Semester */}
+                                    <div className="lg:col-span-3 space-y-2">
+                                        <Label className="text-sm font-medium">Semester</Label>
+                                        <div className="relative">
+                                            <select
+                                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-8 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                                                value={historySemester}
+                                                onChange={(e) => setHistorySemester(e.target.value)}
+                                            >
+                                                <option value="Ganjil">Ganjil</option>
+                                                <option value="Genap">Genap</option>
+                                            </select>
+                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                         </div>
+                                    </div>
 
-                                        <div className="space-y-1.5">
-                                            <Label className="text-sm font-medium">Filter Cepat</Label>
-                                            <div className="flex items-center gap-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className={cn(
-                                                        "h-10 text-xs flex-1",
-                                                        activeDateFilter === 'today' && "bg-blue-800 text-white hover:bg-blue-900 hover:text-white"
-                                                    )}
-                                                    onClick={setToday}
-                                                >
-                                                    Hari Ini
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className={cn(
-                                                        "h-10 text-xs flex-1",
-                                                        activeDateFilter === 'week' && "bg-blue-800 text-white hover:bg-blue-900 hover:text-white"
-                                                    )}
-                                                    onClick={setThisWeek}
-                                                >
-                                                    Minggu Ini
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className={cn(
-                                                        "h-10 text-xs flex-1",
-                                                        activeDateFilter === 'month' && "bg-blue-800 text-white hover:bg-blue-900 hover:text-white"
-                                                    )}
-                                                    onClick={setThisMonth}
-                                                >
-                                                    Bulan Ini
-                                                </Button>
-                                            </div>
+                                    {/* Date Range Start */}
+                                    <div className="lg:col-span-3 space-y-2">
+                                        <Label className="text-sm font-medium">Dari Tanggal</Label>
+                                        <div className="relative">
+                                            <input
+                                                type="date"
+                                                value={historyDateRange.from}
+                                                onChange={(e) => setHistoryDateRange({ ...historyDateRange, from: e.target.value })}
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                                                placeholder="Pilih tanggal"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Date Range End */}
+                                    <div className="lg:col-span-3 space-y-2">
+                                        <Label className="text-sm font-medium">Sampai Tanggal</Label>
+                                        <div className="relative">
+                                            <input
+                                                type="date"
+                                                value={historyDateRange.to}
+                                                onChange={(e) => setHistoryDateRange({ ...historyDateRange, to: e.target.value })}
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                                                placeholder="Pilih tanggal"
+                                            />
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Row 2: Date Range & Reset */}
-                                <div className="flex flex-col sm:flex-row gap-4 items-end">
-                                    <div className="flex-1 space-y-1.5">
-                                        <Label className="text-sm font-medium">Rentang Tanggal</Label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <div className="relative">
-                                                <input
-                                                    type="date"
-                                                    value={historyDateRange.from}
-                                                    onChange={(e) => setHistoryDateRange({ ...historyDateRange, from: e.target.value })}
-                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                                                />
-                                            </div>
-                                            <div className="relative">
-                                                <input
-                                                    type="date"
-                                                    value={historyDateRange.to}
-                                                    onChange={(e) => setHistoryDateRange({ ...historyDateRange, to: e.target.value })}
-                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                                                />
-                                            </div>
-                                        </div>
+                                {/* Bottom Row: Quick Filters & Actions */}
+                                <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-2">
+                                    <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+                                        <span className="text-sm font-medium text-muted-foreground mr-1 whitespace-nowrap">Filter Cepat:</span>
+                                        <Button
+                                            variant="outline"
+                                            className={cn(
+                                                "h-8 px-3 text-sm font-normal",
+                                                activeDateFilter === 'today'
+                                                    ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
+                                                    : ""
+                                            )}
+                                            onClick={setToday}
+                                        >
+                                            Hari Ini
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className={cn(
+                                                "h-8 px-3 text-sm font-normal",
+                                                activeDateFilter === 'week'
+                                                    ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
+                                                    : ""
+                                            )}
+                                            onClick={setThisWeek}
+                                        >
+                                            Minggu Ini
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className={cn(
+                                                "h-8 px-3 text-sm font-normal",
+                                                activeDateFilter === 'month'
+                                                    ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
+                                                    : ""
+                                            )}
+                                            onClick={setThisMonth}
+                                        >
+                                            Bulan Ini
+                                        </Button>
                                     </div>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="gap-2 h-10"
-                                        onClick={() => {
-                                            setHistoryDateRange({ from: "", to: "" });
-                                            setHistorySearchTerm("");
-                                            setActiveDateFilter(null);
-                                        }}
-                                    >
-                                        <RefreshCw className="h-4 w-4" />
-                                        Reset Filter
-                                    </Button>
+
+
                                 </div>
                             </div>
                         </div>
 
-                        <CardContent className="pt-6">
+                        <CardContent className="pt-3">
                             <div className="space-y-3">
                                 {/* Empty State */}
                                 {((filteredHistory.length === 0)) ? (
@@ -1345,7 +1366,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                                             <CheckCircle className="h-4 w-4" />
                                                         </div>
                                                         <div>
-                                                            <span className="text-sm font-medium text-gray-700 block">Status Pembina</span>
+                                                            <span className="text-sm font-medium text-gray-700 block">Status Tutor</span>
                                                             <div className="flex items-center gap-2 mt-0.5">
                                                                 <Badge className="bg-blue-100 text-blue-700 border-blue-200 font-normal text-[10px] px-1.5 h-5">
                                                                     {record.advisorStats.startTime} - {record.advisorStats.endTime}

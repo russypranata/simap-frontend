@@ -37,10 +37,10 @@ import { cn } from "@/lib/utils";
 
 // Mock ekstrakurikuler data
 const mockEkstrakurikulerData: Record<string, any> = {
-    "1": { id: 1, name: "Pramuka", pembina: "Ahmad Fauzi, S.Pd", category: "Kepanduan" },
-    "2": { id: 2, name: "PMR", pembina: "Siti Nurhaliza, S.Kep", category: "Kesehatan" },
-    "3": { id: 3, name: "Paskibra", pembina: "Bambang Sutrisno, S.Pd", category: "Bela Negara" },
-    "4": { id: 4, name: "Basket", pembina: "Dimas Prakoso, S.Pd", category: "Olahraga" },
+    "1": { id: 1, name: "Pramuka", tutor: "Ahmad Fauzi, S.Pd", category: "Kepanduan" },
+    "2": { id: 2, name: "PMR", tutor: "Siti Nurhaliza, S.Kep", category: "Kesehatan" },
+    "3": { id: 3, name: "Paskibra", tutor: "Bambang Sutrisno, S.Pd", category: "Bela Negara" },
+    "4": { id: 4, name: "Basket", tutor: "Dimas Prakoso, S.Pd", category: "Olahraga" },
 };
 
 // Mock attendance history
@@ -67,7 +67,7 @@ const mockAttendanceHistory = [
         id: 3,
         date: "2024-12-06",
         activity: "Pertemuan Rutin",
-        tutorStatus: null, // Pembina lupa isi tab presensi sendiri
+        tutorStatus: null, // Tutor lupa isi tab presensi sendiri
         totalPresent: 38,
         totalAbsent: 7,
         percentage: 84,
@@ -85,7 +85,7 @@ const mockAttendanceHistory = [
         id: 5,
         date: "2024-11-22",
         activity: "Pertemuan Rutin",
-        tutorStatus: null, // Pembina lupa isi tab presensi sendiri
+        tutorStatus: null, // Tutor lupa isi tab presensi sendiri
         totalPresent: 41,
         totalAbsent: 4,
         percentage: 91,
@@ -162,7 +162,7 @@ export default function EkstrakurikulerAttendancePage() {
                         <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">{ekskul.name}</span>
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Pembina: {ekskul.pembina} • {ekskul.category}
+                        Tutor: {ekskul.tutor} • {ekskul.category}
                     </p>
                 </div>
             </div>
@@ -230,7 +230,7 @@ export default function EkstrakurikulerAttendancePage() {
                                     <th className="text-left p-4 font-medium text-sm w-12">No</th>
                                     <th className="text-left p-4 font-medium text-sm min-w-[120px]">Tanggal</th>
                                     <th className="text-left p-4 font-medium text-sm min-w-[200px]">Kegiatan</th>
-                                    <th className="text-left p-4 font-medium text-sm min-w-[180px]">Status Pembina</th>
+                                    <th className="text-left p-4 font-medium text-sm min-w-[180px]">Status Tutor</th>
                                     <th className="text-center p-4 font-medium text-sm w-24">Hadir</th>
                                     <th className="text-center p-4 font-medium text-sm w-24">Tidak Hadir</th>
                                     <th className="text-center p-4 font-medium text-sm w-32">Persentase</th>
@@ -255,7 +255,7 @@ export default function EkstrakurikulerAttendancePage() {
                                                         <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                                                             <CheckCircle className="h-4 w-4 text-green-600" />
                                                         </div>
-                                                        <span className="text-sm font-medium">{ekskul.pembina}</span>
+                                                        <span className="text-sm font-medium">{ekskul.tutor}</span>
                                                     </div>
                                                 ) : (
                                                     <div className="flex items-center gap-2">
@@ -264,7 +264,7 @@ export default function EkstrakurikulerAttendancePage() {
                                                         </div>
                                                         <div>
                                                             <p className="text-sm font-medium text-amber-700">Belum Terisi</p>
-                                                            <p className="text-xs text-muted-foreground">Pembina belum mengisi presensi</p>
+                                                            <p className="text-xs text-muted-foreground">Tutor belum mengisi presensi</p>
                                                         </div>
                                                     </div>
                                                 )}

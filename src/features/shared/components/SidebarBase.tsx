@@ -107,7 +107,7 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
             {/* Navigation */}
             <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
-                    <div className="pl-2 pr-4 py-2 space-y-1">
+                    <div className="pl-2 pr-4 py-3 space-y-1">
                         <nav>
                             {filteredMenuItems.map((item) => {
                                 const isActive =
@@ -136,12 +136,12 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
                                                         isActive || isChildActive ? "secondary" : "ghost"
                                                     }
                                                     className={cn(
-                                                        "w-full justify-start mb-1 h-10 px-3",
+                                                        "w-full justify-start mb-1 h-11 px-3",
                                                         (isActive || isChildActive) &&
                                                         "bg-primary text-primary-foreground hover:bg-primary/90"
                                                     )}
                                                 >
-                                                    <Icon className="h-4 w-4 mr-3" />
+                                                    <Icon className="h-5 w-5 mr-3" />
                                                     <span className="flex-1 text-left">{item.title}</span>
                                                     <ChevronDown
                                                         className={cn(
@@ -207,13 +207,15 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
                                     <Button
                                         variant={isActive ? "secondary" : "ghost"}
                                         className={cn(
-                                            "w-full justify-start mb-1",
-                                            collapsed ? "h-10 w-10 p-0" : "h-10 px-3",
+                                            "w-full mb-1",
+                                            collapsed
+                                                ? "h-10 w-10 p-0 justify-center"
+                                                : "h-11 px-3 justify-start",
                                             isActive &&
                                             "bg-primary text-primary-foreground hover:bg-primary/90"
                                         )}
                                     >
-                                        <Icon className={cn("h-4 w-4", !collapsed && "mr-3")} />
+                                        <Icon className={cn(collapsed ? "h-4 w-4" : "h-5 w-5", !collapsed && "mr-3")} />
                                         {!collapsed && (
                                             <>
                                                 <span className="flex-1 text-left">{item.title}</span>

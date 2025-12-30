@@ -35,7 +35,7 @@ export default function MutamayizinCoordinatorRouteLayout({
                 case 'orang_tua':
                     router.push('/parent/dashboard');
                     break;
-                case 'pembina_ekskul':
+                case 'tutor_ekskul':
                     router.push('/extracurricular-advisor/dashboard');
                     break;
                 default:

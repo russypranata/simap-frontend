@@ -224,7 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const menuItems =
     role === 'siswa' ? studentMenuItems :
-      role === 'pembina_ekskul' ? extracurricularMenuItems :
+      role === 'tutor_ekskul' ? extracurricularMenuItems :
         teacherMenuItems;
 
   const filteredMenuItems = menuItems.filter(
@@ -277,7 +277,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {filteredMenuItems.map((item) => {
                 const isActive = pathname === item.href || (pathname === "/" && (
                   role === 'siswa' ? item.href === "/student/dashboard" :
-                    role === 'pembina_ekskul' ? item.href === "/extracurricular-advisor/dashboard" :
+                    role === 'tutor_ekskul' ? item.href === "/extracurricular-advisor/dashboard" :
                       item.href === "/teacher/dashboard"
                 ));
                 const Icon = item.icon;

@@ -21,7 +21,7 @@ export default function ExtracurricularAdvisorRouteLayout({
         if (!isAuthenticated) {
             // Redirect to home if not authenticated
             router.push('/');
-        } else if (role !== 'pembina_ekskul') {
+        } else if (role !== 'tutor_ekskul') {
             // Redirect to appropriate dashboard based on role
             switch (role) {
                 case 'guru':
@@ -46,7 +46,7 @@ export default function ExtracurricularAdvisorRouteLayout({
     }, [isAuthenticated, role, router, isLoading]);
 
     // Show nothing while initializing or redirecting
-    if (isLoading || !isAuthenticated || role !== 'pembina_ekskul') {
+    if (isLoading || !isAuthenticated || role !== 'tutor_ekskul') {
         return null;
     }
 

@@ -36,9 +36,9 @@ const mockDashboardData = {
         { id: 2, day: "Jumat", date: "09 Januari 2026", time: "14:00 - 16:00" },
     ],
     recentActivities: [
-        { id: 1, day: "Jumat", date: "19 Des 2025", time: "14:00 - 16:00", attendance: 93 },
-        { id: 2, day: "Jumat", date: "12 Des 2025", time: "14:00 - 16:00", attendance: 89 },
-        { id: 3, day: "Jumat", date: "05 Des 2025", time: "14:00 - 16:00", attendance: 84 },
+        { id: 1, day: "Jumat", date: "20 Des 2025", time: "14:00 - 16:00", attendance: 93 },
+        { id: 2, day: "Jumat", date: "13 Des 2025", time: "14:00 - 16:30", attendance: 89 },
+        { id: 3, day: "Jumat", date: "06 Des 2025", time: "14:00 - 16:00", attendance: 84 },
     ],
 };
 
@@ -53,7 +53,7 @@ export const ExtracurricularDashboard: React.FC = () => {
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
                             <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Dashboard </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Pembina Ekskul</span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Tutor Ekskul</span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
                             <Award className="h-5 w-5" />
@@ -100,7 +100,7 @@ export const ExtracurricularDashboard: React.FC = () => {
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold text-white">{mockDashboardData.extracurricular.name}</h2>
-                                <p className="text-blue-100 text-sm">Pembina: {mockDashboardData.extracurricular.advisor}</p>
+                                <p className="text-blue-100 text-sm">Tutor: {mockDashboardData.extracurricular.advisor}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -168,7 +168,7 @@ export const ExtracurricularDashboard: React.FC = () => {
 
             {/* Two Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Upcoming Schedule */}
+                {/* Schedule Info */}
                 <Card>
                     <CardHeader className="pb-0">
                         <div className="flex items-center gap-3">
@@ -177,27 +177,48 @@ export const ExtracurricularDashboard: React.FC = () => {
                             </div>
                             <div>
                                 <CardTitle className="text-lg font-semibold text-gray-900">
-                                    Jadwal Berikutnya
+                                    Jadwal Kegiatan
                                 </CardTitle>
                                 <CardDescription className="text-sm text-muted-foreground">
-                                    Pertemuan ekstrakurikuler yang akan datang
+                                    Jadwal rutin ekstrakurikuler Pramuka
                                 </CardDescription>
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent className="pt-0 space-y-2">
-                        {mockDashboardData.upcomingSchedules.map((schedule) => (
-                            <div key={schedule.id} className="flex items-center gap-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                <div className="p-2.5 bg-blue-100 rounded-full">
-                                    <Clock className="h-5 w-5 text-blue-600" />
+                    <CardContent className="pt-0">
+                        <div className="relative ml-3">
+                            {/* Timeline Line */}
+                            <div className="absolute left-0 top-6 bottom-6 w-0.5 bg-blue-200" />
+
+                            {/* Jadwal Rutin */}
+                            <div className="relative pl-6 pb-3">
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-500 -ml-1" />
+                                <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-100 border border-blue-300">
+                                    <div className="p-2.5 rounded-full bg-blue-200">
+                                        <Clock className="h-5 w-5 text-blue-700" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-blue-600 font-medium">Jadwal Rutin</p>
+                                        <p className="font-semibold text-blue-900">{mockDashboardData.extracurricular.schedule}</p>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <p className="font-semibold text-blue-900">{schedule.day}</p>
-                                    <p className="text-sm text-blue-700">{schedule.date}</p>
-                                </div>
-                                <p className="text-sm font-medium text-blue-700">{schedule.time}</p>
                             </div>
-                        ))}
+
+                            {/* Jadwal Berikutnya */}
+                            <div className="relative pl-6">
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-300 -ml-1" />
+                                <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
+                                    <div className="p-2.5 rounded-full bg-blue-100">
+                                        <Calendar className="h-5 w-5 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-blue-600 font-medium">Pertemuan Berikutnya</p>
+                                        <p className="font-semibold text-blue-900">{mockDashboardData.upcomingSchedules[0].day}, {mockDashboardData.upcomingSchedules[0].date}</p>
+                                    </div>
+                                    <p className="text-sm font-medium text-blue-700">{mockDashboardData.upcomingSchedules[0].time}</p>
+                                </div>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -222,7 +243,7 @@ export const ExtracurricularDashboard: React.FC = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="text-primary"
-                                onClick={() => router.push("/extracurricular-advisor/attendance")}
+                                onClick={() => router.push("/extracurricular-advisor/attendance?tab=history")}
                             >
                                 Lihat Semua
                                 <ArrowRight className="h-4 w-4 ml-1" />
@@ -297,9 +318,9 @@ export const ExtracurricularDashboard: React.FC = () => {
                     <div className="flex items-start gap-3">
                         <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                         <div className="space-y-1">
-                            <p className="text-sm font-semibold text-blue-900">Tips untuk Pembina</p>
+                            <p className="text-sm font-semibold text-blue-900">Tips untuk Tutor</p>
                             <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
-                                <li>Isi presensi siswa dan pembina setiap ada kegiatan ekstrakurikuler</li>
+                                <li>Isi presensi siswa dan tutor setiap ada kegiatan ekstrakurikuler</li>
                                 <li>Pantau kehadiran anggota untuk memastikan partisipasi aktif</li>
                                 <li>Perbarui data anggota secara berkala</li>
                             </ul>

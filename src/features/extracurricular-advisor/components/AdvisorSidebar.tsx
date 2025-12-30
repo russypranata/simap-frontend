@@ -20,7 +20,7 @@ export const AdvisorSidebar: React.FC = () => {
             icon: LayoutDashboard,
         },
         {
-            title: "Kelola Anggota",
+            title: "Daftar Anggota",
             href: "/extracurricular-advisor/members",
             icon: Users,
         },

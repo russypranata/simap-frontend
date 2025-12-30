@@ -31,7 +31,7 @@ const mockEkstrakurikuler = [
         id: 1,
         name: "Pramuka",
         category: "Kepanduan",
-        pembina: "Ahmad Fauzi, S.Pd",
+        tutor: "Ahmad Fauzi, S.Pd",
         totalMembers: 45,
         totalMeetings: 12,
         avgAttendance: 92,
@@ -41,7 +41,7 @@ const mockEkstrakurikuler = [
         id: 2,
         name: "PMR",
         category: "Kesehatan",
-        pembina: "Siti Nurhaliza, S.Kep",
+        tutor: "Siti Nurhaliza, S.Kep",
         totalMembers: 30,
         totalMeetings: 10,
         avgAttendance: 88,
@@ -51,7 +51,7 @@ const mockEkstrakurikuler = [
         id: 3,
         name: "Paskibra",
         category: "Bela Negara",
-        pembina: "Bambang Sutrisno, S.Pd",
+        tutor: "Bambang Sutrisno, S.Pd",
         totalMembers: 25,
         totalMeetings: 15,
         avgAttendance: 95,
@@ -61,7 +61,7 @@ const mockEkstrakurikuler = [
         id: 4,
         name: "Basket",
         category: "Olahraga",
-        pembina: "Dimas Prakoso, S.Pd",
+        tutor: "Dimas Prakoso, S.Pd",
         totalMembers: 20,
         totalMeetings: 18,
         avgAttendance: 85,
@@ -85,7 +85,7 @@ export default function AttendanceDashboard() {
     // Filter ekstrakurikuler
     const filteredEkskul = mockEkstrakurikuler.filter((ekskul) => {
         const matchesSearch = ekskul.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            ekskul.pembina.toLowerCase().includes(searchQuery.toLowerCase());
+            ekskul.tutor.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = categoryFilter === "all" || ekskul.category === categoryFilter;
         return matchesSearch && matchesCategory;
     });
@@ -185,7 +185,7 @@ export default function AttendanceDashboard() {
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
-                                    placeholder="Cari nama ekskul atau pembina..."
+                                    placeholder="Cari nama ekskul atau tutor..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="pl-9"
@@ -237,7 +237,7 @@ export default function AttendanceDashboard() {
                                             <div className="space-y-2 text-sm">
                                                 <div className="flex items-center text-muted-foreground">
                                                     <Users className="h-4 w-4 mr-2" />
-                                                    <span>Pembina: {ekskul.pembina}</span>
+                                                    <span>Tutor: {ekskul.tutor}</span>
                                                 </div>
                                                 <div className="flex justify-between items-center">
                                                     <span className="text-muted-foreground">Anggota:</span>

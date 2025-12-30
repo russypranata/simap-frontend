@@ -11,7 +11,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
@@ -23,48 +22,24 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
-import {
     Users,
-    UserPlus,
     Search,
     Filter,
-    Trash2,
     Calendar,
     CheckCircle,
-    AlertTriangle,
-    Settings,
     Eye,
     Activity,
     AlertCircle,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
-import { toast } from "sonner";
 
-// Mock Data - Available students (not yet registered)
-const mockAvailableStudents = [
-    { id: 101, nis: "2024001", name: "Ahmad Rizky", class: "X A" },
-    { id: 102, nis: "2024002", name: "Siti Nurhaliza", class: "X A" },
-    { id: 103, nis: "2024003", name: "Budi Santoso", class: "X B" },
-    { id: 104, nis: "2024004", name: "Dewi Lestari", class: "X A" },
-    { id: 105, nis: "2024005", name: "Eko Prasetyo", class: "X B" },
-    { id: 106, nis: "2024006", name: "Fitri Handayani", class: "X A" },
-    { id: 107, nis: "2024007", name: "Gilang Ramadhan", class: "X B" },
-];
 
 // Mock Data - Registered members
 const mockMembers: Member[] = [
@@ -78,6 +53,21 @@ const mockMembers: Member[] = [
     { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", joinDate: "2024-08-05", attendance: 82 },
     { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", joinDate: "2024-07-15", attendance: 88 },
     { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", joinDate: "2024-08-10", attendance: 91 },
+    { id: 11, nis: "2022011", name: "Irfan Hakim", class: "X B", joinDate: "2024-08-12", attendance: 87 },
+    { id: 12, nis: "2022012", name: "Julia Permata", class: "XI A", joinDate: "2024-07-18", attendance: 93 },
+    { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", joinDate: "2024-07-22", attendance: 76 },
+    { id: 14, nis: "2022014", name: "Luna Maya", class: "XII A", joinDate: "2024-07-15", attendance: 89 },
+    { id: 15, nis: "2022015", name: "Muhammad Rizky", class: "XII B", joinDate: "2024-07-15", attendance: 94 },
+    { id: 16, nis: "2022016", name: "Nabila Putri", class: "X A", joinDate: "2024-08-05", attendance: 81 },
+    { id: 17, nis: "2022017", name: "Oscar Wijaya", class: "X B", joinDate: "2024-08-08", attendance: 72 },
+    { id: 18, nis: "2022018", name: "Putri Ayu", class: "XI A", joinDate: "2024-07-20", attendance: 96 },
+    { id: 19, nis: "2022019", name: "Qori Azzahra", class: "XI B", joinDate: "2024-07-25", attendance: 84 },
+    { id: 20, nis: "2022020", name: "Reza Pahlevi", class: "XII A", joinDate: "2024-07-15", attendance: 91 },
+    { id: 21, nis: "2022021", name: "Sinta Dewi", class: "XII B", joinDate: "2024-07-15", attendance: 68 },
+    { id: 22, nis: "2022022", name: "Taufik Hidayat", class: "X A", joinDate: "2024-08-10", attendance: 79 },
+    { id: 23, nis: "2022023", name: "Umar Bakri", class: "X B", joinDate: "2024-08-15", attendance: 86 },
+    { id: 24, nis: "2022024", name: "Vina Melati", class: "XI A", joinDate: "2024-07-18", attendance: 92 },
+    { id: 25, nis: "2022025", name: "Wahyu Pratama", class: "XI B", joinDate: "2024-07-22", attendance: 88 },
 ];
 
 interface Member {
@@ -90,25 +80,13 @@ interface Member {
 }
 
 export const ExtracurricularMembers: React.FC = () => {
-    const [members, setMembers] = useState<Member[]>(mockMembers);
+    const [members] = useState<Member[]>(mockMembers);
     const [searchQuery, setSearchQuery] = useState("");
     const [classFilter, setClassFilter] = useState("all");
-    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<Member | null>(null);
-    const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
-    const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
-    const [dialogSearchQuery, setDialogSearchQuery] = useState("");
-    const [dialogClassFilter, setDialogClassFilter] = useState("all");
-
-    // Form state for adding members
-    const [formData, setFormData] = useState({
-        academicYear: "2025/2026",
-        semester: "Ganjil",
-        startDate: formatDate(new Date(), "yyyy-MM-dd"),
-        notes: "",
-    });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     // Filter members for main table
     const filteredMembers = useMemo(() => {
@@ -121,77 +99,21 @@ export const ExtracurricularMembers: React.FC = () => {
         });
     }, [members, searchQuery, classFilter]);
 
-    // Filter available students for dialog
-    const filteredAvailableStudents = useMemo(() => {
-        return mockAvailableStudents.filter((student) => {
-            const matchesSearch =
-                student.name.toLowerCase().includes(dialogSearchQuery.toLowerCase()) ||
-                student.nis.includes(dialogSearchQuery);
-            const matchesClass = dialogClassFilter === "all" || student.class === dialogClassFilter;
-            return matchesSearch && matchesClass;
-        });
-    }, [dialogSearchQuery, dialogClassFilter]);
+    // Pagination
+    const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedMembers = filteredMembers.slice(startIndex, startIndex + itemsPerPage);
+
+    // Reset page when filter changes
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, classFilter, itemsPerPage]);
 
     // Stats
     const totalMembers = members.length;
     const avgAttendance = Math.round(members.reduce((acc, curr) => acc + curr.attendance, 0) / (members.length || 1));
     const topPerformers = members.filter((m) => m.attendance >= 90).length;
     const needsAttention = members.filter((m) => m.attendance < 75).length;
-
-    const handleSelectStudent = (studentId: number) => {
-        setSelectedStudents((prev) =>
-            prev.includes(studentId)
-                ? prev.filter((id) => id !== studentId)
-                : [...prev, studentId]
-        );
-    };
-
-    const handleSelectAll = () => {
-        if (selectedStudents.length === filteredAvailableStudents.length) {
-            setSelectedStudents([]);
-        } else {
-            setSelectedStudents(filteredAvailableStudents.map((s) => s.id));
-        }
-    };
-
-    const handleSubmitRegistration = () => {
-        const newMembers = selectedStudents.map((studentId) => {
-            const student = mockAvailableStudents.find((s) => s.id === studentId);
-            return {
-                id: members.length + studentId,
-                nis: student!.nis,
-                name: student!.name,
-                class: student!.class,
-                joinDate: formData.startDate,
-                attendance: 0,
-            };
-        });
-
-        setMembers([...members, ...newMembers]);
-        setSelectedStudents([]);
-        setIsAddDialogOpen(false);
-        setFormData({
-            academicYear: "2025/2026",
-            semester: "Ganjil",
-            startDate: formatDate(new Date(), "yyyy-MM-dd"),
-            notes: "",
-        });
-        toast.success(`${newMembers.length} siswa berhasil didaftarkan!`);
-    };
-
-    const handleOpenDeleteDialog = (member: Member) => {
-        setMemberToDelete(member);
-        setIsDeleteDialogOpen(true);
-    };
-
-    const handleConfirmDelete = () => {
-        if (memberToDelete) {
-            setMembers((prev) => prev.filter((m) => m.id !== memberToDelete.id));
-            toast.success(`Anggota "${memberToDelete.name}" berhasil dihapus`);
-            setMemberToDelete(null);
-            setIsDeleteDialogOpen(false);
-        }
-    };
 
     const handleViewDetail = (member: Member) => {
         setSelectedMember(member);
@@ -205,7 +127,7 @@ export const ExtracurricularMembers: React.FC = () => {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Kelola </span>
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Daftar </span>
                             <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Anggota Ekskul</span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
@@ -213,7 +135,7 @@ export const ExtracurricularMembers: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Daftarkan dan kelola anggota ekstrakurikuler Pramuka
+                        Lihat daftar anggota ekstrakurikuler Pramuka
                     </p>
                     <div className="flex items-center gap-3 mt-4">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
@@ -226,247 +148,83 @@ export const ExtracurricularMembers: React.FC = () => {
                         </span>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="bg-blue-800 text-white hover:bg-blue-900 px-6 py-2.5">
-                                <UserPlus className="h-4 w-4 mr-2" />
-                                Daftarkan Anggota
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                                <DialogTitle>Daftarkan Anggota Baru</DialogTitle>
-                                <DialogDescription>
-                                    Pilih siswa yang akan didaftarkan ke ekstrakurikuler Pramuka
-                                </DialogDescription>
-                            </DialogHeader>
+            </div>
 
-                            <div className="space-y-4">
-                                {/* Form Fields */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>Tahun Ajaran</Label>
-                                        <Select
-                                            value={formData.academicYear}
-                                            onValueChange={(value) =>
-                                                setFormData({ ...formData, academicYear: value })
-                                            }
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="2025/2026">2025/2026</SelectItem>
-                                                <SelectItem value="2023/2024">2023/2024</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+            {/* Stats Card */}
+            <Card className="overflow-hidden p-0 gap-0">
+                {/* Header */}
+                <div className="bg-blue-800 p-4 rounded-t-lg relative overflow-hidden">
+                    {/* Decorative circles */}
+                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full" />
+                    <div className="absolute right-12 -bottom-6 w-16 h-16 bg-white/5 rounded-full" />
 
-                                    <div className="space-y-2">
-                                        <Label>Semester</Label>
-                                        <Select
-                                            value={formData.semester}
-                                            onValueChange={(value) =>
-                                                setFormData({ ...formData, semester: value })
-                                            }
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Ganjil">Ganjil</SelectItem>
-                                                <SelectItem value="Genap">Genap</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Tanggal Mulai</Label>
-                                        <Input
-                                            type="date"
-                                            value={formData.startDate}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, startDate: e.target.value })
-                                            }
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Ekstrakurikuler</Label>
-                                        <Input value="Pramuka" disabled />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label>Keterangan (Opsional)</Label>
-                                    <Textarea
-                                        placeholder="Tambahkan catatan jika diperlukan..."
-                                        value={formData.notes}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, notes: e.target.value })
-                                        }
-                                        rows={2}
-                                    />
-                                </div>
-
-                                {/* Student Selection */}
-                                <div className="space-y-4 border-t pt-4">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-base font-semibold">Pilih Siswa</Label>
-                                        <Badge variant="secondary">
-                                            {selectedStudents.length} dipilih
-                                        </Badge>
-                                    </div>
-
-                                    {/* Filters */}
-                                    <div className="flex gap-3">
-                                        <div className="relative flex-1">
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            <Input
-                                                placeholder="Cari nama atau NIS..."
-                                                value={dialogSearchQuery}
-                                                onChange={(e) => setDialogSearchQuery(e.target.value)}
-                                                className="pl-9"
-                                            />
-                                        </div>
-                                        <Select value={dialogClassFilter} onValueChange={setDialogClassFilter}>
-                                            <SelectTrigger className="w-[150px]">
-                                                <SelectValue placeholder="Filter Kelas" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="all">Semua Kelas</SelectItem>
-                                                <SelectItem value="X A">X A</SelectItem>
-                                                <SelectItem value="X B">X B</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    {/* Student Table */}
-                                    <div className="border rounded-lg max-h-[250px] overflow-y-auto">
-                                        <table className="w-full">
-                                            <thead className="bg-muted/50 sticky top-0">
-                                                <tr>
-                                                    <th className="text-left p-3 font-medium text-sm w-12">
-                                                        <Checkbox
-                                                            checked={
-                                                                selectedStudents.length === filteredAvailableStudents.length &&
-                                                                filteredAvailableStudents.length > 0
-                                                            }
-                                                            onCheckedChange={handleSelectAll}
-                                                        />
-                                                    </th>
-                                                    <th className="text-left p-3 font-medium text-sm">NIS</th>
-                                                    <th className="text-left p-3 font-medium text-sm">Nama Siswa</th>
-                                                    <th className="text-left p-3 font-medium text-sm">Kelas</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {filteredAvailableStudents.map((student) => (
-                                                    <tr key={student.id} className="border-b hover:bg-muted/30">
-                                                        <td className="p-3">
-                                                            <Checkbox
-                                                                checked={selectedStudents.includes(student.id)}
-                                                                onCheckedChange={() => handleSelectStudent(student.id)}
-                                                            />
-                                                        </td>
-                                                        <td className="p-3 font-mono text-sm">{student.nis}</td>
-                                                        <td className="p-3 font-medium">{student.name}</td>
-                                                        <td className="p-3">
-                                                            <Badge variant="outline">{student.class}</Badge>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                                    Batal
-                                </Button>
-                                <Button onClick={handleSubmitRegistration} disabled={selectedStudents.length === 0}>
-                                    Daftarkan {selectedStudents.length} Siswa
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                    <div className="flex items-center gap-3 relative z-10">
+                        <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-lg">
+                            <Users className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-lg text-white">Statistik Anggota</h3>
+                            <p className="text-blue-100 text-sm">Ekstrakurikuler Pramuka</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                    <CardContent className="p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Total Anggota</p>
-                                <p className="text-2xl font-bold">{totalMembers}</p>
-                                <p className="text-xs text-muted-foreground">Terdaftar aktif</p>
-                            </div>
-                            <div className="p-3 bg-blue-100 rounded-xl">
-                                <Users className="h-6 w-6 text-blue-600" />
-                            </div>
+                {/* Stats Grid */}
+                <div className="grid grid-cols-4 divide-x">
+                    {/* Total Anggota */}
+                    <div className="p-4 text-center">
+                        <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
+                            <Users className="h-5 w-5 text-blue-600" />
                         </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Top Performers</p>
-                                <p className="text-2xl font-bold text-green-600">{topPerformers}</p>
-                                <p className="text-xs text-muted-foreground">Kehadiran ≥90%</p>
-                            </div>
-                            <div className="p-3 bg-green-100 rounded-xl">
-                                <CheckCircle className="h-6 w-6 text-green-600" />
-                            </div>
+                        <p className="text-2xl font-bold text-gray-900">{totalMembers}</p>
+                        <p className="text-xs text-muted-foreground">Total Anggota</p>
+                    </div>
+
+                    {/* Top Performers */}
+                    <div className="p-4 text-center">
+                        <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
                         </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Rata-rata Kehadiran</p>
-                                <p className="text-2xl font-bold text-primary">{avgAttendance}%</p>
-                                <p className="text-xs text-muted-foreground">Semester ini</p>
-                            </div>
-                            <div className="p-3 bg-primary/10 rounded-xl">
-                                <Activity className="h-6 w-6 text-primary" />
-                            </div>
+                        <p className="text-2xl font-bold text-green-600">{topPerformers}</p>
+                        <p className="text-xs text-muted-foreground">Kehadiran ≥90%</p>
+                    </div>
+
+                    {/* Rata-rata Kehadiran */}
+                    <div className="p-4 text-center">
+                        <div className="inline-flex p-2.5 bg-primary/10 rounded-full mb-2">
+                            <Activity className="h-5 w-5 text-primary" />
                         </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Perlu Perhatian</p>
-                                <p className="text-2xl font-bold text-red-600">{needsAttention}</p>
-                                <p className="text-xs text-muted-foreground">Kehadiran &lt;75%</p>
-                            </div>
-                            <div className="p-3 bg-red-100 rounded-xl">
-                                <AlertCircle className="h-6 w-6 text-red-600" />
-                            </div>
+                        <p className="text-2xl font-bold text-primary">{avgAttendance}%</p>
+                        <p className="text-xs text-muted-foreground">Rata-rata Kehadiran</p>
+                    </div>
+
+                    {/* Perlu Perhatian */}
+                    <div className="p-4 text-center">
+                        <div className="inline-flex p-2.5 bg-red-100 rounded-full mb-2">
+                            <AlertCircle className="h-5 w-5 text-red-600" />
                         </div>
-                    </CardContent>
-                </Card>
-            </div>
+                        <p className="text-2xl font-bold text-red-600">{needsAttention}</p>
+                        <p className="text-xs text-muted-foreground">Kehadiran &lt;75%</p>
+                    </div>
+                </div>
+            </Card>
 
             {/* Members Table */}
             <Card>
                 <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                            <Users className="h-5 w-5 text-primary" />
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <Users className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-semibold">Daftar Anggota Terdaftar</CardTitle>
+                                <CardDescription>Anggota aktif ekstrakurikuler Pramuka</CardDescription>
+                            </div>
                         </div>
-                        <div>
-                            <CardTitle className="text-lg font-semibold">Daftar Anggota</CardTitle>
-                            <CardDescription>Kelola dan pantau anggota ekstrakurikuler</CardDescription>
-                        </div>
+                        <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                            {totalMembers} Anggota
+                        </Badge>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -515,7 +273,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredMembers.length === 0 ? (
+                                {paginatedMembers.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className="p-12">
                                             <div className="flex flex-col items-center justify-center text-center space-y-4">
@@ -534,9 +292,9 @@ export const ExtracurricularMembers: React.FC = () => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredMembers.map((member, index) => (
+                                    paginatedMembers.map((member, index) => (
                                         <tr key={member.id} className="border-b hover:bg-muted/30 transition-colors">
-                                            <td className="p-4 text-sm">{index + 1}</td>
+                                            <td className="p-4 text-sm">{startIndex + index + 1}</td>
                                             <td className="p-4 text-sm font-mono">{member.nis}</td>
                                             <td className="p-4">
                                                 <div className="font-medium">{member.name}</div>
@@ -568,34 +326,15 @@ export const ExtracurricularMembers: React.FC = () => {
                                                 </div>
                                             </td>
                                             <td className="p-4 text-center">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" className="h-8 w-8 p-0 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg">
-                                                            <Settings className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-44">
-                                                        <DropdownMenuItem
-                                                            className="cursor-pointer"
-                                                            onClick={() => handleViewDetail(member)}
-                                                        >
-                                                            <div className="p-1 rounded bg-blue-50 mr-2">
-                                                                <Eye className="h-3.5 w-3.5 text-blue-600" />
-                                                            </div>
-                                                            Lihat Detail
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem
-                                                            className="cursor-pointer text-red-600 focus:text-red-600"
-                                                            onClick={() => handleOpenDeleteDialog(member)}
-                                                        >
-                                                            <div className="p-1 rounded bg-red-50 mr-2">
-                                                                <Trash2 className="h-3.5 w-3.5" />
-                                                            </div>
-                                                            Hapus Anggota
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 px-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg"
+                                                    onClick={() => handleViewDetail(member)}
+                                                >
+                                                    <Eye className="h-4 w-4 mr-1.5" />
+                                                    Detail
+                                                </Button>
                                             </td>
                                         </tr>
                                     ))
@@ -604,9 +343,99 @@ export const ExtracurricularMembers: React.FC = () => {
                         </table>
                     </div>
 
-                    {/* Footer Info */}
-                    <div className="p-4 border-t text-sm text-muted-foreground">
-                        Menampilkan {filteredMembers.length} dari {members.length} anggota
+                    {/* Footer with Pagination */}
+                    <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 bg-muted/20">
+                        {/* Left: Pagination Info */}
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>Menampilkan</span>
+                            <span className="font-medium text-foreground">
+                                {filteredMembers.length === 0 ? 0 : startIndex + 1}
+                            </span>
+                            <span>-</span>
+                            <span className="font-medium text-foreground">
+                                {Math.min(startIndex + itemsPerPage, filteredMembers.length)}
+                            </span>
+                            <span>dari</span>
+                            <span className="font-medium text-foreground">{filteredMembers.length}</span>
+                            <span>data</span>
+                        </div>
+
+                        {/* Right: Pagination */}
+                        <div className="flex items-center gap-3">
+                            {/* Items per page */}
+                            <Select value={itemsPerPage.toString()} onValueChange={(val) => setItemsPerPage(Number(val))}>
+                                <SelectTrigger className="w-[100px] h-8">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="5">5 / hal</SelectItem>
+                                    <SelectItem value="10">10 / hal</SelectItem>
+                                    <SelectItem value="25">25 / hal</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            {/* Pagination buttons */}
+                            {totalPages > 1 && (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-muted-foreground">
+                                        Hal {currentPage}/{totalPages}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <div className="flex items-center space-x-1">
+                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                            const pageNumber = i + 1;
+                                            return (
+                                                <Button
+                                                    key={pageNumber}
+                                                    variant={currentPage === pageNumber ? "default" : "outline"}
+                                                    size="sm"
+                                                    onClick={() => setCurrentPage(pageNumber)}
+                                                    className={cn(
+                                                        "w-8 h-8 p-0",
+                                                        currentPage === pageNumber && "bg-blue-800 hover:bg-blue-900 text-white"
+                                                    )}
+                                                >
+                                                    {pageNumber}
+                                                </Button>
+                                            );
+                                        })}
+                                        {totalPages > 5 && (
+                                            <>
+                                                <span className="text-sm text-muted-foreground">...</span>
+                                                <Button
+                                                    variant={currentPage === totalPages ? "default" : "outline"}
+                                                    size="sm"
+                                                    onClick={() => setCurrentPage(totalPages)}
+                                                    className={cn(
+                                                        "w-8 h-8 p-0",
+                                                        currentPage === totalPages && "bg-blue-800 hover:bg-blue-900 text-white"
+                                                    )}
+                                                >
+                                                    {totalPages}
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -702,57 +531,6 @@ export const ExtracurricularMembers: React.FC = () => {
                             Tutup
                         </Button>
                     </div>
-                </DialogContent>
-            </Dialog>
-
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <DialogContent className="max-w-sm">
-                    <DialogHeader>
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-red-100 rounded-lg">
-                                <AlertTriangle className="h-5 w-5 text-red-600" />
-                            </div>
-                            <div>
-                                <DialogTitle>Hapus Anggota</DialogTitle>
-                                <DialogDescription>
-                                    Tindakan ini tidak dapat dibatalkan
-                                </DialogDescription>
-                            </div>
-                        </div>
-                    </DialogHeader>
-
-                    {memberToDelete && (
-                        <div className="py-4">
-                            <p className="text-sm text-muted-foreground">
-                                Apakah Anda yakin ingin menghapus anggota berikut dari ekstrakurikuler?
-                            </p>
-                            <div className="mt-3 p-3 bg-muted/50 rounded-lg">
-                                <p className="font-medium">{memberToDelete.name}</p>
-                                <p className="text-sm text-muted-foreground">NIS: {memberToDelete.nis} • Kelas {memberToDelete.class}</p>
-                            </div>
-                        </div>
-                    )}
-
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                setIsDeleteDialogOpen(false);
-                                setMemberToDelete(null);
-                            }}
-                        >
-                            Batal
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={handleConfirmDelete}
-                            className="bg-red-600 hover:bg-red-700"
-                        >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Hapus Anggota
-                        </Button>
-                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>

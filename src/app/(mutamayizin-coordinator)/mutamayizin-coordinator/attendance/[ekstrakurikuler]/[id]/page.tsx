@@ -296,13 +296,13 @@ export default function AttendanceDetailPage() {
                             </div>
                         </div>
 
-                        {/* Pembina */}
+                        {/* Tutor */}
                         <div className="p-4 flex items-center gap-3">
                             <div className="p-2 bg-amber-50 rounded-lg">
                                 <Users className="h-5 w-5 text-amber-600" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs text-muted-foreground font-medium">Pembina/Tutor</p>
+                                <p className="text-xs text-muted-foreground font-medium">Tutor</p>
                                 <p className="font-semibold text-gray-900">{mockDetailData.tutor}</p>
                                 {mockDetailData.tutorStatus === "hadir" ? (
                                     <Badge className="mt-1 gap-1 text-xs bg-green-100 text-green-700 border-green-200">

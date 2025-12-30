@@ -68,7 +68,7 @@ export default function LoginPage() {
             case 'orang_tua':
                 router.push('/parent/dashboard');
                 break;
-            case 'pembina_ekskul':
+            case 'tutor_ekskul':
                 router.push('/extracurricular-advisor/dashboard');
                 break;
             case 'pj_mutamayizin':
@@ -112,9 +112,9 @@ export default function LoginPage() {
                 login('siswa');
                 handleLoginNavigation('siswa');
                 return;
-            } else if (loginData.username === 'pembina' && loginData.password === '123') {
-                login('pembina_ekskul');
-                handleLoginNavigation('pembina_ekskul');
+            } else if (loginData.username === 'tutor' && loginData.password === '123') {
+                login('tutor_ekskul');
+                handleLoginNavigation('tutor_ekskul');
                 return;
             } else if (loginData.username === 'mutamayizin' && loginData.password === '123') {
                 login('pj_mutamayizin');
@@ -621,7 +621,7 @@ export default function LoginPage() {
                                             { name: 'Guru Mapel', icon: BookOpen, color: 'bg-blue-50 text-blue-700', borderColor: 'border-blue-200', gradient: 'from-blue-600/20 to-transparent' },
                                             { name: 'Guru Piket', icon: Clock, color: 'bg-orange-50 text-orange-700', borderColor: 'border-orange-200', gradient: 'from-orange-600/20 to-transparent' },
                                             { name: 'Wali Kelas', icon: UserRound, color: 'bg-emerald-50 text-emerald-700', borderColor: 'border-emerald-200', gradient: 'from-emerald-600/20 to-transparent' },
-                                            { name: 'Pembina Ekskul', icon: Star, color: 'bg-violet-50 text-violet-700', borderColor: 'border-violet-200', gradient: 'from-violet-600/20 to-transparent' },
+                                            { name: 'Tutor Ekskul', icon: Star, color: 'bg-violet-50 text-violet-700', borderColor: 'border-violet-200', gradient: 'from-violet-600/20 to-transparent' },
                                             { name: 'PJ Mutamayizin', icon: Sparkles, color: 'bg-pink-50 text-pink-700', borderColor: 'border-pink-200', gradient: 'from-pink-600/20 to-transparent' },
                                             { name: 'Siswa', icon: User, color: 'bg-cyan-50 text-cyan-700', borderColor: 'border-cyan-200', gradient: 'from-cyan-600/20 to-transparent' },
                                             { name: 'Kepala Sekolah', icon: GraduationCap, color: 'bg-indigo-50 text-indigo-700', borderColor: 'border-indigo-200', gradient: 'from-indigo-600/20 to-transparent' },

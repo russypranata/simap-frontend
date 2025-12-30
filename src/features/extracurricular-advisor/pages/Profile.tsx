@@ -25,7 +25,7 @@ const mockProfileData = {
     name: "Ahmad Fauzi, S.Pd",
     email: "ahmad.fauzi@alfityan.sch.id",
     phone: "+62 812-3456-7890",
-    role: "Pembina Ekstrakurikuler",
+    role: "Tutor Ekstrakurikuler",
     profilePicture: "",
     address: "Jl. Pendidikan No. 123, Gowa, Sulawesi Selatan",
     joinDate: "15 Juli 2020",

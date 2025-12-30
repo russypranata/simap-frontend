@@ -110,7 +110,7 @@ export default function AttendanceDetailPage() {
             case "sakit":
                 return "bg-yellow-100 text-yellow-700 border-yellow-200";
             case "izin":
-                return "bg-blue-100 text-blue-700 border-blue-200";
+                return "bg-sky-100 text-sky-700 border-sky-200";
             case "alpa":
                 return "bg-red-100 text-red-700 border-red-200";
             default:
@@ -184,171 +184,137 @@ export default function AttendanceDetailPage() {
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Button variant="outline" className="gap-2">
-                        <Printer className="h-4 w-4" />
-                        Cetak
-                    </Button>
-                    <Button variant="outline" className="gap-2">
-                        <Download className="h-4 w-4" />
-                        Export
-                    </Button>
-                </div>
             </div>
 
-            {/* Summary Stats */}
-            <Card>
-                <CardContent className="p-0">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-y sm:divide-y-0 sm:divide-x">
-                        {/* Total */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
-                                <Users className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Siswa</p>
-                        </div>
-
-                        {/* Hadir */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
-                                <CheckCircle className="h-5 w-5 text-green-600" />
-                            </div>
-                            <p className="text-2xl font-bold text-green-600">{stats.present}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Hadir</p>
-                        </div>
-
-                        {/* Sakit */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-yellow-100 rounded-full mb-2">
-                                <AlertCircle className="h-5 w-5 text-yellow-600" />
-                            </div>
-                            <p className="text-2xl font-bold text-yellow-600">{stats.sick}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Sakit</p>
-                        </div>
-
-                        {/* Izin */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
-                                <Clock className="h-5 w-5 text-purple-600" />
-                            </div>
-                            <p className="text-2xl font-bold text-purple-600">{stats.permit}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Izin</p>
-                        </div>
-
-                        {/* Alpa */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-red-100 rounded-full mb-2">
-                                <XCircle className="h-5 w-5 text-red-600" />
-                            </div>
-                            <p className="text-2xl font-bold text-red-600">{stats.absent}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Alpa</p>
-                        </div>
-
-                        {/* Persentase */}
-                        <div className="p-4 text-center">
-                            <div className={cn(
-                                "inline-flex p-2.5 rounded-full mb-2",
-                                stats.percentage >= 90 ? "bg-green-100" :
-                                    stats.percentage >= 75 ? "bg-yellow-100" : "bg-red-100"
-                            )}>
-                                <CheckCircle className={cn(
-                                    "h-5 w-5",
-                                    stats.percentage >= 90 ? "text-green-600" :
-                                        stats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
-                                )} />
-                            </div>
-                            <p className={cn(
-                                "text-2xl font-bold",
-                                stats.percentage >= 90 ? "text-green-600" :
-                                    stats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
-                            )}>{stats.percentage}%</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Kehadiran</p>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Activity Info Card */}
-            <Card className="overflow-hidden">
-                <div className="bg-blue-800 p-5 rounded-t-lg">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                                <Calendar className="h-7 w-7 text-white" />
+            {/* Activity Info Card with Stats */}
+            <Card className="overflow-hidden p-0 gap-0">
+                {/* Header */}
+                <div className="bg-blue-800 p-4 rounded-t-lg">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-lg">
+                                <Calendar className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-xl text-white">{mockDetailData.activity}</h3>
-                                <p className="text-blue-100">Ekstrakurikuler {mockDetailData.ekstrakurikuler}</p>
+                                <h3 className="font-bold text-lg text-white">{mockDetailData.activity}</h3>
+                                <p className="text-blue-100 text-sm">Ekstrakurikuler {mockDetailData.ekstrakurikuler}</p>
                             </div>
                         </div>
-                        <Badge className="bg-green-500 text-white border-0 gap-1.5 px-3 py-1.5 text-sm font-medium">
-                            <CheckCircle className="h-4 w-4" />
+                        <Badge className="bg-green-500 text-white border-0 gap-1 px-2.5 py-1 text-xs font-medium">
+                            <CheckCircle className="h-3.5 w-3.5" />
                             Presensi Lengkap
                         </Badge>
                     </div>
                 </div>
-                <CardContent className="p-0">
-                    <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x">
-                        {/* Tanggal */}
-                        <div className="p-4 flex items-center gap-3">
-                            <div className="p-2 bg-blue-50 rounded-lg">
-                                <Calendar className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground font-medium">Tanggal</p>
-                                <p className="font-semibold text-gray-900">{formatDate(mockDetailData.date, "dd MMMM yyyy")}</p>
-                            </div>
-                        </div>
 
-                        {/* Waktu */}
-                        <div className="p-4 flex items-center gap-3">
-                            <div className="p-2 bg-purple-50 rounded-lg">
-                                <Clock className="h-5 w-5 text-purple-600" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground font-medium">Waktu Kegiatan</p>
-                                <p className="font-semibold text-gray-900">{mockDetailData.startTime} - {mockDetailData.endTime} WIB</p>
-                            </div>
+                {/* Activity Details */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x border-b">
+                    {/* Tanggal */}
+                    <div className="px-3 py-4 flex items-center gap-3">
+                        <div className="p-1.5 bg-blue-50 rounded-lg">
+                            <Calendar className="h-4 w-4 text-blue-600" />
                         </div>
-
-                        {/* Pembina */}
-                        <div className="p-4 flex items-center gap-3">
-                            <div className="p-2 bg-green-50 rounded-lg">
-                                <Users className="h-5 w-5 text-green-600" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground font-medium">Pembina/Tutor</p>
-                                <p className="font-semibold text-gray-900">{mockDetailData.tutor}</p>
-                            </div>
-                        </div>
-
-                        {/* Kehadiran Ringkas */}
-                        <div className="p-4 flex items-center gap-3">
-                            <div className={cn(
-                                "p-2 rounded-lg",
-                                stats.percentage >= 90 ? "bg-green-50" :
-                                    stats.percentage >= 75 ? "bg-yellow-50" : "bg-red-50"
-                            )}>
-                                <CheckCircle className={cn(
-                                    "h-5 w-5",
-                                    stats.percentage >= 90 ? "text-green-600" :
-                                        stats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
-                                )} />
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground font-medium">Tingkat Kehadiran</p>
-                                <p className={cn(
-                                    "font-semibold",
-                                    stats.percentage >= 90 ? "text-green-600" :
-                                        stats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
-                                )}>
-                                    {stats.present}/{stats.total} Hadir ({stats.percentage}%)
-                                </p>
-                            </div>
+                        <div>
+                            <p className="text-xs text-muted-foreground">Tanggal</p>
+                            <p className="text-sm font-semibold text-gray-900">{formatDate(mockDetailData.date, "dd MMMM yyyy")}</p>
                         </div>
                     </div>
-                </CardContent>
+
+                    {/* Waktu */}
+                    <div className="px-3 py-4 flex items-center gap-3">
+                        <div className="p-1.5 bg-purple-50 rounded-lg">
+                            <Clock className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-muted-foreground">Waktu</p>
+                            <p className="text-sm font-semibold text-gray-900">{mockDetailData.startTime} - {mockDetailData.endTime} WIB</p>
+                        </div>
+                    </div>
+
+                    {/* Tutor */}
+                    <div className="px-3 py-4 flex items-center gap-3">
+                        <div className="p-1.5 bg-green-50 rounded-lg">
+                            <Users className="h-4 w-4 text-green-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-muted-foreground">Tutor</p>
+                            <p className="text-sm font-semibold text-gray-900">{mockDetailData.tutor}</p>
+                        </div>
+                    </div>
+
+                    {/* Kehadiran */}
+                    <div className="px-3 py-4 flex items-center gap-3">
+                        <div className={cn(
+                            "p-1.5 rounded-lg",
+                            stats.percentage >= 90 ? "bg-green-50" :
+                                stats.percentage >= 75 ? "bg-orange-50" : "bg-rose-50"
+                        )}>
+                            <CheckCircle className={cn(
+                                "h-4 w-4",
+                                stats.percentage >= 90 ? "text-green-600" :
+                                    stats.percentage >= 75 ? "text-orange-600" : "text-rose-600"
+                            )} />
+                        </div>
+                        <div>
+                            <p className="text-xs text-muted-foreground">Kehadiran</p>
+                            <p className={cn(
+                                "text-sm font-semibold",
+                                stats.percentage >= 90 ? "text-green-600" :
+                                    stats.percentage >= 75 ? "text-orange-600" : "text-rose-600"
+                            )}>
+                                {stats.present}/{stats.total} ({stats.percentage}%)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Stats Grid - 5 columns */}
+                <div className="grid grid-cols-5 divide-x">
+                    {/* Total */}
+                    <div className="p-3 text-center">
+                        <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
+                            <Users className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <p className="text-xl font-bold text-gray-900">{stats.total}</p>
+                        <p className="text-xs text-muted-foreground">Total</p>
+                    </div>
+
+                    {/* Hadir */}
+                    <div className="p-3 text-center">
+                        <div className="inline-flex p-2 bg-green-100 rounded-full mb-1.5">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                        </div>
+                        <p className="text-xl font-bold text-green-600">{stats.present}</p>
+                        <p className="text-xs text-muted-foreground">Hadir</p>
+                    </div>
+
+                    {/* Sakit */}
+                    <div className="p-3 text-center">
+                        <div className="inline-flex p-2 bg-yellow-100 rounded-full mb-1.5">
+                            <AlertCircle className="h-4 w-4 text-yellow-600" />
+                        </div>
+                        <p className="text-xl font-bold text-yellow-600">{stats.sick}</p>
+                        <p className="text-xs text-muted-foreground">Sakit</p>
+                    </div>
+
+                    {/* Izin */}
+                    <div className="p-3 text-center">
+                        <div className="inline-flex p-2 bg-sky-100 rounded-full mb-1.5">
+                            <Clock className="h-4 w-4 text-sky-600" />
+                        </div>
+                        <p className="text-xl font-bold text-sky-600">{stats.permit}</p>
+                        <p className="text-xs text-muted-foreground">Izin</p>
+                    </div>
+
+                    {/* Alpa */}
+                    <div className="p-3 text-center">
+                        <div className="inline-flex p-2 bg-red-100 rounded-full mb-1.5">
+                            <XCircle className="h-4 w-4 text-red-600" />
+                        </div>
+                        <p className="text-xl font-bold text-red-600">{stats.absent}</p>
+                        <p className="text-xs text-muted-foreground">Alpa</p>
+                    </div>
+                </div>
             </Card>
 
             {/* Student List */}

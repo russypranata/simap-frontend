@@ -54,8 +54,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 return 'Administrator';
             case 'orang_tua':
                 return 'Orang Tua';
-            case 'pembina_ekskul':
-                return 'Pembina Ekskul';
+            case 'tutor_ekskul':
+                return 'Tutor Ekskul';
             case 'pj_mutamayizin':
                 return 'PJ Mutamayizin';
             default:
