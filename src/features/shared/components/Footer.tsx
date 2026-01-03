@@ -7,28 +7,16 @@ export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-muted/30">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-          <div className="flex items-center space-x-2">
-            <School className="h-6 w-6 text-primary" />
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                SIMAP - Sistem Informasi Manajemen Administrasi dan Pendidikan
-              </p>
-              <p className="text-xs text-muted-foreground">
-                © {currentYear} SIMAP. Semua hak dilindungi.
-              </p>
-            </div>
-          </div>
-          
-          {/* <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-xs text-muted-foreground">
-            <span>Versi 1.0.0</span>
-            <span>•</span>
-            <span>Dikembangkan dengan Next.js</span>
-            <span>•</span>
-            <span>Bantuan & Dukungan</span>
-          </div> */}
+    <footer className="border-t bg-card/50 backdrop-blur-sm mt-auto">
+      <div className="container flex flex-col items-center justify-between gap-4 py-6 md:h-16 md:flex-row md:py-0 px-6">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <School className="h-4 w-4" />
+          <span>© {currentYear} SIMAP - <span className="hidden sm:inline">Sistem Informasi Manajemen Administrasi dan Pendidikan</span><span className="sm:hidden">SIMAP</span></span>
+        </div>
+        <div className="flex items-center gap-6 text-sm text-muted-foreground">
+          <a href="#" className="hover:text-primary transition-colors">Bantuan</a>
+          <a href="#" className="hover:text-primary transition-colors">Kebijakan Privasi</a>
+          <span className="text-muted-foreground/40 font-mono text-xs">v1.2.0</span>
         </div>
       </div>
     </footer>

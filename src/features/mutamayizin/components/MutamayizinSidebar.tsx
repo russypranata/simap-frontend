@@ -7,6 +7,7 @@ import {
     LayoutDashboard,
     Award,
     CalendarCheck,
+    Users,
     User,
 } from "lucide-react";
 
@@ -28,6 +29,11 @@ export const MutamayizinSidebar: React.FC = () => {
             title: "Presensi Ekskul",
             href: "/mutamayizin-coordinator/attendance",
             icon: CalendarCheck,
+        },
+        {
+            title: "Anggota Ekskul",
+            href: "/mutamayizin-coordinator/members",
+            icon: Users,
         },
         {
             title: "Profil",

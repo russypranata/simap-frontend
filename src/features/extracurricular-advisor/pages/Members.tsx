@@ -174,9 +174,9 @@ export const ExtracurricularMembers: React.FC = () => {
                     {/* Total Anggota */}
                     <div className="p-4 text-center">
                         <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
-                            <Users className="h-5 w-5 text-blue-600" />
+                            <Users className="h-5 w-5 text-blue-800" />
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{totalMembers}</p>
+                        <p className="text-2xl font-bold text-blue-800">{totalMembers}</p>
                         <p className="text-xs text-muted-foreground">Total Anggota</p>
                     </div>
 
@@ -329,7 +329,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="h-8 px-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg"
+                                                    className="h-8 px-3 bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary rounded-lg"
                                                     onClick={() => handleViewDetail(member)}
                                                 >
                                                     <Eye className="h-4 w-4 mr-1.5" />

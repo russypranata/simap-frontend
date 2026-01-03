@@ -26,7 +26,21 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-export const AddAchievement: React.FC = () => {
+// Mock data - in real app, fetch based on ID from URL
+const mockAchievementData = {
+    id: 1,
+    studentName: "Ahmad Rizki",
+    competitionName: "Olimpiade Matematika",
+    category: "Akademik",
+    rank: "Juara 1",
+    eventName: "OSN Tingkat Provinsi",
+    organizer: "Dinas Pendidikan Provinsi Kalimantan Barat",
+    level: "Provinsi",
+    date: "2024-11-15",
+    photo: null,
+};
+
+export const EditAchievement: React.FC = () => {
     const router = useRouter();
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [isCustomRank, setIsCustomRank] = useState(false);
@@ -34,14 +48,14 @@ export const AddAchievement: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
-        studentName: "",
-        competitionName: "",
-        category: "",
-        rank: "",
-        eventName: "",
-        organizer: "",
-        level: "",
-        date: "",
+        studentName: mockAchievementData.studentName,
+        competitionName: mockAchievementData.competitionName,
+        category: mockAchievementData.category,
+        rank: mockAchievementData.rank,
+        eventName: mockAchievementData.eventName,
+        organizer: mockAchievementData.organizer,
+        level: mockAchievementData.level,
+        date: mockAchievementData.date,
     });
 
     const handleRankChange = (value: string) => {
@@ -152,7 +166,7 @@ export const AddAchievement: React.FC = () => {
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            toast.success("Prestasi berhasil ditambahkan!");
+            toast.success("Prestasi berhasil diperbarui!");
 
             // Redirect back to list
             router.push("/mutamayizin-coordinator/achievements");
@@ -194,7 +208,7 @@ export const AddAchievement: React.FC = () => {
                             <ArrowLeft className="h-4 w-4" />
                         </Button>
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Tambah </span>
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Edit </span>
                             <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Prestasi</span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
@@ -202,7 +216,7 @@ export const AddAchievement: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Isi formulir di bawah untuk menambahkan data prestasi siswa Program Mutamayizin
+                        Perbarui informasi prestasi siswa Program Mutamayizin
                     </p>
                 </div>
             </div>
@@ -471,7 +485,7 @@ export const AddAchievement: React.FC = () => {
                                 ) : (
                                     <>
                                         <Save className="h-4 w-4 mr-2" />
-                                        Simpan Prestasi
+                                        Simpan Perubahan
                                     </>
                                 )}
                             </Button>

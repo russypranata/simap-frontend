@@ -28,8 +28,32 @@ import {
     Filter,
     TrendingUp,
     Trophy,
+    ChevronLeft,
+    ChevronRight,
+    MoreVertical,
+    Eye,
+    Edit,
+    Trash2,
+    User,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Achievement interface
 interface Achievement {
@@ -45,7 +69,7 @@ interface Achievement {
     photo: string | null;
 }
 
-// Mock data untuk prestasi
+// Mock data untuk prestasi (15 items for pagination testing)
 const mockAchievements: Achievement[] = [
     {
         id: 1,
@@ -83,6 +107,150 @@ const mockAchievements: Achievement[] = [
         date: "2024-09-10",
         photo: null,
     },
+    {
+        id: 4,
+        studentName: "Rina Amelia",
+        competitionName: "Lomba Karya Tulis Ilmiah",
+        category: "Akademik",
+        rank: "Juara 3",
+        eventName: "LKTI Nasional",
+        organizer: "Universitas Tanjungpura",
+        level: "Nasional",
+        date: "2024-08-25",
+        photo: null,
+    },
+    {
+        id: 5,
+        studentName: "Budi Santoso",
+        competitionName: "Lomba Futsal",
+        category: "Olahraga",
+        rank: "Juara 1",
+        eventName: "Turnamen Futsal Pelajar",
+        organizer: "KONI Kalimantan Barat",
+        level: "Provinsi",
+        date: "2024-07-18",
+        photo: null,
+    },
+    {
+        id: 6,
+        studentName: "Dewi Lestari",
+        competitionName: "Lomba Menyanyi",
+        category: "Seni",
+        rank: "Juara 2",
+        eventName: "Festival Seni Pelajar",
+        organizer: "Dinas Kebudayaan Kalbar",
+        level: "Provinsi",
+        date: "2024-06-30",
+        photo: null,
+    },
+    {
+        id: 7,
+        studentName: "Arif Hidayat",
+        competitionName: "Olimpiade Fisika",
+        category: "Akademik",
+        rank: "Juara 3",
+        eventName: "OSN Kabupaten",
+        organizer: "Dinas Pendidikan Kabupaten Kubu Raya",
+        level: "Kabupaten",
+        date: "2024-05-12",
+        photo: null,
+    },
+    {
+        id: 8,
+        studentName: "Indah Permata",
+        competitionName: "Lomba Desain Grafis",
+        category: "Teknologi",
+        rank: "Juara 1",
+        eventName: "Creative Design Competition",
+        organizer: "Politeknik Negeri Pontianak",
+        level: "Provinsi",
+        date: "2024-04-22",
+        photo: null,
+    },
+    {
+        id: 9,
+        studentName: "Dimas Pratama",
+        competitionName: "Olimpiade Kimia",
+        category: "Akademik",
+        rank: "Juara 2",
+        eventName: "OSN Tingkat Nasional",
+        organizer: "Kemendikbud RI",
+        level: "Nasional",
+        date: "2024-03-15",
+        photo: null,
+    },
+    {
+        id: 10,
+        studentName: "Ayu Kartika",
+        competitionName: "Lomba Tari Tradisional",
+        category: "Seni",
+        rank: "Juara 1",
+        eventName: "Festival Budaya Nusantara",
+        organizer: "Kemendikbud RI",
+        level: "Nasional",
+        date: "2024-02-28",
+        photo: null,
+    },
+    {
+        id: 11,
+        studentName: "Reza Maulana",
+        competitionName: "Lomba Catur",
+        category: "Olahraga",
+        rank: "Juara 3",
+        eventName: "Championship Catur Pelajar",
+        organizer: "Percasi Kalbar",
+        level: "Provinsi",
+        date: "2024-01-20",
+        photo: null,
+    },
+    {
+        id: 12,
+        studentName: "Fitri Handayani",
+        competitionName: "Olimpiade Biologi",
+        category: "Akademik",
+        rank: "Juara 1",
+        eventName: "OSN Provinsi",
+        organizer: "Dinas Pendidikan Provinsi Kalbar",
+        level: "Provinsi",
+        date: "2023-12-10",
+        photo: null,
+    },
+    {
+        id: 13,
+        studentName: "Hendra Gunawan",
+        competitionName: "Lomba Fotografi",
+        category: "Seni",
+        rank: "Juara 2",
+        eventName: "Photography Contest",
+        organizer: "Komunitas Fotografer Pontianak",
+        level: "Kabupaten",
+        date: "2023-11-25",
+        photo: null,
+    },
+    {
+        id: 14,
+        studentName: "Lina Marlina",
+        competitionName: "Lomba Debat Bahasa Indonesia",
+        category: "Non-Akademik",
+        rank: "Juara 1",
+        eventName: "National Debate Championship",
+        organizer: "Kemendikbud RI",
+        level: "Nasional",
+        date: "2023-10-15",
+        photo: null,
+    },
+    {
+        id: 15,
+        studentName: "Yoga Pratama",
+        competitionName: "Lomba Robotik",
+        category: "Teknologi",
+        rank: "Juara 3",
+        eventName: "World Robot Olympiad",
+        organizer: "WRO Indonesia",
+        level: "Internasional",
+        date: "2023-09-05",
+        photo: null,
+    },
 ];
 
 export const MutamayizinAchievements: React.FC = () => {
@@ -90,6 +258,10 @@ export const MutamayizinAchievements: React.FC = () => {
     const [achievements] = useState<Achievement[]>(mockAchievements);
     const [searchQuery, setSearchQuery] = useState("");
     const [levelFilter, setLevelFilter] = useState("all");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
 
     // Filter achievements
     const filteredAchievements = useMemo(() => {
@@ -103,6 +275,18 @@ export const MutamayizinAchievements: React.FC = () => {
         });
     }, [achievements, searchQuery, levelFilter]);
 
+    // Pagination
+    const totalPages = Math.ceil(filteredAchievements.length / itemsPerPage);
+    const paginatedAchievements = filteredAchievements.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Reset to page 1 when filters change
+    useMemo(() => {
+        setCurrentPage(1);
+    }, [searchQuery, levelFilter]);
+
     // Stats
     const totalAchievements = achievements.length;
     const nationalAchievements = achievements.filter((a) => a.level === "Nasional" || a.level === "Internasional").length;
@@ -112,31 +296,43 @@ export const MutamayizinAchievements: React.FC = () => {
         router.push("/mutamayizin-coordinator/achievements/add");
     };
 
-    const getLevelBadgeColor = (level: string) => {
-        switch (level) {
-            case "Internasional":
-                return "bg-purple-100 text-purple-700 border-purple-200";
-            case "Nasional":
-                return "bg-red-100 text-red-700 border-red-200";
-            case "Provinsi":
-                return "bg-blue-100 text-blue-700 border-blue-200";
-            case "Kabupaten":
-                return "bg-green-100 text-green-700 border-green-200";
-            default:
-                return "bg-gray-100 text-gray-700 border-gray-200";
+    const handleViewDetail = (achievement: Achievement) => {
+        router.push(`/mutamayizin-coordinator/achievements/${achievement.id}`);
+    };
+
+    const handleEdit = (achievement: Achievement) => {
+        router.push(`/mutamayizin-coordinator/achievements/${achievement.id}/edit`);
+    };
+
+    const handleDeleteClick = (achievement: Achievement) => {
+        setSelectedAchievement(achievement);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        if (selectedAchievement) {
+            // TODO: API call to delete
+            console.log("Deleting achievement:", selectedAchievement.id);
+            // Show success toast
+            setDeleteDialogOpen(false);
+            setSelectedAchievement(null);
         }
+    };
+
+    const getLevelBadgeColor = () => {
+        return "bg-amber-100 text-amber-800 border-amber-300";
     };
 
     const getRankBadgeColor = (rank: string) => {
         switch (rank) {
             case "Juara 1":
-                return "bg-yellow-100 text-yellow-800 border-yellow-300";
+                return "bg-emerald-100 text-emerald-700 border-emerald-300";
             case "Juara 2":
-                return "bg-slate-100 text-slate-700 border-slate-300";
+                return "bg-sky-100 text-sky-700 border-sky-300";
             case "Juara 3":
                 return "bg-orange-100 text-orange-700 border-orange-300";
             default:
-                return "bg-gray-100 text-gray-700 border-gray-200";
+                return "bg-zinc-100 text-zinc-600 border-zinc-300";
         }
     };
 
@@ -155,7 +351,7 @@ export const MutamayizinAchievements: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Kelola data prestasi siswa Program Mutamayizin
+                        Kelola data dan riwayat prestasi siswa Program Mutamayizin
                     </p>
                     <div className="flex items-center gap-3 mt-4">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
@@ -179,81 +375,89 @@ export const MutamayizinAchievements: React.FC = () => {
                 </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Card>
-                    <CardContent className="p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Total Prestasi</p>
-                                <p className="text-2xl font-bold">{totalAchievements}</p>
-                                <p className="text-xs text-muted-foreground">Tahun ini</p>
-                            </div>
-                            <div className="p-3 bg-blue-100 rounded-xl">
-                                <Trophy className="h-6 w-6 text-blue-600" />
-                            </div>
+            {/* Stats Card with Decorative Header */}
+            <Card className="overflow-hidden p-0">
+                {/* Decorative Header Section */}
+                <div className="bg-blue-800 p-5 relative overflow-hidden">
+                    {/* Decorative Geometric Pattern */}
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
+                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
+                    </div>
+
+                    <div className="flex items-center gap-4 relative z-10">
+                        <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                            <Award className="h-7 w-7 text-white" />
                         </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Tingkat Nasional+</p>
-                                <p className="text-2xl font-bold text-red-600">{nationalAchievements}</p>
-                                <p className="text-xs text-muted-foreground">Nasional & Internasional</p>
-                            </div>
-                            <div className="p-3 bg-red-100 rounded-xl">
-                                <Star className="h-6 w-6 text-red-600" />
-                            </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-white">Statistik Prestasi</h2>
+                            <p className="text-blue-100 text-sm">Program Mutamayizin Alfityan</p>
                         </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="p-5">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Juara 1</p>
-                                <p className="text-2xl font-bold text-primary">{firstPlaceCount}</p>
-                                <p className="text-xs text-muted-foreground">Peringkat tertinggi</p>
+                    </div>
+                </div>
+
+                {/* Stats Section */}
+                <CardContent className="p-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x">
+                        {/* Total Prestasi */}
+                        <div className="p-4 text-center">
+                            <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
+                                <Trophy className="h-5 w-5 text-blue-800" />
                             </div>
-                            <div className="p-3 bg-primary/10 rounded-xl">
-                                <TrendingUp className="h-6 w-6 text-primary" />
-                            </div>
+                            <p className="text-2xl font-bold text-blue-800">{totalAchievements}</p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Prestasi</p>
                         </div>
-                    </CardContent>
-                </Card>
-            </div>
+
+                        {/* Tingkat Nasional+ */}
+                        <div className="p-4 text-center">
+                            <div className="inline-flex p-2.5 bg-red-100 rounded-full mb-2">
+                                <Star className="h-5 w-5 text-red-600" />
+                            </div>
+                            <p className="text-2xl font-bold text-red-600">{nationalAchievements}</p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Nasional & Internasional</p>
+                        </div>
+
+                        {/* Juara 1 */}
+                        <div className="p-4 text-center">
+                            <div className="inline-flex p-2.5 bg-emerald-100 rounded-full mb-2">
+                                <TrendingUp className="h-5 w-5 text-emerald-600" />
+                            </div>
+                            <p className="text-2xl font-bold text-emerald-600">{firstPlaceCount}</p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Juara 1</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Achievements Table */}
             <Card>
-                <CardHeader>
+                <CardHeader className="pb-0">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-primary/10 rounded-lg">
                             <Award className="h-5 w-5 text-primary" />
                         </div>
                         <div>
                             <CardTitle className="text-lg font-semibold">Daftar Prestasi Siswa</CardTitle>
-                            <CardDescription>Kelola dan pantau prestasi siswa</CardDescription>
+                            <CardDescription>Daftar pencapaian dan kompetisi siswa Program Mutamayizin</CardDescription>
                         </div>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
                     {/* Toolbar */}
-                    <div className="p-4 border-b">
+                    <div className="px-4 pb-4 pt-2 border-b">
                         <div className="flex flex-col md:flex-row gap-4">
                             <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                 <Input
                                     placeholder="Cari berdasarkan nama siswa, lomba, atau event..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-9"
+                                    className="pl-10 h-11"
                                 />
                             </div>
                             <Select value={levelFilter} onValueChange={setLevelFilter}>
-                                <SelectTrigger className="w-[180px]">
-                                    <Filter className="h-4 w-4 mr-2" />
+                                <SelectTrigger className="w-[180px] h-11">
+                                    <Filter className="h-5 w-5 mr-2" />
                                     <SelectValue placeholder="Tingkat" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -275,20 +479,18 @@ export const MutamayizinAchievements: React.FC = () => {
                             <thead className="bg-muted/50">
                                 <tr>
                                     <th className="text-left p-4 font-medium text-sm w-12">No</th>
-                                    <th className="text-left p-4 font-medium text-sm min-w-[150px]">Nama Siswa</th>
-                                    <th className="text-left p-4 font-medium text-sm min-w-[180px]">Nama Lomba</th>
-                                    <th className="text-left p-4 font-medium text-sm w-32">Kategori</th>
+                                    <th className="text-left p-4 font-medium text-sm min-w-[180px]">Nama Siswa</th>
+                                    <th className="text-left p-4 font-medium text-sm min-w-[200px]">Nama Lomba</th>
                                     <th className="text-left p-4 font-medium text-sm w-32">Peringkat</th>
-                                    <th className="text-left p-4 font-medium text-sm min-w-[200px]">Event</th>
-                                    <th className="text-left p-4 font-medium text-sm min-w-[200px]">Penyelenggara</th>
                                     <th className="text-left p-4 font-medium text-sm w-32">Tingkat</th>
                                     <th className="text-left p-4 font-medium text-sm w-32">Tanggal</th>
+                                    <th className="text-center p-4 font-medium text-sm w-24">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredAchievements.length === 0 ? (
                                     <tr>
-                                        <td colSpan={9} className="p-12">
+                                        <td colSpan={7} className="p-12">
                                             <div className="flex flex-col items-center justify-center text-center space-y-4">
                                                 <div className="rounded-full bg-muted p-6">
                                                     <Search className="h-12 w-12 text-muted-foreground" />
@@ -305,34 +507,83 @@ export const MutamayizinAchievements: React.FC = () => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredAchievements.map((achievement, index) => (
-                                        <tr key={achievement.id} className="border-b hover:bg-muted/30 transition-colors">
-                                            <td className="p-4 text-sm">{index + 1}</td>
+                                    paginatedAchievements.map((achievement, index) => (
+                                        <tr key={achievement.id} className="border-b hover:bg-muted/50 transition-all duration-150 group">
                                             <td className="p-4">
-                                                <div className="font-medium">{achievement.studentName}</div>
+                                                <div className="text-sm font-medium text-muted-foreground">{(currentPage - 1) * itemsPerPage + index + 1}</div>
                                             </td>
-                                            <td className="p-4 text-sm">{achievement.competitionName}</td>
-                                            <td className="p-4 text-sm text-muted-foreground">{achievement.category || "-"}</td>
                                             <td className="p-4">
-                                                <Badge variant="outline" className={getRankBadgeColor(achievement.rank)}>
-                                                    <Star className="h-3 w-3 mr-1" />
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                                        <User className="h-4 w-4 text-blue-800" />
+                                                    </div>
+                                                    <div className="text-foreground">{achievement.studentName}</div>
+                                                </div>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="space-y-1">
+                                                    <div className="text-foreground leading-tight">{achievement.competitionName}</div>
+                                                    {achievement.category && (
+                                                        <div className="text-xs text-muted-foreground">{achievement.category}</div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="p-4">
+                                                <Badge variant="outline" className={`${getRankBadgeColor(achievement.rank)} font-medium px-2.5 py-1 text-xs`}>
+                                                    <Star className="h-3.5 w-3.5 mr-1.5" />
                                                     {achievement.rank}
                                                 </Badge>
                                             </td>
-                                            <td className="p-4 text-sm">{achievement.eventName}</td>
-                                            <td className="p-4 text-sm text-muted-foreground">{achievement.organizer}</td>
                                             <td className="p-4">
-                                                <Badge variant="outline" className={getLevelBadgeColor(achievement.level)}>
-                                                    <MapPin className="h-3 w-3 mr-1" />
+                                                <Badge variant="outline" className={`${getLevelBadgeColor()} font-medium px-2.5 py-1 text-xs`}>
+                                                    <MapPin className="h-3.5 w-3.5 mr-1.5" />
                                                     {achievement.level}
                                                 </Badge>
                                             </td>
-                                            <td className="p-4 text-sm text-muted-foreground">
-                                                {new Date(achievement.date).toLocaleDateString("id-ID", {
-                                                    day: "numeric",
-                                                    month: "short",
-                                                    year: "numeric"
-                                                })}
+                                            <td className="p-4">
+                                                <div className="text-sm text-muted-foreground">
+                                                    {new Date(achievement.date).toLocaleDateString("id-ID", {
+                                                        day: "numeric",
+                                                        month: "short",
+                                                        year: "numeric"
+                                                    })}
+                                                </div>
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-8 px-3 bg-blue-100 hover:bg-blue-200 text-blue-800 hover:text-blue-900 border-blue-200"
+                                                        >
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-48">
+                                                        <DropdownMenuItem onClick={() => handleViewDetail(achievement)} className="focus:bg-blue-50">
+                                                            <div className="p-1.5 bg-blue-100 rounded-md mr-2">
+                                                                <Eye className="h-3.5 w-3.5 text-blue-800" />
+                                                            </div>
+                                                            <span className="text-blue-800">Lihat Detail</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleEdit(achievement)} className="focus:bg-amber-50">
+                                                            <div className="p-1.5 bg-amber-100 rounded-md mr-2">
+                                                                <Edit className="h-3.5 w-3.5 text-amber-600" />
+                                                            </div>
+                                                            <span className="text-foreground">Edit</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => handleDeleteClick(achievement)}
+                                                            className="focus:bg-red-50"
+                                                        >
+                                                            <div className="p-1.5 bg-red-100 rounded-md mr-2">
+                                                                <Trash2 className="h-3.5 w-3.5 text-red-600" />
+                                                            </div>
+                                                            <span className="text-red-600">Hapus</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </td>
                                         </tr>
                                     ))
@@ -341,9 +592,99 @@ export const MutamayizinAchievements: React.FC = () => {
                         </table>
                     </div>
 
-                    {/* Footer Info */}
-                    <div className="p-4 border-t text-sm text-muted-foreground">
-                        Menampilkan {filteredAchievements.length} dari {achievements.length} prestasi
+                    {/* Footer with Pagination */}
+                    <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 bg-muted/20">
+                        {/* Left: Pagination Info */}
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>Menampilkan</span>
+                            <span className="font-medium text-foreground">
+                                {filteredAchievements.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
+                            </span>
+                            <span>-</span>
+                            <span className="font-medium text-foreground">
+                                {Math.min(currentPage * itemsPerPage, filteredAchievements.length)}
+                            </span>
+                            <span>dari</span>
+                            <span className="font-medium text-foreground">{filteredAchievements.length}</span>
+                            <span>prestasi</span>
+                        </div>
+
+                        {/* Right: Pagination */}
+                        <div className="flex items-center gap-3">
+                            {/* Items per page */}
+                            <Select value={itemsPerPage.toString()} onValueChange={(val) => setItemsPerPage(Number(val))}>
+                                <SelectTrigger className="w-[100px] h-8">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="5">5 / hal</SelectItem>
+                                    <SelectItem value="10">10 / hal</SelectItem>
+                                    <SelectItem value="25">25 / hal</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            {/* Pagination buttons */}
+                            {totalPages > 1 && (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-muted-foreground">
+                                        Hal {currentPage}/{totalPages}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <div className="flex items-center space-x-1">
+                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                            const pageNumber = i + 1;
+                                            return (
+                                                <Button
+                                                    key={pageNumber}
+                                                    variant={currentPage === pageNumber ? "default" : "outline"}
+                                                    size="sm"
+                                                    onClick={() => setCurrentPage(pageNumber)}
+                                                    className={cn(
+                                                        "w-8 h-8 p-0",
+                                                        currentPage === pageNumber && "bg-blue-800 hover:bg-blue-900 text-white"
+                                                    )}
+                                                >
+                                                    {pageNumber}
+                                                </Button>
+                                            );
+                                        })}
+                                        {totalPages > 5 && (
+                                            <>
+                                                <span className="text-sm text-muted-foreground">...</span>
+                                                <Button
+                                                    variant={currentPage === totalPages ? "default" : "outline"}
+                                                    size="sm"
+                                                    onClick={() => setCurrentPage(totalPages)}
+                                                    className={cn(
+                                                        "w-8 h-8 p-0",
+                                                        currentPage === totalPages && "bg-blue-800 hover:bg-blue-900 text-white"
+                                                    )}
+                                                >
+                                                    {totalPages}
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </CardContent>
             </Card>

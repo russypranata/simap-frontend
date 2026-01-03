@@ -118,9 +118,9 @@ export const ExtracurricularDashboard: React.FC = () => {
                         {/* Total Anggota */}
                         <div className="p-3 text-center">
                             <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
-                                <Users className="h-5 w-5 text-blue-600" />
+                                <Users className="h-5 w-5 text-blue-800" />
                             </div>
-                            <p className="text-2xl font-bold text-gray-900">{mockDashboardData.extracurricular.totalMembers}</p>
+                            <p className="text-2xl font-bold text-blue-800">{mockDashboardData.extracurricular.totalMembers}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Anggota</p>
                         </div>
 
@@ -188,17 +188,17 @@ export const ExtracurricularDashboard: React.FC = () => {
                     <CardContent className="pt-0">
                         <div className="relative ml-3">
                             {/* Timeline Line */}
-                            <div className="absolute left-0 top-6 bottom-6 w-0.5 bg-blue-200" />
+                            <div className="absolute left-0 top-6 bottom-6 w-0.5 bg-blue-300" />
 
                             {/* Jadwal Rutin */}
                             <div className="relative pl-6 pb-3">
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-500 -ml-1" />
-                                <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-100 border border-blue-300">
-                                    <div className="p-2.5 rounded-full bg-blue-200">
-                                        <Clock className="h-5 w-5 text-blue-700" />
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-800 -ml-1" />
+                                <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-50 border border-dashed border-blue-800">
+                                    <div className="p-2.5 rounded-full bg-blue-100 border border-blue-800">
+                                        <Clock className="h-5 w-5 text-blue-800" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-blue-600 font-medium">Jadwal Rutin</p>
+                                        <p className="text-xs text-blue-800 font-medium">Jadwal Rutin</p>
                                         <p className="font-semibold text-blue-900">{mockDashboardData.extracurricular.schedule}</p>
                                     </div>
                                 </div>
@@ -206,16 +206,16 @@ export const ExtracurricularDashboard: React.FC = () => {
 
                             {/* Jadwal Berikutnya */}
                             <div className="relative pl-6">
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-300 -ml-1" />
-                                <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-800 -ml-1" />
+                                <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-50 border border-blue-800/20">
                                     <div className="p-2.5 rounded-full bg-blue-100">
-                                        <Calendar className="h-5 w-5 text-blue-600" />
+                                        <Calendar className="h-5 w-5 text-blue-800" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-blue-600 font-medium">Pertemuan Berikutnya</p>
+                                        <p className="text-xs text-blue-800 font-medium">Pertemuan Berikutnya</p>
                                         <p className="font-semibold text-blue-900">{mockDashboardData.upcomingSchedules[0].day}, {mockDashboardData.upcomingSchedules[0].date}</p>
                                     </div>
-                                    <p className="text-sm font-medium text-blue-700">{mockDashboardData.upcomingSchedules[0].time}</p>
+                                    <p className="text-sm font-medium text-blue-900">{mockDashboardData.upcomingSchedules[0].time}</p>
                                 </div>
                             </div>
                         </div>
@@ -255,13 +255,15 @@ export const ExtracurricularDashboard: React.FC = () => {
                             {mockDashboardData.recentActivities.map((activity) => (
                                 <div
                                     key={activity.id}
+                                    onClick={() => router.push(`/extracurricular-advisor/attendance/${activity.id}`)}
                                     className={cn(
-                                        "flex items-center justify-between p-3 rounded-lg border transition-colors",
+                                        "flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer",
+                                        "hover:scale-[1.02]",
                                         activity.attendance >= 90
-                                            ? "bg-green-50 border-green-200 hover:bg-green-100/80"
+                                            ? "bg-green-50 border-green-200 hover:bg-green-100/80 hover:border-green-300"
                                             : activity.attendance >= 75
-                                                ? "bg-yellow-50 border-yellow-200 hover:bg-yellow-100/80"
-                                                : "bg-red-50 border-red-200 hover:bg-red-100/80"
+                                                ? "bg-yellow-50 border-yellow-200 hover:bg-yellow-100/80 hover:border-yellow-300"
+                                                : "bg-red-50 border-red-200 hover:bg-red-100/80 hover:border-red-300"
                                     )}
                                 >
                                     <div className="flex items-center gap-3">
@@ -313,16 +315,15 @@ export const ExtracurricularDashboard: React.FC = () => {
             </div>
 
             {/* Quick Tips */}
-            <Card className="bg-blue-50 border-blue-200">
+            <Card className="bg-blue-50 border-blue-800/20">
                 <CardContent className="p-3">
                     <div className="flex items-start gap-3">
-                        <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <AlertCircle className="h-5 w-5 text-blue-800 flex-shrink-0 mt-0.5" />
                         <div className="space-y-1">
-                            <p className="text-sm font-semibold text-blue-900">Tips untuk Tutor</p>
-                            <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
+                            <p className="text-sm font-semibold text-blue-800">Tips untuk Tutor</p>
+                            <ul className="text-sm text-blue-900 space-y-1 list-disc list-inside">
                                 <li>Isi presensi siswa dan tutor setiap ada kegiatan ekstrakurikuler</li>
                                 <li>Pantau kehadiran anggota untuk memastikan partisipasi aktif</li>
-                                <li>Perbarui data anggota secara berkala</li>
                             </ul>
                         </div>
                     </div>

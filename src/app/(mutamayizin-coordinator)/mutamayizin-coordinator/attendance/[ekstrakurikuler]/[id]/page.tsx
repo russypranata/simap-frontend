@@ -5,6 +5,9 @@ import { useRouter, useParams } from "next/navigation";
 import {
     Card,
     CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,11 +47,11 @@ const mockDetailData = {
     startTime: "14:00",
     endTime: "16:00",
     students: [
-        { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", status: "hadir" },
-        { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", status: "sakit" },
-        { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", status: "hadir" },
-        { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", status: "izin" },
-        { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", status: "hadir" },
+        { id: 1, nis: "2022001", name: "Abdullah", class: "X A", status: "hadir", photo: null },
+        { id: 2, nis: "2022002", name: "Ahmad Dahlan", class: "XI B", status: "sakit", photo: null },
+        { id: 3, nis: "2022003", name: "Aisyah Putri", class: "XII A", status: "hadir", photo: null },
+        { id: 4, nis: "2022004", name: "Ali Bin Abi Thalib", class: "X B", status: "izin", photo: null },
+        { id: 5, nis: "2022005", name: "Anisa Rahma", class: "XI A", status: "hadir", photo: null },
         { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", status: "hadir" },
         { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", status: "hadir" },
         { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", status: "sakit" },
@@ -103,7 +106,7 @@ export default function AttendanceDetailPage() {
             case "sakit":
                 return "bg-yellow-100 text-yellow-700 border-yellow-200";
             case "izin":
-                return "bg-blue-100 text-blue-700 border-blue-200";
+                return "bg-sky-100 text-sky-700 border-sky-200";
             case "alpa":
                 return "bg-red-100 text-red-700 border-red-200";
             default:
@@ -180,190 +183,162 @@ export default function AttendanceDetailPage() {
                 </div>
             </div>
 
-            {/* Summary Stats */}
-            <Card>
-                <CardContent className="p-0">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-y sm:divide-y-0 sm:divide-x">
-                        {/* Total */}
-                        <div className="p-3 text-center">
-                            <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
-                                <Users className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Siswa</p>
-                        </div>
 
-                        {/* Hadir */}
-                        <div className="p-3 text-center">
-                            <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
-                                <CheckCircle className="h-5 w-5 text-green-600" />
-                            </div>
-                            <p className="text-2xl font-bold text-green-600">{stats.present}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Hadir</p>
-                        </div>
 
-                        {/* Sakit */}
-                        <div className="p-3 text-center">
-                            <div className="inline-flex p-2.5 bg-yellow-100 rounded-full mb-2">
-                                <AlertCircle className="h-5 w-5 text-yellow-600" />
-                            </div>
-                            <p className="text-2xl font-bold text-yellow-600">{stats.sick}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Sakit</p>
-                        </div>
-
-                        {/* Izin */}
-                        <div className="p-3 text-center">
-                            <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
-                                <Clock className="h-5 w-5 text-purple-600" />
-                            </div>
-                            <p className="text-2xl font-bold text-purple-600">{stats.permit}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Izin</p>
-                        </div>
-
-                        {/* Alpa */}
-                        <div className="p-3 text-center">
-                            <div className="inline-flex p-2.5 bg-red-100 rounded-full mb-2">
-                                <XCircle className="h-5 w-5 text-red-600" />
-                            </div>
-                            <p className="text-2xl font-bold text-red-600">{stats.absent}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Alpa</p>
-                        </div>
-
-                        {/* Persentase */}
-                        <div className="p-3 text-center">
-                            <div className={cn(
-                                "inline-flex p-2.5 rounded-full mb-2",
-                                stats.percentage >= 90 ? "bg-green-100" :
-                                    stats.percentage >= 75 ? "bg-yellow-100" : "bg-red-100"
-                            )}>
-                                <CheckCircle className={cn(
-                                    "h-5 w-5",
-                                    stats.percentage >= 90 ? "text-green-600" :
-                                        stats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
-                                )} />
-                            </div>
-                            <p className={cn(
-                                "text-2xl font-bold",
-                                stats.percentage >= 90 ? "text-green-600" :
-                                    stats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
-                            )}>{stats.percentage}%</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Kehadiran</p>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Activity Info Card */}
-            <Card className="overflow-hidden">
-                <div className="bg-blue-800 p-5">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                                <Calendar className="h-7 w-7 text-white" />
+            {/* Activity Info Card with Stats */}
+            <Card className="overflow-hidden p-0 gap-0">
+                {/* Header */}
+                <div className="bg-blue-800 p-4 rounded-t-lg">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-lg">
+                                <Calendar className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-xl text-white">{mockDetailData.activity}</h3>
-                                <p className="text-blue-100">Ekstrakurikuler {mockDetailData.ekstrakurikuler}</p>
+                                <h3 className="font-bold text-lg text-white">{mockDetailData.activity}</h3>
+                                <p className="text-blue-100 text-sm">Ekstrakurikuler {mockDetailData.ekstrakurikuler}</p>
                             </div>
                         </div>
-                        <Badge className="bg-green-500 text-white border-0 gap-1.5 px-3 py-1.5 text-sm font-medium">
-                            <CheckCircle className="h-4 w-4" />
-                            Presensi Lengkap
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                            <Badge className="bg-blue-700/50 text-blue-100 hover:bg-blue-700/70 border-0 gap-1.5 px-2.5 py-1 text-xs font-medium">
+                                <Clock className="h-3.5 w-3.5" />
+                                {mockDetailData.startTime} - {mockDetailData.endTime} WIB
+                            </Badge>
+                            <Badge className="bg-green-500 text-white border-0 gap-1 px-2.5 py-1 text-xs font-medium">
+                                <CheckCircle className="h-3.5 w-3.5" />
+                                Presensi Lengkap
+                            </Badge>
+                        </div>
                     </div>
                 </div>
-                <CardContent className="p-0">
-                    <div className="grid grid-cols-1 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x">
-                        {/* Tanggal */}
-                        <div className="p-4 flex items-center gap-3">
-                            <div className="p-2 bg-blue-50 rounded-lg">
-                                <Calendar className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground font-medium">Tanggal</p>
-                                <p className="font-semibold text-gray-900">{formatDate(mockDetailData.date, "dd MMMM yyyy")}</p>
-                            </div>
-                        </div>
 
-                        {/* Waktu */}
-                        <div className="p-4 flex items-center gap-3">
-                            <div className="p-2 bg-purple-50 rounded-lg">
-                                <Clock className="h-5 w-5 text-purple-600" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground font-medium">Waktu Kegiatan</p>
-                                <p className="font-semibold text-gray-900">{mockDetailData.startTime} - {mockDetailData.endTime} WIB</p>
-                            </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x border-b">
+                    {/* Tanggal */}
+                    <div className="px-3 py-4 flex items-center gap-3">
+                        <div className="p-1.5 bg-blue-50 rounded-lg">
+                            <Calendar className="h-4 w-4 text-blue-600" />
                         </div>
-
-                        {/* Tutor */}
-                        <div className="p-4 flex items-center gap-3">
-                            <div className="p-2 bg-amber-50 rounded-lg">
-                                <Users className="h-5 w-5 text-amber-600" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-xs text-muted-foreground font-medium">Tutor</p>
-                                <p className="font-semibold text-gray-900">{mockDetailData.tutor}</p>
-                                {mockDetailData.tutorStatus === "hadir" ? (
-                                    <Badge className="mt-1 gap-1 text-xs bg-green-100 text-green-700 border-green-200">
-                                        <CheckCircle className="h-3 w-3" />
-                                        Hadir
-                                    </Badge>
-                                ) : (
-                                    <Badge className="mt-1 gap-1 text-xs bg-amber-100 text-amber-700 border-amber-200">
-                                        <AlertCircle className="h-3 w-3" />
-                                        Belum Mengisi
-                                    </Badge>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Kehadiran Siswa */}
-                        <div className="p-4 flex items-center gap-3">
-                            <div className={cn(
-                                "p-2 rounded-lg",
-                                stats.percentage >= 90 ? "bg-green-50" :
-                                    stats.percentage >= 75 ? "bg-yellow-50" : "bg-red-50"
-                            )}>
-                                <CheckCircle className={cn(
-                                    "h-5 w-5",
-                                    stats.percentage >= 90 ? "text-green-600" :
-                                        stats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
-                                )} />
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground font-medium">Kehadiran Siswa</p>
-                                <p className={cn(
-                                    "font-semibold",
-                                    stats.percentage >= 90 ? "text-green-600" :
-                                        stats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
-                                )}>
-                                    {stats.present}/{stats.total} ({stats.percentage}%)
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Total Absen */}
-                        <div className="p-4 flex items-center gap-3">
-                            <div className="p-2 bg-red-50 rounded-lg">
-                                <AlertCircle className="h-5 w-5 text-red-600" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground font-medium">Tidak Hadir</p>
-                                <p className="font-semibold text-red-600">
-                                    {stats.sick + stats.permit + stats.absent} Siswa
-                                </p>
-                            </div>
+                        <div>
+                            <p className="text-xs text-muted-foreground">Tanggal</p>
+                            <p className="text-sm font-semibold text-gray-900">{formatDate(mockDetailData.date, "dd MMMM yyyy")}</p>
                         </div>
                     </div>
-                </CardContent>
+
+                    {/* Waktu */}
+                    <div className="px-3 py-4 flex items-center gap-3">
+                        <div className="p-1.5 bg-purple-50 rounded-lg">
+                            <Clock className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-muted-foreground">Waktu</p>
+                            <p className="text-sm font-semibold text-gray-900">{mockDetailData.startTime} - {mockDetailData.endTime} WIB</p>
+                        </div>
+                    </div>
+
+                    {/* Tutor */}
+                    <div className="px-3 py-4 flex items-center gap-3">
+                        <div className="p-1.5 bg-green-50 rounded-lg">
+                            <Users className="h-4 w-4 text-green-600" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-xs text-muted-foreground">Tutor</p>
+                            <p className="text-sm font-semibold text-gray-900">{mockDetailData.tutor}</p>
+                        </div>
+                    </div>
+
+                    {/* Kehadiran */}
+                    <div className="px-3 py-4 flex items-center gap-3">
+                        <div className={cn(
+                            "p-1.5 rounded-lg",
+                            stats.percentage >= 90 ? "bg-green-50" :
+                                stats.percentage >= 75 ? "bg-orange-50" : "bg-rose-50"
+                        )}>
+                            <CheckCircle className={cn(
+                                "h-4 w-4",
+                                stats.percentage >= 90 ? "text-green-600" :
+                                    stats.percentage >= 75 ? "text-orange-600" : "text-rose-600"
+                            )} />
+                        </div>
+                        <div>
+                            <p className="text-xs text-muted-foreground">Kehadiran</p>
+                            <p className={cn(
+                                "text-sm font-semibold",
+                                stats.percentage >= 90 ? "text-green-600" :
+                                    stats.percentage >= 75 ? "text-orange-600" : "text-rose-600"
+                            )}>
+                                {stats.present}/{stats.total} ({stats.percentage}%)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Stats Grid - 5 columns */}
+                <div className="grid grid-cols-5 divide-x">
+                    {/* Total */}
+                    <div className="p-3 text-center">
+                        <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
+                            <Users className="h-4 w-4 text-blue-800" />
+                        </div>
+                        <p className="text-xl font-bold text-blue-800">{stats.total}</p>
+                        <p className="text-xs text-muted-foreground">Total</p>
+                    </div>
+
+                    {/* Hadir */}
+                    <div className="p-3 text-center">
+                        <div className="inline-flex p-2 bg-green-100 rounded-full mb-1.5">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                        </div>
+                        <p className="text-xl font-bold text-green-600">{stats.present}</p>
+                        <p className="text-xs text-muted-foreground">Hadir</p>
+                    </div>
+
+                    {/* Sakit */}
+                    <div className="p-3 text-center">
+                        <div className="inline-flex p-2 bg-yellow-100 rounded-full mb-1.5">
+                            <AlertCircle className="h-4 w-4 text-yellow-600" />
+                        </div>
+                        <p className="text-xl font-bold text-yellow-600">{stats.sick}</p>
+                        <p className="text-xs text-muted-foreground">Sakit</p>
+                    </div>
+
+                    {/* Izin */}
+                    <div className="p-3 text-center">
+                        <div className="inline-flex p-2 bg-sky-100 rounded-full mb-1.5">
+                            <Clock className="h-4 w-4 text-sky-600" />
+                        </div>
+                        <p className="text-xl font-bold text-sky-600">{stats.permit}</p>
+                        <p className="text-xs text-muted-foreground">Izin</p>
+                    </div>
+
+                    {/* Alpa */}
+                    <div className="p-3 text-center">
+                        <div className="inline-flex p-2 bg-red-100 rounded-full mb-1.5">
+                            <XCircle className="h-4 w-4 text-red-600" />
+                        </div>
+                        <p className="text-xl font-bold text-red-600">{stats.absent}</p>
+                        <p className="text-xs text-muted-foreground">Alpa</p>
+                    </div>
+                </div>
             </Card>
 
             {/* Student List */}
             <Card>
+                <CardHeader className="pb-0">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                            <Users className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-lg font-semibold">Daftar Kehadiran Siswa</CardTitle>
+                            <CardDescription>
+                                Data kehadiran setiap siswa pada kegiatan ini
+                            </CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
                 <CardContent className="p-0">
                     {/* Toolbar */}
-                    <div className="p-4 border-b">
+                    <div className="px-4 pb-4 pt-2 border-b">
                         <div className="flex flex-col lg:flex-row gap-4">
                             {/* Search */}
                             <div className="relative flex-1">
@@ -409,19 +384,7 @@ export default function AttendanceDetailPage() {
                                     </Select>
                                 </div>
 
-                                <div className="flex items-center gap-2">
-                                    <Label className="text-sm whitespace-nowrap">Tampilkan:</Label>
-                                    <Select value={itemsPerPage.toString()} onValueChange={(v) => setItemsPerPage(parseInt(v))}>
-                                        <SelectTrigger className="w-[80px]">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="10">10</SelectItem>
-                                            <SelectItem value="25">25</SelectItem>
-                                            <SelectItem value="50">50</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -466,11 +429,19 @@ export default function AttendanceDetailPage() {
                                                 <td className="p-4 text-sm font-mono">{student.nis}</td>
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                                            <span className="text-sm font-medium text-primary">
-                                                                {student.name.charAt(0)}
-                                                            </span>
-                                                        </div>
+                                                        {(student as any).photo ? (
+                                                            <img
+                                                                src={(student as any).photo}
+                                                                alt={student.name}
+                                                                className="h-10 w-10 rounded-full object-cover border border-slate-200"
+                                                            />
+                                                        ) : (
+                                                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center border border-blue-200/50">
+                                                                <span className="text-sm font-bold text-blue-800">
+                                                                    {student.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()}
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                         <span className="font-medium">{student.name}</span>
                                                     </div>
                                                 </td>
@@ -494,23 +465,80 @@ export default function AttendanceDetailPage() {
                     </div>
 
                     {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t">
-                            <div className="text-sm text-muted-foreground">
-                                Halaman <span className="font-semibold">{currentPage}</span> dari <span className="font-semibold">{totalPages}</span>
-                            </div>
+                    <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 border-t bg-muted/20">
+                        {/* Left: Pagination Info */}
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>Menampilkan</span>
+                            <span className="font-medium text-foreground">
+                                {filteredStudents.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
+                            </span>
+                            <span>-</span>
+                            <span className="font-medium text-foreground">
+                                {Math.min(currentPage * itemsPerPage, filteredStudents.length)}
+                            </span>
+                            <span>dari</span>
+                            <span className="font-medium text-foreground">{filteredStudents.length}</span>
+                            <span>data</span>
+                        </div>
+
+                        {/* Right: Pagination Controls */}
+                        <div className="flex items-center gap-3">
+                            <Select
+                                value={itemsPerPage.toString()}
+                                onValueChange={(val) => {
+                                    setItemsPerPage(Number(val));
+                                    setCurrentPage(1);
+                                }}
+                            >
+                                <SelectTrigger className="w-[110px] h-8 text-sm">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="5">5 / hal</SelectItem>
+                                    <SelectItem value="10">10 / hal</SelectItem>
+                                    <SelectItem value="25">25 / hal</SelectItem>
+                                    <SelectItem value="50">50 / hal</SelectItem>
+                                </SelectContent>
+                            </Select>
+
                             <div className="flex items-center gap-2">
                                 <Button
                                     variant="outline"
-                                    size="sm"
+                                    size="icon"
+                                    className="h-8 w-8"
                                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                     disabled={currentPage === 1}
                                 >
                                     <ChevronLeft className="h-4 w-4" />
                                 </Button>
+                                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                    let pageNumber;
+                                    if (totalPages <= 5) {
+                                        pageNumber = i + 1;
+                                    } else if (currentPage <= 3) {
+                                        pageNumber = i + 1;
+                                    } else if (currentPage >= totalPages - 2) {
+                                        pageNumber = totalPages - 4 + i;
+                                    } else {
+                                        pageNumber = currentPage - 2 + i;
+                                    }
+
+                                    return (
+                                        <Button
+                                            key={pageNumber}
+                                            variant={currentPage === pageNumber ? "default" : "outline"}
+                                            size="icon"
+                                            className={cn("h-8 w-8", currentPage === pageNumber ? "bg-blue-800 hover:bg-blue-900" : "")}
+                                            onClick={() => setCurrentPage(pageNumber)}
+                                        >
+                                            {pageNumber}
+                                        </Button>
+                                    );
+                                })}
                                 <Button
                                     variant="outline"
-                                    size="sm"
+                                    size="icon"
+                                    className="h-8 w-8"
                                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                     disabled={currentPage === totalPages}
                                 >
@@ -518,7 +546,7 @@ export default function AttendanceDetailPage() {
                                 </Button>
                             </div>
                         </div>
-                    )}
+                    </div>
                 </CardContent>
             </Card>
         </div>

@@ -18,6 +18,7 @@ import {
     Award,
     Activity,
     Star,
+    BarChart3,
 } from "lucide-react";
 
 // Mock data untuk Extracurricular Advisor
@@ -87,11 +88,19 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
             <Card>
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
-                        <CardTitle>Profil Saya</CardTitle>
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                <User className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <CardTitle>Profil Saya</CardTitle>
+                                <p className="text-sm text-muted-foreground mt-0.5 font-normal">Kelola informasi pribadi dan akun Anda</p>
+                            </div>
+                        </div>
                         <Button
                             onClick={handleEditProfile}
                             size="sm"
-                            className="flex items-center space-x-2"
+                            className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white"
                         >
                             <Edit className="h-4 w-4" />
                             <span>Edit Profil</span>
@@ -108,7 +117,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                         src={mockProfileData.profilePicture}
                                         alt={mockProfileData.name}
                                     />
-                                    <AvatarFallback className="text-3xl font-semibold bg-primary text-primary-foreground">
+                                    <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white">
                                         {initials}
                                     </AvatarFallback>
                                 </Avatar>
@@ -121,14 +130,11 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 <h2 className="text-2xl font-bold text-foreground">
                                     {mockProfileData.name}
                                 </h2>
-                                <Badge className="bg-primary text-primary-foreground">
-                                    {mockProfileData.role}
+                                <Badge className="bg-blue-800 text-white">
+                                    Tutor Ekstrakurikuler {mockProfileData.extracurricular}
                                 </Badge>
                                 <p className="text-sm text-muted-foreground">
                                     NIP: {mockProfileData.nip}
-                                </p>
-                                <p className="text-sm font-medium text-primary">
-                                    Ekstrakurikuler: {mockProfileData.extracurricular}
                                 </p>
                             </div>
                         </div>
@@ -201,12 +207,20 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
 
             {/* Extracurricular Statistics */}
             <Card>
-                <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold mb-4">Statistik Ekstrakurikuler</h3>
+                <CardContent className="px-6">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                            <BarChart3 className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold">Statistik Ekstrakurikuler</h3>
+                            <p className="text-sm text-muted-foreground">Ringkasan data anggota dan kegiatan ekstrakurikuler</p>
+                        </div>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
                             <div className="p-2 rounded-full bg-blue-100">
-                                <Users className="h-5 w-5 text-blue-600" />
+                                <Users className="h-5 w-5 text-blue-800" />
                             </div>
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Total Anggota</p>

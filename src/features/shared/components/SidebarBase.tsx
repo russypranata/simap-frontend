@@ -112,6 +112,7 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
                             {filteredMenuItems.map((item) => {
                                 const isActive =
                                     pathname === item.href ||
+                                    (item.href !== "/" && pathname?.startsWith(item.href)) ||
                                     (pathname === "/" &&
                                         defaultDashboardHref &&
                                         item.href === defaultDashboardHref);

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -137,7 +137,23 @@ export default function AttendanceDashboard() {
             </div>
 
             {/* Stats Cards */}
-            <Card>
+            <Card className="overflow-hidden p-0">
+                <div className="bg-blue-800 p-5 relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
+                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
+                    </div>
+                    <div className="flex items-center gap-4 relative z-10">
+                        <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                            <TrendingUp className="h-7 w-7 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-white">Statistik Presensi</h2>
+                            <p className="text-blue-100 text-sm">Ringkasan performa kehadiran ekstrakurikuler</p>
+                        </div>
+                    </div>
+                </div>
+
                 <CardContent className="p-0">
                     <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x">
                         <div className="p-3 text-center">
@@ -177,6 +193,22 @@ export default function AttendanceDashboard() {
 
             {/* Ekstrakurikuler List */}
             <Card>
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <CalendarCheck className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-semibold">Daftar Kegiatan Ekstrakurikuler</CardTitle>
+                                <CardDescription>Pilih ekstrakurikuler untuk melihat detail presensi</CardDescription>
+                            </div>
+                        </div>
+                        <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                            {filteredEkskul.length} Kegiatan
+                        </Badge>
+                    </div>
+                </CardHeader>
                 <CardContent className="p-0">
                     {/* Toolbar */}
                     <div className="p-4 border-b">

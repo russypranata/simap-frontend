@@ -18,6 +18,7 @@ import {
     Award,
     Activity,
     Star,
+    BarChart3,
 } from "lucide-react";
 import { mutamayizinService, MutamayizinProfileData, MutamayizinDashboardStats } from "../services/mutamayizinService";
 
@@ -108,11 +109,19 @@ export const MutamayizinProfile: React.FC = () => {
             <Card>
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
-                        <CardTitle>Profil Saya</CardTitle>
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                <User className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <CardTitle>Profil Saya</CardTitle>
+                                <p className="text-sm text-muted-foreground mt-0.5 font-normal">Kelola informasi pribadi dan akun Anda</p>
+                            </div>
+                        </div>
                         <Button
                             onClick={handleEditProfile}
                             size="sm"
-                            className="flex items-center space-x-2"
+                            className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white"
                         >
                             <Edit className="h-4 w-4" />
                             <span>Edit Profil</span>
@@ -129,7 +138,7 @@ export const MutamayizinProfile: React.FC = () => {
                                         src={profileData.profilePicture}
                                         alt={profileData.name}
                                     />
-                                    <AvatarFallback className="text-3xl font-semibold bg-primary text-primary-foreground">
+                                    <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white">
                                         {initials}
                                     </AvatarFallback>
                                 </Avatar>
@@ -142,14 +151,11 @@ export const MutamayizinProfile: React.FC = () => {
                                 <h2 className="text-2xl font-bold text-foreground">
                                     {profileData.name}
                                 </h2>
-                                <Badge className="bg-primary text-primary-foreground">
+                                <Badge className="bg-blue-800 text-white">
                                     {profileData.role}
                                 </Badge>
                                 <p className="text-sm text-muted-foreground">
                                     NIP: {profileData.nip}
-                                </p>
-                                <p className="text-sm font-medium text-primary">
-                                    Program: {profileData.programName}
                                 </p>
                             </div>
                         </div>
@@ -222,16 +228,24 @@ export const MutamayizinProfile: React.FC = () => {
 
             {/* Program Statistics */}
             <Card>
-                <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold mb-4">Statistik Program Mutamayizin</h3>
+                <CardContent className="px-6">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                            <BarChart3 className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold">Statistik Program Mutamayizin</h3>
+                            <p className="text-sm text-muted-foreground">Ringkasan performa dan partisipasi siswa</p>
+                        </div>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
                             <div className="p-2 rounded-full bg-blue-100">
-                                <Users className="h-5 w-5 text-blue-600" />
+                                <Users className="h-5 w-5 text-blue-800" />
                             </div>
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Total Siswa</p>
-                                <p className="text-lg font-semibold">
+                                <p className="text-lg font-semibold text-blue-800">
                                     {stats.totalStudents}
                                 </p>
                             </div>
