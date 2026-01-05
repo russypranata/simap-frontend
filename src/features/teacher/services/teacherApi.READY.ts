@@ -1,5 +1,5 @@
 // Teacher API service - READY FOR REAL API
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import {
     Teacher,
     TeacherClass,
@@ -143,7 +143,7 @@ const mockAxios = {
 };
 
 // Helper function to choose between mock and real API
-const getApiClient = () => (USE_MOCK ? mockAxios : apiClient);
+const getApiClient = (): AxiosInstance => (USE_MOCK ? (mockAxios as unknown as AxiosInstance) : apiClient);
 
 // Teacher API service
 export const teacherApi = {
