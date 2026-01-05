@@ -39,6 +39,8 @@ export interface SidebarItem {
     condition?: boolean;
     subItems?: SidebarItem[];
     isExternal?: boolean;
+    defaultOpen?: boolean;
+    isGroup?: boolean;
 }
 
 interface SidebarBaseProps {
@@ -56,7 +58,18 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
 }) => {
     const { collapsed, setCollapsed } = useSidebarContext();
     const pathname = usePathname();
-    const [openSubmenus, setOpenSubmenus] = useState<string[]>([]);
+
+    // Initialize openSubmenus with items that have defaultOpen: true or have active children
+    const getDefaultOpenSubmenus = () => {
+        return menuItems
+            .filter(item =>
+                item.defaultOpen ||
+                item.subItems?.some(sub => pathname === sub.href || pathname?.startsWith(sub.href))
+            )
+            .map(item => item.href);
+    };
+
+    const [openSubmenus, setOpenSubmenus] = useState<string[]>(getDefaultOpenSubmenus);
 
     const toggleSubmenu = (href: string) => {
         setOpenSubmenus((prev) =>
@@ -120,10 +133,91 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
                                 const hasSubItems = item.subItems && item.subItems.length > 0;
                                 const isSubmenuOpen = openSubmenus.includes(item.href);
                                 const isChildActive = item.subItems?.some(
-                                    (sub) => pathname === sub.href
+                                    (sub) => pathname === sub.href || pathname?.startsWith(sub.href + "/")
                                 );
 
                                 if (hasSubItems && !collapsed) {
+                                    // Check if this is a static group (always visible, no collapse)
+                                    if (item.isGroup) {
+                                        return (
+                                            <div key={item.href}>
+                                                {/* Group Label - Use Button for consistent alignment */}
+                                                <Button
+                                                    variant="ghost"
+                                                    className="w-full h-11 px-3 justify-start mb-1 cursor-default hover:bg-transparent"
+                                                    disabled={false}
+                                                    tabIndex={-1}
+                                                >
+                                                    <Icon className="h-5 w-5 mr-3 text-muted-foreground" />
+                                                    <span className="text-sm font-medium text-muted-foreground">
+                                                        {item.title}
+                                                    </span>
+                                                </Button>
+                                                {/* Sub Items - With left border connector */}
+                                                <div className="ml-5 pl-3 border-l-2 border-muted space-y-1">
+                                                    {item.subItems!.map((subItem) => {
+                                                        // Check if any other submenu has a more specific match
+                                                        const hasMoreSpecificMatch = item.subItems!.some(
+                                                            other =>
+                                                                other.href !== subItem.href &&
+                                                                other.href.startsWith(subItem.href) &&
+                                                                (pathname === other.href || pathname?.startsWith(other.href + "/"))
+                                                        );
+
+                                                        // Only active if exact match or starts with this href (but no more specific match exists)
+                                                        const isSubActive = !hasMoreSpecificMatch && (
+                                                            pathname === subItem.href ||
+                                                            (pathname?.startsWith(subItem.href + "/") ?? false)
+                                                        );
+                                                        const SubIcon = subItem.icon;
+
+                                                        const ButtonContent = (
+                                                            <Button
+                                                                variant={isSubActive ? "secondary" : "ghost"}
+                                                                className={cn(
+                                                                    "w-full justify-start h-10 px-3 text-sm",
+                                                                    isSubActive &&
+                                                                    "bg-primary text-primary-foreground hover:bg-primary/90"
+                                                                )}
+                                                            >
+                                                                <SubIcon
+                                                                    className={cn(
+                                                                        "h-4 w-4 mr-3",
+                                                                        isSubActive ? "" : "opacity-70"
+                                                                    )}
+                                                                />
+                                                                <span className="flex-1 text-left truncate">
+                                                                    {subItem.title}
+                                                                </span>
+                                                            </Button>
+                                                        );
+
+                                                        if (subItem.isExternal) {
+                                                            return (
+                                                                <a
+                                                                    key={subItem.href}
+                                                                    href={subItem.href}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="block"
+                                                                >
+                                                                    {ButtonContent}
+                                                                </a>
+                                                            );
+                                                        }
+
+                                                        return (
+                                                            <Link key={subItem.href} href={subItem.href}>
+                                                                {ButtonContent}
+                                                            </Link>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+
+                                    // Collapsible submenu (existing behavior)
                                     return (
                                         <Collapsible
                                             key={item.href}
@@ -152,16 +246,28 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
                                                     />
                                                 </Button>
                                             </CollapsibleTrigger>
-                                            <CollapsibleContent className="space-y-1">
+                                            <CollapsibleContent className="ml-5 pl-3 border-l-2 border-muted space-y-1">
                                                 {item.subItems!.map((subItem) => {
-                                                    const isSubActive = pathname === subItem.href;
+                                                    // Check if any other submenu has a more specific match
+                                                    const hasMoreSpecificMatch = item.subItems!.some(
+                                                        other =>
+                                                            other.href !== subItem.href &&
+                                                            other.href.startsWith(subItem.href) &&
+                                                            (pathname === other.href || pathname?.startsWith(other.href + "/"))
+                                                    );
+
+                                                    // Only active if exact match or starts with this href (but no more specific match exists)
+                                                    const isSubActive = !hasMoreSpecificMatch && (
+                                                        pathname === subItem.href ||
+                                                        (pathname?.startsWith(subItem.href + "/") ?? false)
+                                                    );
                                                     const SubIcon = subItem.icon;
 
                                                     const ButtonContent = (
                                                         <Button
                                                             variant="ghost"
                                                             className={cn(
-                                                                "w-full justify-start h-9 pl-12 pr-3 text-sm mb-1",
+                                                                "w-full justify-start h-10 px-3 text-sm mb-1",
                                                                 isSubActive
                                                                     ? "text-primary font-medium bg-primary/5"
                                                                     : "text-foreground hover:bg-muted/50"

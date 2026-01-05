@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import {
     Calendar,
+    CalendarCheck,
     Users,
     TrendingUp,
     Search,
@@ -48,6 +49,17 @@ const mockEkstrakurikulerData: Record<string, any> = {
 const mockAttendanceHistory = [
     {
         id: 1,
+        date: "2026-01-02",
+        activity: "Pertemuan Rutin",
+        tutorStatus: "hadir",
+        totalPresent: 42,
+        totalAbsent: 3,
+        percentage: 93,
+        semester: "ganjil",
+        academicYear: "2025/2026",
+    },
+    {
+        id: 2,
         date: "2024-12-20",
         activity: "Pertemuan Rutin",
         tutorStatus: "hadir",
@@ -58,7 +70,7 @@ const mockAttendanceHistory = [
         academicYear: "2024/2025",
     },
     {
-        id: 2,
+        id: 3,
         date: "2024-11-29",
         activity: "Jambore Sekolah",
         tutorStatus: "hadir",
@@ -69,7 +81,7 @@ const mockAttendanceHistory = [
         academicYear: "2024/2025",
     },
     {
-        id: 3,
+        id: 4,
         date: "2024-10-25",
         activity: "Persiapan Lomba",
         tutorStatus: "hadir",
@@ -80,7 +92,7 @@ const mockAttendanceHistory = [
         academicYear: "2024/2025",
     },
     {
-        id: 4,
+        id: 5,
         date: "2024-09-20",
         activity: "Simulasi Kegiatan",
         tutorStatus: "hadir",
@@ -205,14 +217,14 @@ const mockAttendanceHistory = [
 export default function EkstrakurikulerAttendancePage() {
     const router = useRouter();
     const params = useParams();
+    const searchParams = useSearchParams();
     const ekstrakurikulerId = params.ekstrakurikuler as string;
 
     const ekskul = mockEkstrakurikulerData[ekstrakurikulerId];
 
     const [searchQuery, setSearchQuery] = useState("");
-    const [academicYearFilter, setAcademicYearFilter] = useState("all");
-    const [semesterFilter, setSemesterFilter] = useState("all");
-    const [monthFilter, setMonthFilter] = useState("all");
+    const [academicYearFilter, setAcademicYearFilter] = useState(searchParams.get("year") || "2025/2026");
+    const [semesterFilter, setSemesterFilter] = useState(searchParams.get("semester") || "Ganjil");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -230,26 +242,23 @@ export default function EkstrakurikulerAttendancePage() {
         );
     }
 
-    // Calculate stats
-    const totalMeetings = mockAttendanceHistory.length;
-    const avgAttendance = Math.round(
-        mockAttendanceHistory.reduce((sum, record) => sum + record.percentage, 0) / totalMeetings
-    );
-
     // Filter
     const filteredHistory = mockAttendanceHistory.filter((record) => {
-        const date = new Date(record.date);
-        const month = date.getMonth() + 1; // 1-12
-
         const matchesAcademicYear = academicYearFilter === "all" || record.academicYear === academicYearFilter;
-        const matchesSemester = semesterFilter === "all" || record.semester === semesterFilter;
-        const matchesMonth = monthFilter === "all" || month.toString() === monthFilter;
+        const matchesSemester = semesterFilter === "all" || record.semester === semesterFilter.toLowerCase();
 
         const formattedDate = formatDate(record.date, "dd MMMM yyyy").toLowerCase();
         const matchesSearch = formattedDate.includes(searchQuery.toLowerCase());
 
-        return matchesSearch && matchesAcademicYear && matchesSemester && matchesMonth;
+        return matchesSearch && matchesAcademicYear && matchesSemester;
     });
+
+    // Calculate stats based on filtered data
+    const totalMeetings = filteredHistory.length;
+    const avgAttendance = totalMeetings > 0 ? Math.round(
+        filteredHistory.reduce((sum, record) => sum + record.percentage, 0) / totalMeetings
+    ) : 0;
+    const lastMeeting = filteredHistory.length > 0 ? filteredHistory[0].date : null;
 
     // Pagination
     const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
@@ -257,6 +266,16 @@ export default function EkstrakurikulerAttendancePage() {
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
+
+    const getSemesterLabel = (sem: string) => {
+        if (sem === "all") return "Semua Semester";
+        return sem === "ganjil" ? "Semester Ganjil" : "Semester Genap";
+    };
+
+    const getAcademicYearLabel = (year: string) => {
+        if (year === "all") return "Semua Tahun";
+        return `TA ${year}`;
+    };
 
     const getAttendanceBadgeColor = (percentage: number) => {
         if (percentage >= 90) return "bg-green-100 text-green-700 border-green-200";
@@ -277,56 +296,71 @@ export default function EkstrakurikulerAttendancePage() {
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
-                        <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">{ekskul.name}</span>
+                    <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight">
+                        <div>
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">{ekskul.name}</span>
+                        </div>
+                        <div className="p-2 bg-blue-50 border border-blue-100 rounded-lg">
+                            <CalendarCheck className="h-5 w-5 text-blue-700" />
+                        </div>
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Tutor: {ekskul.tutor} • {ekskul.category}
+                        Riwayat pertemuan dan kehadiran ekstrakurikuler {ekskul.name}
                     </p>
+                    <div className="flex items-center gap-2 mt-3">
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                            <Calendar className="h-4 w-4" />
+                            <span className="text-sm font-semibold">Tutor: {ekskul.tutor}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {/* Stats Cards */}
             <Card className="overflow-hidden p-0">
-                <div className="bg-blue-800 p-5 relative overflow-hidden">
+                <div className="bg-blue-800 p-4 relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
                         <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
                     </div>
-                    <div className="flex items-center gap-4 relative z-10">
-                        <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                            <TrendingUp className="h-7 w-7 text-white" />
+                    <div className="flex items-center gap-3 relative z-10">
+                        <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
+                            <TrendingUp className="h-6 w-6 text-white" />
                         </div>
-                        <div>
+                        <div className="flex-1">
                             <h2 className="text-xl font-bold text-white">Statistik Presensi</h2>
-                            <p className="text-blue-100 text-sm">Ringkasan performa kehadiran semester ganjil</p>
+                            <p className="text-blue-100 text-sm">
+                                Ringkasan performa kehadiran TA {academicYearFilter} {semesterFilter === "all" ? "(1 Tahun Penuh)" : `Semester ${semesterFilter}`}
+                            </p>
                         </div>
                     </div>
                 </div>
                 <CardContent className="p-0">
                     <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x">
-                        <div className="p-3 text-center">
-                            <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
-                                <Calendar className="h-5 w-5 text-purple-600" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
+                                <Calendar className="h-4 w-4 text-blue-800" />
                             </div>
                             <p className="text-2xl font-bold">{totalMeetings}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Pertemuan</p>
                         </div>
 
-                        <div className="p-3 text-center">
-                            <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
-                                <TrendingUp className="h-5 w-5 text-green-600" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-green-100 rounded-full mb-1.5">
+                                <TrendingUp className="h-4 w-4 text-green-600" />
                             </div>
                             <p className="text-2xl font-bold text-green-600">{avgAttendance}%</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Rata-rata Kehadiran</p>
                         </div>
 
-                        <div className="p-3 text-center">
-                            <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
-                                <Users className="h-5 w-5 text-blue-600" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-purple-100 rounded-full mb-1.5">
+                                <Users className="h-4 w-4 text-purple-600" />
                             </div>
-                            <p className="text-lg font-bold">{formatDate(mockAttendanceHistory[0].date, "dd MMM yyyy")}</p>
+                            <p className="text-lg font-bold">
+                                {lastMeeting ? formatDate(lastMeeting, "dd MMM yyyy") : "-"}
+                            </p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Pertemuan Terakhir</p>
                         </div>
                     </div>
@@ -342,14 +376,14 @@ export default function EkstrakurikulerAttendancePage() {
                                 <ClipboardList className="h-5 w-5 text-primary" />
                             </div>
                             <div>
-                                <CardTitle className="text-lg font-semibold">Riwayat Pertemuan</CardTitle>
+                                <CardTitle className="text-lg font-semibold">Riwayat Presensi Kegiatan</CardTitle>
                                 <CardDescription>
-                                    Daftar riwayat pertemuan ekstrakurikuler {ekskul.name}
+                                    Daftar data kehadiran TA {academicYearFilter} {semesterFilter === "all" ? "(1 Tahun Penuh)" : `Semester ${semesterFilter}`}
                                 </CardDescription>
                             </div>
                         </div>
                         <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-                            {filteredHistory.length} Pertemuan
+                            {filteredHistory.length} Presensi
                         </Badge>
                     </div>
                 </CardHeader>
@@ -367,52 +401,32 @@ export default function EkstrakurikulerAttendancePage() {
                                         className="pl-9"
                                     />
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap gap-2">
                                     <Select value={academicYearFilter} onValueChange={setAcademicYearFilter}>
-                                        <SelectTrigger className="w-[140px]">
-                                            <SelectValue placeholder="Thn Ajaran" />
+                                        <SelectTrigger className="w-full sm:w-[150px] h-9">
+                                            <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                                            <SelectValue placeholder="TA" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">Semua T.A.</SelectItem>
                                             <SelectItem value="2025/2026">2025/2026</SelectItem>
                                             <SelectItem value="2024/2025">2024/2025</SelectItem>
                                             <SelectItem value="2023/2024">2023/2024</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <Select value={semesterFilter} onValueChange={setSemesterFilter}>
-                                        <SelectTrigger className="w-[140px]">
+                                        <SelectTrigger className="w-full sm:w-[140px] h-9">
                                             <SelectValue placeholder="Semester" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">Semua Sem</SelectItem>
-                                            <SelectItem value="ganjil">Sem. Ganjil</SelectItem>
-                                            <SelectItem value="genap">Sem. Genap</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <Select value={monthFilter} onValueChange={setMonthFilter}>
-                                        <SelectTrigger className="w-[140px]">
-                                            <SelectValue placeholder="Bulan" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">Semua Bulan</SelectItem>
-                                            <SelectItem value="1">Januari</SelectItem>
-                                            <SelectItem value="2">Februari</SelectItem>
-                                            <SelectItem value="3">Maret</SelectItem>
-                                            <SelectItem value="4">April</SelectItem>
-                                            <SelectItem value="5">Mei</SelectItem>
-                                            <SelectItem value="6">Juni</SelectItem>
-                                            <SelectItem value="7">Juli</SelectItem>
-                                            <SelectItem value="8">Agustus</SelectItem>
-                                            <SelectItem value="9">September</SelectItem>
-                                            <SelectItem value="10">Oktober</SelectItem>
-                                            <SelectItem value="11">November</SelectItem>
-                                            <SelectItem value="12">Desember</SelectItem>
+                                            <SelectItem value="all">1 Tahun Penuh</SelectItem>
+                                            <SelectItem value="Ganjil">Ganjil</SelectItem>
+                                            <SelectItem value="Genap">Genap</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button variant="outline">
+                                <Button className="bg-blue-800 hover:bg-blue-900 text-white">
                                     <Download className="h-4 w-4 mr-2" />
                                     Export
                                 </Button>
@@ -436,66 +450,84 @@ export default function EkstrakurikulerAttendancePage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {paginatedHistory.map((record, index) => {
-                                    const globalIndex = (currentPage - 1) * itemsPerPage + index + 1;
-                                    return (
-                                        <tr key={record.id} className="border-b hover:bg-muted/30 transition-colors">
-                                            <td className="p-4 text-sm">{globalIndex}</td>
-                                            <td className="p-4 text-sm">
-                                                {formatDate(record.date, "dd MMMM yyyy")}
-                                            </td>
-
-                                            <td className="p-4">
-                                                {record.tutorStatus === "hadir" ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                                                            <CheckCircle className="h-4 w-4 text-green-600" />
-                                                        </div>
-                                                        <span className="text-sm font-medium">{ekskul.tutor}</span>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="h-7 w-7 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                                                            <AlertCircle className="h-4 w-4 text-amber-600" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm font-medium text-amber-700">Belum Terisi</p>
-                                                            <p className="text-xs text-muted-foreground">Tutor belum mengisi presensi</p>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 min-w-[3rem] justify-center">
-                                                    {record.totalPresent}
-                                                </Badge>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200 min-w-[3rem] justify-center">
-                                                    {record.totalAbsent}
-                                                </Badge>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <Badge variant="outline" className={getAttendanceBadgeColor(record.percentage)}>
-                                                    {record.percentage}%
-                                                </Badge>
-                                            </td>
-                                            <td className="p-4">
-                                                <div className="flex items-center justify-center">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="h-8 px-3 bg-blue-100 hover:bg-blue-200 text-blue-800 hover:text-blue-900 border-blue-200 transition-colors"
-                                                        onClick={() => router.push(`/mutamayizin-coordinator/attendance/${ekstrakurikulerId}/${record.id}`)}
-                                                    >
-                                                        <Eye className="h-3.5 w-3.5 mr-1.5" />
-                                                        Detail
-                                                    </Button>
+                                {paginatedHistory.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={7} className="p-0">
+                                            <div className="flex flex-col items-center justify-center py-16">
+                                                <div className="p-4 bg-muted/50 rounded-full mb-4">
+                                                    <Calendar className="h-10 w-10 text-muted-foreground" />
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                                <h3 className="text-lg font-semibold text-foreground mb-1">
+                                                    Belum Ada Data Presensi
+                                                </h3>
+                                                <p className="text-sm text-muted-foreground text-center max-w-md px-4">
+                                                    Tidak ada data presensi untuk periode {getAcademicYearLabel(academicYearFilter)} - {getSemesterLabel(semesterFilter)}.
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    paginatedHistory.map((record, index) => {
+                                        const globalIndex = (currentPage - 1) * itemsPerPage + index + 1;
+                                        return (
+                                            <tr key={record.id} className="border-b hover:bg-muted/30 transition-colors">
+                                                <td className="p-4 text-sm">{globalIndex}</td>
+                                                <td className="p-4 text-sm">
+                                                    {formatDate(record.date, "dd MMMM yyyy")}
+                                                </td>
+
+                                                <td className="p-4">
+                                                    {record.tutorStatus === "hadir" ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                                            </div>
+                                                            <span className="text-sm font-medium">{ekskul.tutor}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="h-7 w-7 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                                                <AlertCircle className="h-4 w-4 text-amber-600" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-medium text-amber-700">Belum Terisi</p>
+                                                                <p className="text-xs text-muted-foreground">Tutor belum mengisi presensi</p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 min-w-[3rem] justify-center">
+                                                        {record.totalPresent}
+                                                    </Badge>
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200 min-w-[3rem] justify-center">
+                                                        {record.totalAbsent}
+                                                    </Badge>
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <Badge variant="outline" className={getAttendanceBadgeColor(record.percentage)}>
+                                                        {record.percentage}%
+                                                    </Badge>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="flex items-center justify-center">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-8 px-3 bg-blue-100 hover:bg-blue-200 text-blue-800 hover:text-blue-900 border-blue-200 transition-colors"
+                                                            onClick={() => router.push(`/mutamayizin-coordinator/attendance/${ekstrakurikulerId}/${record.id}`)}
+                                                        >
+                                                            <Eye className="h-3.5 w-3.5 mr-1.5" />
+                                                            Detail
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -578,6 +610,6 @@ export default function EkstrakurikulerAttendancePage() {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+        </div >
     );
 }

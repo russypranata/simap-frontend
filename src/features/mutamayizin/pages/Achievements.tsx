@@ -84,6 +84,90 @@ const mockAchievements: Achievement[] = [
         photo: null,
     },
     {
+        id: 101,
+        studentName: "Ahmad Rizki",
+        competitionName: "Kompetisi Sains Madrasah",
+        category: "Akademik",
+        rank: "Juara 3",
+        eventName: "KSM Kabupaten",
+        organizer: "Kemenag Kabupaten",
+        level: "Kabupaten",
+        date: "2024-08-10",
+        photo: null,
+    },
+    {
+        id: 102,
+        studentName: "Ahmad Rizki",
+        competitionName: "Lomba Cerdas Cermat",
+        category: "Akademik",
+        rank: "Juara 1",
+        eventName: "LCC Sekolah",
+        organizer: "OSIS SMA",
+        level: "Sekolah",
+        date: "2024-05-02",
+        photo: null,
+    },
+    {
+        id: 103,
+        studentName: "Ahmad Rizki",
+        competitionName: "Olimpiade Matematika Nasional",
+        category: "Akademik",
+        rank: "Juara 2",
+        eventName: "OSN Nasional",
+        organizer: "Puspresnas",
+        level: "Nasional",
+        date: "2023-11-15",
+        photo: null,
+    },
+    {
+        id: 104,
+        studentName: "Ahmad Rizki",
+        competitionName: "Lomba Pidato Bahasa Arab",
+        category: "Bahasa",
+        rank: "Juara 1",
+        eventName: "Festival Bahasa Arab",
+        organizer: "MGMP Bahasa Arab",
+        level: "Provinsi",
+        date: "2023-08-20",
+        photo: null,
+    },
+    {
+        id: 105,
+        studentName: "Ahmad Rizki",
+        competitionName: "Musabaqah Tilawatil Quran",
+        category: "Keagamaan",
+        rank: "Harapan 1",
+        eventName: "MTQ Kabupaten",
+        organizer: "LPTQ Kabupaten",
+        level: "Kabupaten",
+        date: "2023-05-10",
+        photo: null,
+    },
+    {
+        id: 106,
+        studentName: "Ahmad Rizki",
+        competitionName: "Lomba Kaligrafi Islam",
+        category: "Seni",
+        rank: "Juara 3",
+        eventName: "Pekan Seni Islami",
+        organizer: "Yayasan Al-Fityan",
+        level: "Sekolah",
+        date: "2023-03-05",
+        photo: null,
+    },
+    {
+        id: 107,
+        studentName: "Ahmad Rizki",
+        competitionName: "Science Fair Project",
+        category: "Sains",
+        rank: "Juara 2",
+        eventName: "Expo Pendidikan",
+        organizer: "Dinas Pendidikan Kota",
+        level: "Kecamatan",
+        date: "2023-01-20",
+        photo: null,
+    },
+    {
         id: 2,
         studentName: "Siti Nabila",
         competitionName: "Lomba Pidato Bahasa Inggris",
@@ -378,16 +462,16 @@ export const MutamayizinAchievements: React.FC = () => {
             {/* Stats Card with Decorative Header */}
             <Card className="overflow-hidden p-0">
                 {/* Decorative Header Section */}
-                <div className="bg-blue-800 p-5 relative overflow-hidden">
+                <div className="bg-blue-800 p-4 relative overflow-hidden">
                     {/* Decorative Geometric Pattern */}
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
                         <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
                     </div>
 
-                    <div className="flex items-center gap-4 relative z-10">
-                        <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                            <Award className="h-7 w-7 text-white" />
+                    <div className="flex items-center gap-3 relative z-10">
+                        <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
+                            <Award className="h-6 w-6 text-white" />
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-white">Statistik Prestasi</h2>
@@ -400,27 +484,27 @@ export const MutamayizinAchievements: React.FC = () => {
                 <CardContent className="p-0">
                     <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x">
                         {/* Total Prestasi */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
-                                <Trophy className="h-5 w-5 text-blue-800" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
+                                <Trophy className="h-4 w-4 text-blue-800" />
                             </div>
                             <p className="text-2xl font-bold text-blue-800">{totalAchievements}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Prestasi</p>
                         </div>
 
                         {/* Tingkat Nasional+ */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-red-100 rounded-full mb-2">
-                                <Star className="h-5 w-5 text-red-600" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-red-100 rounded-full mb-1.5">
+                                <Star className="h-4 w-4 text-red-600" />
                             </div>
                             <p className="text-2xl font-bold text-red-600">{nationalAchievements}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Nasional & Internasional</p>
                         </div>
 
                         {/* Juara 1 */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-emerald-100 rounded-full mb-2">
-                                <TrendingUp className="h-5 w-5 text-emerald-600" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-emerald-100 rounded-full mb-1.5">
+                                <TrendingUp className="h-4 w-4 text-emerald-600" />
                             </div>
                             <p className="text-2xl font-bold text-emerald-600">{firstPlaceCount}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Juara 1</p>
@@ -432,14 +516,19 @@ export const MutamayizinAchievements: React.FC = () => {
             {/* Achievements Table */}
             <Card>
                 <CardHeader className="pb-0">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                            <Award className="h-5 w-5 text-primary" />
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <Award className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-semibold">Daftar Prestasi Siswa</CardTitle>
+                                <CardDescription>Daftar pencapaian dan kompetisi siswa Program Mutamayizin</CardDescription>
+                            </div>
                         </div>
-                        <div>
-                            <CardTitle className="text-lg font-semibold">Daftar Prestasi Siswa</CardTitle>
-                            <CardDescription>Daftar pencapaian dan kompetisi siswa Program Mutamayizin</CardDescription>
-                        </div>
+                        <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                            {filteredAchievements.length} Prestasi
+                        </Badge>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">

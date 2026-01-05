@@ -156,54 +156,64 @@ export default function AttendanceDetailPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div className="flex items-center space-x-4">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                <div className="flex items-start space-x-4">
                     <Button
                         variant="outline"
                         size="icon"
                         onClick={() => router.back()}
+                        className="mt-1"
                     >
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Detail Riwayat </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Presensi</span>
+                        <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight">
+                            <div>
+                                <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Detail Riwayat </span>
+                                <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Presensi</span>
+                            </div>
+                            <div className="p-2 bg-blue-50 border border-blue-100 rounded-lg">
+                                <Calendar className="h-5 w-5 text-blue-700" />
+                            </div>
                         </h1>
                         <p className="text-muted-foreground mt-1">
-                            Informasi detail kehadiran siswa pada pertemuan ekstrakurikuler
+                            Informasi detail kehadiran siswa pada kegiatan ekstrakurikuler
                         </p>
+                        <div className="flex items-center gap-2 mt-3">
+                            <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200 gap-1.5 px-3 py-1 text-sm font-semibold">
+                                <Users className="h-4 w-4" />
+                                Ekstrakurikuler {mockDetailData.ekstrakurikuler}
+                            </Badge>
+                        </div>
                     </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <Button variant="outline" className="gap-2">
-                        <Download className="h-4 w-4" />
-                        Export
-                    </Button>
                 </div>
             </div>
 
 
 
-            {/* Activity Info Card with Stats */}
+
             <Card className="overflow-hidden p-0 gap-0">
                 {/* Header */}
-                <div className="bg-blue-800 p-4 rounded-t-lg">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="bg-blue-800 p-4 rounded-t-lg relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
+                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
+                    </div>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 relative z-10">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-lg">
                                 <Calendar className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg text-white">{mockDetailData.activity}</h3>
-                                <p className="text-blue-100 text-sm">Ekstrakurikuler {mockDetailData.ekstrakurikuler}</p>
+                                <h3 className="font-bold text-lg text-white">Jadwal Kegiatan</h3>
+                                <div className="flex items-center gap-2 text-blue-100 text-sm mt-0.5">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    <span>Jumat, {mockDetailData.startTime} - {mockDetailData.endTime} WIB</span>
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Badge className="bg-blue-700/50 text-blue-100 hover:bg-blue-700/70 border-0 gap-1.5 px-2.5 py-1 text-xs font-medium">
-                                <Clock className="h-3.5 w-3.5" />
-                                {mockDetailData.startTime} - {mockDetailData.endTime} WIB
-                            </Badge>
+                            {/* Removed redundant time badge */}
                             <Badge className="bg-green-500 text-white border-0 gap-1 px-2.5 py-1 text-xs font-medium">
                                 <CheckCircle className="h-3.5 w-3.5" />
                                 Presensi Lengkap
@@ -219,8 +229,8 @@ export default function AttendanceDetailPage() {
                             <Calendar className="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground">Tanggal</p>
-                            <p className="text-sm font-semibold text-gray-900">{formatDate(mockDetailData.date, "dd MMMM yyyy")}</p>
+                            <p className="text-xs text-muted-foreground">Tanggal Pelaksanaan</p>
+                            <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">{formatDate(mockDetailData.date, "dd MMMM yyyy")}</p>
                         </div>
                     </div>
 
@@ -230,7 +240,7 @@ export default function AttendanceDetailPage() {
                             <Clock className="h-4 w-4 text-purple-600" />
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground">Waktu</p>
+                            <p className="text-xs text-muted-foreground">Waktu Pelaksanaan</p>
                             <p className="text-sm font-semibold text-gray-900">{mockDetailData.startTime} - {mockDetailData.endTime} WIB</p>
                         </div>
                     </div>
@@ -275,7 +285,7 @@ export default function AttendanceDetailPage() {
                 {/* Stats Grid - 5 columns */}
                 <div className="grid grid-cols-5 divide-x">
                     {/* Total */}
-                    <div className="p-3 text-center">
+                    <div className="p-3 text-center hover:bg-muted/5 transition-colors">
                         <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
                             <Users className="h-4 w-4 text-blue-800" />
                         </div>
@@ -284,38 +294,38 @@ export default function AttendanceDetailPage() {
                     </div>
 
                     {/* Hadir */}
-                    <div className="p-3 text-center">
+                    <div className="p-3 text-center hover:bg-muted/5 transition-colors">
                         <div className="inline-flex p-2 bg-green-100 rounded-full mb-1.5">
-                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <CheckCircle className="h-4 w-4 text-green-700" />
                         </div>
-                        <p className="text-xl font-bold text-green-600">{stats.present}</p>
+                        <p className="text-xl font-bold text-green-700">{stats.present}</p>
                         <p className="text-xs text-muted-foreground">Hadir</p>
                     </div>
 
                     {/* Sakit */}
-                    <div className="p-3 text-center">
+                    <div className="p-3 text-center hover:bg-muted/5 transition-colors">
                         <div className="inline-flex p-2 bg-yellow-100 rounded-full mb-1.5">
-                            <AlertCircle className="h-4 w-4 text-yellow-600" />
+                            <AlertCircle className="h-4 w-4 text-yellow-700" />
                         </div>
-                        <p className="text-xl font-bold text-yellow-600">{stats.sick}</p>
+                        <p className="text-xl font-bold text-yellow-700">{stats.sick}</p>
                         <p className="text-xs text-muted-foreground">Sakit</p>
                     </div>
 
                     {/* Izin */}
-                    <div className="p-3 text-center">
+                    <div className="p-3 text-center hover:bg-muted/5 transition-colors">
                         <div className="inline-flex p-2 bg-sky-100 rounded-full mb-1.5">
-                            <Clock className="h-4 w-4 text-sky-600" />
+                            <Clock className="h-4 w-4 text-sky-700" />
                         </div>
-                        <p className="text-xl font-bold text-sky-600">{stats.permit}</p>
+                        <p className="text-xl font-bold text-sky-700">{stats.permit}</p>
                         <p className="text-xs text-muted-foreground">Izin</p>
                     </div>
 
                     {/* Alpa */}
-                    <div className="p-3 text-center">
+                    <div className="p-3 text-center hover:bg-muted/5 transition-colors">
                         <div className="inline-flex p-2 bg-red-100 rounded-full mb-1.5">
-                            <XCircle className="h-4 w-4 text-red-600" />
+                            <XCircle className="h-4 w-4 text-red-700" />
                         </div>
-                        <p className="text-xl font-bold text-red-600">{stats.absent}</p>
+                        <p className="text-xl font-bold text-red-700">{stats.absent}</p>
                         <p className="text-xs text-muted-foreground">Alpa</p>
                     </div>
                 </div>
@@ -384,7 +394,12 @@ export default function AttendanceDetailPage() {
                                     </Select>
                                 </div>
 
-
+                                <div className="flex items-center gap-2 border-l pl-2 ml-auto lg:ml-0">
+                                    <Button className="gap-2 bg-blue-800 hover:bg-blue-900 text-white">
+                                        <Download className="h-4 w-4" />
+                                        Export
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -549,6 +564,6 @@ export default function AttendanceDetailPage() {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+        </div >
     );
 }

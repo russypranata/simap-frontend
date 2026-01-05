@@ -9,6 +9,9 @@ import {
     CalendarCheck,
     Users,
     User,
+    Star,
+    FileSpreadsheet,
+    Briefcase,
 } from "lucide-react";
 
 export const MutamayizinSidebar: React.FC = () => {
@@ -26,14 +29,31 @@ export const MutamayizinSidebar: React.FC = () => {
             icon: Award,
         },
         {
-            title: "Presensi Ekskul",
-            href: "/mutamayizin-coordinator/attendance",
-            icon: CalendarCheck,
-        },
-        {
-            title: "Anggota Ekskul",
-            href: "/mutamayizin-coordinator/members",
-            icon: Users,
+            title: "Ekstrakurikuler",
+            href: "#ekstrakurikuler",
+            icon: Star,
+            subItems: [
+                {
+                    title: "Presensi",
+                    href: "/mutamayizin-coordinator/attendance",
+                    icon: CalendarCheck,
+                },
+                {
+                    title: "Anggota",
+                    href: "/mutamayizin-coordinator/members",
+                    icon: Users,
+                },
+                {
+                    title: "Data Tutor",
+                    href: "/mutamayizin-coordinator/tutors",
+                    icon: Briefcase,
+                },
+                {
+                    title: "Presensi Tutor",
+                    href: "/mutamayizin-coordinator/attendance/tutor-recap",
+                    icon: FileSpreadsheet,
+                },
+            ],
         },
         {
             title: "Profil",

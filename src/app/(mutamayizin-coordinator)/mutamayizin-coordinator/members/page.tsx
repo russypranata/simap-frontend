@@ -31,6 +31,8 @@ import {
     ShieldAlert,
     Mail,
     Phone,
+    Eye,
+    Edit,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -271,10 +273,6 @@ export default function MembersPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button variant="outline" className="gap-2">
-                        <Download className="h-4 w-4" />
-                        Export
-                    </Button>
                     <Button className="bg-blue-800 text-white hover:bg-blue-900 gap-2">
                         <UserPlus className="h-4 w-4" />
                         Tambah Anggota
@@ -284,16 +282,16 @@ export default function MembersPage() {
 
             {/* Stats Cards (Blue Theme like Achievements) */}
             <Card className="overflow-hidden p-0">
-                <div className="bg-blue-800 p-5 relative overflow-hidden">
+                <div className="bg-blue-800 p-4 relative overflow-hidden">
                     {/* Decorative Pattern */}
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
                         <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
                     </div>
 
-                    <div className="flex items-center gap-4 relative z-10">
-                        <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                            <Users className="h-7 w-7 text-white" />
+                    <div className="flex items-center gap-3 relative z-10">
+                        <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
+                            <Users className="h-6 w-6 text-white" />
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-white">Statistik Keanggotaan</h2>
@@ -305,27 +303,27 @@ export default function MembersPage() {
                 <CardContent className="p-0">
                     <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x">
                         {/* Total Members */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
-                                <Users className="h-5 w-5 text-blue-800" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
+                                <Users className="h-4 w-4 text-blue-800" />
                             </div>
                             <p className="text-2xl font-bold text-blue-800">{totalMembers}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Siswa Terdaftar</p>
                         </div>
 
                         {/* Active Members */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
-                                <ShieldCheck className="h-5 w-5 text-green-600" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-green-100 rounded-full mb-1.5">
+                                <ShieldCheck className="h-4 w-4 text-green-600" />
                             </div>
                             <p className="text-2xl font-bold text-green-600">{activeMembers}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Status Aktif</p>
                         </div>
 
                         {/* Multi Ekskul */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
-                                <Users className="h-5 w-5 text-purple-600" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-purple-100 rounded-full mb-1.5">
+                                <Users className="h-4 w-4 text-purple-600" />
                             </div>
                             <p className="text-2xl font-bold text-purple-600">{multiEkskulMembers}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Ikut &gt; 1 Ekskul</p>
@@ -362,7 +360,7 @@ export default function MembersPage() {
                             </div>
                             <div className="flex gap-2">
                                 <Select value={ekskulFilter} onValueChange={setEkskulFilter}>
-                                    <SelectTrigger className="w-[160px] h-11">
+                                    <SelectTrigger className="w-[240px] h-11">
                                         <Filter className="h-4 w-4 mr-2" />
                                         <SelectValue placeholder="Ekstrakurikuler" />
                                     </SelectTrigger>
@@ -374,7 +372,7 @@ export default function MembersPage() {
                                     </SelectContent>
                                 </Select>
                                 <Select value={classFilter} onValueChange={setClassFilter}>
-                                    <SelectTrigger className="w-[130px] h-11">
+                                    <SelectTrigger className="w-[180px] h-11">
                                         <Filter className="h-4 w-4 mr-2" />
                                         <SelectValue placeholder="Kelas" />
                                     </SelectTrigger>
@@ -385,6 +383,10 @@ export default function MembersPage() {
                                         <SelectItem value="XII">Kelas XII</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                <Button className="bg-blue-800 hover:bg-blue-900 text-white">
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Export
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -449,38 +451,67 @@ export default function MembersPage() {
                                                 <td className="p-4">
                                                     <div className="flex flex-wrap gap-1.5">
                                                         {member.ekstrakurikuler.map((ekskul, i) => (
-                                                            <Badge key={i} variant="outline" className="bg-white hover:bg-gray-50">
+                                                            <Badge key={i} className="bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100">
                                                                 {ekskul}
                                                             </Badge>
                                                         ))}
                                                     </div>
                                                 </td>
                                                 <td className="p-4">
-                                                    <Badge className={cn(
-                                                        "gap-1",
-                                                        member.status === "active"
-                                                            ? "bg-green-100 text-green-700 border-green-200"
-                                                            : "bg-gray-100 text-gray-700 border-gray-200"
-                                                    )}>
-                                                        {member.status === "active" ? <ShieldCheck className="h-3 w-3" /> : <ShieldAlert className="h-3 w-3" />}
-                                                        {member.status === "active" ? "Aktif" : "Non-aktif"}
+                                                    <Badge
+                                                        variant={member.status === "active" ? "default" : "secondary"}
+                                                        className={cn(
+                                                            "pl-2 pr-3 py-1 rounded-full border shadow-none font-medium", // Common styles
+                                                            member.status === "active"
+                                                                ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-100" // Active styles
+                                                                : "bg-red-100 text-red-700 border-red-200 hover:bg-red-100" // Inactive styles
+                                                        )}
+                                                    >
+                                                        <div className={cn(
+                                                            "mr-1.5 flex items-center justify-center rounded-full w-4 h-4",
+                                                            member.status === "active" ? "bg-green-600/20 text-green-600" : "bg-red-600/20 text-red-600"
+                                                        )}>
+                                                            {member.status === "active" ? (
+                                                                <ShieldCheck className="h-3 w-3" />
+                                                            ) : (
+                                                                <ShieldAlert className="h-3 w-3" />
+                                                            )}
+                                                        </div>
+                                                        {member.status === "active" ? "Aktif" : "Tidak Aktif"}
                                                     </Badge>
                                                 </td>
-                                                <td className="p-4 text-right">
+                                                <td className="p-4 text-center">
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-8 px-3 bg-blue-100 hover:bg-blue-200 text-blue-800 hover:text-blue-900 border-blue-200"
+                                                            >
                                                                 <MoreVertical className="h-4 w-4" />
                                                             </Button>
                                                         </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
+                                                        <DropdownMenuContent align="end" className="w-48">
                                                             <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                                                            <DropdownMenuItem onClick={() => router.push(`/mutamayizin-coordinator/members/${member.id}`)}>
-                                                                Lihat Detail
+                                                            <DropdownMenuItem onClick={() => router.push(`/mutamayizin-coordinator/members/${member.id}`)} className="focus:bg-blue-50">
+                                                                <div className="p-1.5 bg-blue-100 rounded-md mr-2">
+                                                                    <Eye className="h-3.5 w-3.5 text-blue-800" />
+                                                                </div>
+                                                                <span className="text-blue-800">Lihat Detail</span>
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem>Edit Data</DropdownMenuItem>
+                                                            <DropdownMenuItem className="focus:bg-amber-50">
+                                                                <div className="p-1.5 bg-amber-100 rounded-md mr-2">
+                                                                    <Edit className="h-3.5 w-3.5 text-amber-600" />
+                                                                </div>
+                                                                <span className="text-foreground">Edit Data</span>
+                                                            </DropdownMenuItem>
                                                             <DropdownMenuSeparator />
-                                                            <DropdownMenuItem className="text-red-600">Non-aktifkan</DropdownMenuItem>
+                                                            <DropdownMenuItem className="focus:bg-red-50">
+                                                                <div className="p-1.5 bg-red-100 rounded-md mr-2">
+                                                                    <ShieldAlert className="h-3.5 w-3.5 text-red-600" />
+                                                                </div>
+                                                                <span className="text-red-600">Non-aktifkan</span>
+                                                            </DropdownMenuItem>
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
                                                 </td>
@@ -563,6 +594,6 @@ export default function MembersPage() {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+        </div >
     );
 }
