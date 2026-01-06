@@ -14,33 +14,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
+  title: "SIMAP - Sistem Informasi Manajemen Administrasi Pendidikan",
   description:
-    "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
+    "SIMAP adalah sistem informasi manajemen sekolah terintegrasi yang memudahkan pengelolaan akademik, kesiswaan, dan administrasi. Mendukung peran Guru, Wali Kelas, Siswa, Orang Tua, hingga pengelola Ekstrakurikuler dan Mutamayizin.",
   keywords: [
-    "Z.ai",
-    "Next.js",
-    "TypeScript",
-    "Tailwind CSS",
-    "shadcn/ui",
-    "AI development",
-    "React",
+    "SIMAP",
+    "Sistem Informasi Sekolah",
+    "Manajemen Pendidikan",
+    "E-Rapor",
+    "Presensi",
+    "Ekstrakurikuler",
+    "Mutamayizin",
+    "Sekolah Digital",
+    "Aplikasi Sekolah",
   ],
-  authors: [{ name: "Z.ai Team" }],
-  icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
-  },
+  authors: [{ name: "SIMAP Team" }],
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-    url: "https://chat.z.ai",
-    siteName: "Z.ai",
+    title: "SIMAP - Sistem Informasi Manajemen Administrasi Pendidikan",
+    description: "Sistem informasi manajemen sekolah terintegrasi untuk akademik dan kesiswaan.",
     type: "website",
+    siteName: "SIMAP",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
+    title: "SIMAP - Sistem Informasi Manajemen Administrasi Pendidikan",
+    description: "Sistem informasi manajemen sekolah terintegrasi untuk akademik dan kesiswaan.",
   },
 };
 
