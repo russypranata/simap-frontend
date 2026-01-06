@@ -52,7 +52,7 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({
     return (
         <header
             className={`fixed top-0 z-50 w-full transition-all duration-500 ${scrolled
-                ? 'bg-white/95 backdrop-blur-xl shadow-lg border-b border-slate-200/50'
+                ? 'bg-white/95 backdrop-blur-xl border-b border-slate-200'
                 : 'bg-transparent'
                 }`}
         >

@@ -13,17 +13,23 @@ const slides = [
     {
         id: 1,
         image: '/assets/hero-slide-1.png',
-        alt: 'Student Attendance Dashboard'
+        alt: 'Student Attendance Dashboard',
+        title: 'Modern Dashboard',
+        description: 'Analisis Data Real-time'
     },
     {
         id: 2,
         image: '/assets/hero-slide-2.png',
-        alt: 'Classroom Management Interface'
+        alt: 'Classroom Management Interface',
+        title: 'Manajemen Kelas',
+        description: 'Digitalisasi Jurnal & Penilaian'
     },
     {
         id: 3,
         image: '/assets/hero-slide-3.png',
-        alt: 'School Administration System'
+        alt: 'School Administration System',
+        title: 'Administrasi Sekolah',
+        description: 'Laporan & Rekapitulasi Otomatis'
     }
 ];
 
@@ -66,9 +72,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoginClick }) => {
                 <div className="grid items-center gap-12 lg:grid-cols-2">
                     <div className="text-center lg:text-left space-y-4">
                         {/* Tagline Badge */}
-                        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-50 border border-blue-200 mx-auto lg:mx-0">
-                            <Sparkles className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm font-medium text-blue-700">
+                        {/* Tagline Badge */}
+                        <div className="inline-flex items-center p-1 pr-4 rounded-full bg-white border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.08)] hover:shadow-[0_5px_20px_rgba(37,99,235,0.15)] hover:border-blue-200 transition-all duration-300 mx-auto lg:mx-0 group cursor-default">
+                            <div className="flex items-center justify-center p-1.5 rounded-full bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-500 ease-out">
+                                <Sparkles className="w-4 h-4" />
+                            </div>
+                            <span className="ml-2.5 text-sm font-semibold text-slate-600 group-hover:text-blue-700 transition-colors duration-300">
                                 Integrated School Management System
                             </span>
                         </div>
@@ -158,7 +167,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoginClick }) => {
                                             transformOrigin: 'top center',
                                         }}
                                     >
-                                        <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border-2 border-white bg-white relative">
+                                        <div className="w-full h-full rounded-2xl overflow-hidden border border-slate-200 bg-white relative">
                                             <Image
                                                 src={slide.image}
                                                 alt={slide.alt}
@@ -167,6 +176,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoginClick }) => {
                                                 priority={index === 0} // Priority load only the first/active slide
                                                 sizes="(max-width: 768px) 100vw, 480px"
                                             />
+                                            {/* Text Overlay */}
+                                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100" // Default hidden, show on hover
+                                                style={{ opacity: position === 0 ? 1 : 0 }} // Always show if active slide, otherwise follow hover logic or keep hidden. Let's make it visible for active slide only to reduce noise.
+                                            >
+                                                <h3 className="text-xl font-bold mb-1 drop-shadow-md">{slide.title}</h3>
+                                                <p className="text-sm text-gray-200 font-medium drop-shadow-sm">{slide.description}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 );
