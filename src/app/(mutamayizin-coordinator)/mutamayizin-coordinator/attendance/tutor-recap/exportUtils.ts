@@ -67,6 +67,7 @@ export const exportToCSV = (
 };
 
 // Export to Excel (XLSX)
+// Export to Excel (XLSX)
 export const exportToExcel = async (
     data: TutorAttendance[],
     filename: string = "rekap-presensi-tutor.xlsx"
@@ -74,34 +75,74 @@ export const exportToExcel = async (
     // Dynamically import xlsx library
     const XLSX = await import("xlsx");
 
-    const worksheet = XLSX.utils.json_to_sheet(
-        data.map((record, index) => ({
-            "No": index + 1,
-            "Tanggal": formatDate(record.date),
-            "Nama Tutor": record.tutorName,
-            "Ekstrakurikuler": record.ekstrakurikuler,
-            "Waktu Mulai": formatTime(record.startTime),
-            "Waktu Selesai": formatTime(record.endTime),
-            "Durasi (Menit)": record.duration,
-            "Honor": record.honor || 0,
-        }))
-    );
+    try {
+        // Attempt to load the template from the public folder
+        const templatePath = "/Salinan Presensi Kehadiran Tutor Ekstrakurikuler SMA (Jawaban).xlsx";
+        const response = await fetch(templatePath);
 
-    // Set column widths
-    worksheet["!cols"] = [
-        { wch: 5 },  // No
-        { wch: 18 }, // Tanggal
-        { wch: 25 }, // Nama Tutor
-        { wch: 20 }, // Ekstrakurikuler
-        { wch: 12 }, // Waktu Mulai
-        { wch: 12 }, // Waktu Selesai
-        { wch: 15 }, // Durasi
-        { wch: 15 }, // Honor
-    ];
+        if (!response.ok) {
+            throw new Error(`Template not found at ${templatePath}`);
+        }
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Presensi");
-    XLSX.writeFile(workbook, filename);
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+        // Assume the first sheet is the template
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+
+        // Map data to match template columns
+        // We assume standard columns: No, Tanggal, Nama, Ekskul, Mulai, Selesai, Durasi, Honor
+        const exportData = data.map((record, index) => [
+            index + 1,
+            formatDate(record.date),
+            record.tutorName,
+            record.ekstrakurikuler,
+            formatTime(record.startTime),
+            formatTime(record.endTime),
+            record.duration,
+            record.honor || 0
+        ]);
+
+        // Write data starting from row 6 (A6) to skip headers
+        // We use sheet_add_aoa (Array of Arrays) for precise control without object keys
+        XLSX.utils.sheet_add_aoa(worksheet, exportData, { origin: "A6" });
+
+        XLSX.writeFile(workbook, filename);
+
+    } catch (error) {
+        console.warn("Falling back to basic export due to error:", error);
+
+        // Fallback: Create a new workbook from scratch
+        const worksheet = XLSX.utils.json_to_sheet(
+            data.map((record, index) => ({
+                "No": index + 1,
+                "Tanggal": formatDate(record.date),
+                "Nama Tutor": record.tutorName,
+                "Ekstrakurikuler": record.ekstrakurikuler,
+                "Waktu Mulai": formatTime(record.startTime),
+                "Waktu Selesai": formatTime(record.endTime),
+                "Durasi (Menit)": record.duration,
+                "Honor": record.honor || 0,
+            }))
+        );
+
+        // Set column widths for fallback
+        worksheet["!cols"] = [
+            { wch: 5 },  // No
+            { wch: 18 }, // Tanggal
+            { wch: 25 }, // Nama Tutor
+            { wch: 20 }, // Ekstrakurikuler
+            { wch: 12 }, // Waktu Mulai
+            { wch: 12 }, // Waktu Selesai
+            { wch: 15 }, // Durasi
+            { wch: 15 }, // Honor
+        ];
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Presensi");
+        XLSX.writeFile(workbook, filename);
+    }
 };
 
 // Export to PDF

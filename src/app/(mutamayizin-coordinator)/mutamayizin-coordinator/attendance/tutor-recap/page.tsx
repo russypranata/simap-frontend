@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
     Card,
@@ -44,6 +44,7 @@ import {
     Eye,
     CheckCircle,
     FileType,
+    RefreshCw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -355,6 +356,18 @@ export default function TutorRecapPage() {
     // Export Preview State
     const [isExportPreviewOpen, setIsExportPreviewOpen] = useState(false);
     const [selectedExportFormat, setSelectedExportFormat] = useState<ExportFormat>("excel");
+    const [exportFilename, setExportFilename] = useState("");
+
+    // Update default filename when filters change or dialog opens
+    useEffect(() => {
+        if (isExportPreviewOpen) {
+            const ta = academicYearFilter === "all" ? "semua-ta" : academicYearFilter.replace("/", "-");
+            const smt = semesterFilter === "all" ? "1-tahun-penuh" : semesterFilter;
+            const defaultName = `rekap-presensi-tutor-${ta}-${smt}`;
+            // Only set if it hasn't been modified manually (optional logic, but typically resetting on open is safer/simpler for now)
+            setExportFilename(defaultName);
+        }
+    }, [isExportPreviewOpen, academicYearFilter, semesterFilter]);
 
     // Get unique tutors and ekstrakurikuler from localData
     const uniqueTutors = Array.from(new Set(localData.map(a => a.tutorName))).sort();
@@ -400,19 +413,18 @@ export default function TutorRecapPage() {
     };
 
     // Export Handler
+    // Export Handler
     const handleExport = async () => {
-        const filename = `rekap-presensi-tutor-${academicYearFilter.replace("/", "-")}-${semesterFilter}`;
-
         try {
             switch (selectedExportFormat) {
                 case "csv":
-                    exportToCSV(filteredAttendance, `${filename}.csv`);
+                    exportToCSV(filteredAttendance, `${exportFilename}.csv`);
                     break;
                 case "excel":
-                    await exportToExcel(filteredAttendance, `${filename}.xlsx`);
+                    await exportToExcel(filteredAttendance, `${exportFilename}.xlsx`);
                     break;
                 case "pdf":
-                    await exportToPDF(filteredAttendance, academicYearFilter, semesterFilter, `${filename}.pdf`);
+                    await exportToPDF(filteredAttendance, academicYearFilter, semesterFilter, `${exportFilename}.pdf`);
                     break;
             }
             setIsExportPreviewOpen(false);
@@ -480,11 +492,11 @@ export default function TutorRecapPage() {
                     <div className="flex items-center gap-3 mt-4">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                             <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Tahun Ajaran {academicYearFilter}</span>
+                            <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
                         </div>
                         <div className="h-4 w-[1px] bg-border" />
                         <span className="text-sm font-medium text-blue-800">
-                            {semesterFilter === "all" ? "1 Tahun Penuh" : `Semester ${semesterFilter}`}
+                            Semester Ganjil
                         </span>
                     </div>
                 </div>
@@ -956,13 +968,13 @@ export default function TutorRecapPage() {
                                 </div>
                                 <div>
                                     <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Semester</label>
-                                    <p className="font-semibold text-slate-900 text-sm mt-1">{semesterFilter}</p>
+                                    <p className="font-semibold text-slate-900 text-sm mt-1">{semesterFilter === "all" ? "1 Tahun Penuh" : semesterFilter}</p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Format Selection */}
-                        <div className="grid grid-cols-2 gap-4">
+                        {/* Format Selection & Filename */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <Label className="text-sm font-medium text-slate-700 mb-2 block">Format Export</Label>
                                 <div className="flex gap-2">
@@ -1005,6 +1017,37 @@ export default function TutorRecapPage() {
                                         <FileType className="h-3.5 w-3.5" />
                                         PDF
                                     </Button>
+                                </div>
+                            </div>
+
+                            {/* Filename Input */}
+                            <div>
+                                <Label htmlFor="filename" className="text-sm font-medium text-slate-700 mb-2 block">Nama File</Label>
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        id="filename"
+                                        value={exportFilename}
+                                        onChange={(e) => setExportFilename(e.target.value)}
+                                        placeholder="rekap-presensi-tutor..."
+                                        className="h-9"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-9 w-9 text-slate-400 hover:text-slate-600 shrink-0"
+                                        onClick={() => {
+                                            const ta = academicYearFilter === "all" ? "semua-ta" : academicYearFilter.replace("/", "-");
+                                            const smt = semesterFilter === "all" ? "1-tahun-penuh" : semesterFilter;
+                                            setExportFilename(`rekap-presensi-tutor-${ta}-${smt}`);
+                                        }}
+                                        title="Reset nama default"
+                                    >
+                                        <RefreshCw className="h-4 w-4" />
+                                    </Button>
+                                    <div className="px-3 py-2 bg-slate-100 border border-slate-200 rounded text-xs font-mono text-slate-500 whitespace-nowrap">
+                                        .{selectedExportFormat === "excel" ? "xlsx" : selectedExportFormat}
+                                    </div>
                                 </div>
                             </div>
                         </div>
