@@ -38,18 +38,37 @@ import {
     Clock,
     ChevronLeft,
     ChevronRight,
-    Pencil,
-    Save,
     FileText,
     Eye,
     CheckCircle,
     FileType,
     RefreshCw,
+    ArrowUpDown,
+    ArrowUp,
+    ArrowDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { exportToCSV, exportToExcel, exportToPDF } from "./exportUtils";
-import type { ExportFormat } from "./types";
+
+// Types
+type ExportFormat = "csv" | "excel" | "pdf";
+type SortField = "date" | "tutorName" | "ekstrakurikuler" | "startTime" | "endTime";
+type SortOrder = "asc" | "desc";
+
+// Helper Functions for Display
+const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+    }).format(date);
+};
+
+const formatTime = (timeString: string): string => {
+    const [hours, minutes] = timeString.split(":");
+    return `${hours}:${minutes}`;
+};
 
 // Interface
 interface TutorAttendance {
@@ -60,7 +79,6 @@ interface TutorAttendance {
     startTime: string;
     endTime: string;
     duration: number; // in minutes
-    honor?: number;
     academicYear: string; // e.g., "2024/2025", "2025/2026"
     semester: string; // "Ganjil" or "Genap"
 }
@@ -185,7 +203,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "15:00:00",
         endTime: "17:00:00",
         duration: 120,
-        honor: 70000,
+
         academicYear: "2024/2025",
         semester: "Ganjil",
     },
@@ -197,7 +215,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "15:00:00",
         endTime: "17:00:00",
         duration: 120,
-        honor: 70000,
+
         academicYear: "2024/2025",
         semester: "Ganjil",
     },
@@ -209,7 +227,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "15:00:00",
         endTime: "17:00:00",
         duration: 120,
-        honor: 70000,
+
         academicYear: "2024/2025",
         semester: "Ganjil",
     },
@@ -221,7 +239,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "15:00:00",
         endTime: "17:00:00",
         duration: 120,
-        honor: 70000,
+
         academicYear: "2024/2025",
         semester: "Ganjil",
     },
@@ -234,7 +252,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "15:30:00",
         endTime: "17:00:00",
         duration: 90,
-        honor: 80000,
+
         academicYear: "2025/2026",
         semester: "Ganjil",
     },
@@ -246,7 +264,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "15:30:00",
         endTime: "17:00:00",
         duration: 90,
-        honor: 80000,
+
         academicYear: "2025/2026",
         semester: "Ganjil",
     },
@@ -270,7 +288,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "15:30:00",
         endTime: "17:00:00",
         duration: 90,
-        honor: 80000,
+
         academicYear: "2025/2026",
         semester: "Ganjil",
     },
@@ -282,7 +300,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "15:30:00",
         endTime: "17:00:00",
         duration: 90,
-        honor: 80000,
+
         academicYear: "2025/2026",
         semester: "Ganjil",
     },
@@ -294,7 +312,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "15:30:00",
         endTime: "17:00:00",
         duration: 90,
-        honor: 80000,
+
         academicYear: "2025/2026",
         semester: "Ganjil",
     },
@@ -306,7 +324,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "15:30:00",
         endTime: "17:00:00",
         duration: 90,
-        honor: 80000,
+
         academicYear: "2025/2026",
         semester: "Ganjil",
     },
@@ -318,7 +336,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "16:00:00",
         endTime: "17:30:00",
         duration: 90,
-        honor: 75000,
+
         academicYear: "2025/2026",
         semester: "Ganjil",
     },
@@ -330,7 +348,7 @@ const mockTutorAttendance: TutorAttendance[] = [
         startTime: "16:00:00",
         endTime: "17:30:00",
         duration: 90,
-        honor: 75000,
+
         academicYear: "2025/2026",
         semester: "Ganjil",
     },
@@ -348,11 +366,9 @@ export default function TutorRecapPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Edit Honor State
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [selectedRecord, setSelectedRecord] = useState<TutorAttendance | null>(null);
-    const [editHonorValue, setEditHonorValue] = useState<string>("");
-
+    // Sorting State - Default: date descending (newest first)
+    const [sortField, setSortField] = useState<SortField>("date");
+    const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     // Export Preview State
     const [isExportPreviewOpen, setIsExportPreviewOpen] = useState(false);
     const [selectedExportFormat, setSelectedExportFormat] = useState<ExportFormat>("excel");
@@ -375,7 +391,7 @@ export default function TutorRecapPage() {
 
     // Filter logic
     const filteredAttendance = useMemo(() => {
-        return localData.filter((record) => {
+        const filtered = localData.filter((record) => {
             const matchesSearch =
                 record.tutorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 record.ekstrakurikuler.toLowerCase().includes(searchQuery.toLowerCase());
@@ -386,47 +402,89 @@ export default function TutorRecapPage() {
 
             return matchesSearch && matchesTutor && matchesEkskul && matchesAcademicYear && matchesSemester;
         });
-    }, [localData, searchQuery, tutorFilter, ekskulFilter, academicYearFilter, semesterFilter]);
 
-    const handleEditClick = (record: TutorAttendance) => {
-        setSelectedRecord(record);
-        // Format initial value with dots
-        const formatted = record.honor
-            ? new Intl.NumberFormat("id-ID").format(record.honor)
-            : "";
-        setEditHonorValue(formatted);
-        setIsEditDialogOpen(true);
-    };
+        // Sort the filtered data
+        return filtered.sort((a, b) => {
+            let comparison = 0;
 
-    const handleSaveHonor = () => {
-        if (!selectedRecord) return;
-
-        const newHonor = parseInt(editHonorValue.replace(/\D/g, "")) || 0;
-
-        setLocalData(prev => prev.map(item =>
-            item.id === selectedRecord.id
-                ? { ...item, honor: newHonor }
-                : item
-        ));
-
-        setIsEditDialogOpen(false);
-    };
-
-    // Export Handler
-    // Export Handler
-    const handleExport = async () => {
-        try {
-            switch (selectedExportFormat) {
-                case "csv":
-                    exportToCSV(filteredAttendance, `${exportFilename}.csv`);
+            switch (sortField) {
+                case "date":
+                    comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
                     break;
-                case "excel":
-                    await exportToExcel(filteredAttendance, `${exportFilename}.xlsx`);
+                case "tutorName":
+                    comparison = a.tutorName.localeCompare(b.tutorName);
                     break;
-                case "pdf":
-                    await exportToPDF(filteredAttendance, academicYearFilter, semesterFilter, `${exportFilename}.pdf`);
+                case "ekstrakurikuler":
+                    comparison = a.ekstrakurikuler.localeCompare(b.ekstrakurikuler);
+                    break;
+                case "startTime":
+                    comparison = a.startTime.localeCompare(b.startTime);
+                    break;
+                case "endTime":
+                    comparison = a.endTime.localeCompare(b.endTime);
                     break;
             }
+
+            return sortOrder === "asc" ? comparison : -comparison;
+        });
+    }, [localData, searchQuery, tutorFilter, ekskulFilter, academicYearFilter, semesterFilter, sortField, sortOrder]);
+
+    // Handle column header click for sorting
+    const handleSort = (field: SortField) => {
+        if (sortField === field) {
+            // Toggle order if same field
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+        } else {
+            // Set new field with default order
+            setSortField(field);
+            setSortOrder(field === "date" ? "desc" : "asc"); // Date defaults to desc, others to asc
+        }
+        setCurrentPage(1); // Reset to first page when sorting changes
+    };
+
+    // Render sort icon
+    const renderSortIcon = (field: SortField) => {
+        if (sortField !== field) {
+            return <ArrowUpDown className="h-4 w-4 ml-1 text-slate-400" />;
+        }
+        return sortOrder === "asc"
+            ? <ArrowUp className="h-4 w-4 ml-1 text-blue-600" />
+            : <ArrowDown className="h-4 w-4 ml-1 text-blue-600" />;
+    };
+
+
+
+    // Export Handler - Calls Laravel Backend API
+    const handleExport = async () => {
+        try {
+            // TODO: Replace with actual Laravel API endpoint
+            // const response = await fetch('/api/tutor-recap/export', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //         format: selectedExportFormat,
+            //         academicYear: academicYearFilter,
+            //         semester: semesterFilter,
+            //         tutorFilter,
+            //         ekskulFilter,
+            //         filename: exportFilename
+            //     })
+            // });
+            // 
+            // if (!response.ok) throw new Error('Export failed');
+            // 
+            // const blob = await response.blob();
+            // const url = window.URL.createObjectURL(blob);
+            // const link = document.createElement('a');
+            // link.href = url;
+            // const ext = selectedExportFormat === 'excel' ? 'xlsx' : selectedExportFormat;
+            // link.download = `${exportFilename}.${ext}`;
+            // link.click();
+            // window.URL.revokeObjectURL(url);
+
+            // Placeholder - remove after Laravel API is ready
+            alert(`Export ${selectedExportFormat.toUpperCase()} akan diproses oleh backend Laravel.\n\nFilename: ${exportFilename}\nFormat: ${selectedExportFormat}\nData: ${filteredAttendance.length} records`);
+
             setIsExportPreviewOpen(false);
         } catch (error) {
             console.error("Export error:", error);
@@ -531,7 +589,7 @@ export default function TutorRecapPage() {
                             <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
                                 <FileSpreadsheet className="h-4 w-4 text-blue-800" />
                             </div>
-                            <p className="text-2xl font-bold text-blue-800">{totalRecords}</p>
+                            <p className="text-2xl font-bold text-slate-900">{totalRecords}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Presensi</p>
                         </div>
 
@@ -540,7 +598,7 @@ export default function TutorRecapPage() {
                             <div className="inline-flex p-2 bg-green-100 rounded-full mb-1.5">
                                 <Users className="h-4 w-4 text-green-600" />
                             </div>
-                            <p className="text-2xl font-bold text-green-600">{totalTutors}</p>
+                            <p className="text-2xl font-bold text-slate-900">{totalTutors}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Tutor Aktif</p>
                         </div>
 
@@ -660,18 +718,57 @@ export default function TutorRecapPage() {
                             <thead className="bg-muted/50">
                                 <tr>
                                     <th className="text-center p-4 font-medium text-sm w-12">No</th>
-                                    <th className="text-left p-4 font-medium text-sm w-32">Tanggal</th>
-                                    <th className="text-left p-4 font-medium text-sm min-w-[200px]">Nama Tutor</th>
-                                    <th className="text-left p-4 font-medium text-sm w-40">Ekstrakurikuler</th>
-                                    <th className="text-center p-4 font-medium text-sm w-32">Waktu Mulai</th>
-                                    <th className="text-center p-4 font-medium text-sm w-32">Waktu Selesai</th>
-                                    <th className="text-center p-4 font-medium text-sm w-40">Honor</th>
+                                    <th
+                                        className="text-left p-4 font-medium text-sm w-32 cursor-pointer hover:bg-muted/80 transition-colors select-none"
+                                        onClick={() => handleSort("date")}
+                                    >
+                                        <div className="flex items-center">
+                                            Tanggal
+                                            {renderSortIcon("date")}
+                                        </div>
+                                    </th>
+                                    <th
+                                        className="text-left p-4 font-medium text-sm min-w-[200px] cursor-pointer hover:bg-muted/80 transition-colors select-none"
+                                        onClick={() => handleSort("tutorName")}
+                                    >
+                                        <div className="flex items-center">
+                                            Nama Tutor
+                                            {renderSortIcon("tutorName")}
+                                        </div>
+                                    </th>
+                                    <th
+                                        className="text-left p-4 font-medium text-sm w-40 cursor-pointer hover:bg-muted/80 transition-colors select-none"
+                                        onClick={() => handleSort("ekstrakurikuler")}
+                                    >
+                                        <div className="flex items-center">
+                                            Ekstrakurikuler
+                                            {renderSortIcon("ekstrakurikuler")}
+                                        </div>
+                                    </th>
+                                    <th
+                                        className="text-center p-4 font-medium text-sm w-32 cursor-pointer hover:bg-muted/80 transition-colors select-none"
+                                        onClick={() => handleSort("startTime")}
+                                    >
+                                        <div className="flex items-center justify-center">
+                                            Waktu Mulai
+                                            {renderSortIcon("startTime")}
+                                        </div>
+                                    </th>
+                                    <th
+                                        className="text-center p-4 font-medium text-sm w-32 cursor-pointer hover:bg-muted/80 transition-colors select-none"
+                                        onClick={() => handleSort("endTime")}
+                                    >
+                                        <div className="flex items-center justify-center">
+                                            Waktu Selesai
+                                            {renderSortIcon("endTime")}
+                                        </div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {paginatedAttendance.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="p-12">
+                                        <td colSpan={6} className="p-12">
                                             <div className="flex flex-col items-center justify-center text-center space-y-4">
                                                 <div className="rounded-full bg-muted p-6">
                                                     <FileSpreadsheet className="h-12 w-12 text-muted-foreground" />
@@ -736,27 +833,6 @@ export default function TutorRecapPage() {
                                                 <td className="p-4 text-center">
                                                     <div className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 text-xs font-mono font-medium border border-slate-200">
                                                         {formatTime(record.endTime)}
-                                                    </div>
-                                                </td>
-                                                <td className="p-4 text-center">
-                                                    <div className="relative inline-block group/honor cursor-pointer" onClick={() => handleEditClick(record)}>
-                                                        <span className={cn(
-                                                            "transition-colors",
-                                                            record.honor
-                                                                ? "font-semibold text-slate-700 text-base"
-                                                                : "text-xs font-medium text-blue-800 bg-blue-100 px-3 py-1 rounded-md border border-blue-200 hover:bg-blue-200 hover:text-blue-900 placeholder-honor"
-                                                        )}>
-                                                            {record.honor ? formatCurrency(record.honor) : "Input Honor"}
-                                                        </span>
-                                                        {record.honor && (
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-7 w-7 text-slate-400 opacity-0 group-hover/honor:opacity-100 hover:bg-blue-100 hover:text-blue-700 transition-all rounded-full absolute -right-9 top-1/2 -translate-y-1/2"
-                                                            >
-                                                                <Pencil className="h-3.5 w-3.5" />
-                                                            </Button>
-                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -843,96 +919,6 @@ export default function TutorRecapPage() {
                     </div>
                 </CardContent>
             </Card>
-
-            {/* Edit DIALOG */}
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <div className="flex items-center gap-4 border-b pb-4 mb-2">
-                            <div className="p-2.5 bg-blue-50 rounded-full border border-blue-100">
-                                <FileSpreadsheet className="h-5 w-5 text-blue-700" />
-                            </div>
-                            <div>
-                                <DialogTitle className="text-lg text-slate-900">
-                                    {selectedRecord?.honor ? "Edit Honor Tutor" : "Input Honor Tutor"}
-                                </DialogTitle>
-                                <DialogDescription className="text-slate-500">
-                                    Masukkan nominal honor untuk kegiatan ini.
-                                </DialogDescription>
-                            </div>
-                        </div>
-                    </DialogHeader>
-                    {selectedRecord && (
-                        <div className="grid gap-5 py-2">
-                            {/* Info Card */}
-                            <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 space-y-3">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Tutor</label>
-                                        <p className="font-semibold text-slate-900 text-sm mt-0.5">{selectedRecord.tutorName}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Ekstrakurikuler</label>
-                                        <p className="font-semibold text-slate-900 text-sm mt-0.5">{selectedRecord.ekstrakurikuler}</p>
-                                    </div>
-                                </div>
-                                <div className="h-px bg-slate-200" />
-                                <div className="grid grid-cols-3 gap-2 text-sm">
-                                    <div>
-                                        <span className="text-muted-foreground text-xs block">Tanggal</span>
-                                        <span className="font-medium">{formatDate(selectedRecord.date)}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground text-xs block">Waktu</span>
-                                        <span className="font-mono text-xs font-medium bg-white px-1.5 py-0.5 rounded border border-slate-200">
-                                            {formatTime(selectedRecord.startTime)} - {formatTime(selectedRecord.endTime)}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <span className="text-muted-foreground text-xs block">Durasi</span>
-                                        <span className="font-medium text-emerald-600">{selectedRecord.duration} Menit</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Input Form */}
-                            <div className="space-y-2">
-                                <Label htmlFor="honor" className="text-sm font-semibold text-slate-700">
-                                    Nominal Honor (Rp)
-                                </Label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium">Rp</span>
-                                    <Input
-                                        id="honor"
-                                        value={editHonorValue}
-                                        onChange={(e) => {
-                                            // Remove non-digit characters
-                                            const rawValue = e.target.value.replace(/\D/g, "");
-                                            // Format with dots
-                                            const formatted = new Intl.NumberFormat("id-ID").format(Number(rawValue));
-                                            // Handle empty input
-                                            setEditHonorValue(rawValue === "" ? "" : formatted);
-                                        }}
-                                        className="pl-9 font-medium text-lg h-11 border-blue-200 focus-visible:ring-blue-500"
-                                        type="text"
-                                        placeholder="0"
-                                        autoComplete="off"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    <DialogFooter className="gap-2 sm:gap-0 mt-2">
-                        <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="border-slate-300 text-slate-700">
-                            Batal
-                        </Button>
-                        <Button type="submit" className="bg-blue-800 hover:bg-blue-900" onClick={handleSaveHonor}>
-                            <Save className="h-4 w-4 mr-2" />
-                            Simpan Perubahan
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
 
             {/* Export Preview DIALOG */}
             <Dialog open={isExportPreviewOpen} onOpenChange={setIsExportPreviewOpen}>
@@ -1072,7 +1058,6 @@ export default function TutorRecapPage() {
                                                 <th className="text-left px-3 py-3 font-semibold text-xs uppercase tracking-wider border-b-2 border-slate-300 text-slate-600">Ekskul</th>
                                                 <th className="text-center px-3 py-3 font-semibold text-xs uppercase tracking-wider border-b-2 border-slate-300 text-slate-600">Mulai</th>
                                                 <th className="text-center px-3 py-3 font-semibold text-xs uppercase tracking-wider border-b-2 border-slate-300 text-slate-600">Selesai</th>
-                                                <th className="text-right px-3 py-3 font-semibold text-xs uppercase tracking-wider border-b-2 border-slate-300 text-slate-600">Honor</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-200">
@@ -1090,13 +1075,6 @@ export default function TutorRecapPage() {
                                                     <td className="px-3 py-3 text-xs text-slate-600">{record.ekstrakurikuler}</td>
                                                     <td className="px-3 py-3 text-xs text-center font-mono text-slate-600 bg-slate-50/50">{formatTime(record.startTime)}</td>
                                                     <td className="px-3 py-3 text-xs text-center font-mono text-slate-600 bg-slate-50/50">{formatTime(record.endTime)}</td>
-                                                    <td className="px-3 py-3 text-xs text-right">
-                                                        {record.honor ? (
-                                                            <span className="font-mono font-semibold text-slate-700">{formatCurrency(record.honor)}</span>
-                                                        ) : (
-                                                            <span className="text-slate-400 font-medium">-</span>
-                                                        )}
-                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>

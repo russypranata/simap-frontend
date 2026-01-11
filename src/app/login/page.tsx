@@ -120,6 +120,10 @@ export default function LoginPage() {
                 login('pj_mutamayizin');
                 handleLoginNavigation('pj_mutamayizin');
                 return;
+            } else if (loginData.username === 'ortu' && loginData.password === '123') {
+                login('orang_tua');
+                handleLoginNavigation('orang_tua');
+                return;
             }
 
             throw new Error('Username atau password salah');

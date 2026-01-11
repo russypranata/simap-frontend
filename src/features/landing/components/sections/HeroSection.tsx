@@ -73,7 +73,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoginClick }) => {
                     <div className="text-center lg:text-left space-y-4">
                         {/* Tagline Badge */}
                         {/* Tagline Badge */}
-                        <div className="inline-flex items-center p-1 pr-4 rounded-full bg-white border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.08)] hover:shadow-[0_5px_20px_rgba(37,99,235,0.15)] hover:border-blue-200 transition-all duration-300 mx-auto lg:mx-0 group cursor-default">
+                        <div className="inline-flex items-center p-1 pr-4 rounded-full bg-white/60 backdrop-blur-sm border border-white/40 shadow-[0_2px_10px_rgba(0,0,0,0.08)] hover:shadow-[0_5px_20px_rgba(37,99,235,0.15)] hover:border-blue-200 transition-all duration-300 mx-auto lg:mx-0 group cursor-default">
                             <div className="flex items-center justify-center p-1.5 rounded-full bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-500 ease-out">
                                 <Sparkles className="w-4 h-4" />
                             </div>

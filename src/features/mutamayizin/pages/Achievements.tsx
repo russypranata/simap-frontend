@@ -488,7 +488,7 @@ export const MutamayizinAchievements: React.FC = () => {
                             <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
                                 <Trophy className="h-4 w-4 text-blue-800" />
                             </div>
-                            <p className="text-2xl font-bold text-blue-800">{totalAchievements}</p>
+                            <p className="text-2xl font-bold text-slate-900">{totalAchievements}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Prestasi</p>
                         </div>
 
@@ -497,7 +497,7 @@ export const MutamayizinAchievements: React.FC = () => {
                             <div className="inline-flex p-2 bg-red-100 rounded-full mb-1.5">
                                 <Star className="h-4 w-4 text-red-600" />
                             </div>
-                            <p className="text-2xl font-bold text-red-600">{nationalAchievements}</p>
+                            <p className="text-2xl font-bold text-slate-900">{nationalAchievements}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Nasional & Internasional</p>
                         </div>
 

@@ -33,6 +33,7 @@ import {
     Phone,
     Eye,
     Edit,
+    Calendar,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -271,6 +272,16 @@ export default function MembersPage() {
                     <p className="text-muted-foreground mt-1">
                         Kelola data siswa yang terdaftar dalam program ekstrakurikuler
                     </p>
+                    <div className="flex items-center gap-3 mt-4">
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                            <Calendar className="h-4 w-4" />
+                            <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
+                        </div>
+                        <div className="h-4 w-[1px] bg-border" />
+                        <span className="text-sm font-medium text-blue-800">
+                            Semester Ganjil
+                        </span>
+                    </div>
                 </div>
                 <div className="flex items-center gap-3">
                     <Button className="bg-blue-800 text-white hover:bg-blue-900 gap-2">
@@ -307,7 +318,7 @@ export default function MembersPage() {
                             <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
                                 <Users className="h-4 w-4 text-blue-800" />
                             </div>
-                            <p className="text-2xl font-bold text-blue-800">{totalMembers}</p>
+                            <p className="text-2xl font-bold text-slate-900">{totalMembers}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Siswa Terdaftar</p>
                         </div>
 
@@ -316,7 +327,7 @@ export default function MembersPage() {
                             <div className="inline-flex p-2 bg-green-100 rounded-full mb-1.5">
                                 <ShieldCheck className="h-4 w-4 text-green-600" />
                             </div>
-                            <p className="text-2xl font-bold text-green-600">{activeMembers}</p>
+                            <p className="text-2xl font-bold text-slate-900">{activeMembers}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Status Aktif</p>
                         </div>
 

@@ -1,342 +1,505 @@
 "use client";
 
-import React from "react";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
+import React, { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import {
     Calendar,
-    BookOpen,
+    Award,
+    GraduationCap,
     Clock,
+    BookOpen,
+    CheckCircle,
+    Trophy,
+    Megaphone,
+    User,
+    ChevronRight,
     TrendingUp,
     AlertCircle,
-    Award,
-    CheckCircle,
-    Bell,
-    ArrowUp,
-    FileText,
-    MoreHorizontal,
-    GraduationCap,
-    Book,
+    Star,
     MapPin,
-    User
+    AlertTriangle,
+    ClipboardList,
 } from "lucide-react";
-import { formatDate } from "@/features/shared/utils/dateFormatter"; // Assuming this utility exists based on TeacherDashboard
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
-// ----------------------------------------------------------------------
-// Interfaces
-// ----------------------------------------------------------------------
-
-interface StatCardProps {
-    title: string;
-    value: string | number;
-    description: string;
-    icon: React.ComponentType<{ className?: string }>;
-    color: string;
-    bgColor: string;
-    trend?: {
-        value: number;
-        isUp: boolean;
-    };
+// Types
+interface TodayScheduleItem {
+    id: number;
+    time: string;
+    subject: string;
+    teacher: string;
+    room: string;
 }
 
-// ----------------------------------------------------------------------
-// Sub-components
-// ----------------------------------------------------------------------
+interface RecentAnnouncement {
+    id: number;
+    title: string;
+    category: string;
+    date: string;
+    isNew: boolean;
+}
 
-const StatCard: React.FC<StatCardProps> = ({
-    title,
-    value,
-    description,
-    icon: Icon,
-    color,
-    bgColor,
-    trend,
-}) => {
-    return (
-        <Card className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-none shadow-sm bg-white">
-            <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                    <div>
-                        <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
-                        <h3 className="text-2xl font-bold text-slate-800">{value}</h3>
-                    </div>
-                    <div className={`p-3 rounded-xl ${bgColor}`}>
-                        <Icon className={`h-5 w-5 ${color}`} />
-                    </div>
-                </div>
-                <div className="mt-4 flex items-center justify-between">
-                    {trend ? (
-                        <div className={`flex items-center text-xs font-medium ${trend.isUp ? "text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full" : "text-red-600 bg-red-50 px-2 py-1 rounded-full"}`}>
-                            <TrendingUp className={`h-3 w-3 mr-1 ${!trend.isUp && "rotate-180"}`} />
-                            {trend.value}% dari bulan lalu
-                        </div>
-                    ) : (
-                        <div className="text-xs text-slate-400">Update terbaru</div>
-                    )}
-                </div>
-                <p className="text-xs text-slate-400 mt-2">{description}</p>
-            </CardContent>
-        </Card>
-    );
-};
+// Mock data
+const mockTodaySchedule: TodayScheduleItem[] = [
+    { id: 1, time: "07:00", subject: "Biologi", teacher: "Bu Ani", room: "Lab Biologi" },
+    { id: 2, time: "08:30", subject: "Matematika", teacher: "Pak Ahmad", room: "XII IPA 1" },
+    { id: 3, time: "09:30", subject: "Bahasa Indonesia", teacher: "Bu Dewi", room: "XII IPA 1" },
+    { id: 4, time: "10:15", subject: "BK", teacher: "Bu Linda", room: "R. BK" },
+];
 
-// ----------------------------------------------------------------------
-// Main Component
-// ----------------------------------------------------------------------
+const mockAnnouncements: RecentAnnouncement[] = [
+    { id: 1, title: "Jadwal Ujian Akhir Semester Ganjil 2025/2026", category: "Penting", date: "10 Jan", isNew: true },
+    { id: 2, title: "Libur Semester Ganjil 2025/2026", category: "Jadwal", date: "9 Jan", isNew: true },
+    { id: 3, title: "Pendaftaran Lomba OSN 2026", category: "Akademik", date: "8 Jan", isNew: false },
+];
 
 export const StudentDashboard: React.FC = () => {
+    const [userName, setUserName] = useState<string>("Siswa");
+    const [currentTime, setCurrentTime] = useState(new Date());
 
-    // --- Mock Data ---
+    useEffect(() => {
+        setUserName("Ahmad Fauzan Ramadhan");
 
-    const studentInfo = {
-        name: "Ahmad Rizky",
-        class: "XII A",
-        nis: "2023001",
-        semester: "Ganjil 2025/2026"
+        // Update time every minute
+        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+        return () => clearInterval(timer);
+    }, []);
+
+    // Get greeting based on time
+    const greeting = useMemo(() => {
+        const hour = currentTime.getHours();
+        if (hour < 11) return "Selamat pagi";
+        if (hour < 15) return "Selamat siang";
+        if (hour < 18) return "Selamat sore";
+        return "Selamat malam";
+    }, [currentTime]);
+
+    // Mock stats
+    const stats = {
+        averageScore: 85.2,
+        rank: 5,
+        attendanceRate: 96,
+        ekstrakurikuler: 2,
+        unreadAnnouncements: 2,
+        violationCount: 3,  // Number of violations
     };
 
-    const stats = [
-        {
-            title: "Kehadiran",
-            value: "95%",
-            description: "Sangat Baik",
-            icon: CheckCircle,
-            color: "text-emerald-600",
-            bgColor: "bg-emerald-50",
-            trend: { value: 2, isUp: true }
-        },
-        {
-            title: "Poin Pelanggaran",
-            value: "0",
-            description: "Bersih",
-            icon: AlertCircle,
-            color: "text-blue-600",
-            bgColor: "bg-blue-50", // Changed from red to blue/green if 0
-        },
-        {
-            title: "Tugas Pending",
-            value: "3",
-            description: "Perlu dikerjakan",
-            icon: FileText,
-            color: "text-amber-600",
-            bgColor: "bg-amber-50",
-        },
-        {
-            title: "Rata-rata Nilai",
-            value: "88.5",
-            description: "Predikat A",
-            icon: Award,
-            color: "text-purple-600",
-            bgColor: "bg-purple-50",
-            trend: { value: 1.5, isUp: true }
-        }
-    ];
-
-    const todaySchedule = [
-        { time: "07:00 - 08:30", subject: "Matematika Wajib", teacher: "Pak Budi", room: "XII-A", status: "finished" },
-        { time: "08:30 - 10:00", subject: "Bahasa Inggris", teacher: "Ms. Sarah", room: "Lab Bahasa", status: "ongoing" },
-        { time: "10:15 - 11:45", subject: "Fisika", teacher: "Bu Rini", room: "Lab Fisika", status: "upcoming" },
-        { time: "13:00 - 14:30", subject: "Olahraga", teacher: "Pak Joko", room: "Lapangan", status: "upcoming" },
-    ];
-
-    const assignments = [
-        { id: 1, subject: "Matematika", title: "Latihan Soal Integral", deadline: "Besok, 23:59", priority: "high" },
-        { id: 2, subject: "Biologi", title: "Laporan Praktikum", deadline: "3 hari lagi", priority: "medium" },
-        { id: 3, subject: "Sejarah", title: "Makalah Revolusi", deadline: "Minggu depan", priority: "low" },
-    ];
-
-    const announcements = [
-        { id: 1, title: "Persiapan Ujian Tengah Semester", date: "20 Des 2025", category: "Akademik" },
-        { id: 2, title: "Jadwal Libur Awal Ramadhan", date: "18 Des 2025", category: "Umum" },
-    ];
-
     return (
-        <div className="space-y-8 pb-8">
-
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-                        Halo, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400">{studentInfo.name}</span> 👋
-                    </h1>
-                    <p className="text-slate-500 mt-1 flex items-center gap-2">
-                        <GraduationCap className="w-4 h-4" />
-                        {studentInfo.class} • NIS: {studentInfo.nis}
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Dashboard </span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Siswa</span>
+                        </h1>
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                            <GraduationCap className="h-5 w-5" />
+                        </div>
+                    </div>
+                    <p className="text-muted-foreground mt-1">
+                        {greeting}, <span className="font-medium text-foreground">{userName}</span>!
                     </p>
-                </div>
-                <div className="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-                    <div className="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-sm font-bold flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        {studentInfo.semester}
+                    <div className="flex items-center gap-3 mt-4">
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                            <Calendar className="h-4 w-4" />
+                            <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
+                        </div>
+                        <div className="h-4 w-[1px] bg-border" />
+                        <span className="text-sm font-medium text-blue-800">Semester Ganjil</span>
                     </div>
                 </div>
+                <div className="flex items-center gap-2">
+                    <Badge className="bg-blue-100 text-blue-800 border-blue-200 gap-1">
+                        <GraduationCap className="h-3.5 w-3.5" />
+                        XII IPA 1
+                    </Badge>
+                </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, idx) => (
-                    <StatCard key={idx} {...stat} />
-                ))}
-            </div>
+            {/* Warning Banner - Show if violations >= 3 or low grades */}
+            {(stats.violationCount >= 3 || stats.averageScore < 75) && (
+                <Card className={cn(
+                    "border-2",
+                    stats.violationCount >= 5 || stats.averageScore < 70
+                        ? "bg-red-50 border-red-300"
+                        : "bg-amber-50 border-amber-300"
+                )}>
+                    <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                            <div className={cn(
+                                "p-2 rounded-lg",
+                                stats.violationCount >= 5 || stats.averageScore < 70
+                                    ? "bg-red-100" : "bg-amber-100"
+                            )}>
+                                <AlertTriangle className={cn(
+                                    "h-5 w-5",
+                                    stats.violationCount >= 5 || stats.averageScore < 70
+                                        ? "text-red-600" : "text-amber-600"
+                                )} />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className={cn(
+                                    "font-semibold",
+                                    stats.violationCount >= 5 || stats.averageScore < 70
+                                        ? "text-red-900" : "text-amber-900"
+                                )}>
+                                    Perhatian Diperlukan!
+                                </h3>
+                                <p className={cn(
+                                    "text-sm mt-1",
+                                    stats.violationCount >= 5 || stats.averageScore < 70
+                                        ? "text-red-800" : "text-amber-800"
+                                )}>
+                                    {stats.violationCount >= 3 && `Kamu memiliki ${stats.violationCount} catatan pelanggaran. `}
+                                    {stats.averageScore < 75 && `Nilai rata-rata kamu di bawah KKM. `}
+                                    Segera perbaiki dan hubungi Guru BK jika membutuhkan bantuan.
+                                </p>
+                            </div>
+                            <Link href="/student/behavior">
+                                <Button variant="outline" size="sm" className="gap-1 text-amber-800 border-amber-300 hover:bg-amber-100">
+                                    Lihat Detail
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                {/* Left Content (2/3) */}
-                <div className="lg:col-span-2 space-y-8">
-
-                    {/* Today's Schedule */}
-                    <Card className="border-none shadow-sm bg-white overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="flex items-center gap-2 text-lg">
-                                    <Clock className="w-5 h-5 text-blue-600" />
-                                    Jadwal Hari Ini
-                                </CardTitle>
-                                <Badge variant="outline" className="bg-white">
-                                    {formatDate(new Date(), "dd MMMM yyyy")}
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+                {/* Rata-rata Nilai */}
+                <Link href="/student/grades">
+                    <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-blue-100 hover:border-blue-300 bg-gradient-to-br from-white to-blue-50/50">
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="p-2.5 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors">
+                                    <TrendingUp className="h-5 w-5 text-blue-700" />
+                                </div>
+                                <Badge className="bg-blue-100 text-blue-700 border-0 text-[10px] px-1.5">
+                                    {stats.averageScore >= 80 ? "Baik" : stats.averageScore >= 70 ? "Cukup" : "Kurang"}
                                 </Badge>
                             </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <div className="divide-y divide-slate-100">
-                                {todaySchedule.map((item, idx) => (
-                                    <div key={idx} className={`p-4 hover:bg-slate-50 transition-colors flex items-center justify-between ${item.status === 'ongoing' ? 'bg-blue-50/50' : ''}`}>
-                                        <div className="flex items-center gap-4">
-                                            <div className={`p-3 rounded-xl ${item.status === 'ongoing' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
-                                                <Book className="w-5 h-5" />
-                                            </div>
-                                            <div>
-                                                <h4 className={`font-bold ${item.status === 'ongoing' ? 'text-blue-900' : 'text-slate-800'}`}>{item.subject}</h4>
-                                                <p className="text-sm text-slate-500 flex items-center gap-2 mt-0.5">
-                                                    <User className="w-3 h-3" /> {item.teacher}
-                                                    <span className="text-slate-300">•</span>
-                                                    <MapPin className="w-3 h-3" /> {item.room}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-mono text-sm font-semibold text-slate-700">{item.time}</p>
-                                            <Badge
-                                                className={`mt-1 ${item.status === 'finished' ? 'bg-slate-100 text-slate-500 hover:bg-slate-100' :
-                                                    item.status === 'ongoing' ? 'bg-blue-500 hover:bg-blue-600' :
-                                                        'bg-amber-100 text-amber-700 hover:bg-amber-100'
-                                                    }`}
-                                            >
-                                                {item.status === 'finished' ? 'Selesai' : item.status === 'ongoing' ? 'Sedang Berlangsung' : 'Akan Datang'}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            <p className="text-2xl font-bold text-blue-800">{stats.averageScore}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">Rata-rata Nilai</p>
                         </CardContent>
                     </Card>
+                </Link>
 
-                    {/* Assignments */}
-                    <Card className="border-none shadow-sm bg-white">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-lg">
-                                <FileText className="w-5 h-5 text-amber-500" />
-                                Tugas & PR
-                            </CardTitle>
-                            <CardDescription>
-                                Jangan lupa kerjakan tugasmu tepat waktu!
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                {assignments.map((task) => (
-                                    <div key={task.id} className="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:border-amber-200 hover:bg-amber-50/30 transition-all group">
-                                        <div className="flex items-start gap-4">
-                                            <div className="mt-1">
-                                                <div className={`w-2 h-2 rounded-full ${task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-blue-500'}`} />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold text-slate-800 group-hover:text-amber-700 transition-colors">{task.title}</h4>
-                                                <p className="text-sm text-slate-500">{task.subject}</p>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className={`text-xs font-semibold ${task.priority === 'high' ? 'text-red-500' : 'text-slate-500'}`}>
-                                                {task.deadline}
-                                            </p>
-                                            <Button size="sm" variant="ghost" className="h-8 mt-1 text-slate-400 hover:text-amber-600">
-                                                Detail <MoreHorizontal className="w-3 h-3 ml-1" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
+                {/* Peringkat */}
+                <Link href="/student/grades">
+                    <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-amber-100 hover:border-amber-300 bg-gradient-to-br from-white to-amber-50/50">
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="p-2.5 bg-amber-100 rounded-xl group-hover:bg-amber-200 transition-colors">
+                                    <Award className="h-5 w-5 text-amber-600" />
+                                </div>
+                                <span className="text-[10px] text-muted-foreground">dari 32</span>
                             </div>
+                            <p className="text-2xl font-bold text-amber-600">#{stats.rank}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">Peringkat Kelas</p>
                         </CardContent>
                     </Card>
+                </Link>
 
-                </div>
-
-                {/* Right Content (Sidebar) */}
-                <div className="space-y-6">
-
-                    {/* Announcements Widget */}
-                    <Card className="border-none shadow-sm bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg flex items-center gap-2 text-white">
-                                    <Bell className="w-5 h-5" /> Info Sekolah
-                                </CardTitle>
-                                <Badge className="bg-white/20 hover:bg-white/30 text-white border-none">Baru</Badge>
+                {/* Kehadiran */}
+                <Link href="/student/attendance">
+                    <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-green-100 hover:border-green-300 bg-gradient-to-br from-white to-green-50/50">
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="p-2.5 bg-green-100 rounded-xl group-hover:bg-green-200 transition-colors">
+                                    <CheckCircle className="h-5 w-5 text-green-600" />
+                                </div>
+                                <Badge className={cn(
+                                    "border-0 text-[10px] px-1.5",
+                                    stats.attendanceRate >= 90 ? "bg-green-100 text-green-700" :
+                                        stats.attendanceRate >= 75 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                                )}>
+                                    {stats.attendanceRate >= 90 ? "Bagus" : stats.attendanceRate >= 75 ? "Cukup" : "Rendah"}
+                                </Badge>
                             </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {announcements.map((info) => (
-                                <div key={info.id} className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-colors cursor-pointer">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <Badge className="bg-indigo-500/50 hover:bg-indigo-500 text-[10px] h-5">{info.category}</Badge>
-                                        <span className="text-xs text-indigo-100">{info.date}</span>
+                            <p className="text-2xl font-bold text-green-600">{stats.attendanceRate}%</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">Kehadiran</p>
+                        </CardContent>
+                    </Card>
+                </Link>
+
+                {/* Catatan Perilaku */}
+                <Link href="/student/behavior">
+                    <Card className={cn(
+                        "group hover:shadow-lg transition-all duration-300 cursor-pointer",
+                        stats.violationCount >= 3
+                            ? "ring-2 ring-red-300 border-red-200 bg-gradient-to-br from-white to-red-50/50"
+                            : stats.violationCount > 0
+                                ? "border-amber-100 hover:border-amber-300 bg-gradient-to-br from-white to-amber-50/50"
+                                : "border-green-100 hover:border-green-300 bg-gradient-to-br from-white to-green-50/50"
+                    )}>
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className={cn(
+                                    "p-2.5 rounded-xl transition-colors",
+                                    stats.violationCount >= 3 ? "bg-red-100 group-hover:bg-red-200" :
+                                        stats.violationCount > 0 ? "bg-amber-100 group-hover:bg-amber-200" :
+                                            "bg-green-100 group-hover:bg-green-200"
+                                )}>
+                                    <ClipboardList className={cn(
+                                        "h-5 w-5",
+                                        stats.violationCount >= 3 ? "text-red-600" :
+                                            stats.violationCount > 0 ? "text-amber-600" : "text-green-600"
+                                    )} />
+                                </div>
+                                {stats.violationCount >= 3 ? (
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                                        <span className="text-[10px] text-red-600 font-medium">Perhatian</span>
+                                    </span>
+                                ) : stats.violationCount === 0 ? (
+                                    <Badge className="bg-green-100 text-green-700 border-0 text-[10px] px-1.5">Bersih</Badge>
+                                ) : null}
+                            </div>
+                            <p className={cn(
+                                "text-2xl font-bold",
+                                stats.violationCount >= 3 ? "text-red-600" :
+                                    stats.violationCount > 0 ? "text-amber-600" : "text-green-600"
+                            )}>
+                                {stats.violationCount}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">Pelanggaran</p>
+                        </CardContent>
+                    </Card>
+                </Link>
+
+                {/* Ekstrakurikuler */}
+                <Link href="/student/extracurricular">
+                    <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-purple-100 hover:border-purple-300 bg-gradient-to-br from-white to-purple-50/50">
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="p-2.5 bg-purple-100 rounded-xl group-hover:bg-purple-200 transition-colors">
+                                    <Trophy className="h-5 w-5 text-purple-600" />
+                                </div>
+                                <Badge className="bg-purple-100 text-purple-700 border-0 text-[10px] px-1.5">Aktif</Badge>
+                            </div>
+                            <p className="text-2xl font-bold text-purple-600">{stats.ekstrakurikuler}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">Ekstrakurikuler</p>
+                        </CardContent>
+                    </Card>
+                </Link>
+
+                {/* Pengumuman */}
+                <Link href="/student/announcements">
+                    <Card className={cn(
+                        "group hover:shadow-lg transition-all duration-300 cursor-pointer",
+                        stats.unreadAnnouncements > 0
+                            ? "border-rose-100 hover:border-rose-300 bg-gradient-to-br from-white to-rose-50/50"
+                            : "border-gray-100 hover:border-gray-300 bg-gradient-to-br from-white to-gray-50/50"
+                    )}>
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className={cn(
+                                    "p-2.5 rounded-xl transition-colors",
+                                    stats.unreadAnnouncements > 0
+                                        ? "bg-rose-100 group-hover:bg-rose-200"
+                                        : "bg-gray-100 group-hover:bg-gray-200"
+                                )}>
+                                    <Megaphone className={cn(
+                                        "h-5 w-5",
+                                        stats.unreadAnnouncements > 0 ? "text-rose-600" : "text-gray-600"
+                                    )} />
+                                </div>
+                                {stats.unreadAnnouncements > 0 && (
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
+                                        <span className="text-[10px] text-rose-600 font-medium">Baru</span>
+                                    </span>
+                                )}
+                            </div>
+                            <p className={cn(
+                                "text-2xl font-bold",
+                                stats.unreadAnnouncements > 0 ? "text-rose-600" : "text-gray-600"
+                            )}>
+                                {stats.unreadAnnouncements}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">Pengumuman Baru</p>
+                        </CardContent>
+                    </Card>
+                </Link>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Today's Schedule */}
+                <Card>
+                    <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-100 rounded-lg">
+                                    <Calendar className="h-5 w-5 text-blue-800" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg">Jadwal Hari Ini</CardTitle>
+                                    <CardDescription>
+                                        {currentTime.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" })}
+                                    </CardDescription>
+                                </div>
+                            </div>
+                            <Link href="/student/schedule">
+                                <Button variant="ghost" size="sm" className="gap-1 text-blue-800">
+                                    Lihat Semua
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3">
+                            {mockTodaySchedule.map((item, index) => (
+                                <div
+                                    key={item.id}
+                                    className={cn(
+                                        "flex items-center gap-4 p-3 rounded-lg",
+                                        index === 0 ? "bg-blue-50 border border-blue-200" : "bg-muted/30"
+                                    )}
+                                >
+                                    <div className="text-center min-w-[50px]">
+                                        <p className={cn(
+                                            "text-sm font-bold",
+                                            index === 0 ? "text-blue-800" : "text-muted-foreground"
+                                        )}>
+                                            {item.time}
+                                        </p>
                                     </div>
-                                    <h4 className="font-semibold text-sm leading-snug">{info.title}</h4>
+                                    <div className="flex-1">
+                                        <p className="font-medium">{item.subject}</p>
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                            <span className="flex items-center gap-1">
+                                                <User className="h-3 w-3" />
+                                                {item.teacher}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <MapPin className="h-3 w-3" />
+                                                {item.room}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {index === 0 && (
+                                        <Badge className="bg-blue-800 text-white text-xs">Sekarang</Badge>
+                                    )}
                                 </div>
                             ))}
-                            <Button className="w-full bg-white text-indigo-700 hover:bg-indigo-50 font-bold">
-                                Lihat Semua Pengumuman
-                            </Button>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    {/* Quick Access Grid */}
-                    <Card className="border-none shadow-sm">
-                        <CardHeader>
-                            <CardTitle className="text-base text-slate-700">Akses Cepat</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-2 gap-3">
-                                <Button variant="outline" className="h-20 flex flex-col gap-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 transition-all">
-                                    <BookOpen className="w-6 h-6" />
-                                    <span className="text-xs">E-Library</span>
-                                </Button>
-                                <Button variant="outline" className="h-20 flex flex-col gap-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-600 transition-all">
-                                    <Award className="w-6 h-6" />
-                                    <span className="text-xs">Raport</span>
-                                </Button>
-                                <Button variant="outline" className="h-20 flex flex-col gap-2 border-slate-200 hover:border-amber-500 hover:bg-amber-50 hover:text-amber-600 transition-all">
-                                    <Clock className="w-6 h-6" />
-                                    <span className="text-xs">Riwayat Absen</span>
-                                </Button>
-                                <Button variant="outline" className="h-20 flex flex-col gap-2 border-slate-200 hover:border-purple-500 hover:bg-purple-50 hover:text-purple-600 transition-all">
-                                    <User className="w-6 h-6" />
-                                    <span className="text-xs">Profil</span>
-                                </Button>
+                {/* Recent Announcements */}
+                <Card>
+                    <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-amber-100 rounded-lg">
+                                    <Megaphone className="h-5 w-5 text-amber-600" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg">Pengumuman Terbaru</CardTitle>
+                                    <CardDescription>Informasi penting dari sekolah</CardDescription>
+                                </div>
                             </div>
-                        </CardContent>
-                    </Card>
-
-                </div>
+                            <Link href="/student/announcements">
+                                <Button variant="ghost" size="sm" className="gap-1 text-blue-800">
+                                    Lihat Semua
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3">
+                            {mockAnnouncements.map((item) => (
+                                <Link
+                                    key={item.id}
+                                    href="/student/announcements"
+                                    className="block p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                                >
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Badge variant="outline" className={cn(
+                                                    "text-xs",
+                                                    item.category === "Penting"
+                                                        ? "bg-red-100 text-red-700 border-red-200"
+                                                        : item.category === "Akademik"
+                                                            ? "bg-blue-100 text-blue-700 border-blue-200"
+                                                            : "bg-amber-100 text-amber-700 border-amber-200"
+                                                )}>
+                                                    {item.category}
+                                                </Badge>
+                                                {item.isNew && (
+                                                    <span className="w-2 h-2 bg-red-500 rounded-full" />
+                                                )}
+                                            </div>
+                                            <p className="font-medium text-sm line-clamp-1">{item.title}</p>
+                                        </div>
+                                        <span className="text-xs text-muted-foreground flex-shrink-0">{item.date}</span>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
+
+            {/* Quick Access */}
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                            <Star className="h-5 w-5 text-primary" />
+                        </div>
+                        <CardTitle className="text-lg">Akses Cepat</CardTitle>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <Link href="/student/schedule">
+                            <div className="p-4 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors text-center group">
+                                <div className="inline-flex p-3 bg-blue-100 rounded-full mb-2 group-hover:bg-blue-200 transition-colors">
+                                    <Calendar className="h-6 w-6 text-blue-800" />
+                                </div>
+                                <p className="font-medium text-sm text-blue-800">Jadwal</p>
+                            </div>
+                        </Link>
+                        <Link href="/student/grades">
+                            <div className="p-4 rounded-lg bg-green-50 hover:bg-green-100 transition-colors text-center group">
+                                <div className="inline-flex p-3 bg-green-100 rounded-full mb-2 group-hover:bg-green-200 transition-colors">
+                                    <GraduationCap className="h-6 w-6 text-green-700" />
+                                </div>
+                                <p className="font-medium text-sm text-green-700">Nilai</p>
+                            </div>
+                        </Link>
+                        <Link href="/student/attendance">
+                            <div className="p-4 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors text-center group">
+                                <div className="inline-flex p-3 bg-purple-100 rounded-full mb-2 group-hover:bg-purple-200 transition-colors">
+                                    <CheckCircle className="h-6 w-6 text-purple-700" />
+                                </div>
+                                <p className="font-medium text-sm text-purple-700">Kehadiran</p>
+                            </div>
+                        </Link>
+                        <Link href="/student/extracurricular">
+                            <div className="p-4 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors text-center group">
+                                <div className="inline-flex p-3 bg-amber-100 rounded-full mb-2 group-hover:bg-amber-200 transition-colors">
+                                    <Trophy className="h-6 w-6 text-amber-700" />
+                                </div>
+                                <p className="font-medium text-sm text-amber-700">Ekstrakurikuler</p>
+                            </div>
+                        </Link>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 };

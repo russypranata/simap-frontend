@@ -175,9 +175,9 @@ export const MutamayizinTutors: React.FC = () => {
             </div>
 
             {/* Stats Card */}
-            <Card className="overflow-hidden p-0 gap-0">
+            <Card className="overflow-hidden p-0">
                 {/* Header */}
-                <div className="bg-blue-800 p-5 relative overflow-hidden">
+                <div className="bg-blue-800 p-4 relative overflow-hidden">
                     {/* Decorative Pattern */}
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
@@ -185,11 +185,11 @@ export const MutamayizinTutors: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-3 relative z-10">
-                        <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                            <Briefcase className="h-7 w-7 text-white" />
+                        <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
+                            <Briefcase className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-xl text-white">Statistik Tutor</h3>
+                            <h2 className="text-xl font-bold text-white">Statistik Tutor</h2>
                             <p className="text-blue-100 text-sm">Ringkasan data tenaga pengajar ekskul</p>
                         </div>
                     </div>
@@ -199,27 +199,27 @@ export const MutamayizinTutors: React.FC = () => {
                 <CardContent className="p-0">
                     <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x">
                         {/* Total Tutor */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
-                                <Users className="h-5 w-5 text-blue-800" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
+                                <Users className="h-4 w-4 text-blue-800" />
                             </div>
-                            <p className="text-2xl font-bold text-blue-800">{totalTutors}</p>
+                            <p className="text-2xl font-bold text-slate-900">{totalTutors}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Tutor</p>
                         </div>
 
                         {/* Tutor Aktif */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
-                                <CheckCircle className="h-5 w-5 text-green-600" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-green-100 rounded-full mb-1.5">
+                                <CheckCircle className="h-4 w-4 text-green-600" />
                             </div>
-                            <p className="text-2xl font-bold text-green-600">{activeTutors}</p>
+                            <p className="text-2xl font-bold text-slate-900">{activeTutors}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Tutor Aktif</p>
                         </div>
 
                         {/* Multi Ekskul */}
-                        <div className="p-4 text-center">
-                            <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
-                                <Users className="h-5 w-5 text-purple-600" />
+                        <div className="p-2.5 text-center">
+                            <div className="inline-flex p-2 bg-purple-100 rounded-full mb-1.5">
+                                <Users className="h-4 w-4 text-purple-600" />
                             </div>
                             <p className="text-2xl font-bold text-purple-600">{multiEkskulTutors}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Mengajar &gt; 1 Ekskul</p>

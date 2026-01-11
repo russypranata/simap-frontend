@@ -3,13 +3,14 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRole } from '@/app/context/RoleContext';
+import { ParentLayout } from '@/features/parent/components/ParentLayout';
 
-export default function ParentLayout({
+export default function ParentRouteLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { role, isAuthenticated } = useRole();
+  const { role, isAuthenticated, isLoading } = useRole();
   const router = useRouter();
 
   // Role-based auth guard
@@ -34,15 +35,10 @@ export default function ParentLayout({
     }
   }, [isAuthenticated, role, router]);
 
-  // Show nothing while redirecting
-  if (!isAuthenticated || role !== 'orang_tua') {
+  // Show nothing while initializing or redirecting
+  if (isLoading || !isAuthenticated || role !== 'orang_tua') {
     return null;
   }
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Parent Dashboard (Coming Soon)</h1>
-      {children}
-    </div>
-  );
+  return <ParentLayout>{children}</ParentLayout>;
 }

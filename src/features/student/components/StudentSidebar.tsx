@@ -11,6 +11,10 @@ import {
     Megaphone,
     FileText,
     User,
+    CheckCircle,
+    Trophy,
+    ClipboardList,
+    Award,
 } from "lucide-react";
 
 export const StudentSidebar: React.FC = () => {
@@ -33,15 +37,24 @@ export const StudentSidebar: React.FC = () => {
             icon: GraduationCap,
         },
         {
-            title: "Tugas & PR",
-            href: "/student/assignments",
-            icon: FileText,
-            badge: "3",
+            title: "Kehadiran",
+            href: "/student/attendance",
+            icon: CheckCircle,
         },
         {
-            title: "Perpustakaan",
-            href: "/student/library",
-            icon: BookOpen,
+            title: "Ekstrakurikuler",
+            href: "/student/extracurricular",
+            icon: Trophy,
+        },
+        {
+            title: "Prestasi",
+            href: "/student/achievements",
+            icon: Award,
+        },
+        {
+            title: "Catatan Perilaku",
+            href: "/student/behavior",
+            icon: ClipboardList,
         },
         {
             title: "Pengumuman",
