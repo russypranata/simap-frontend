@@ -1,5 +1,5 @@
-import { EditTeacherProfile } from '@/features/teacher/pages/EditProfile';
+import { EditProfilePage } from '@/features/teacher/pages/EditProfilePage';
 
 export default function EditProfile() {
-  return <EditTeacherProfile />;
+  return <EditProfilePage />;
 }
