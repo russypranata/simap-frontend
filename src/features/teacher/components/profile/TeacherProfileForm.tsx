@@ -8,7 +8,17 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { Camera, Save, X } from 'lucide-react';
+import {
+  Camera,
+  Save,
+  X,
+  User,
+  Mail,
+  Phone,
+  IdCard,
+  BookOpen,
+  MapPin
+} from 'lucide-react';
 
 interface ProfileFormProps {
   initialData: {
@@ -25,7 +35,7 @@ interface ProfileFormProps {
   isLoading?: boolean;
 }
 
-export const ProfileForm: React.FC<ProfileFormProps> = ({
+export const TeacherProfileForm: React.FC<ProfileFormProps> = ({
   initialData,
   onSave,
   onCancel,
@@ -59,7 +69,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.email) {
       toast.error('Nama dan email wajib diisi');
       return;
@@ -77,11 +87,16 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Edit Profil</CardTitle>
-        <CardDescription>
-          Perbarui informasi profil Anda di sini
-        </CardDescription>
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+            <User className="h-5 w-5" />
+          </div>
+          <div>
+            <CardTitle>Informasi Profil</CardTitle>
+            <p className="text-sm text-muted-foreground mt-0.5 font-normal">Perbarui detail identitas dan kontak</p>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -108,17 +123,28 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 className="hidden"
               />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Klik foto untuk mengubah (Maks. 2MB)
-            </p>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="text-blue-800 hover:text-blue-900 border-blue-800/30 hover:border-blue-800"
+              onClick={() => document.getElementById('profile-picture')?.click()}
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              Ubah Foto Profil
+            </Button>
           </div>
 
           {/* Form Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">
-                Nama Lengkap <span className="text-red-500">*</span>
-              </Label>
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-primary" />
+                <Label htmlFor="name" className="mb-0">
+                  Nama Lengkap <span className="text-red-500">*</span>
+                </Label>
+              </div>
               <Input
                 id="name"
                 name="name"
@@ -126,13 +152,17 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 onChange={handleInputChange}
                 placeholder="Masukkan nama lengkap"
                 required
+                className=""
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">
-                Email <span className="text-red-500">*</span>
-              </Label>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-primary" />
+                <Label htmlFor="email" className="mb-0">
+                  Email <span className="text-red-500">*</span>
+                </Label>
+              </div>
               <Input
                 id="email"
                 name="email"
@@ -141,11 +171,17 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 onChange={handleInputChange}
                 placeholder="email@example.com"
                 required
+                className=""
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Nomor Telepon</Label>
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-primary" />
+                <Label htmlFor="phone" className="mb-0">
+                  Nomor Telepon
+                </Label>
+              </div>
               <Input
                 id="phone"
                 name="phone"
@@ -153,11 +189,17 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 value={formData.phone || ''}
                 onChange={handleInputChange}
                 placeholder="+62 812-3456-7890"
+                className=""
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="nip">NIP</Label>
+              <div className="flex items-center gap-2">
+                <IdCard className="h-4 w-4 text-primary" />
+                <Label htmlFor="nip" className="mb-0">
+                  NIP
+                </Label>
+              </div>
               <Input
                 id="nip"
                 name="nip"
@@ -170,18 +212,29 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="subject">Mata Pelajaran</Label>
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4 text-primary" />
+                <Label htmlFor="subject" className="mb-0">
+                  Mata Pelajaran
+                </Label>
+              </div>
               <Input
                 id="subject"
                 name="subject"
                 value={formData.subject || ''}
                 onChange={handleInputChange}
                 placeholder="Mata Pelajaran"
+                className=""
               />
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="address">Alamat</Label>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                <Label htmlFor="address" className="mb-0">
+                  Alamat
+                </Label>
+              </div>
               <Textarea
                 id="address"
                 name="address"
@@ -189,6 +242,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 onChange={handleInputChange}
                 placeholder="Alamat lengkap"
                 rows={3}
+                className=""
               />
             </div>
           </div>

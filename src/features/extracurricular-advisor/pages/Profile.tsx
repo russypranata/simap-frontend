@@ -20,6 +20,7 @@ import {
     Star,
     BarChart3,
 } from "lucide-react";
+import { ProfileSkeleton } from "../components/profile";
 
 // Mock data untuk Extracurricular Advisor
 const mockProfileData = {
@@ -38,14 +39,27 @@ const mockProfileData = {
     avgStudentAttendance: 91,
 };
 
+
 export const ExtracurricularAdvisorProfile: React.FC = () => {
     const router = useRouter();
+    const [profileData, setProfileData] = React.useState<typeof mockProfileData | null>(null);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setProfileData(mockProfileData);
+            setLoading(false);
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleEditProfile = () => {
         router.push("/extracurricular-advisor/profile/edit");
     };
 
-    const initials = mockProfileData.name
+    if (loading || !profileData) return <ProfileSkeleton />;
+
+    const initials = profileData.name
         .split(" ")
         .map((n) => n[0])
         .join("")
@@ -114,8 +128,8 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                             <div className="relative group">
                                 <Avatar className="h-32 w-32 border-4 border-primary/10">
                                     <AvatarImage
-                                        src={mockProfileData.profilePicture}
-                                        alt={mockProfileData.name}
+                                        src={profileData.profilePicture}
+                                        alt={profileData.name}
                                     />
                                     <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white">
                                         {initials}
@@ -128,13 +142,13 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
 
                             <div className="flex-1 text-center md:text-left space-y-2">
                                 <h2 className="text-2xl font-bold text-foreground">
-                                    {mockProfileData.name}
+                                    {profileData.name}
                                 </h2>
                                 <Badge className="bg-blue-800 text-white">
-                                    Tutor Ekstrakurikuler {mockProfileData.extracurricular}
+                                    Tutor Ekstrakurikuler {profileData.extracurricular}
                                 </Badge>
                                 <p className="text-sm text-muted-foreground">
-                                    NIP: {mockProfileData.nip}
+                                    NIP: {profileData.nip}
                                 </p>
                             </div>
                         </div>
@@ -148,7 +162,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs text-muted-foreground">Email</p>
                                     <p className="text-sm font-medium truncate">
-                                        {mockProfileData.email}
+                                        {profileData.email}
                                     </p>
                                 </div>
                             </div>
@@ -160,7 +174,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 <div className="flex-1">
                                     <p className="text-xs text-muted-foreground">Telepon</p>
                                     <p className="text-sm font-medium">
-                                        {mockProfileData.phone}
+                                        {profileData.phone}
                                     </p>
                                 </div>
                             </div>
@@ -172,7 +186,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 <div className="flex-1">
                                     <p className="text-xs text-muted-foreground">Alamat</p>
                                     <p className="text-sm font-medium">
-                                        {mockProfileData.address}
+                                        {profileData.address}
                                     </p>
                                 </div>
                             </div>
@@ -186,7 +200,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                         Bergabung Sejak
                                     </p>
                                     <p className="text-sm font-medium">
-                                        {mockProfileData.joinDate}
+                                        {profileData.joinDate}
                                     </p>
                                 </div>
                             </div>
@@ -225,7 +239,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Total Anggota</p>
                                 <p className="text-lg font-semibold">
-                                    {mockProfileData.totalMembers}
+                                    {profileData.totalMembers}
                                 </p>
                             </div>
                         </div>
@@ -237,7 +251,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Anggota Aktif</p>
                                 <p className="text-lg font-semibold">
-                                    {mockProfileData.activeMembers}
+                                    {profileData.activeMembers}
                                 </p>
                             </div>
                         </div>
@@ -249,7 +263,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Total Pertemuan</p>
                                 <p className="text-lg font-semibold">
-                                    {mockProfileData.totalMeetings}
+                                    {profileData.totalMeetings}
                                 </p>
                             </div>
                         </div>
@@ -261,7 +275,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Kehadiran Siswa</p>
                                 <p className="text-lg font-semibold">
-                                    {mockProfileData.avgStudentAttendance}%
+                                    {profileData.avgStudentAttendance}%
                                 </p>
                             </div>
                         </div>

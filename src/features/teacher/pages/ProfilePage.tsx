@@ -15,9 +15,15 @@ import {
     Home
 } from 'lucide-react';
 
+import { ProfileSkeleton } from '../components/profile';
+
 export const ProfilePage: React.FC = () => {
-    const { profileData } = useProfileData();
+    const { profileData, isFetching } = useProfileData();
     const router = useRouter();
+
+    if (isFetching || !profileData) {
+        return <ProfileSkeleton />;
+    }
 
     const handleEditProfile = () => {
         router.push('/profile/edit');

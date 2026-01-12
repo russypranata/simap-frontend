@@ -3,20 +3,22 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProfileForm } from '../components/profile';
+import { Card, CardContent } from '@/components/ui/card';
+import { TeacherProfileForm, EditProfileSkeleton } from '../components/profile';
 import { useProfileData } from '../hooks/useProfileData';
-import { ArrowLeft, Info } from 'lucide-react';
-import { toast } from 'sonner';
+import { ArrowLeft, User } from 'lucide-react';
 
 export const EditProfilePage: React.FC = () => {
-  const { profileData, updateProfile, isLoading } = useProfileData();
+  const { profileData, updateProfile, isSaving, isFetching } = useProfileData();
   const router = useRouter();
+
+  if (isFetching || !profileData) {
+    return <EditProfileSkeleton />;
+  }
 
   const handleSave = async (updatedData: any) => {
     const success = await updateProfile(updatedData);
     if (success) {
-      // Navigate back to profile page
       setTimeout(() => {
         router.push('/profile');
       }, 1500);
@@ -24,51 +26,43 @@ export const EditProfilePage: React.FC = () => {
   };
 
   const handleCancel = () => {
-    // Navigate back to profile page
     router.push('/profile');
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header Standardized */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleCancel}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Edit Profil</h1>
-            <p className="text-muted-foreground">
-              Perbarui informasi profil Anda
-            </p>
+        <div>
+          <div className="flex items-start gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCancel}
+              className="h-8 w-8 p-0 mt-1.5"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold tracking-tight">
+                  <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Edit </span>
+                  <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Profil</span>
+                </h1>
+                <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                  <User className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="text-muted-foreground mt-1">
+                Kelola dan ubah informasi data diri Anda
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Info Card */}
-      <Card className="border-blue-200 bg-blue-50/50">
-        <CardContent className="p-4">
-          <div className="flex items-start space-x-3">
-            <Info className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-blue-900">
-                Informasi Penting
-              </p>
-              <p className="text-sm text-blue-700 mt-1">
-                Pastikan semua informasi yang Anda masukkan akurat dan terkini. 
-                Data NIP tidak dapat diubah. Jika ada kesalahan, hubungi administrator.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Profile Form */}
-      <ProfileForm
+      {/* Main Form Card */}
+      <TeacherProfileForm
         initialData={{
           name: profileData.name,
           email: profileData.email,
@@ -80,36 +74,26 @@ export const EditProfilePage: React.FC = () => {
         }}
         onSave={handleSave}
         onCancel={handleCancel}
-        isLoading={isLoading}
+        isLoading={isSaving}
       />
 
-      {/* Additional Tips */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Tips Keamanan</CardTitle>
-          <CardDescription>
-            Lindungi akun Anda dengan mengikuti tips berikut
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-start space-x-2">
-              <span className="text-primary mt-1">•</span>
-              <span>Gunakan foto profil yang profesional dan jelas</span>
-            </li>
-            <li className="flex items-start space-x-2">
-              <span className="text-primary mt-1">•</span>
-              <span>Pastikan alamat email selalu aktif untuk menerima notifikasi penting</span>
-            </li>
-            <li className="flex items-start space-x-2">
-              <span className="text-primary mt-1">•</span>
-              <span>Perbarui nomor telepon jika ada perubahan untuk memudahkan komunikasi</span>
-            </li>
-            <li className="flex items-start space-x-2">
-              <span className="text-primary mt-1">•</span>
-              <span>Jangan bagikan informasi login Anda kepada siapapun</span>
-            </li>
-          </ul>
+      {/* Info Card Standardized (Bottom) */}
+      <Card className="border-blue-800/20 bg-blue-50">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-primary/10 rounded-full">
+              <User className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 space-y-1">
+              <p className="text-sm font-semibold text-blue-800">
+                Informasi Penting
+              </p>
+              <ul className="text-sm text-blue-900 space-y-1 list-disc list-inside">
+                <li>Pastikan informasi yang Anda masukkan benar dan akurat</li>
+                <li>Data NIP tidak dapat diubah. Jika ada kesalahan, hubungi administrator</li>
+              </ul>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
