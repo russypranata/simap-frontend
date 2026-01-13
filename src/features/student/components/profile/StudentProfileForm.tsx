@@ -157,7 +157,7 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
                             <User className="h-5 w-5" />
                         </div>
                         <div>
-                            <CardTitle>Informasi Profil</CardTitle>
+                            <CardTitle className="text-lg">Informasi Profil</CardTitle>
                             <p className="text-sm text-muted-foreground mt-0.5 font-normal">
                                 Perbarui detail identitas dan kontak
                             </p>
@@ -195,7 +195,7 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
                         <Button
                             variant="outline"
                             size="sm"
-                            className="text-blue-800 hover:text-blue-900 border-blue-800/30 hover:border-blue-800"
+                            className="text-blue-800 hover:text-blue-900 border-transparent hover:border-transparent hover:bg-blue-50"
                             onClick={handleImageClick}
                         >
                             <Camera className="h-4 w-4 mr-2" />

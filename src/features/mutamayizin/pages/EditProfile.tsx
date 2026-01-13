@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, User } from "lucide-react";
+import { User, Pencil } from "lucide-react";
 import { mutamayizinService } from "../services/mutamayizinService";
 import { MutamayizinProfileForm, MutamayizinProfileData } from "@/features/mutamayizin/components/profile/MutamayizinProfileForm";
 
@@ -58,14 +58,6 @@ export const EditMutamayizinProfile: React.FC = () => {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                 <div>
                     <div className="flex items-start gap-3">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => router.back()}
-                            className="h-8 w-8 p-0 mt-1.5"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                        </Button>
                         <div>
                             <div className="flex items-center gap-3">
                                 <h1 className="text-3xl font-bold tracking-tight">
@@ -77,7 +69,7 @@ export const EditMutamayizinProfile: React.FC = () => {
                                     </span>
                                 </h1>
                                 <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                                    <User className="h-5 w-5" />
+                                    <Pencil className="h-5 w-5" />
                                 </div>
                             </div>
                             <p className="text-muted-foreground mt-1">

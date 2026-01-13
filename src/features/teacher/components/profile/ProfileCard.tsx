@@ -5,14 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
   Edit,
-  Camera
+  Camera,
+  CheckCircle2
 } from 'lucide-react';
 
 interface ProfileCardProps {
@@ -51,7 +52,15 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
     <Card>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle>Profil Saya</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              <User className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Profil Saya</CardTitle>
+              <p className="text-sm text-muted-foreground mt-0.5 font-normal">Informasi lengkap pendidik</p>
+            </div>
+          </div>
           <Button onClick={onEdit} size="sm" className="flex items-center space-x-2">
             <Edit className="h-4 w-4" />
             <span>Edit Profil</span>
@@ -76,76 +85,88 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
 
             <div className="flex-1 text-center md:text-left space-y-2">
               <h2 className="text-2xl font-bold text-foreground">{name}</h2>
-              <Badge className="bg-primary text-primary-foreground">{role}</Badge>
+
+              <div className="space-y-2 mt-1">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                  <Badge className="bg-primary text-primary-foreground">{role}</Badge>
+                  {subject && (
+                    <Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">
+                      {subject}
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <span className="text-xs text-muted-foreground font-medium">Status Akun:</span>
+                  <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200 pl-2 pr-3 py-1">
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                    Aktif
+                  </Badge>
+                </div>
+              </div>
+
               {nip && (
-                <p className="text-sm text-muted-foreground">NIP: {nip}</p>
-              )}
-              {subject && (
-                <p className="text-sm font-medium text-primary">Mata Pelajaran: {subject}</p>
+                <p className="text-sm text-muted-foreground mt-1">NIP: {nip}</p>
               )}
             </div>
           </div>
 
           {/* Contact Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
-            <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Mail className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground">Email</p>
-                <p className="text-sm font-medium truncate">{email}</p>
-              </div>
-            </div>
-
-            {phone && (
+          <div className="space-y-4 pt-6 border-t mt-2">
+            <h3 className="text-base font-medium text-foreground flex items-center gap-2">
+              <Phone className="h-4.5 w-4.5 text-primary" />
+              Informasi Kontak
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
                 <div className="p-2 rounded-full bg-primary/10">
-                  <Phone className="h-5 w-5 text-primary" />
+                  <Mail className="h-5 w-5 text-primary" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground">Telepon</p>
-                  <p className="text-sm font-medium">{phone}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="text-sm font-medium truncate">{email}</p>
                 </div>
               </div>
-            )}
 
-            {address && (
-              <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 md:col-span-2">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <MapPin className="h-5 w-5 text-primary" />
+              {phone && (
+                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Phone className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground">Telepon</p>
+                    <p className="text-sm font-medium">{phone}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground">Alamat</p>
-                  <p className="text-sm font-medium">{address}</p>
-                </div>
-              </div>
-            )}
+              )}
 
-            {joinDate && (
-              <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <Calendar className="h-5 w-5 text-primary" />
+              {address && (
+                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 md:col-span-2">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <MapPin className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground">Alamat</p>
+                    <p className="text-sm font-medium">{address}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground">Bergabung Sejak</p>
-                  <p className="text-sm font-medium">{joinDate}</p>
-                </div>
-              </div>
-            )}
+              )}
 
-            <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-              <div className="p-2 rounded-full bg-primary/10">
-                <User className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground">Status</p>
-                <p className="text-sm font-medium text-green-600">Aktif</p>
-              </div>
+              {joinDate && (
+                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Calendar className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground">Bergabung Sejak</p>
+                    <p className="text-sm font-medium">{joinDate}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </CardContent>
-    </Card>
+    </Card >
   );
 };

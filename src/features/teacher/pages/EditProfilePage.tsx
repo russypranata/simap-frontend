@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { TeacherProfileForm, EditProfileSkeleton } from '../components/profile';
 import { useProfileData } from '../hooks/useProfileData';
-import { ArrowLeft, User } from 'lucide-react';
+import { User, Pencil } from 'lucide-react';
 
 export const EditProfilePage: React.FC = () => {
   const { profileData, updateProfile, isSaving, isFetching } = useProfileData();
@@ -35,14 +35,6 @@ export const EditProfilePage: React.FC = () => {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div>
           <div className="flex items-start gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleCancel}
-              className="h-8 w-8 p-0 mt-1.5"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-bold tracking-tight">
@@ -50,7 +42,7 @@ export const EditProfilePage: React.FC = () => {
                   <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Profil</span>
                 </h1>
                 <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                  <User className="h-5 w-5" />
+                  <Pencil className="h-5 w-5" />
                 </div>
               </div>
               <p className="text-muted-foreground mt-1">

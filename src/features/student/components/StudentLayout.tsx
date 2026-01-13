@@ -14,7 +14,7 @@ export const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
     return (
         <BaseLayout
             sidebar={<StudentSidebar />}
-            navbar={<Navbar title="SIMAP" showNotifications={true} />}
+            navbar={<Navbar showNotifications={true} />}
             footer={<Footer />}
         >
             {children}

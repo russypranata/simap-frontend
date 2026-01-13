@@ -19,6 +19,7 @@ import {
     Activity,
     Star,
     BarChart3,
+    CheckCircle2,
 } from "lucide-react";
 import { ProfileSkeleton } from "../components/profile";
 
@@ -107,7 +108,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 <User className="h-5 w-5" />
                             </div>
                             <div>
-                                <CardTitle>Profil Saya</CardTitle>
+                                <CardTitle className="text-lg">Profil Saya</CardTitle>
                                 <p className="text-sm text-muted-foreground mt-0.5 font-normal">Kelola informasi pribadi dan akun Anda</p>
                             </div>
                         </div>
@@ -144,74 +145,81 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 <h2 className="text-2xl font-bold text-foreground">
                                     {profileData.name}
                                 </h2>
-                                <Badge className="bg-blue-800 text-white">
-                                    Tutor Ekstrakurikuler {profileData.extracurricular}
-                                </Badge>
-                                <p className="text-sm text-muted-foreground">
+                                <div className="space-y-2 mt-1">
+                                    <div className="flex items-center justify-center md:justify-start gap-2">
+                                        <Badge className="bg-blue-800 text-white">
+                                            Tutor Ekstrakurikuler {profileData.extracurricular}
+                                        </Badge>
+                                    </div>
+                                    <div className="flex items-center justify-center md:justify-start gap-2">
+                                        <span className="text-xs text-muted-foreground font-medium">Status Akun:</span>
+                                        <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200 pl-2 pr-3 py-1">
+                                            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                                            Aktif
+                                        </Badge>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
                                     NIP: {profileData.nip}
                                 </p>
                             </div>
                         </div>
 
                         {/* Contact Information */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
-                            <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                <div className="p-2 rounded-full bg-primary/10">
-                                    <Mail className="h-5 w-5 text-primary" />
+                        <div className="space-y-4 pt-6 border-t mt-2">
+                            <h3 className="text-base font-medium text-foreground flex items-center gap-2">
+                                <Phone className="h-4.5 w-4.5 text-primary" />
+                                Informasi Kontak
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
+                                    <div className="p-2 rounded-full bg-primary/10">
+                                        <Mail className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs text-muted-foreground">Email</p>
+                                        <p className="text-sm font-medium truncate">
+                                            {profileData.email}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-xs text-muted-foreground">Email</p>
-                                    <p className="text-sm font-medium truncate">
-                                        {profileData.email}
-                                    </p>
-                                </div>
-                            </div>
 
-                            <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                <div className="p-2 rounded-full bg-primary/10">
-                                    <Phone className="h-5 w-5 text-primary" />
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
+                                    <div className="p-2 rounded-full bg-primary/10">
+                                        <Phone className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-muted-foreground">Telepon</p>
+                                        <p className="text-sm font-medium">
+                                            {profileData.phone}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <p className="text-xs text-muted-foreground">Telepon</p>
-                                    <p className="text-sm font-medium">
-                                        {profileData.phone}
-                                    </p>
-                                </div>
-                            </div>
 
-                            <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 md:col-span-2">
-                                <div className="p-2 rounded-full bg-primary/10">
-                                    <MapPin className="h-5 w-5 text-primary" />
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 md:col-span-2">
+                                    <div className="p-2 rounded-full bg-primary/10">
+                                        <MapPin className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-muted-foreground">Alamat</p>
+                                        <p className="text-sm font-medium">
+                                            {profileData.address}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <p className="text-xs text-muted-foreground">Alamat</p>
-                                    <p className="text-sm font-medium">
-                                        {profileData.address}
-                                    </p>
-                                </div>
-                            </div>
 
-                            <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                <div className="p-2 rounded-full bg-primary/10">
-                                    <Calendar className="h-5 w-5 text-primary" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-xs text-muted-foreground">
-                                        Bergabung Sejak
-                                    </p>
-                                    <p className="text-sm font-medium">
-                                        {profileData.joinDate}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                <div className="p-2 rounded-full bg-primary/10">
-                                    <User className="h-5 w-5 text-primary" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-xs text-muted-foreground">Status</p>
-                                    <p className="text-sm font-medium text-green-600">Aktif</p>
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
+                                    <div className="p-2 rounded-full bg-primary/10">
+                                        <Calendar className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-muted-foreground">
+                                            Bergabung Sejak
+                                        </p>
+                                        <p className="text-sm font-medium">
+                                            {profileData.joinDate}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -221,16 +229,18 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
 
             {/* Extracurricular Statistics */}
             <Card>
-                <CardContent className="px-6">
-                    <div className="flex items-center gap-3 mb-4">
+                <CardHeader className="pb-4">
+                    <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
                             <BarChart3 className="h-5 w-5" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold">Statistik Ekstrakurikuler</h3>
-                            <p className="text-sm text-muted-foreground">Ringkasan data anggota dan kegiatan ekstrakurikuler</p>
+                            <CardTitle className="text-lg">Statistik Ekstrakurikuler</CardTitle>
+                            <p className="text-sm text-muted-foreground mt-0.5 font-normal">Ringkasan data anggota dan kegiatan ekstrakurikuler</p>
                         </div>
                     </div>
+                </CardHeader>
+                <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
                             <div className="p-2 rounded-full bg-blue-100">

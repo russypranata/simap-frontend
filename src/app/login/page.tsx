@@ -38,6 +38,7 @@ import {
     PanelRightOpen,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { authService } from '@/features/auth/services/authService';
 
 export default function LoginPage() {
     const { login } = useRole();
@@ -79,54 +80,25 @@ export default function LoginPage() {
         }
     };
 
-    const determineRole = (username: string): 'guru' | 'siswa' | 'admin' | 'orang_tua' => {
-        const lower = username.toLowerCase();
-        if (lower.includes('admin')) return 'admin';
-        if (lower.includes('siswa') || lower.includes('student') || lower.includes('nis')) return 'siswa';
-        if (lower.includes('ortu') || lower.includes('parent')) return 'orang_tua';
-        // Check for teacher explicitly
-        if (lower.includes('guru') || lower.includes('teacher') || lower.includes('nip')) return 'guru';
-
-        // Default to guru for dummy purposes
-        return 'guru';
-    };
-
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
 
         try {
-            // --- API INTEGRATION (LOGIN) START --- 
-            // const res = await api.post('/auth/login', { username, password });
+            // Call Auth Service
+            const response = await authService.login({
+                username: loginData.username,
+                password: loginData.password
+            });
 
-            // MOCK DELAY
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-
-            // --- DUMMY CREDENTIALS CHECK ---
-            if (loginData.username === 'guru' && loginData.password === '123') {
-                login('guru');
-                handleLoginNavigation('guru');
-                return;
-            } else if (loginData.username === 'siswa' && loginData.password === '123') {
-                login('siswa');
-                handleLoginNavigation('siswa');
-                return;
-            } else if (loginData.username === 'tutor' && loginData.password === '123') {
-                login('tutor_ekskul');
-                handleLoginNavigation('tutor_ekskul');
-                return;
-            } else if (loginData.username === 'mutamayizin' && loginData.password === '123') {
-                login('pj_mutamayizin');
-                handleLoginNavigation('pj_mutamayizin');
-                return;
-            } else if (loginData.username === 'ortu' && loginData.password === '123') {
-                login('orang_tua');
-                handleLoginNavigation('orang_tua');
-                return;
+            // Update Context with Role from API
+            if (response.user.role) {
+                login(response.user.role);
+                handleLoginNavigation(response.user.role);
+            } else {
+                throw new Error('Role pengguna tidak ditemukan');
             }
-
-            throw new Error('Username atau password salah');
 
         } catch (err: any) {
             setError(err.message || 'Gagal masuk ke sistem.');

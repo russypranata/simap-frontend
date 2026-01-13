@@ -8,7 +8,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -26,16 +25,15 @@ import {
 import { useRole } from '@/app/context/RoleContext';
 
 import { NotificationBell } from './NotificationBell';
-import { User, LogOut, School, Calendar } from 'lucide-react';
+import { NavbarBreadcrumb } from './NavbarBreadcrumb';
+import { User, LogOut, Calendar } from 'lucide-react';
 import { formatDate, getDayName } from '@/features/shared/utils/dateFormatter';
 
 interface NavbarProps {
-    title?: string;
     showNotifications?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
-    title = 'SIMAP',
     showNotifications = true,
 }) => {
     const { role, isAuthenticated, logout } = useRole();
@@ -67,12 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <nav className="bg-card border-b">
             <div className="flex h-16 items-center justify-between px-4">
                 <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                        <School className="h-8 w-8 text-primary" />
-                        <h1 className="text-xl font-bold text-foreground">
-                            {title}
-                        </h1>
-                    </div>
+                    <NavbarBreadcrumb />
                 </div>
 
                 <div className="flex items-center space-x-4">

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { authService } from '@/features/auth/services/authService';
 
 export type UserRole = 'guru' | 'siswa' | 'admin' | 'orang_tua' | 'tutor_ekskul' | 'pj_mutamayizin' | null;
 
@@ -10,7 +11,7 @@ interface RoleContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (role: UserRole) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   isHomeroomTeacher: boolean;
   setIsHomeroomTeacher: (isHomeroom: boolean) => void;
   isPiketTeacher: boolean;
@@ -97,12 +98,12 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await authService.logout();
     setRole(null);
     setIsHomeroomTeacher(false);
     setIsPiketTeacher(false);
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('userRole');
       localStorage.removeItem('isHomeroomTeacher');
       localStorage.removeItem('isPiketTeacher');
     }

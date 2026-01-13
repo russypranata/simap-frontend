@@ -121,7 +121,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
               )}
 
               <div className="flex-1">
-                <Navbar title={title} showNotifications={true} />
+                <Navbar showNotifications={true} />
               </div>
             </div>
           </header>
