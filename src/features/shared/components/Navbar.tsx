@@ -21,7 +21,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import { useRole } from '@/app/context/RoleContext';
 
 import { NotificationBell } from './NotificationBell';
@@ -31,11 +31,10 @@ import { formatDate, getDayName } from '@/features/shared/utils/dateFormatter';
 
 interface NavbarProps {
     showNotifications?: boolean;
+    title?: string;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({
-    showNotifications = true,
-}) => {
+export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
     const { role, isAuthenticated, logout } = useRole();
 
     const handleLogout = () => {
@@ -77,7 +76,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                             <p className="text-xs text-muted-foreground font-medium">
                                 Hari ini
                             </p>
-                            <p className="text-sm font-medium text-foreground" suppressHydrationWarning>
+                            <p
+                                className="text-sm font-medium text-foreground"
+                                suppressHydrationWarning
+                            >
                                 {getDayName(new Date())},{' '}
                                 {formatDate(new Date())}
                             </p>
@@ -102,30 +104,43 @@ export const Navbar: React.FC<NavbarProps> = ({
                                                 alt="Avatar"
                                             />
                                             <AvatarFallback>
-                                                {getRoleDisplayName(role)?.charAt(
-                                                    0
-                                                ) || 'U'}
+                                                {getRoleDisplayName(
+                                                    role,
+                                                )?.charAt(0) || 'U'}
                                             </AvatarFallback>
                                         </Avatar>
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-80 p-0" align="end" forceMount>
+                                <DropdownMenuContent
+                                    className="w-80 p-0"
+                                    align="end"
+                                    forceMount
+                                >
                                     <div className="bg-primary/5 p-4 border-b">
                                         <div className="flex items-center gap-3">
                                             <div className="relative">
                                                 <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
-                                                    <AvatarImage src="/avatars/01.png" alt="Avatar" />
+                                                    <AvatarImage
+                                                        src="/avatars/01.png"
+                                                        alt="Avatar"
+                                                    />
                                                     <AvatarFallback className="bg-primary text-primary-foreground font-bold">
-                                                        {getRoleDisplayName(role)?.charAt(0) || 'U'}
+                                                        {getRoleDisplayName(
+                                                            role,
+                                                        )?.charAt(0) || 'U'}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-background"></span>
                                             </div>
                                             <div className="flex flex-col space-y-0.5">
-                                                <p className="text-sm font-bold text-foreground">Ahmad Fauzi</p>
+                                                <p className="text-sm font-bold text-foreground">
+                                                    Ahmad Fauzi
+                                                </p>
                                                 <div className="flex items-center">
                                                     <span className="text-xs font-medium text-muted-foreground bg-background/50 px-1.5 py-0.5 rounded-md border border-border/50">
-                                                        {getRoleDisplayName(role)}
+                                                        {getRoleDisplayName(
+                                                            role,
+                                                        )}
                                                     </span>
                                                 </div>
                                             </div>
@@ -133,15 +148,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                                     </div>
 
                                     <div className="p-2 space-y-1">
-                                        <Link href="/profile" className="block outline-none">
+                                        <Link
+                                            href="/profile"
+                                            className="block outline-none"
+                                        >
                                             <DropdownMenuItem className="p-3 my-0.5 cursor-pointer rounded-lg focus:bg-accent group">
                                                 <div className="flex items-center gap-4">
                                                     <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-50 text-blue-600 group-focus:bg-blue-200 transition-colors">
                                                         <User className="h-4 w-4" />
                                                     </div>
                                                     <div className="flex flex-col space-y-0.5">
-                                                        <span className="text-sm font-semibold group-data-[highlighted]:text-accent-foreground">Profil Saya</span>
-                                                        <span className="text-xs text-muted-foreground group-data-[highlighted]:text-accent-foreground/70">Lihat dan edit data diri</span>
+                                                        <span className="text-sm font-semibold group-data-highlighted:text-accent-foreground">
+                                                            Profil Saya
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground group-data-highlighted:text-accent-foreground/70">
+                                                            Lihat dan edit data
+                                                            diri
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </DropdownMenuItem>
@@ -153,14 +176,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                                     <div className="p-2">
                                         <AlertDialogTrigger asChild>
                                             <DropdownMenuItem
-                                                onSelect={(e) => e.preventDefault()}
+                                                onSelect={(e) =>
+                                                    e.preventDefault()
+                                                }
                                                 className="p-3 cursor-pointer rounded-lg text-red-600 focus:text-red-700 focus:bg-red-50 group"
                                             >
                                                 <div className="flex items-center gap-4 w-full">
                                                     <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-red-50 text-red-600 group-focus:bg-red-200 transition-colors">
                                                         <LogOut className="h-4 w-4" />
                                                     </div>
-                                                    <span className="text-sm font-bold">Keluar Aplikasi</span>
+                                                    <span className="text-sm font-bold">
+                                                        Keluar Aplikasi
+                                                    </span>
                                                 </div>
                                             </DropdownMenuItem>
                                         </AlertDialogTrigger>
@@ -181,7 +208,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                                                 Akhiri Sesi?
                                             </AlertDialogTitle>
                                             <AlertDialogDescription className="text-left leading-relaxed">
-                                                Sesi Anda saat ini akan segera diakhiri. Mohon pastikan seluruh data dan perubahan pekerjaan Anda telah tersimpan dengan aman sebelum melanjutkan untuk keluar dari aplikasi.
+                                                Sesi Anda saat ini akan segera
+                                                diakhiri. Mohon pastikan seluruh
+                                                data dan perubahan pekerjaan
+                                                Anda telah tersimpan dengan aman
+                                                sebelum melanjutkan untuk keluar
+                                                dari aplikasi.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter className="mt-8 gap-3 sm:space-x-0 sm:justify-end">
