@@ -35,7 +35,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
-    const { role, isAuthenticated, logout } = useRole();
+    const { role, user, isAuthenticated, logout } = useRole();
 
     const handleLogout = () => {
         logout();
@@ -57,6 +57,25 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                 return 'PJ Mutamayizin';
             default:
                 return 'Pengguna';
+        }
+    };
+
+    const getInitials = (name?: string) => {
+        if (!name) return 'U';
+        return name
+            .split(' ')
+            .map((n) => n[0])
+            .slice(0, 2)
+            .join('')
+            .toUpperCase();
+    };
+
+    const getProfileLink = (role: string | null) => {
+        switch (role) {
+            case 'siswa':
+                return '/student/profile';
+            default:
+                return '/profile';
         }
     };
 
@@ -98,15 +117,14 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                         variant="ghost"
                                         className="relative h-9 w-9 rounded-full"
                                     >
-                                        <Avatar className="h-9 w-9">
-                                            <AvatarImage
-                                                src="/avatars/01.png"
-                                                alt="Avatar"
-                                            />
+                                        <Avatar className="h-9 w-9 border border-border">
+                                            {/* <AvatarImage
+                                                src={user?.avatar}
+                                                alt={user?.name || 'User'}
+                                                className="object-cover"
+                                            /> */}
                                             <AvatarFallback>
-                                                {getRoleDisplayName(
-                                                    role,
-                                                )?.charAt(0) || 'U'}
+                                                {getInitials(user?.name)}
                                             </AvatarFallback>
                                         </Avatar>
                                     </Button>
@@ -120,21 +138,24 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                         <div className="flex items-center gap-3">
                                             <div className="relative">
                                                 <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
-                                                    <AvatarImage
-                                                        src="/avatars/01.png"
-                                                        alt="Avatar"
-                                                    />
+                                                    {/* <AvatarImage
+                                                        src={user?.avatar}
+                                                        alt={
+                                                            user?.name || 'User'
+                                                        }
+                                                        className="object-cover"
+                                                    /> */}
                                                     <AvatarFallback className="bg-primary text-primary-foreground font-bold">
-                                                        {getRoleDisplayName(
-                                                            role,
-                                                        )?.charAt(0) || 'U'}
+                                                        {getInitials(
+                                                            user?.name,
+                                                        )}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-background"></span>
                                             </div>
                                             <div className="flex flex-col space-y-0.5">
-                                                <p className="text-sm font-bold text-foreground">
-                                                    Ahmad Fauzi
+                                                <p className="text-sm font-bold text-foreground truncate max-w-[180px]">
+                                                    {user?.name || 'Pengguna'}
                                                 </p>
                                                 <div className="flex items-center">
                                                     <span className="text-xs font-medium text-muted-foreground bg-background/50 px-1.5 py-0.5 rounded-md border border-border/50">
@@ -149,7 +170,7 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
 
                                     <div className="p-2 space-y-1">
                                         <Link
-                                            href="/profile"
+                                            href={getProfileLink(role)}
                                             className="block outline-none"
                                         >
                                             <DropdownMenuItem className="p-3 my-0.5 cursor-pointer rounded-lg focus:bg-accent group">
