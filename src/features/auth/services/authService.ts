@@ -95,14 +95,15 @@ export const authService = {
             }
 
             const result = await response.json();
+            const payload = result.data;
 
             // Normalize role to lowercase to match frontend expectations
             // Backend returns "Siswa", "Guru", etc. but frontend expects "siswa", "guru", etc.
             const normalizedResult: LoginResponse = {
-                token: result.token,
+                token: payload.token,
                 user: {
-                    ...result.user,
-                    role: result.user.role?.toLowerCase() as UserRole,
+                    ...payload.user,
+                    role: payload.user.role?.toLowerCase() as UserRole,
                 },
             };
 
