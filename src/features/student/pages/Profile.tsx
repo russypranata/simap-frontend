@@ -4,6 +4,10 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+    Dialog,
+    DialogContent,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import JsBarcode from 'jsbarcode';
@@ -44,6 +48,7 @@ export const StudentProfile: React.FC = () => {
         points: 1250,
     });
     const [loading, setLoading] = useState(true);
+    const [isPhotoOpen, setIsPhotoOpen] = useState(false);
     const barcodeRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -162,37 +167,98 @@ export const StudentProfile: React.FC = () => {
                                 </p>
                             </div>
                         </div>
-                        <Button
-                            onClick={() => router.push('/student/profile/edit')}
-                            size="sm"
-                            className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white"
-                        >
-                            <Edit className="h-4 w-4" />
-                            <span>Edit Profil</span>
-                        </Button>
+                        <div className="flex items-center gap-3">
+                            <Badge
+                                variant="secondary"
+                                className="bg-green-100 text-green-700 border-green-200 pl-2 pr-3 py-1 hidden sm:flex"
+                            >
+                                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                                Aktif
+                            </Badge>
+                            <Button
+                                onClick={() =>
+                                    router.push('/student/profile/edit')
+                                }
+                                size="sm"
+                                className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white"
+                            >
+                                <Edit className="h-4 w-4" />
+                                <span>Edit Profil</span>
+                            </Button>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-6">
                         {/* Profile Picture and Basic Info */}
                         <div className="flex flex-col md:flex-row items-center md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                            <Avatar className="w-32 h-auto aspect-3/4 rounded-xl border-4 border-primary/10">
-                                <AvatarImage
-                                    src={profileData.profilePicture}
-                                    alt={profileData.name}
-                                    className="object-cover"
-                                />
-                                <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-xl">
-                                    {initials}
-                                </AvatarFallback>
-                            </Avatar>
+                            <div
+                                onClick={() => {
+                                    if (profileData.profilePicture) {
+                                        setIsPhotoOpen(true);
+                                    }
+                                }}
+                                className={`relative group ${profileData.profilePicture ? 'cursor-pointer' : 'cursor-default'}`}
+                            >
+                                <Avatar className="w-32 h-auto aspect-3/4 rounded-xl border-4 border-primary/10 transition-transform duration-300 group-hover:scale-105">
+                                    <AvatarImage
+                                        src={profileData.profilePicture}
+                                        alt={profileData.name}
+                                        className="object-cover"
+                                    />
+                                    <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-xl">
+                                        {initials}
+                                    </AvatarFallback>
+                                </Avatar>
+                                {profileData.profilePicture && (
+                                    <div className="absolute inset-0 bg-black/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                        <div className="bg-white/90 p-2 rounded-full shadow-sm backdrop-blur-sm">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="20"
+                                                height="20"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="text-gray-800"
+                                            >
+                                                <circle cx="11" cy="11" r="8" />
+                                                <path d="m21 21-4.3-4.3" />
+                                                <path d="M11 8v6" />
+                                                <path d="M8 11h6" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <Dialog
+                                open={isPhotoOpen}
+                                onOpenChange={setIsPhotoOpen}
+                            >
+                                <DialogContent className="max-w-md md:max-w-lg p-1 bg-transparent border-none shadow-none text-transparent">
+                                    <div className="relative rounded-lg overflow-hidden bg-white shadow-2xl">
+                                        {profileData.profilePicture && (
+                                            /* eslint-disable-next-line @next/next/no-img-element */
+                                            <img
+                                                src={profileData.profilePicture}
+                                                alt={`Foto Profil ${profileData.name}`}
+                                                className="w-full h-auto object-contain max-h-[80vh] rounded-lg"
+                                            />
+                                        )}
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
 
                             <div className="flex-1 text-center md:text-left space-y-2">
                                 <h2 className="text-2xl font-bold text-foreground">
                                     {profileData.name}
                                 </h2>
                                 <div className="space-y-2 mt-1">
-                                    <div className="flex items-center justify-center md:justify-start gap-2">
+                                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                                         <Badge className="bg-blue-800 text-white pl-2 pr-3 py-1">
                                             <GraduationCap className="h-3.5 w-3.5 mr-1.5" />
                                             {profileData.role}
@@ -203,18 +269,6 @@ export const StudentProfile: React.FC = () => {
                                         >
                                             <Users className="h-3.5 w-3.5 mr-1.5" />
                                             {profileData.class}
-                                        </Badge>
-                                    </div>
-                                    <div className="flex items-center justify-center md:justify-start gap-2">
-                                        <span className="text-xs text-muted-foreground font-medium">
-                                            Status Akun:
-                                        </span>
-                                        <Badge
-                                            variant="secondary"
-                                            className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200 pl-2 pr-3 py-1"
-                                        >
-                                            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                                            Aktif
                                         </Badge>
                                     </div>
                                 </div>

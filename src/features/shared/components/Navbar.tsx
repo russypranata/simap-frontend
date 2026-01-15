@@ -28,6 +28,8 @@ import { NotificationBell } from './NotificationBell';
 import { NavbarBreadcrumb } from './NavbarBreadcrumb';
 import { User, LogOut, Calendar } from 'lucide-react';
 import { formatDate, getDayName } from '@/features/shared/utils/dateFormatter';
+import { getStudentProfile } from '@/features/student/services/studentProfileService';
+import { StudentProfileData } from '@/features/student/data/mockStudentData';
 
 interface NavbarProps {
     showNotifications?: boolean;
@@ -36,6 +38,22 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
     const { role, isAuthenticated, logout } = useRole();
+    const [studentProfile, setStudentProfile] =
+        React.useState<StudentProfileData | null>(null);
+
+    React.useEffect(() => {
+        if (isAuthenticated && role === 'siswa') {
+            const fetchProfile = async () => {
+                try {
+                    const data = await getStudentProfile();
+                    setStudentProfile(data);
+                } catch (error) {
+                    console.error('Failed to fetch student profile for navbar', error);
+                }
+            };
+            fetchProfile();
+        }
+    }, [isAuthenticated, role]);
 
     const handleLogout = () => {
         logout();
@@ -115,18 +133,28 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                 <DropdownMenuTrigger asChild>
                                     <Button
                                         variant="ghost"
-                                        className="relative h-9 w-9 rounded-full"
+                                        className="relative h-9 w-9 rounded-full ring-2 ring-primary/10 hover:ring-primary/20 transition-all"
                                     >
-                                        <Avatar className="h-9 w-9 border border-border">
-                                            {/* <AvatarImage
-                                                src={user?.avatar}
-                                                alt={user?.name || 'User'}
+                                        <Avatar className="h-9 w-9">
+                                            <AvatarImage
+                                                src={
+                                                    studentProfile?.profilePicture ||
+                                                    undefined
+                                                }
+                                                alt={
+                                                    studentProfile?.name ||
+                                                    'User'
+                                                }
                                                 className="object-cover"
-                                            /> */}
-                                            <AvatarFallback>
-                                                {getRoleDisplayName(
-                                                    role,
-                                                )?.charAt(0) || 'U'}
+                                            />
+                                            <AvatarFallback className="bg-blue-800 text-white">
+                                                {studentProfile?.name
+                                                    ? getInitials(
+                                                          studentProfile.name,
+                                                      )
+                                                    : getRoleDisplayName(
+                                                          role,
+                                                      )?.charAt(0) || 'U'}
                                             </AvatarFallback>
                                         </Avatar>
                                     </Button>
@@ -141,20 +169,28 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                             <div className="relative">
                                                 <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                                                     <AvatarImage
-                                                        src="/avatars/01.png"
+                                                        src={
+                                                            studentProfile?.profilePicture ||
+                                                            undefined
+                                                        }
                                                         alt="Avatar"
                                                     />
-                                                    <AvatarFallback className="bg-primary text-primary-foreground font-bold">
-                                                        {getRoleDisplayName(
-                                                            role,
-                                                        )?.charAt(0) || 'U'}
+                                                    <AvatarFallback className="bg-blue-800 text-white font-bold">
+                                                        {studentProfile?.name
+                                                            ? getInitials(
+                                                                  studentProfile.name,
+                                                              )
+                                                            : getRoleDisplayName(
+                                                                  role,
+                                                              )?.charAt(0) || 'U'}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-background"></span>
                                             </div>
                                             <div className="flex flex-col space-y-0.5">
                                                 <p className="text-sm font-bold text-foreground">
-                                                    Ahmad Fauzi
+                                                    {studentProfile?.name ||
+                                                        'Pengguna'}
                                                 </p>
                                                 <div className="flex items-center">
                                                     <span className="text-xs font-medium text-muted-foreground bg-background/50 px-1.5 py-0.5 rounded-md border border-border/50">
