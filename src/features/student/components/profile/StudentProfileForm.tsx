@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
     User,
     Mail,
@@ -18,15 +18,17 @@ import {
     Camera,
     IdCard,
     GraduationCap,
-} from "lucide-react";
-import { toast } from "sonner";
-import { PhotoRequirementsModal } from "./PhotoRequirementsModal";
+    AtSign,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { PhotoRequirementsModal } from './PhotoRequirementsModal';
+import { ImageCropper } from './ImageCropper';
 
-import { StudentProfileData } from "../../data/mockStudentData";
+import { StudentProfileData } from '../../data/mockStudentData';
 
 interface StudentProfileFormProps {
     initialData: StudentProfileData;
-    onSave: (data: StudentProfileData) => void;
+    onSave: (data: StudentProfileData, file: File | null) => void;
     onCancel: () => void;
     isLoading?: boolean;
 }
@@ -38,29 +40,34 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
     isLoading = false,
 }) => {
     const [formData, setFormData] = useState<StudentProfileData>(initialData);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [showRequirements, setShowRequirements] = useState(false);
 
+    // Cropper State
+    const [cropperOpen, setCropperOpen] = useState(false);
+    const [tempImageSrc, setTempImageSrc] = useState<string | null>(null);
+
     const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSave = () => {
-        if (!formData.name || !formData.email) {
-            toast.error("Nama dan email wajib diisi");
+        if (!formData.name || !formData.email || !formData.username) {
+            toast.error('Nama, Username, dan Email wajib diisi');
             return;
         }
-        onSave(formData);
+        onSave(formData, selectedFile);
     };
 
     const getInitials = (name: string) => {
         return name
-            .split(" ")
+            .split(' ')
             .map((n) => n[0])
             .slice(0, 2)
-            .join("")
+            .join('')
             .toUpperCase();
     };
 
@@ -84,67 +91,83 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
         // 1. Validasi Format
         const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!validTypes.includes(file.type)) {
-            toast.error(<span className="font-bold text-red-800">Format File Tidak Valid</span>, {
-                description: "Mohon unggah foto dengan format JPG atau PNG.",
-            });
-            if (fileInputRef.current) fileInputRef.current.value = "";
+            toast.error(
+                <span className="font-bold text-red-800">
+                    Format File Tidak Valid
+                </span>,
+                {
+                    description:
+                        'Mohon unggah foto dengan format JPG atau PNG.',
+                },
+            );
+            if (fileInputRef.current) fileInputRef.current.value = '';
             return;
         }
 
         // 2. Validasi Ukuran (Max 2MB)
         const maxSize = 2 * 1024 * 1024; // 2MB
         if (file.size > maxSize) {
-            toast.error(<span className="font-bold text-red-800">File Terlalu Besar</span>, {
-                description: `Ukuran file ${(file.size / (1024 * 1024)).toFixed(1)}MB melebihi batas maksimal 2MB.`,
-            });
-            if (fileInputRef.current) fileInputRef.current.value = "";
+            toast.error(
+                <span className="font-bold text-red-800">
+                    File Terlalu Besar
+                </span>,
+                {
+                    description: `Ukuran file ${(file.size / (1024 * 1024)).toFixed(1)}MB melebihi batas maksimal 2MB.`,
+                },
+            );
+            if (fileInputRef.current) fileInputRef.current.value = '';
             return;
         }
 
-        // 3. Validasi Dimensi & Rasio
-        const img = new Image();
-        const objectUrl = URL.createObjectURL(file);
+        // Read file as Data URL for cropping
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+            setTempImageSrc(reader.result?.toString() || null);
+            setCropperOpen(true);
+        });
+        reader.readAsDataURL(file);
 
+        // Reset input value to allow selecting same file again
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleCropComplete = (croppedFile: File) => {
+        const objectUrl = URL.createObjectURL(croppedFile);
+
+        // Validasi Dimensi pada hasil crop
+        const img = new Image();
         img.onload = () => {
             const width = img.width;
             const height = img.height;
-            const ratio = width / height;
 
-            // Validasi Resolusi Minimal (300x400)
+            // Validasi Resolusi Minimal (300x400) - Optional, since cropper might handle aspect
+            // Keeping it loose or handled by cropper visual guide
+            // But strict requirement says 300x400
             if (width < 300 || height < 400) {
-                toast.error(<span className="font-bold text-red-800">Resolusi Terlalu Rendah</span>, {
-                    description: `Dimensi foto ${width}x${height}px kurang dari minimal 300x400px.`,
-                });
+                toast.error(
+                    <span className="font-bold text-red-800">
+                        Resolusi Terlalu Rendah
+                    </span>,
+                    {
+                        description: `Hasil crop ${width}x${height}px kurang dari minimal 300x400px. Mohon pilih area yang lebih besar.`,
+                    },
+                );
                 URL.revokeObjectURL(objectUrl);
-                if (fileInputRef.current) fileInputRef.current.value = "";
                 return;
             }
 
-            // Validasi Rasio (Target 3:4 = 0.75)
-            // Toleransi: 0.65 - 0.85
-            if (ratio < 0.65 || ratio > 0.85) {
-                toast.error(<span className="font-bold text-red-800">Proporsi Tidak Sesuai</span>, {
-                    description: "Foto harus berorientasi Portrait dengan rasio 3:4.",
-                });
-                URL.revokeObjectURL(objectUrl);
-                if (fileInputRef.current) fileInputRef.current.value = "";
-                return;
-            }
-
-            // Semua Validasi Lolos
             setFormData((prev) => ({ ...prev, avatar: objectUrl }));
-            toast.success(<span className="font-bold text-green-800">Foto Berhasil Dipilih</span>, {
-                description: "Jangan lupa simpan perubahan profil Anda.",
-            });
+            setSelectedFile(croppedFile);
+            setCropperOpen(false); // Close modal
+            toast.success(
+                <span className="font-bold text-green-800">
+                    Foto Berhasil Diperbarui
+                </span>,
+                {
+                    description: 'Jangan lupa simpan perubahan profil Anda.',
+                },
+            );
         };
-
-        img.onerror = () => {
-            toast.error(<span className="font-bold text-red-800">Gagal Memproses File</span>, {
-                description: "Terjadi kesalahan saat membaca file gambar.",
-            });
-            URL.revokeObjectURL(objectUrl);
-        };
-
         img.src = objectUrl;
     };
 
@@ -153,11 +176,13 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
             <Card>
                 <CardHeader className="pb-4">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                             <User className="h-5 w-5" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg">Informasi Profil</CardTitle>
+                            <CardTitle className="text-lg">
+                                Informasi Profil
+                            </CardTitle>
                             <p className="text-sm text-muted-foreground mt-0.5 font-normal">
                                 Perbarui detail identitas dan kontak
                             </p>
@@ -168,19 +193,19 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
                     {/* Avatar Section */}
                     <div className="flex flex-col items-center space-y-4 pb-6 border-b">
                         <div className="relative group">
-                            <Avatar className="h-32 w-32 border-4 border-primary/10">
+                            <Avatar className="w-32 h-auto aspect-3/4 rounded-xl border-4 border-primary/10">
                                 <AvatarImage
                                     src={formData.avatar}
                                     alt={formData.name}
                                     className="object-cover"
                                 />
-                                <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white">
+                                <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-xl">
                                     {getInitials(formData.name)}
                                 </AvatarFallback>
                             </Avatar>
                             <div
                                 onClick={handleImageClick}
-                                className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
+                                className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl cursor-pointer"
                             >
                                 <Camera className="h-8 w-8 text-white" />
                             </div>
@@ -224,6 +249,25 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
                             />
                         </div>
 
+                        {/* Username */}
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <AtSign className="h-4 w-4 text-primary" />
+                                <Label htmlFor="username" className="mb-0">
+                                    Username
+                                    <span className="text-red-500 ml-1">*</span>
+                                </Label>
+                            </div>
+                            <Input
+                                id="username"
+                                name="username"
+                                value={formData.username}
+                                onChange={handleInputChange}
+                                placeholder="Masukkan username"
+                                className=""
+                            />
+                        </div>
+
                         {/* NIS & Kelas (Read Only) */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
@@ -231,7 +275,9 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
                                     <IdCard className="h-4 w-4 text-primary" />
                                     <Label htmlFor="nis" className="mb-0">
                                         NIS
-                                        <span className="text-red-500 ml-1">*</span>
+                                        <span className="text-red-500 ml-1">
+                                            *
+                                        </span>
                                     </Label>
                                 </div>
                                 <Input
@@ -272,7 +318,9 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
                                     <Mail className="h-4 w-4 text-primary" />
                                     <Label htmlFor="email" className="mb-0">
                                         Email
-                                        <span className="text-red-500 ml-1">*</span>
+                                        <span className="text-red-500 ml-1">
+                                            *
+                                        </span>
                                     </Label>
                                 </div>
                                 <Input
@@ -290,7 +338,9 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
                                     <Phone className="h-4 w-4 text-primary" />
                                     <Label htmlFor="phone" className="mb-0">
                                         Nomor Telepon
-                                        <span className="text-red-500 ml-1">*</span>
+                                        <span className="text-red-500 ml-1">
+                                            *
+                                        </span>
                                     </Label>
                                 </div>
                                 <Input
@@ -309,7 +359,10 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
                                     <MapPin className="h-4 w-4 text-primary" />
-                                    <Label htmlFor="birthPlace" className="mb-0">
+                                    <Label
+                                        htmlFor="birthPlace"
+                                        className="mb-0"
+                                    >
                                         Tempat Lahir
                                     </Label>
                                 </div>
@@ -376,7 +429,9 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
                                 className="flex-1 sm:flex-none bg-blue-800 hover:bg-blue-900 text-white"
                             >
                                 <Save className="h-4 w-4 mr-2" />
-                                {isLoading ? "Menyimpan..." : "Simpan Perubahan"}
+                                {isLoading
+                                    ? 'Menyimpan...'
+                                    : 'Simpan Perubahan'}
                             </Button>
                         </div>
                     </div>
@@ -388,6 +443,14 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
                 open={showRequirements}
                 onOpenChange={setShowRequirements}
                 onProceed={handleProceedToUpload}
+            />
+
+            {/* Image Cropper Modal */}
+            <ImageCropper
+                open={cropperOpen}
+                onClose={() => setCropperOpen(false)}
+                imageSrc={tempImageSrc}
+                onCropComplete={handleCropComplete}
             />
         </>
     );

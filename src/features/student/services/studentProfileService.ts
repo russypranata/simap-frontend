@@ -12,17 +12,18 @@ import {
     ApiResponse,
     ApiErrorResponse,
     mockStudentProfile,
-} from "../data/mockStudentData";
+} from '../data/mockStudentData';
 
 // ============================================
 // CONFIGURATION
 // ============================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 const STUDENT_API_URL = `${API_BASE_URL}/student`;
 
 // Development mode flag
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK === "true" || true; // Set to false when API ready
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK === 'true'; // Defaults to false
 const SIMULATED_DELAY_MS = 1500;
 
 // ============================================
@@ -33,11 +34,14 @@ const SIMULATED_DELAY_MS = 1500;
  * Get authorization headers with Bearer token
  */
 const getAuthHeaders = (): HeadersInit => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+    const token =
+        typeof window !== 'undefined'
+            ? localStorage.getItem('authToken')
+            : null;
     return {
-        "Authorization": `Bearer ${token}`,
-        "Accept": "application/json",
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
     };
 };
 
@@ -62,12 +66,12 @@ const handleApiError = async (response: Response): Promise<never> => {
  * Format date from ISO to display format (for UI)
  */
 export const formatDateForDisplay = (isoDate: string): string => {
-    if (!isoDate) return "";
+    if (!isoDate) return '';
     const date = new Date(isoDate);
-    return date.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
+    return date.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
     });
 };
 
@@ -75,9 +79,9 @@ export const formatDateForDisplay = (isoDate: string): string => {
  * Format date from display to ISO format (for API)
  */
 export const formatDateForApi = (displayDate: string): string => {
-    if (!displayDate) return "";
+    if (!displayDate) return '';
     const date = new Date(displayDate);
-    return date.toISOString().split("T")[0]; // Returns "YYYY-MM-DD"
+    return date.toISOString().split('T')[0]; // Returns "YYYY-MM-DD"
 };
 
 // ============================================
@@ -91,13 +95,13 @@ export const formatDateForApi = (displayDate: string): string => {
 export const getStudentProfile = async (): Promise<StudentProfileData> => {
     // ===== MOCK IMPLEMENTATION =====
     if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, SIMULATED_DELAY_MS));
+        await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
         return mockStudentProfile;
     }
 
     // ===== REAL API IMPLEMENTATION =====
     const response = await fetch(`${STUDENT_API_URL}/profile`, {
-        method: "GET",
+        method: 'GET',
         headers: getAuthHeaders(),
     });
 
@@ -114,18 +118,18 @@ export const getStudentProfile = async (): Promise<StudentProfileData> => {
  * Update student profile data
  */
 export const updateStudentProfile = async (
-    data: UpdateProfileRequest
+    data: UpdateProfileRequest,
 ): Promise<StudentProfileData> => {
     // ===== MOCK IMPLEMENTATION =====
     if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, SIMULATED_DELAY_MS));
-        console.log("[Mock] Profile updated:", data);
+        await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+        console.log('[Mock] Profile updated:', data);
         return { ...mockStudentProfile, ...data };
     }
 
     // ===== REAL API IMPLEMENTATION =====
     const response = await fetch(`${STUDENT_API_URL}/profile`, {
-        method: "PUT",
+        method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(data),
     });
@@ -143,13 +147,13 @@ export const updateStudentProfile = async (
  * Upload profile picture
  */
 export const uploadProfileAvatar = async (
-    file: File
+    file: File,
 ): Promise<AvatarUploadResponse> => {
     // ===== MOCK IMPLEMENTATION =====
     if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, SIMULATED_DELAY_MS));
+        await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
         const mockUrl = URL.createObjectURL(file);
-        console.log("[Mock] Avatar uploaded:", file.name);
+        console.log('[Mock] Avatar uploaded:', file.name);
         return {
             avatar: mockUrl,
             profilePicture: mockUrl,
@@ -161,16 +165,19 @@ export const uploadProfileAvatar = async (
     }
 
     // ===== REAL API IMPLEMENTATION =====
-    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+    const token =
+        typeof window !== 'undefined'
+            ? localStorage.getItem('authToken')
+            : null;
 
     const formData = new FormData();
-    formData.append("avatar", file);
+    formData.append('avatar', file);
 
     const response = await fetch(`${STUDENT_API_URL}/profile/avatar`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
             // Note: Don't set Content-Type for FormData, browser will set it with boundary
         },
         body: formData,
@@ -189,34 +196,42 @@ export const uploadProfileAvatar = async (
  * Change user password
  */
 export const updatePassword = async (
-    data: UpdatePasswordRequest
+    data: UpdatePasswordRequest,
 ): Promise<PasswordUpdateResponse> => {
     // ===== MOCK IMPLEMENTATION =====
     if (USE_MOCK_DATA) {
-        await new Promise(resolve => setTimeout(resolve, SIMULATED_DELAY_MS));
+        await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
 
         // Simulate password validation
-        if (data.currentPassword === "") {
-            const error = new Error("Kata sandi saat ini wajib diisi") as Error & {
+        if (data.currentPassword === '') {
+            const error = new Error(
+                'Kata sandi saat ini wajib diisi',
+            ) as Error & {
                 code: number;
                 errors?: Record<string, string[]>;
             };
             error.code = 400;
-            error.errors = { currentPassword: ["Kata sandi saat ini wajib diisi"] };
+            error.errors = {
+                currentPassword: ['Kata sandi saat ini wajib diisi'],
+            };
             throw error;
         }
 
         if (data.newPassword !== data.confirmPassword) {
-            const error = new Error("Konfirmasi kata sandi tidak cocok") as Error & {
+            const error = new Error(
+                'Konfirmasi kata sandi tidak cocok',
+            ) as Error & {
                 code: number;
                 errors?: Record<string, string[]>;
             };
             error.code = 400;
-            error.errors = { confirmPassword: ["Konfirmasi kata sandi tidak cocok"] };
+            error.errors = {
+                confirmPassword: ['Konfirmasi kata sandi tidak cocok'],
+            };
             throw error;
         }
 
-        console.log("[Mock] Password updated");
+        console.log('[Mock] Password updated');
         return {
             passwordLastChanged: new Date().toISOString(),
         };
@@ -224,7 +239,7 @@ export const updatePassword = async (
 
     // ===== REAL API IMPLEMENTATION =====
     const response = await fetch(`${STUDENT_API_URL}/profile/password`, {
-        method: "PUT",
+        method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(data),
     });
@@ -249,16 +264,16 @@ export const validatePasswordStrength = (password: string): string[] => {
     const errors: string[] = [];
 
     if (password.length < 8) {
-        errors.push("Minimal 8 karakter");
+        errors.push('Minimal 8 karakter');
     }
     if (!/[A-Z]/.test(password)) {
-        errors.push("Harus mengandung huruf besar");
+        errors.push('Harus mengandung huruf besar');
     }
     if (!/[a-z]/.test(password)) {
-        errors.push("Harus mengandung huruf kecil");
+        errors.push('Harus mengandung huruf kecil');
     }
     if (!/[0-9]/.test(password)) {
-        errors.push("Harus mengandung angka");
+        errors.push('Harus mengandung angka');
     }
 
     return errors;
@@ -283,19 +298,23 @@ export const validatePhone = (phone: string): boolean => {
 /**
  * Validate image file for avatar upload
  */
-export const validateAvatarFile = (file: File): { valid: boolean; errors: string[] } => {
+export const validateAvatarFile = (
+    file: File,
+): { valid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
     // Check file type
-    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     if (!validTypes.includes(file.type)) {
-        errors.push("Format file harus JPG, JPEG, atau PNG");
+        errors.push('Format file harus JPG, JPEG, atau PNG');
     }
 
     // Check file size (max 2MB)
     const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
-        errors.push(`Ukuran file ${(file.size / (1024 * 1024)).toFixed(1)}MB melebihi batas maksimal 2MB`);
+        errors.push(
+            `Ukuran file ${(file.size / (1024 * 1024)).toFixed(1)}MB melebihi batas maksimal 2MB`,
+        );
     }
 
     return {

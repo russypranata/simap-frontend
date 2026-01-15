@@ -1,21 +1,32 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, User, Pencil, Lock, Key } from "lucide-react";
-import { toast } from "sonner";
-import { StudentProfileForm } from "@/features/student/components/profile/StudentProfileForm";
-import { EditProfileSkeleton, ChangePasswordDialog } from "@/features/student/components/profile";
-import { StudentProfileData } from "@/features/student/data/mockStudentData";
-import { getStudentProfile, updateStudentProfile } from "@/features/student/services/studentProfileService";
+import { useRef, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useRole } from '@/app/context/RoleContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, User, Pencil, Lock, Key } from 'lucide-react';
+import { toast } from 'sonner';
+import { StudentProfileForm } from '@/features/student/components/profile/StudentProfileForm';
+import {
+    EditProfileSkeleton,
+    ChangePasswordDialog,
+} from '@/features/student/components/profile';
+import { StudentProfileData } from '@/features/student/data/mockStudentData';
+import {
+    getStudentProfile,
+    updateStudentProfile,
+    uploadProfileAvatar,
+} from '@/features/student/services/studentProfileService';
 
-export const EditStudentProfile: React.FC = () => {
+export const StudentEditProfile: React.FC = () => {
     const router = useRouter();
+    const { updateUser } = useRole(); // Get updateUser
     const [isLoading, setIsLoading] = useState(false); // For saving state
     const [isFetching, setIsFetching] = useState(true); // For initial data load
-    const [profileData, setProfileData] = useState<StudentProfileData | null>(null);
+    const [profileData, setProfileData] = useState<StudentProfileData | null>(
+        null,
+    );
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
     // Simulate API Fetching for Initial Data
@@ -26,8 +37,8 @@ export const EditStudentProfile: React.FC = () => {
                 const data = await getStudentProfile();
                 setProfileData(data);
             } catch (error) {
-                console.error("Failed to fetch profile:", error);
-                toast.error("Gagal memuat data profil");
+                console.error('Failed to fetch profile:', error);
+                toast.error('Gagal memuat data profil');
             } finally {
                 setIsFetching(false);
             }
@@ -36,14 +47,49 @@ export const EditStudentProfile: React.FC = () => {
         fetchProfileData();
     }, []);
 
-    const handleSave = async (data: StudentProfileData) => {
+    const handleSave = async (data: StudentProfileData, file: File | null) => {
         setIsLoading(true);
         try {
-            await updateStudentProfile(data);
-            toast.success("Profil berhasil diperbarui!");
-            router.push("/student/profile");
+            // 1. Update Profile Data
+            const payload = {
+                name: data.name,
+                username: data.username,
+                email: data.email,
+                phone: data.phone,
+                // Use undefined for empty strings so JSON.stringify omits them
+                address: data.address || undefined,
+                birthPlace: data.birthPlace || undefined,
+                birthDate: data.birthDate || undefined,
+            };
+            await updateStudentProfile(payload);
+
+            // 2. Upload Avatar if selected
+            let avatarUrl = data.profilePicture;
+            if (file) {
+                const uploadResponse = await uploadProfileAvatar(file);
+                // Assuming the upload response returns the new avatar URL structure
+                // If uploadResponse is void or doesn't return URL, we might need to rely on re-fetching
+                // or the local object URL from file (which is temporary)
+                // Ideally uploadProfileAvatar should return the new URL.
+                // Let's assume for now we can't easily get the remote URL without another fetch,
+                // but we can update the context with the local preview for immediate feedback,
+                // OR better: refetch the profile to get everything fresh.
+            }
+
+            // Refetch to get the definitive server state including new avatar URL
+            const freshProfile = await getStudentProfile();
+
+            // Update Context
+            updateUser({
+                name: freshProfile.name,
+                avatar: freshProfile.profilePicture,
+                // Map other fields if necessary
+            });
+
+            toast.success('Profil berhasil diperbarui!');
+            router.push('/student/profile');
         } catch (error) {
-            toast.error("Gagal menyimpan perubahan");
+            toast.error('Gagal menyimpan perubahan');
             console.error(error);
         } finally {
             setIsLoading(false);
@@ -51,7 +97,7 @@ export const EditStudentProfile: React.FC = () => {
     };
 
     const handleCancel = () => {
-        router.push("/student/profile");
+        router.push('/student/profile');
     };
 
     if (isFetching || !profileData) {
@@ -65,10 +111,10 @@ export const EditStudentProfile: React.FC = () => {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
-                                Edit{" "}
+                            <span className="bg-linear-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
+                                Edit{' '}
                             </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
+                            <span className="bg-linear-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
                                 Profil
                             </span>
                         </h1>
@@ -94,12 +140,16 @@ export const EditStudentProfile: React.FC = () => {
             <Card className="overflow-hidden gap-3">
                 <CardHeader className="pb-2">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                             <Lock className="h-5 w-5" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg">Pengaturan Sandi</CardTitle>
-                            <p className="text-sm text-muted-foreground mt-0.5 font-normal">Kelola kata sandi dan akses akun</p>
+                            <CardTitle className="text-lg">
+                                Pengaturan Sandi
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground mt-0.5 font-normal">
+                                Kelola kata sandi dan akses akun
+                            </p>
                         </div>
                     </div>
                 </CardHeader>
@@ -107,12 +157,16 @@ export const EditStudentProfile: React.FC = () => {
                     <div className="group relative flex items-center justify-between p-4 rounded-xl border border-border/60 bg-muted/30 hover:bg-muted/50 transition-all duration-300">
                         {/* Left side - Password info */}
                         <div className="flex items-center gap-4">
-                            <div className="p-2.5 rounded-full bg-yellow-100 text-yellow-600 border border-yellow-200 flex-shrink-0">
+                            <div className="p-2.5 rounded-full bg-yellow-100 text-yellow-600 border border-yellow-200 shrink-0">
                                 <Key className="h-5 w-5" />
                             </div>
                             <div className="space-y-1">
-                                <h4 className="text-base font-semibold text-foreground">Kata Sandi</h4>
-                                <span className="text-sm font-medium text-muted-foreground tracking-widest">********</span>
+                                <h4 className="text-base font-semibold text-foreground">
+                                    Kata Sandi
+                                </h4>
+                                <span className="text-sm font-medium text-muted-foreground tracking-widest">
+                                    ********
+                                </span>
                                 <p className="text-xs text-muted-foreground">
                                     Diperbarui 3 bulan lalu
                                 </p>
@@ -149,9 +203,19 @@ export const EditStudentProfile: React.FC = () => {
                                 Informasi Penting
                             </p>
                             <ul className="text-sm text-blue-900 space-y-1.5 list-disc list-inside">
-                                <li>Pastikan data diri Anda (Nama, Email, No. Telepon) selalu valid dan aktif.</li>
-                                <li><strong>NIS</strong> dan <strong>Kelas</strong> dikunci oleh sistem. Hubungi tata usaha jika terdapat kesalahan.</li>
-                                <li>Jaga keamanan akun Anda dengan tidak membagikan kata sandi kepada orang lain.</li>
+                                <li>
+                                    Pastikan data diri Anda (Nama, Email, No.
+                                    Telepon) selalu valid dan aktif.
+                                </li>
+                                <li>
+                                    <strong>NIS</strong> dan{' '}
+                                    <strong>Kelas</strong> dikunci oleh sistem.
+                                    Hubungi tata usaha jika terdapat kesalahan.
+                                </li>
+                                <li>
+                                    Jaga keamanan akun Anda dengan tidak
+                                    membagikan kata sandi kepada orang lain.
+                                </li>
                             </ul>
                         </div>
                     </div>

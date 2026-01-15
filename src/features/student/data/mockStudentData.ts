@@ -10,6 +10,7 @@
 export interface StudentProfileData {
     id: number;
     name: string;
+    username: string;
     nis: string;
     nisn: string;
     class: string;
@@ -35,6 +36,7 @@ export interface StudentProfileData {
  */
 export interface UpdateProfileRequest {
     name: string;
+    username: string;
     email: string;
     phone: string;
     address?: string;
@@ -90,7 +92,7 @@ export interface StudentStats {
  */
 export interface ApiResponse<T> {
     code: number;
-    status: "success" | "error";
+    status: 'success' | 'error';
     message: string;
     data: T;
     meta?: {
@@ -104,7 +106,7 @@ export interface ApiResponse<T> {
  */
 export interface ApiErrorResponse {
     code: number;
-    status: "error";
+    status: 'error';
     message: string;
     errors?: Record<string, string[]>;
 }
@@ -123,24 +125,25 @@ export interface ValidationErrors {
 
 export const mockStudentProfile: StudentProfileData = {
     id: 1,
-    name: "Ahmad Fauzan Ramadhan",
-    nis: "0012345678",
-    nisn: "0107959840",
-    class: "XII IPA 1",
-    email: "ahmad.fauzan@student.sman1.sch.id",
-    phone: "08123456789",
-    address: "Jl. Merdeka No. 10, RT 05/RW 02, Kel. Sukamaju, Kec. Cikupa",
-    birthPlace: "Tangerang",
-    birthDate: "2007-05-15", // ISO format
-    religion: "Islam",
-    joinDate: "Juli 2023",
-    role: "Siswa",
-    validUntil: "31 Juni 2028",
-    profilePicture: "",
-    avatar: "",
-    passwordLastChanged: "2024-10-13T10:30:00Z",
-    createdAt: "2023-07-01T00:00:00Z",
-    updatedAt: "2025-01-13T12:00:00Z",
+    name: 'Ahmad Fauzan Ramadhan',
+    username: 'ahmad.fauzan',
+    nis: '0012345678',
+    nisn: '0107959840',
+    class: 'XII IPA 1',
+    email: 'ahmad.fauzan@student.sman1.sch.id',
+    phone: '08123456789',
+    address: 'Jl. Merdeka No. 10, RT 05/RW 02, Kel. Sukamaju, Kec. Cikupa',
+    birthPlace: 'Tangerang',
+    birthDate: '2007-05-15', // ISO format
+    religion: 'Islam',
+    joinDate: 'Juli 2023',
+    role: 'Siswa',
+    validUntil: '31 Juni 2028',
+    profilePicture: '',
+    avatar: '',
+    passwordLastChanged: '2024-10-13T10:30:00Z',
+    createdAt: '2023-07-01T00:00:00Z',
+    updatedAt: '2025-01-13T12:00:00Z',
 };
 
 export const mockStudentStats: StudentStats = {

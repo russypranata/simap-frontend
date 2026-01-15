@@ -60,6 +60,25 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
         }
     };
 
+    const getInitials = (name?: string) => {
+        if (!name) return 'U';
+        return name
+            .split(' ')
+            .map((n) => n[0])
+            .slice(0, 2)
+            .join('')
+            .toUpperCase();
+    };
+
+    const getProfileLink = (role: string | null) => {
+        switch (role) {
+            case 'siswa':
+                return '/student/profile';
+            default:
+                return '/profile';
+        }
+    };
+
     return (
         <nav className="bg-card border-b">
             <div className="flex h-16 items-center justify-between px-4">
@@ -98,11 +117,12 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                         variant="ghost"
                                         className="relative h-9 w-9 rounded-full"
                                     >
-                                        <Avatar className="h-9 w-9">
-                                            <AvatarImage
-                                                src="/avatars/01.png"
-                                                alt="Avatar"
-                                            />
+                                        <Avatar className="h-9 w-9 border border-border">
+                                            {/* <AvatarImage
+                                                src={user?.avatar}
+                                                alt={user?.name || 'User'}
+                                                className="object-cover"
+                                            /> */}
                                             <AvatarFallback>
                                                 {getRoleDisplayName(
                                                     role,

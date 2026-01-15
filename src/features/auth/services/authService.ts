@@ -62,6 +62,10 @@ export const authService = {
                 if (typeof window !== 'undefined') {
                     localStorage.setItem('authToken', response.token);
                     localStorage.setItem('userRole', response.user.role || '');
+                    localStorage.setItem(
+                        'userData',
+                        JSON.stringify(response.user),
+                    );
                 }
                 return response;
             }
@@ -128,6 +132,7 @@ export const authService = {
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('userRole');
+                localStorage.removeItem('userData');
             }
             return;
         }
@@ -150,6 +155,7 @@ export const authService = {
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('userRole');
+                localStorage.removeItem('userData');
             }
         }
     },
