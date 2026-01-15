@@ -27,42 +27,21 @@ const MOCK_USERS: Record<string, LoginResponse['user']> = {
         username: 'guru',
         name: 'Budi Santoso, S.Pd',
         role: 'guru',
-        avatar: 'https://ui-avatars.com/api/?name=Budi+Santoso&background=0D8ABC&color=fff',
     },
-    siswa: {
-        id: '2',
-        username: 'siswa',
-        name: 'Ahmad Fulan',
-        role: 'siswa',
-        avatar: 'https://ui-avatars.com/api/?name=Ahmad+Fulan&background=random',
-    },
-    admin: {
-        id: '3',
-        username: 'admin',
-        name: 'Administrator',
-        role: 'admin',
-        avatar: 'https://ui-avatars.com/api/?name=Administrator&background=333&color=fff',
-    },
-    ortu: {
-        id: '4',
-        username: 'ortu',
-        name: 'Pak Fulan',
-        role: 'orang_tua',
-        avatar: 'https://ui-avatars.com/api/?name=Pak+Fulan&background=random',
-    },
+    siswa: { id: '2', username: 'siswa', name: 'Ahmad Fulan', role: 'siswa' },
+    admin: { id: '3', username: 'admin', name: 'Administrator', role: 'admin' },
+    ortu: { id: '4', username: 'ortu', name: 'Pak Fulan', role: 'orang_tua' },
     tutor: {
         id: '5',
         username: 'tutor',
         name: 'Kak Tutor',
         role: 'tutor_ekskul',
-        avatar: 'https://ui-avatars.com/api/?name=Kak+Tutor&background=random',
     },
     mutamayizin: {
         id: '6',
         username: 'mutamayizin',
         name: 'Ust. Mutamayizin',
         role: 'pj_mutamayizin',
-        avatar: 'https://ui-avatars.com/api/?name=Ust+Mutamayizin&background=random',
     },
 };
 
@@ -138,10 +117,6 @@ export const authService = {
                 localStorage.setItem(
                     'userRole',
                     normalizedResult.user.role || '',
-                );
-                localStorage.setItem(
-                    'userData',
-                    JSON.stringify(normalizedResult.user),
                 );
             }
 

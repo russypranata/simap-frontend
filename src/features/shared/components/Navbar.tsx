@@ -35,7 +35,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
-    const { role, user, isAuthenticated, logout } = useRole();
+    const { role, isAuthenticated, logout } = useRole();
 
     const handleLogout = () => {
         logout();
@@ -124,7 +124,9 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                                 className="object-cover"
                                             /> */}
                                             <AvatarFallback>
-                                                {getInitials(user?.name)}
+                                                {getRoleDisplayName(
+                                                    role,
+                                                )?.charAt(0) || 'U'}
                                             </AvatarFallback>
                                         </Avatar>
                                     </Button>
@@ -138,24 +140,21 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                         <div className="flex items-center gap-3">
                                             <div className="relative">
                                                 <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
-                                                    {/* <AvatarImage
-                                                        src={user?.avatar}
-                                                        alt={
-                                                            user?.name || 'User'
-                                                        }
-                                                        className="object-cover"
-                                                    /> */}
+                                                    <AvatarImage
+                                                        src="/avatars/01.png"
+                                                        alt="Avatar"
+                                                    />
                                                     <AvatarFallback className="bg-primary text-primary-foreground font-bold">
-                                                        {getInitials(
-                                                            user?.name,
-                                                        )}
+                                                        {getRoleDisplayName(
+                                                            role,
+                                                        )?.charAt(0) || 'U'}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-background"></span>
                                             </div>
                                             <div className="flex flex-col space-y-0.5">
-                                                <p className="text-sm font-bold text-foreground truncate max-w-[180px]">
-                                                    {user?.name || 'Pengguna'}
+                                                <p className="text-sm font-bold text-foreground">
+                                                    Ahmad Fauzi
                                                 </p>
                                                 <div className="flex items-center">
                                                     <span className="text-xs font-medium text-muted-foreground bg-background/50 px-1.5 py-0.5 rounded-md border border-border/50">
@@ -170,7 +169,7 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
 
                                     <div className="p-2 space-y-1">
                                         <Link
-                                            href={getProfileLink(role)}
+                                            href="/profile"
                                             className="block outline-none"
                                         >
                                             <DropdownMenuItem className="p-3 my-0.5 cursor-pointer rounded-lg focus:bg-accent group">

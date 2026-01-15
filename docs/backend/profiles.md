@@ -36,7 +36,6 @@ curl -X GET http://localhost:8000/api/v1/student/profile \
     "data": {
         "id": 1,
         "name": "Ahmad Fauzan",
-        "username": "ahmad.fauzan",
         "nis": "12345678",
         "nisn": "12345678",
         "class": "XII IPA 1",
@@ -74,7 +73,6 @@ curl -X PUT http://localhost:8000/api/v1/student/profile \
   -H "Accept: application/json" \
   -d '{
     "name": "Ahmad Fauzan Updated",
-    "username": "ahmad.fauzan.updated",
     "email": "ahmad@example.com",
     "phone": "081999888777",
     "address": "New Address",
@@ -88,7 +86,6 @@ curl -X PUT http://localhost:8000/api/v1/student/profile \
 | Field        | Type   | Required | Description                |
 | ------------ | ------ | -------- | -------------------------- |
 | `name`       | string | Yes      | Full name (min 3 chars)    |
-| `username`   | string | Yes      | Username (min 3 chars)     |
 | `email`      | string | Yes      | Valid email address        |
 | `phone`      | string | Yes      | Phone (starts with 08)     |
 | `address`    | string | No       | Address (max 500 chars)    |
