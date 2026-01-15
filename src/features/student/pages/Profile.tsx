@@ -423,7 +423,7 @@ export const StudentProfile: React.FC = () => {
             </Card>
 
             {/* Academic Statistic s */}
-            <Card>
+            <Card className="gap-0">
                 <CardHeader className="pb-4">
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -544,8 +544,8 @@ export const StudentProfile: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                     {/* Preview Info Alert */}
-                    <div className="mb-6 p-4 rounded-lg bg-amber-50/50 border border-amber-100 flex gap-3 text-amber-900/80">
-                        <div className="mt-0.5 shrink-0 text-amber-500">
+                    <div className="mb-6 p-4 rounded-lg bg-blue-50/50 border border-blue-100 flex gap-3 text-blue-900/80">
+                        <div className="mt-0.5 shrink-0 text-blue-600">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="18"
@@ -563,10 +563,10 @@ export const StudentProfile: React.FC = () => {
                             </svg>
                         </div>
                         <div className="space-y-1">
-                            <h4 className="text-sm font-semibold text-amber-800">
+                            <h4 className="text-sm font-semibold text-blue-900">
                                 Mode Pratinjau (Preview)
                             </h4>
-                            <p className="text-xs sm:text-sm leading-relaxed">
+                            <p className="text-xs sm:text-sm leading-relaxed text-blue-800/80">
                                 Tampilan di bawah ini hanya simulasi visual.
                                 Hasil cetak/PDF akan memiliki resolusi tinggi
                                 (High Quality) dan barcode yang tajam sesuai
