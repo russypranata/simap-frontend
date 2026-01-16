@@ -13,19 +13,12 @@ import {
 } from '@/features/auth/services/authService';
 
 export type UserRole =
-    | 'admin'
-    | 'subject_teacher'
-    | 'picket_teacher'
-    | 'homeroom_teacher'
-    | 'extracurricular_tutor'
-    | 'mutamayizin_coordinator'
-    | 'student'
-    | 'headmaster'
-    | 'parent'
     | 'guru'
     | 'siswa'
+    | 'admin'
     | 'orang_tua'
     | 'tutor_ekskul'
+    | 'pj_mutamayizin'
     | null;
 
 export type User = LoginResponse['user'];
@@ -85,11 +78,8 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
                         }
                     }
 
-                    if (
-                        savedRole === 'subject_teacher' ||
-                        savedRole === 'homeroom_teacher'
-                    ) {
-                        // Force true for guru/teachers to ensure Wali Kelas is visible
+                    if (savedRole === 'guru') {
+                        // Force true for guru to ensure Wali Kelas is visible
                         setIsHomeroomTeacher(true);
                         localStorage.setItem('isHomeroomTeacher', 'true');
 
@@ -116,7 +106,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
     // Dedicated effect to sync user data if role exists but user is missing
     useEffect(() => {
         const syncUserData = async () => {
-            if (role === 'student' && !user) {
+            if (role === 'siswa' && !user) {
                 try {
                     const { getStudentProfile } =
                         await import('@/features/student/services/studentProfileService');
@@ -129,7 +119,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
                         id: String(profile.id),
                         username: profile.nis,
                         name: profile.name,
-                        role: 'student',
+                        role: 'siswa',
                         avatar: profile.profilePicture,
                     };
 
@@ -197,10 +187,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
         }
 
         // For demo purposes, randomly set homeroom teacher status for teachers
-        if (
-            loginRole === 'subject_teacher' ||
-            loginRole === 'homeroom_teacher'
-        ) {
+        if (loginRole === 'guru') {
             const isHomeroom = true; // Always true for development/demo
             setIsHomeroomTeacher(isHomeroom);
 

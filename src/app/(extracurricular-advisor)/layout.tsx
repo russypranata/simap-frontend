@@ -21,25 +21,22 @@ export default function ExtracurricularAdvisorRouteLayout({
         if (!isAuthenticated) {
             // Redirect to home if not authenticated
             router.push('/');
-        } else if (role !== 'extracurricular_tutor') {
+        } else if (role !== 'tutor_ekskul') {
             // Redirect to appropriate dashboard based on role
             switch (role) {
-                case 'subject_teacher':
-                case 'homeroom_teacher':
-                case 'picket_teacher':
-                case 'headmaster':
+                case 'guru':
                     router.push('/teacher/dashboard');
                     break;
-                case 'student':
+                case 'siswa':
                     router.push('/student/dashboard');
                     break;
                 case 'admin':
                     router.push('/admin/dashboard');
                     break;
-                case 'parent':
+                case 'orang_tua':
                     router.push('/parent/dashboard');
                     break;
-                case 'mutamayizin_coordinator':
+                case 'pj_mutamayizin':
                     router.push('/mutamayizin-coordinator/dashboard');
                     break;
                 default:
@@ -49,7 +46,7 @@ export default function ExtracurricularAdvisorRouteLayout({
     }, [isAuthenticated, role, router, isLoading]);
 
     // Show nothing while initializing or redirecting
-    if (isLoading || !isAuthenticated || role !== 'extracurricular_tutor') {
+    if (isLoading || !isAuthenticated || role !== 'tutor_ekskul') {
         return null;
     }
 

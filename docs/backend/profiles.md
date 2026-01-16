@@ -36,7 +36,6 @@ curl -X GET http://localhost:8000/api/v1/student/profile \
     "data": {
         "id": 1,
         "name": "Ahmad Fauzan",
-        "username": "ahmad.fauzan",
         "nis": "12345678",
         "nisn": "12345678",
         "class": "XII IPA 1",
@@ -74,7 +73,6 @@ curl -X PUT http://localhost:8000/api/v1/student/profile \
   -H "Accept: application/json" \
   -d '{
     "name": "Ahmad Fauzan Updated",
-    "username": "ahmad.fauzan.updated",
     "email": "ahmad@example.com",
     "phone": "081999888777",
     "address": "New Address",
@@ -88,7 +86,6 @@ curl -X PUT http://localhost:8000/api/v1/student/profile \
 | Field        | Type   | Required | Description                |
 | ------------ | ------ | -------- | -------------------------- |
 | `name`       | string | Yes      | Full name (min 3 chars)    |
-| `username`   | string | Yes      | Username (min 3 chars)     |
 | `email`      | string | Yes      | Valid email address        |
 | `phone`      | string | Yes      | Phone (starts with 08)     |
 | `address`    | string | No       | Address (max 500 chars)    |
@@ -384,107 +381,3 @@ curl -X PUT http://localhost:8000/api/v1/staff-profiles/1 \
 ```
 
 - **Body**: Same as Create
-
----
-
-## 3. Extracurricular Advisor Profile (Tutor Ekskul)
-
-**Base URL**: `/extracurricular-advisor/profile`
-**Auth Required**: Yes (Bearer Token - Tutor Role)
-
-### Get Profile
-
-Retrieve the authenticated tutor's profile information.
-
-- **URL**: `/extracurricular-advisor/profile`
-- **Method**: `GET`
-
-#### Example Request
-
-```bash
-curl -X GET http://localhost:8000/api/v1/extracurricular-advisor/profile \
-  -H "Authorization: Bearer <your_token>" \
-  -H "Accept: application/json"
-```
-
-#### Response (200 OK)
-
-```json
-{
-    "code": 200,
-    "status": "success",
-    "message": "Profile data retrieved successfully",
-    "data": {
-        "name": "Extracurricular Tutor Test User",
-        "username": "tutor123",
-        "email": "tutor_ekskul@test.com",
-        "phone": "081234567890",
-        "address": "Jl. Pendidikan No. 10",
-        "role": "Tutor Ekstrakurikuler",
-        "profilePicture": "https://api.simap.sch.id/storage/avatars/default.jpg",
-        "joinDate": "2023-01-01",
-        "nip": "1234567890123456",
-        "extracurricular": "Futsal"
-    }
-}
-```
-
-### Update Profile
-
-Update the authenticated tutor's profile information (Personal fields only).
-**Note**: `nip` and `extracurricular` are read-only for the tutor.
-
-- **URL**: `/extracurricular-advisor/profile`
-- **Method**: `PUT`
-
-#### Example Request
-
-```bash
-curl -X PUT http://localhost:8000/api/v1/extracurricular-advisor/profile \
-  -H "Authorization: Bearer <your_token>" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
-  -d '{
-    "name": "Tutor Updated",
-    "username": "tutor.updated",
-    "email": "tutor@test.com",
-    "phone": "0812345678",
-    "address": "New Address"
-  }'
-```
-
-#### Request Body
-
-| Field      | Type   | Required | Description       |
-| ---------- | ------ | -------- | ----------------- |
-| `name`     | string | Yes      | Full name         |
-| `username` | string | Yes      | Username (unique) |
-| `email`    | string | Yes      | Email (unique)    |
-| `phone`    | string | Yes      | Phone number      |
-| `address`  | string | No       | Address           |
-
-#### Response (200 OK)
-
-```json
-{
-    "code": 200,
-    "status": "success",
-    "message": "Profile updated successfully",
-    "data": { ... }
-}
-```
-
-### Upload Avatar
-
-Upload or update profile picture.
-
-- **URL**: `/extracurricular-advisor/profile/avatar`
-- **Method**: `POST`
-- **Headers**: `Content-Type: multipart/form-data`
-
-### Change Password
-
-Change account password.
-
-- **URL**: `/extracurricular-advisor/profile/password`
-- **Method**: `PUT`

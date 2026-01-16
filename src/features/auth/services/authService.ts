@@ -26,22 +26,22 @@ const MOCK_USERS: Record<string, LoginResponse['user']> = {
         id: '1',
         username: 'guru',
         name: 'Budi Santoso, S.Pd',
-        role: 'subject_teacher',
+        role: 'guru',
     },
-    siswa: { id: '2', username: 'siswa', name: 'Ahmad Fulan', role: 'student' },
+    siswa: { id: '2', username: 'siswa', name: 'Ahmad Fulan', role: 'siswa' },
     admin: { id: '3', username: 'admin', name: 'Administrator', role: 'admin' },
-    ortu: { id: '4', username: 'ortu', name: 'Pak Fulan', role: 'parent' },
+    ortu: { id: '4', username: 'ortu', name: 'Pak Fulan', role: 'orang_tua' },
     tutor: {
         id: '5',
         username: 'tutor',
         name: 'Kak Tutor',
-        role: 'extracurricular_tutor',
+        role: 'tutor_ekskul',
     },
     mutamayizin: {
         id: '6',
         username: 'mutamayizin',
         name: 'Ust. Mutamayizin',
-        role: 'mutamayizin_coordinator',
+        role: 'pj_mutamayizin',
     },
 };
 
@@ -102,7 +102,7 @@ export const authService = {
             const payload = result.data;
 
             // Normalize role to lowercase to match frontend expectations
-            // Backend returns snake_case (e.g. subject_teacher), ensuring consistency
+            // Backend returns "Siswa", "Guru", etc. but frontend expects "siswa", "guru", etc.
             const normalizedResult: LoginResponse = {
                 token: payload.token,
                 user: {

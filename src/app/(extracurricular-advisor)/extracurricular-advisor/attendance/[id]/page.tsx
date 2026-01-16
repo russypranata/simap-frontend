@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import React, { useState, useMemo } from "react";
+import { useRouter, useParams } from "next/navigation";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
     ArrowLeft,
     Calendar,
@@ -29,204 +29,56 @@ import {
     Search,
     XCircle,
     AlertCircle,
+    History,
+    Filter,
+    Download,
     ChevronLeft,
     ChevronRight,
-} from 'lucide-react';
-import { formatDate } from '@/features/shared/utils/dateFormatter';
-import { cn } from '@/lib/utils';
+    Printer,
+} from "lucide-react";
+import { formatDate } from "@/features/shared/utils/dateFormatter";
+import { cn } from "@/lib/utils";
 
 // Mock Data for Detail
 const mockDetailData = {
     id: 1,
-    date: '2025-12-20',
-    activity: 'Pertemuan Rutin',
-    ekstrakurikuler: 'Pramuka',
-    tutor: 'Ahmad Fauzi, S.Pd',
-    startTime: '14:00',
-    endTime: '16:00',
+    date: "2025-12-20",
+    activity: "Pertemuan Rutin",
+    ekstrakurikuler: "Pramuka",
+    tutor: "Ahmad Fauzi, S.Pd",
+    startTime: "14:00",
+    endTime: "16:00",
     students: [
-        {
-            id: 1,
-            nis: '2022001',
-            name: 'Andi Wijaya',
-            class: 'XII A',
-            status: 'hadir',
-        },
-        {
-            id: 2,
-            nis: '2022002',
-            name: 'Rina Kusuma',
-            class: 'XI A',
-            status: 'sakit',
-        },
-        {
-            id: 3,
-            nis: '2022003',
-            name: 'Doni Pratama',
-            class: 'XI B',
-            status: 'hadir',
-        },
-        {
-            id: 4,
-            nis: '2022004',
-            name: 'Siti Aminah',
-            class: 'XII B',
-            status: 'izin',
-        },
-        {
-            id: 5,
-            nis: '2022005',
-            name: 'Budi Santoso',
-            class: 'X A',
-            status: 'hadir',
-        },
-        {
-            id: 6,
-            nis: '2022006',
-            name: 'Dewi Lestari',
-            class: 'XII A',
-            status: 'hadir',
-        },
-        {
-            id: 7,
-            nis: '2022007',
-            name: 'Eko Prasetyo',
-            class: 'XI A',
-            status: 'hadir',
-        },
-        {
-            id: 8,
-            nis: '2022008',
-            name: 'Fitri Handayani',
-            class: 'XI B',
-            status: 'sakit',
-        },
-        {
-            id: 9,
-            nis: '2022009',
-            name: 'Gilang Ramadhan',
-            class: 'XII B',
-            status: 'hadir',
-        },
-        {
-            id: 10,
-            nis: '2022010',
-            name: 'Hana Safitri',
-            class: 'X A',
-            status: 'hadir',
-        },
-        {
-            id: 11,
-            nis: '2022011',
-            name: 'Indra Permana',
-            class: 'XII A',
-            status: 'hadir',
-        },
-        {
-            id: 12,
-            nis: '2022012',
-            name: 'Jihan Aulia',
-            class: 'XI A',
-            status: 'hadir',
-        },
-        {
-            id: 13,
-            nis: '2022013',
-            name: 'Kevin Anggara',
-            class: 'XI B',
-            status: 'alpa',
-        },
-        {
-            id: 14,
-            nis: '2022014',
-            name: 'Lina Marlina',
-            class: 'XII B',
-            status: 'hadir',
-        },
-        {
-            id: 15,
-            nis: '2022015',
-            name: 'Muhamad Rizky',
-            class: 'X A',
-            status: 'hadir',
-        },
-        {
-            id: 16,
-            nis: '2022016',
-            name: 'Nadia Putri',
-            class: 'XII A',
-            status: 'hadir',
-        },
-        {
-            id: 17,
-            nis: '2022017',
-            name: 'Oscar Wijaya',
-            class: 'XI A',
-            status: 'izin',
-        },
-        {
-            id: 18,
-            nis: '2022018',
-            name: 'Putri Ayu',
-            class: 'XI B',
-            status: 'hadir',
-        },
-        {
-            id: 19,
-            nis: '2022019',
-            name: 'Qori Azzahra',
-            class: 'XII B',
-            status: 'hadir',
-        },
-        {
-            id: 20,
-            nis: '2022020',
-            name: 'Reza Pahlevi',
-            class: 'X A',
-            status: 'hadir',
-        },
-        {
-            id: 21,
-            nis: '2022021',
-            name: 'Sinta Dewi',
-            class: 'XII A',
-            status: 'hadir',
-        },
-        {
-            id: 22,
-            nis: '2022022',
-            name: 'Taufik Hidayat',
-            class: 'XI A',
-            status: 'hadir',
-        },
-        {
-            id: 23,
-            nis: '2022023',
-            name: 'Umar Bakri',
-            class: 'XI B',
-            status: 'hadir',
-        },
-        {
-            id: 24,
-            nis: '2022024',
-            name: 'Vina Melati',
-            class: 'XII B',
-            status: 'hadir',
-        },
-        {
-            id: 25,
-            nis: '2022025',
-            name: 'Wahyu Pratama',
-            class: 'X A',
-            status: 'hadir',
-        },
-    ],
+        { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", status: "hadir" },
+        { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", status: "sakit" },
+        { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", status: "hadir" },
+        { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", status: "izin" },
+        { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", status: "hadir" },
+        { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", status: "hadir" },
+        { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", status: "hadir" },
+        { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", status: "sakit" },
+        { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", status: "hadir" },
+        { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", status: "hadir" },
+        { id: 11, nis: "2022011", name: "Indra Permana", class: "XII A", status: "hadir" },
+        { id: 12, nis: "2022012", name: "Jihan Aulia", class: "XI A", status: "hadir" },
+        { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", status: "alpa" },
+        { id: 14, nis: "2022014", name: "Lina Marlina", class: "XII B", status: "hadir" },
+        { id: 15, nis: "2022015", name: "Muhamad Rizky", class: "X A", status: "hadir" },
+        { id: 16, nis: "2022016", name: "Nadia Putri", class: "XII A", status: "hadir" },
+        { id: 17, nis: "2022017", name: "Oscar Wijaya", class: "XI A", status: "izin" },
+        { id: 18, nis: "2022018", name: "Putri Ayu", class: "XI B", status: "hadir" },
+        { id: 19, nis: "2022019", name: "Qori Azzahra", class: "XII B", status: "hadir" },
+        { id: 20, nis: "2022020", name: "Reza Pahlevi", class: "X A", status: "hadir" },
+        { id: 21, nis: "2022021", name: "Sinta Dewi", class: "XII A", status: "hadir" },
+        { id: 22, nis: "2022022", name: "Taufik Hidayat", class: "XI A", status: "hadir" },
+        { id: 23, nis: "2022023", name: "Umar Bakri", class: "XI B", status: "hadir" },
+        { id: 24, nis: "2022024", name: "Vina Melati", class: "XII B", status: "hadir" },
+        { id: 25, nis: "2022025", name: "Wahyu Pratama", class: "X A", status: "hadir" },
+    ]
 };
 
 // Get unique classes from students
-const uniqueClasses = [
-    ...new Set(mockDetailData.students.map((s) => s.class)),
-].sort();
+const uniqueClasses = [...new Set(mockDetailData.students.map(s => s.class))].sort();
 
 export default function AttendanceDetailPage() {
     const router = useRouter();
@@ -234,26 +86,18 @@ export default function AttendanceDetailPage() {
     const { id } = params;
 
     // State
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [classFilter, setClassFilter] = useState('all');
+    const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState("all");
+    const [classFilter, setClassFilter] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     // Calculate stats
     const stats = useMemo(() => {
-        const present = mockDetailData.students.filter(
-            (s) => s.status === 'hadir',
-        ).length;
-        const sick = mockDetailData.students.filter(
-            (s) => s.status === 'sakit',
-        ).length;
-        const permit = mockDetailData.students.filter(
-            (s) => s.status === 'izin',
-        ).length;
-        const absent = mockDetailData.students.filter(
-            (s) => s.status === 'alpa',
-        ).length;
+        const present = mockDetailData.students.filter(s => s.status === "hadir").length;
+        const sick = mockDetailData.students.filter(s => s.status === "sakit").length;
+        const permit = mockDetailData.students.filter(s => s.status === "izin").length;
+        const absent = mockDetailData.students.filter(s => s.status === "alpa").length;
         const total = mockDetailData.students.length;
         const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
         return { present, sick, permit, absent, total, percentage };
@@ -261,28 +105,28 @@ export default function AttendanceDetailPage() {
 
     const getStatusBadgeVariant = (status: string) => {
         switch (status) {
-            case 'hadir':
-                return 'bg-green-100 text-green-700 border-green-200';
-            case 'sakit':
-                return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-            case 'izin':
-                return 'bg-sky-100 text-sky-700 border-sky-200';
-            case 'alpa':
-                return 'bg-red-100 text-red-700 border-red-200';
+            case "hadir":
+                return "bg-green-100 text-green-700 border-green-200";
+            case "sakit":
+                return "bg-yellow-100 text-yellow-700 border-yellow-200";
+            case "izin":
+                return "bg-sky-100 text-sky-700 border-sky-200";
+            case "alpa":
+                return "bg-red-100 text-red-700 border-red-200";
             default:
-                return 'bg-gray-100 text-gray-700 border-gray-200';
+                return "bg-gray-100 text-gray-700 border-gray-200";
         }
     };
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'hadir':
+            case "hadir":
                 return <CheckCircle className="h-3 w-3" />;
-            case 'sakit':
+            case "sakit":
                 return <AlertCircle className="h-3 w-3" />;
-            case 'izin':
+            case "izin":
                 return <Clock className="h-3 w-3" />;
-            case 'alpa':
+            case "alpa":
                 return <XCircle className="h-3 w-3" />;
             default:
                 return null;
@@ -290,19 +134,16 @@ export default function AttendanceDetailPage() {
     };
 
     const getClassBadgeColor = (className: string) => {
-        return 'bg-blue-50 text-blue-800 border-blue-200';
+        return "bg-blue-50 text-blue-800 border-blue-200";
     };
 
     // Filter students
     const filteredStudents = useMemo(() => {
-        return mockDetailData.students.filter((student) => {
-            const matchesSearch =
-                student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        return mockDetailData.students.filter(student => {
+            const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 student.nis.includes(searchTerm);
-            const matchesStatus =
-                statusFilter === 'all' || student.status === statusFilter;
-            const matchesClass =
-                classFilter === 'all' || student.class === classFilter;
+            const matchesStatus = statusFilter === "all" || student.status === statusFilter;
+            const matchesClass = classFilter === "all" || student.class === classFilter;
             return matchesSearch && matchesStatus && matchesClass;
         });
     }, [searchTerm, statusFilter, classFilter]);
@@ -335,16 +176,11 @@ export default function AttendanceDetailPage() {
                     </Button>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-linear-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
-                                Detail Riwayat{' '}
-                            </span>
-                            <span className="bg-linear-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
-                                Presensi
-                            </span>
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Detail Riwayat </span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Presensi</span>
                         </h1>
                         <p className="text-muted-foreground mt-1">
-                            Informasi detail kehadiran siswa pada pertemuan
-                            ekstrakurikuler
+                            Informasi detail kehadiran siswa pada pertemuan ekstrakurikuler
                         </p>
                     </div>
                 </div>
@@ -360,13 +196,8 @@ export default function AttendanceDetailPage() {
                                 <Calendar className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg text-white">
-                                    {mockDetailData.activity}
-                                </h3>
-                                <p className="text-blue-100 text-sm">
-                                    Ekstrakurikuler{' '}
-                                    {mockDetailData.ekstrakurikuler}
-                                </p>
+                                <h3 className="font-bold text-lg text-white">{mockDetailData.activity}</h3>
+                                <p className="text-blue-100 text-sm">Ekstrakurikuler {mockDetailData.ekstrakurikuler}</p>
                             </div>
                         </div>
                         <Badge className="bg-green-500 text-white border-0 gap-1 px-2.5 py-1 text-xs font-medium">
@@ -384,15 +215,8 @@ export default function AttendanceDetailPage() {
                             <Calendar className="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground">
-                                Tanggal
-                            </p>
-                            <p className="text-sm font-semibold text-gray-900">
-                                {formatDate(
-                                    mockDetailData.date,
-                                    'dd MMMM yyyy',
-                                )}
-                            </p>
+                            <p className="text-xs text-muted-foreground">Tanggal</p>
+                            <p className="text-sm font-semibold text-gray-900">{formatDate(mockDetailData.date, "dd MMMM yyyy")}</p>
                         </div>
                     </div>
 
@@ -402,13 +226,8 @@ export default function AttendanceDetailPage() {
                             <Clock className="h-4 w-4 text-purple-600" />
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground">
-                                Waktu
-                            </p>
-                            <p className="text-sm font-semibold text-gray-900">
-                                {mockDetailData.startTime} -{' '}
-                                {mockDetailData.endTime} WIB
-                            </p>
+                            <p className="text-xs text-muted-foreground">Waktu</p>
+                            <p className="text-sm font-semibold text-gray-900">{mockDetailData.startTime} - {mockDetailData.endTime} WIB</p>
                         </div>
                     </div>
 
@@ -418,54 +237,32 @@ export default function AttendanceDetailPage() {
                             <Users className="h-4 w-4 text-green-600" />
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground">
-                                Tutor
-                            </p>
-                            <p className="text-sm font-semibold text-gray-900">
-                                {mockDetailData.tutor}
-                            </p>
+                            <p className="text-xs text-muted-foreground">Tutor</p>
+                            <p className="text-sm font-semibold text-gray-900">{mockDetailData.tutor}</p>
                         </div>
                     </div>
 
                     {/* Kehadiran */}
                     <div className="px-3 py-4 flex items-center gap-3">
-                        <div
-                            className={cn(
-                                'p-1.5 rounded-lg',
-                                stats.percentage >= 90
-                                    ? 'bg-green-50'
-                                    : stats.percentage >= 75
-                                      ? 'bg-orange-50'
-                                      : 'bg-rose-50',
-                            )}
-                        >
-                            <CheckCircle
-                                className={cn(
-                                    'h-4 w-4',
-                                    stats.percentage >= 90
-                                        ? 'text-green-600'
-                                        : stats.percentage >= 75
-                                          ? 'text-orange-600'
-                                          : 'text-rose-600',
-                                )}
-                            />
+                        <div className={cn(
+                            "p-1.5 rounded-lg",
+                            stats.percentage >= 90 ? "bg-green-50" :
+                                stats.percentage >= 75 ? "bg-orange-50" : "bg-rose-50"
+                        )}>
+                            <CheckCircle className={cn(
+                                "h-4 w-4",
+                                stats.percentage >= 90 ? "text-green-600" :
+                                    stats.percentage >= 75 ? "text-orange-600" : "text-rose-600"
+                            )} />
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground">
-                                Kehadiran
-                            </p>
-                            <p
-                                className={cn(
-                                    'text-sm font-semibold',
-                                    stats.percentage >= 90
-                                        ? 'text-green-600'
-                                        : stats.percentage >= 75
-                                          ? 'text-orange-600'
-                                          : 'text-rose-600',
-                                )}
-                            >
-                                {stats.present}/{stats.total} (
-                                {stats.percentage}%)
+                            <p className="text-xs text-muted-foreground">Kehadiran</p>
+                            <p className={cn(
+                                "text-sm font-semibold",
+                                stats.percentage >= 90 ? "text-green-600" :
+                                    stats.percentage >= 75 ? "text-orange-600" : "text-rose-600"
+                            )}>
+                                {stats.present}/{stats.total} ({stats.percentage}%)
                             </p>
                         </div>
                     </div>
@@ -478,9 +275,7 @@ export default function AttendanceDetailPage() {
                         <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
                             <Users className="h-4 w-4 text-blue-600" />
                         </div>
-                        <p className="text-xl font-bold text-gray-900">
-                            {stats.total}
-                        </p>
+                        <p className="text-xl font-bold text-gray-900">{stats.total}</p>
                         <p className="text-xs text-muted-foreground">Total</p>
                     </div>
 
@@ -489,9 +284,7 @@ export default function AttendanceDetailPage() {
                         <div className="inline-flex p-2 bg-green-100 rounded-full mb-1.5">
                             <CheckCircle className="h-4 w-4 text-green-600" />
                         </div>
-                        <p className="text-xl font-bold text-green-600">
-                            {stats.present}
-                        </p>
+                        <p className="text-xl font-bold text-green-600">{stats.present}</p>
                         <p className="text-xs text-muted-foreground">Hadir</p>
                     </div>
 
@@ -500,9 +293,7 @@ export default function AttendanceDetailPage() {
                         <div className="inline-flex p-2 bg-yellow-100 rounded-full mb-1.5">
                             <AlertCircle className="h-4 w-4 text-yellow-600" />
                         </div>
-                        <p className="text-xl font-bold text-yellow-600">
-                            {stats.sick}
-                        </p>
+                        <p className="text-xl font-bold text-yellow-600">{stats.sick}</p>
                         <p className="text-xs text-muted-foreground">Sakit</p>
                     </div>
 
@@ -511,9 +302,7 @@ export default function AttendanceDetailPage() {
                         <div className="inline-flex p-2 bg-sky-100 rounded-full mb-1.5">
                             <Clock className="h-4 w-4 text-sky-600" />
                         </div>
-                        <p className="text-xl font-bold text-sky-600">
-                            {stats.permit}
-                        </p>
+                        <p className="text-xl font-bold text-sky-600">{stats.permit}</p>
                         <p className="text-xs text-muted-foreground">Izin</p>
                     </div>
 
@@ -522,9 +311,7 @@ export default function AttendanceDetailPage() {
                         <div className="inline-flex p-2 bg-red-100 rounded-full mb-1.5">
                             <XCircle className="h-4 w-4 text-red-600" />
                         </div>
-                        <p className="text-xl font-bold text-red-600">
-                            {stats.absent}
-                        </p>
+                        <p className="text-xl font-bold text-red-600">{stats.absent}</p>
                         <p className="text-xs text-muted-foreground">Alpa</p>
                     </div>
                 </div>
@@ -538,12 +325,8 @@ export default function AttendanceDetailPage() {
                             <Users className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg font-semibold">
-                                Daftar Kehadiran Siswa
-                            </CardTitle>
-                            <CardDescription>
-                                Data kehadiran setiap siswa pada kegiatan ini
-                            </CardDescription>
+                            <CardTitle className="text-lg font-semibold">Daftar Kehadiran Siswa</CardTitle>
+                            <CardDescription>Data kehadiran setiap siswa pada kegiatan ini</CardDescription>
                         </div>
                     </div>
                 </CardHeader>
@@ -557,14 +340,12 @@ export default function AttendanceDetailPage() {
                                 <Input
                                     placeholder="Cari nama atau NIS..."
                                     value={searchTerm}
-                                    onChange={(e) =>
-                                        setSearchTerm(e.target.value)
-                                    }
+                                    onChange={(e) => setSearchTerm(e.target.value)}
                                     className="pl-9 pr-9"
                                 />
                                 {searchTerm && (
                                     <button
-                                        onClick={() => setSearchTerm('')}
+                                        onClick={() => setSearchTerm("")}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                     >
                                         <XCircle className="h-4 w-4" />
@@ -575,87 +356,47 @@ export default function AttendanceDetailPage() {
                             {/* Filters */}
                             <div className="flex flex-wrap items-center gap-2">
                                 <div className="flex items-center gap-2">
-                                    <Label className="text-sm whitespace-nowrap">
-                                        Kelas:
-                                    </Label>
-                                    <Select
-                                        value={classFilter}
-                                        onValueChange={setClassFilter}
-                                    >
+                                    <Label className="text-sm whitespace-nowrap">Kelas:</Label>
+                                    <Select value={classFilter} onValueChange={setClassFilter}>
                                         <SelectTrigger className="w-[120px]">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">
-                                                Semua
-                                            </SelectItem>
-                                            {uniqueClasses.map((cls) => (
-                                                <SelectItem
-                                                    key={cls}
-                                                    value={cls}
-                                                >
-                                                    {cls}
-                                                </SelectItem>
+                                            <SelectItem value="all">Semua</SelectItem>
+                                            {uniqueClasses.map(cls => (
+                                                <SelectItem key={cls} value={cls}>{cls}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <Label className="text-sm whitespace-nowrap">
-                                        Status:
-                                    </Label>
-                                    <Select
-                                        value={statusFilter}
-                                        onValueChange={setStatusFilter}
-                                    >
+                                    <Label className="text-sm whitespace-nowrap">Status:</Label>
+                                    <Select value={statusFilter} onValueChange={setStatusFilter}>
                                         <SelectTrigger className="w-[120px]">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="all">
-                                                Semua
-                                            </SelectItem>
-                                            <SelectItem value="hadir">
-                                                Hadir
-                                            </SelectItem>
-                                            <SelectItem value="sakit">
-                                                Sakit
-                                            </SelectItem>
-                                            <SelectItem value="izin">
-                                                Izin
-                                            </SelectItem>
-                                            <SelectItem value="alpa">
-                                                Alpa
-                                            </SelectItem>
+                                            <SelectItem value="all">Semua</SelectItem>
+                                            <SelectItem value="hadir">Hadir</SelectItem>
+                                            <SelectItem value="sakit">Sakit</SelectItem>
+                                            <SelectItem value="izin">Izin</SelectItem>
+                                            <SelectItem value="alpa">Alpa</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <Label className="text-sm whitespace-nowrap">
-                                        Tampilkan:
-                                    </Label>
-                                    <Select
-                                        value={itemsPerPage.toString()}
-                                        onValueChange={(v) =>
-                                            setItemsPerPage(parseInt(v))
-                                        }
-                                    >
+                                    <Label className="text-sm whitespace-nowrap">Tampilkan:</Label>
+                                    <Select value={itemsPerPage.toString()} onValueChange={(v) => setItemsPerPage(parseInt(v))}>
                                         <SelectTrigger className="w-[80px]">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="5">5</SelectItem>
-                                            <SelectItem value="10">
-                                                10
-                                            </SelectItem>
-                                            <SelectItem value="25">
-                                                25
-                                            </SelectItem>
-                                            <SelectItem value="50">
-                                                50
-                                            </SelectItem>
+                                            <SelectItem value="10">10</SelectItem>
+                                            <SelectItem value="25">25</SelectItem>
+                                            <SelectItem value="50">50</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -665,28 +406,20 @@ export default function AttendanceDetailPage() {
                         {/* Active Filters Info */}
                         <div className="flex items-center justify-between mt-4">
                             <div className="text-sm text-muted-foreground">
-                                Menampilkan {paginatedStudents.length} dari{' '}
-                                {filteredStudents.length} siswa
-                                {(searchTerm ||
-                                    statusFilter !== 'all' ||
-                                    classFilter !== 'all') && (
-                                    <span className="text-primary">
-                                        {' '}
-                                        (difilter dari {stats.total} total)
-                                    </span>
+                                Menampilkan {paginatedStudents.length} dari {filteredStudents.length} siswa
+                                {(searchTerm || statusFilter !== "all" || classFilter !== "all") && (
+                                    <span className="text-primary"> (difilter dari {stats.total} total)</span>
                                 )}
                             </div>
-                            {(searchTerm ||
-                                statusFilter !== 'all' ||
-                                classFilter !== 'all') && (
+                            {(searchTerm || statusFilter !== "all" || classFilter !== "all") && (
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     className="text-muted-foreground hover:text-foreground"
                                     onClick={() => {
-                                        setSearchTerm('');
-                                        setStatusFilter('all');
-                                        setClassFilter('all');
+                                        setSearchTerm("");
+                                        setStatusFilter("all");
+                                        setClassFilter("all");
                                     }}
                                 >
                                     Reset Filter
@@ -700,21 +433,11 @@ export default function AttendanceDetailPage() {
                         <table className="w-full">
                             <thead className="bg-muted/50">
                                 <tr>
-                                    <th className="text-left p-4 font-medium text-sm w-12">
-                                        No
-                                    </th>
-                                    <th className="text-left p-4 font-medium text-sm w-24">
-                                        NIS
-                                    </th>
-                                    <th className="text-left p-4 font-medium text-sm min-w-48">
-                                        Nama Siswa
-                                    </th>
-                                    <th className="text-left p-4 font-medium text-sm w-24">
-                                        Kelas
-                                    </th>
-                                    <th className="text-center p-4 font-medium text-sm w-32">
-                                        Status
-                                    </th>
+                                    <th className="text-left p-4 font-medium text-sm w-12">No</th>
+                                    <th className="text-left p-4 font-medium text-sm w-24">NIS</th>
+                                    <th className="text-left p-4 font-medium text-sm min-w-48">Nama Siswa</th>
+                                    <th className="text-left p-4 font-medium text-sm w-24">Kelas</th>
+                                    <th className="text-center p-4 font-medium text-sm w-32">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -726,13 +449,11 @@ export default function AttendanceDetailPage() {
                                                     <Search className="h-12 w-12 text-muted-foreground" />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <h3 className="text-lg font-semibold">
-                                                        Tidak Ada Data
-                                                    </h3>
+                                                    <h3 className="text-lg font-semibold">Tidak Ada Data</h3>
                                                     <p className="text-sm text-muted-foreground max-w-md">
                                                         {searchTerm
                                                             ? `Tidak ada siswa yang cocok dengan pencarian "${searchTerm}"`
-                                                            : 'Tidak ada data siswa yang sesuai dengan filter.'}
+                                                            : "Tidak ada data siswa yang sesuai dengan filter."}
                                                     </p>
                                                 </div>
                                             </div>
@@ -740,62 +461,30 @@ export default function AttendanceDetailPage() {
                                     </tr>
                                 ) : (
                                     paginatedStudents.map((student, index) => {
-                                        const globalIndex =
-                                            (currentPage - 1) * itemsPerPage +
-                                            index +
-                                            1;
+                                        const globalIndex = (currentPage - 1) * itemsPerPage + index + 1;
                                         return (
-                                            <tr
-                                                key={student.id}
-                                                className="border-b hover:bg-muted/30 transition-colors"
-                                            >
-                                                <td className="p-4 text-sm">
-                                                    {globalIndex}
-                                                </td>
-                                                <td className="p-4 text-sm font-mono">
-                                                    {student.nis}
-                                                </td>
+                                            <tr key={student.id} className="border-b hover:bg-muted/30 transition-colors">
+                                                <td className="p-4 text-sm">{globalIndex}</td>
+                                                <td className="p-4 text-sm font-mono">{student.nis}</td>
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-3">
                                                         <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                                                             <span className="text-sm font-medium text-primary">
-                                                                {student.name.charAt(
-                                                                    0,
-                                                                )}
+                                                                {student.name.charAt(0)}
                                                             </span>
                                                         </div>
-                                                        <span className="font-medium">
-                                                            {student.name}
-                                                        </span>
+                                                        <span className="font-medium">{student.name}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-4">
-                                                    <Badge
-                                                        className={getClassBadgeColor(
-                                                            student.class,
-                                                        )}
-                                                    >
+                                                    <Badge className={getClassBadgeColor(student.class)}>
                                                         {student.class}
                                                     </Badge>
                                                 </td>
                                                 <td className="p-4 text-center">
-                                                    <Badge
-                                                        className={cn(
-                                                            'gap-1',
-                                                            getStatusBadgeVariant(
-                                                                student.status,
-                                                            ),
-                                                        )}
-                                                    >
-                                                        {getStatusIcon(
-                                                            student.status,
-                                                        )}
-                                                        {student.status
-                                                            .charAt(0)
-                                                            .toUpperCase() +
-                                                            student.status.slice(
-                                                                1,
-                                                            )}
+                                                    <Badge className={cn("gap-1", getStatusBadgeVariant(student.status))}>
+                                                        {getStatusIcon(student.status)}
+                                                        {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
                                                     </Badge>
                                                 </td>
                                             </tr>
@@ -813,14 +502,7 @@ export default function AttendanceDetailPage() {
                             <div className="flex items-center gap-2">
                                 <Users className="h-4 w-4 text-muted-foreground" />
                                 <span className="text-sm">
-                                    Halaman{' '}
-                                    <span className="font-semibold">
-                                        {currentPage}
-                                    </span>{' '}
-                                    dari{' '}
-                                    <span className="font-semibold">
-                                        {totalPages || 1}
-                                    </span>
+                                    Halaman <span className="font-semibold">{currentPage}</span> dari <span className="font-semibold">{totalPages || 1}</span>
                                 </span>
                             </div>
                         </div>
@@ -831,100 +513,60 @@ export default function AttendanceDetailPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() =>
-                                        setCurrentPage((prev) =>
-                                            Math.max(1, prev - 1),
-                                        )
-                                    }
+                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                     disabled={currentPage === 1}
                                     className="h-8 w-8 p-0"
                                 >
                                     <ChevronLeft className="h-4 w-4" />
                                 </Button>
                                 <div className="flex items-center gap-1">
-                                    {Array.from(
-                                        { length: Math.min(5, totalPages) },
-                                        (_, i) => {
-                                            let pageNumber: number;
-                                            if (totalPages <= 5) {
-                                                pageNumber = i + 1;
-                                            } else if (currentPage <= 3) {
-                                                pageNumber = i + 1;
-                                            } else if (
-                                                currentPage >=
-                                                totalPages - 2
-                                            ) {
-                                                pageNumber = totalPages - 4 + i;
-                                            } else {
-                                                pageNumber =
-                                                    currentPage - 2 + i;
-                                            }
-                                            return (
-                                                <Button
-                                                    key={pageNumber}
-                                                    variant={
-                                                        currentPage ===
-                                                        pageNumber
-                                                            ? 'default'
-                                                            : 'outline'
-                                                    }
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        setCurrentPage(
-                                                            pageNumber,
-                                                        )
-                                                    }
-                                                    className={cn(
-                                                        'w-8 h-8 p-0',
-                                                        currentPage ===
-                                                            pageNumber &&
-                                                            'bg-blue-800 hover:bg-blue-900 text-white',
-                                                    )}
-                                                >
-                                                    {pageNumber}
-                                                </Button>
-                                            );
-                                        },
+                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                        let pageNumber: number;
+                                        if (totalPages <= 5) {
+                                            pageNumber = i + 1;
+                                        } else if (currentPage <= 3) {
+                                            pageNumber = i + 1;
+                                        } else if (currentPage >= totalPages - 2) {
+                                            pageNumber = totalPages - 4 + i;
+                                        } else {
+                                            pageNumber = currentPage - 2 + i;
+                                        }
+                                        return (
+                                            <Button
+                                                key={pageNumber}
+                                                variant={currentPage === pageNumber ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(pageNumber)}
+                                                className={cn(
+                                                    "w-8 h-8 p-0",
+                                                    currentPage === pageNumber && "bg-blue-800 hover:bg-blue-900 text-white"
+                                                )}
+                                            >
+                                                {pageNumber}
+                                            </Button>
+                                        );
+                                    })}
+                                    {totalPages > 5 && currentPage < totalPages - 2 && (
+                                        <>
+                                            <span className="text-sm text-muted-foreground px-1">...</span>
+                                            <Button
+                                                variant={currentPage === totalPages ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(totalPages)}
+                                                className={cn(
+                                                    "w-8 h-8 p-0",
+                                                    currentPage === totalPages && "bg-blue-800 hover:bg-blue-900 text-white"
+                                                )}
+                                            >
+                                                {totalPages}
+                                            </Button>
+                                        </>
                                     )}
-                                    {totalPages > 5 &&
-                                        currentPage < totalPages - 2 && (
-                                            <>
-                                                <span className="text-sm text-muted-foreground px-1">
-                                                    ...
-                                                </span>
-                                                <Button
-                                                    variant={
-                                                        currentPage ===
-                                                        totalPages
-                                                            ? 'default'
-                                                            : 'outline'
-                                                    }
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        setCurrentPage(
-                                                            totalPages,
-                                                        )
-                                                    }
-                                                    className={cn(
-                                                        'w-8 h-8 p-0',
-                                                        currentPage ===
-                                                            totalPages &&
-                                                            'bg-blue-800 hover:bg-blue-900 text-white',
-                                                    )}
-                                                >
-                                                    {totalPages}
-                                                </Button>
-                                            </>
-                                        )}
                                 </div>
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() =>
-                                        setCurrentPage((prev) =>
-                                            Math.min(totalPages, prev + 1),
-                                        )
-                                    }
+                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                     disabled={currentPage === totalPages}
                                     className="h-8 w-8 p-0"
                                 >

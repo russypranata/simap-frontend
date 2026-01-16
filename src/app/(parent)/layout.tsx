@@ -6,42 +6,39 @@ import { useRole } from '@/app/context/RoleContext';
 import { ParentLayout } from '@/features/parent/components/ParentLayout';
 
 export default function ParentRouteLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    const { role, isAuthenticated, isLoading } = useRole();
-    const router = useRouter();
+  const { role, isAuthenticated, isLoading } = useRole();
+  const router = useRouter();
 
-    // Role-based auth guard
-    useEffect(() => {
-        if (!isAuthenticated) {
-            router.push('/');
-        } else if (role !== 'parent') {
-            // Redirect to appropriate dashboard based on role
-            switch (role) {
-                case 'subject_teacher':
-                case 'homeroom_teacher':
-                case 'picket_teacher':
-                case 'headmaster':
-                    router.push('/teacher/dashboard'); // Corrected from /dashboard
-                    break;
-                case 'student':
-                    router.push('/student/dashboard');
-                    break;
-                case 'admin':
-                    router.push('/admin/dashboard');
-                    break;
-                default:
-                    router.push('/');
-            }
-        }
-    }, [isAuthenticated, role, router]);
-
-    // Show nothing while initializing or redirecting
-    if (isLoading || !isAuthenticated || role !== 'parent') {
-        return null;
+  // Role-based auth guard
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/');
+    } else if (role !== 'orang_tua') {
+      // Redirect to appropriate dashboard based on role
+      switch (role) {
+        case 'guru':
+          router.push('/dashboard');
+          break;
+        case 'siswa':
+          router.push('/student/dashboard');
+          break;
+        case 'admin':
+          router.push('/admin/dashboard');
+          break;
+        default:
+          router.push('/');
+      }
     }
+  }, [isAuthenticated, role, router]);
 
-    return <ParentLayout>{children}</ParentLayout>;
+  // Show nothing while initializing or redirecting
+  if (isLoading || !isAuthenticated || role !== 'orang_tua') {
+    return null;
+  }
+
+  return <ParentLayout>{children}</ParentLayout>;
 }
