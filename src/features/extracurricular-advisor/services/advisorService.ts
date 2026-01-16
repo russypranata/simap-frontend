@@ -1,16 +1,14 @@
 // Advisor Service
 // This service handles all API interactions for the Extracurricular Advisor role
 
-import {
-    AdvisorProfileData,
-    mockAdvisorData,
-} from '../data/mockAdvisorData';
+import { AdvisorProfileData, mockAdvisorData } from '../data/mockAdvisorData';
 
 // ============================================
 // CONFIGURATION
 // ============================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 // Use specific advisor API URL prefix
 const ADVISOR_API_URL = `${API_BASE_URL}/extracurricular-advisor`;
 
@@ -160,22 +158,26 @@ export const advisorService = {
     // DASHBOARD & OPERATIONAL
     // ========================================
 
-    getDashboardStats: async (params: { academicYear?: string; semester?: string } = {}): Promise<AdvisorDashboardStats> => {
+    getDashboardStats: async (
+        params: { academicYear?: string; semester?: string } = {},
+    ): Promise<AdvisorDashboardStats> => {
         const { academicYear, semester } = params;
 
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
-            
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
+
             // Simulate different stats for past years
-            if (academicYear && academicYear !== "2025/2026") {
-                 return {
+            if (academicYear && academicYear !== '2025/2026') {
+                return {
                     totalMembers: 30, // Less members in past
                     lastAttendancePresent: 28,
                     averageAttendance: 88,
                     totalMeetings: 10,
                     activeStudents: 25,
-                    needsAttention: 2
+                    needsAttention: 2,
                 };
             }
 
@@ -185,21 +187,40 @@ export const advisorService = {
                 averageAttendance: 91,
                 totalMeetings: 12,
                 activeStudents: 38,
-                needsAttention: 7
+                needsAttention: 7,
             };
         }
 
         // ===== REAL API IMPLEMENTATION =====
         const queryParams = new URLSearchParams();
         if (academicYear) queryParams.append('academic_year', academicYear);
-        if (semester && semester !== 'all') queryParams.append('semester', semester);
+        if (semester && semester !== 'all')
+            queryParams.append('semester', semester);
 
-        const response = await fetch(`${ADVISOR_API_URL}/dashboard/stats?${queryParams.toString()}`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-        });
+        const response = await fetch(
+            `${ADVISOR_API_URL}/dashboard/stats?${queryParams.toString()}`,
+            {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            },
+        );
 
-        if (!response.ok) await handleApiError(response);
+        if (!response.ok) {
+            if (response.status === 404) {
+                console.warn(
+                    'Dashboard stats endpoint not found (404). Using fallback data.',
+                );
+                return {
+                    totalMembers: 0,
+                    lastAttendancePresent: 0,
+                    averageAttendance: 0,
+                    totalMeetings: 0,
+                    activeStudents: 0,
+                    needsAttention: 0,
+                };
+            }
+            await handleApiError(response);
+        }
         const result = await response.json();
         return result.data;
     },
@@ -207,10 +228,22 @@ export const advisorService = {
     getUpcomingSchedule: async (): Promise<any[]> => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
             return [
-                { id: 1, day: "Jumat", date: "26 Desember 2025", time: "14:00 - 16:00" },
-                { id: 2, day: "Jumat", date: "09 Januari 2026", time: "14:00 - 16:00" },
+                {
+                    id: 1,
+                    day: 'Jumat',
+                    date: '26 Desember 2025',
+                    time: '14:00 - 16:00',
+                },
+                {
+                    id: 2,
+                    day: 'Jumat',
+                    date: '09 Januari 2026',
+                    time: '14:00 - 16:00',
+                },
             ];
         }
 
@@ -220,7 +253,15 @@ export const advisorService = {
             headers: getAuthHeaders(),
         });
 
-        if (!response.ok) await handleApiError(response);
+        if (!response.ok) {
+            if (response.status === 404) {
+                console.warn(
+                    'Upcoming schedule endpoint not found (404). Using fallback data.',
+                );
+                return [];
+            }
+            await handleApiError(response);
+        }
         const result = await response.json();
         return result.data;
     },
@@ -228,21 +269,52 @@ export const advisorService = {
     getRecentActivities: async (): Promise<any[]> => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
             return [
-                { id: 1, day: "Jumat", date: "20 Des 2025", time: "14:00 - 16:00", attendance: 93 },
-                { id: 2, day: "Jumat", date: "13 Des 2025", time: "14:00 - 16:30", attendance: 89 },
-                { id: 3, day: "Jumat", date: "06 Des 2025", time: "14:00 - 16:00", attendance: 84 },
+                {
+                    id: 1,
+                    day: 'Jumat',
+                    date: '20 Des 2025',
+                    time: '14:00 - 16:00',
+                    attendance: 93,
+                },
+                {
+                    id: 2,
+                    day: 'Jumat',
+                    date: '13 Des 2025',
+                    time: '14:00 - 16:30',
+                    attendance: 89,
+                },
+                {
+                    id: 3,
+                    day: 'Jumat',
+                    date: '06 Des 2025',
+                    time: '14:00 - 16:00',
+                    attendance: 84,
+                },
             ];
         }
 
         // ===== REAL API IMPLEMENTATION =====
-        const response = await fetch(`${ADVISOR_API_URL}/dashboard/recent-activities`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-        });
+        const response = await fetch(
+            `${ADVISOR_API_URL}/dashboard/recent-activities`,
+            {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            },
+        );
 
-        if (!response.ok) await handleApiError(response);
+        if (!response.ok) {
+            if (response.status === 404) {
+                console.warn(
+                    'Recent activities endpoint not found (404). Using fallback data.',
+                );
+                return [];
+            }
+            await handleApiError(response);
+        }
         const result = await response.json();
         return result.data;
     },
@@ -251,91 +323,216 @@ export const advisorService = {
     // MEMBER MANAGEMENT
     // ========================================
 
-    getMembers: async (params: { 
-        academicYear?: string; 
-        class?: string; 
-        search?: string; 
-        page?: number; 
-        limit?: number;
-        semester?: string;
-    } = {}): Promise<{ data: AdvisorMember[]; meta: { currentPage: number; totalPages: number; totalItems: number } }> => {
-        const { 
-            academicYear = "2025/2026", 
-            class: classFilter, 
-            search, 
-            page = 1, 
+    getMembers: async (
+        params: {
+            academicYear?: string;
+            class?: string;
+            search?: string;
+            page?: number;
+            limit?: number;
+            semester?: string;
+        } = {},
+    ): Promise<{
+        data: AdvisorMember[];
+        meta: { currentPage: number; totalPages: number; totalItems: number };
+    }> => {
+        const {
+            academicYear = '2025/2026',
+            class: classFilter,
+            search,
+            page = 1,
             limit = 10,
-            semester
+            semester,
         } = params;
 
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
-            
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
+
             // Base Mock Data
             let mockMembers = [
-                { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", joinDate: "2024-07-15", attendance: 92 },
-                { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", joinDate: "2024-07-15", attendance: 88 },
-                { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", joinDate: "2024-07-20", attendance: 95 },
-                { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", joinDate: "2024-07-15", attendance: 78 },
-                { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", joinDate: "2024-08-01", attendance: 85 },
-                { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", joinDate: "2024-07-15", attendance: 45 },
-                { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", joinDate: "2024-07-20", attendance: 90 },
-                { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", joinDate: "2024-08-05", attendance: 82 },
-                { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", joinDate: "2024-07-15", attendance: 88 },
-                { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", joinDate: "2024-08-10", attendance: 91 },
-                { id: 11, nis: "2022011", name: "Irfan Hakim", class: "X B", joinDate: "2024-08-12", attendance: 87 },
-                { id: 12, nis: "2022012", name: "Julia Permata", class: "XI A", joinDate: "2024-07-18", attendance: 93 },
-                { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", joinDate: "2024-07-22", attendance: 76 },
-                { id: 14, nis: "2022014", name: "Luna Maya", class: "XII A", joinDate: "2024-07-15", attendance: 89 },
-                { id: 15, nis: "2022015", name: "Mario Bros", class: "X B", joinDate: "2024-08-15", attendance: 95 },
+                {
+                    id: 1,
+                    nis: '2022001',
+                    name: 'Andi Wijaya',
+                    class: 'XII A',
+                    joinDate: '2024-07-15',
+                    attendance: 92,
+                },
+                {
+                    id: 2,
+                    nis: '2022002',
+                    name: 'Rina Kusuma',
+                    class: 'XI A',
+                    joinDate: '2024-07-15',
+                    attendance: 88,
+                },
+                {
+                    id: 3,
+                    nis: '2022003',
+                    name: 'Doni Pratama',
+                    class: 'XI B',
+                    joinDate: '2024-07-20',
+                    attendance: 95,
+                },
+                {
+                    id: 4,
+                    nis: '2022004',
+                    name: 'Siti Aminah',
+                    class: 'XII B',
+                    joinDate: '2024-07-15',
+                    attendance: 78,
+                },
+                {
+                    id: 5,
+                    nis: '2022005',
+                    name: 'Budi Santoso',
+                    class: 'X A',
+                    joinDate: '2024-08-01',
+                    attendance: 85,
+                },
+                {
+                    id: 6,
+                    nis: '2022006',
+                    name: 'Dewi Lestari',
+                    class: 'XII A',
+                    joinDate: '2024-07-15',
+                    attendance: 45,
+                },
+                {
+                    id: 7,
+                    nis: '2022007',
+                    name: 'Eko Prasetyo',
+                    class: 'XI A',
+                    joinDate: '2024-07-20',
+                    attendance: 90,
+                },
+                {
+                    id: 8,
+                    nis: '2022008',
+                    name: 'Fitri Handayani',
+                    class: 'XI B',
+                    joinDate: '2024-08-05',
+                    attendance: 82,
+                },
+                {
+                    id: 9,
+                    nis: '2022009',
+                    name: 'Gilang Ramadhan',
+                    class: 'XII B',
+                    joinDate: '2024-07-15',
+                    attendance: 88,
+                },
+                {
+                    id: 10,
+                    nis: '2022010',
+                    name: 'Hana Safitri',
+                    class: 'X A',
+                    joinDate: '2024-08-10',
+                    attendance: 91,
+                },
+                {
+                    id: 11,
+                    nis: '2022011',
+                    name: 'Irfan Hakim',
+                    class: 'X B',
+                    joinDate: '2024-08-12',
+                    attendance: 87,
+                },
+                {
+                    id: 12,
+                    nis: '2022012',
+                    name: 'Julia Permata',
+                    class: 'XI A',
+                    joinDate: '2024-07-18',
+                    attendance: 93,
+                },
+                {
+                    id: 13,
+                    nis: '2022013',
+                    name: 'Kevin Anggara',
+                    class: 'XI B',
+                    joinDate: '2024-07-22',
+                    attendance: 76,
+                },
+                {
+                    id: 14,
+                    nis: '2022014',
+                    name: 'Luna Maya',
+                    class: 'XII A',
+                    joinDate: '2024-07-15',
+                    attendance: 89,
+                },
+                {
+                    id: 15,
+                    nis: '2022015',
+                    name: 'Mario Bros',
+                    class: 'X B',
+                    joinDate: '2024-08-15',
+                    attendance: 95,
+                },
             ];
 
             // 0. Filter by Academic Year (Mock Logic)
-            if (academicYear !== "2025/2026") {
+            if (academicYear !== '2025/2026') {
                 // Return empty or different data for past years to simulate history
                 // For demo purposes, we just return empty to show "No Data" effect or a few dummy alumni
                 mockMembers = [
-                    { id: 99, nis: "2021001", name: "Alumni Budi (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 100 }
+                    {
+                        id: 99,
+                        nis: '2021001',
+                        name: 'Alumni Budi (24/25)',
+                        class: 'XII A',
+                        joinDate: '2023-07-15',
+                        attendance: 100,
+                    },
                 ];
             }
 
             // 0.5 Filter by Semester (Mock Logic - Simulate different attendance)
-            if (semester && semester === "2") {
+            if (semester && semester === '2') {
                 // Adjust attendance slightly to show difference between semesters
-                mockMembers = mockMembers.map(m => ({
+                mockMembers = mockMembers.map((m) => ({
                     ...m,
-                    attendance: Math.max(0, m.attendance - 10) // Simulate generic drop in semester 2 for demo
+                    attendance: Math.max(0, m.attendance - 10), // Simulate generic drop in semester 2 for demo
                 }));
             }
 
             // 1. Filter by Search
             if (search) {
                 const lowerSearch = search.toLowerCase();
-                mockMembers = mockMembers.filter(m => 
-                    m.name.toLowerCase().includes(lowerSearch) || 
-                    m.nis.includes(lowerSearch)
+                mockMembers = mockMembers.filter(
+                    (m) =>
+                        m.name.toLowerCase().includes(lowerSearch) ||
+                        m.nis.includes(lowerSearch),
                 );
             }
 
             // 2. Filter by Class
-            if (classFilter && classFilter !== "all") {
-                mockMembers = mockMembers.filter(m => m.class === classFilter);
+            if (classFilter && classFilter !== 'all') {
+                mockMembers = mockMembers.filter(
+                    (m) => m.class === classFilter,
+                );
             }
 
             // 3. Pagination
             const totalItems = mockMembers.length;
             const totalPages = Math.ceil(totalItems / limit);
             const startIndex = (page - 1) * limit;
-            const paginatedData = mockMembers.slice(startIndex, startIndex + limit);
+            const paginatedData = mockMembers.slice(
+                startIndex,
+                startIndex + limit,
+            );
 
             return {
                 data: paginatedData,
                 meta: {
                     currentPage: page,
                     totalPages,
-                    totalItems
-                }
+                    totalItems,
+                },
             };
         }
 
@@ -344,15 +541,18 @@ export const advisorService = {
             page: page.toString(),
             limit: limit.toString(),
             academic_year: academicYear,
-            ...(semester && semester !== "all" && { semester }), // Add semester param if not 'all'
+            ...(semester && semester !== 'all' && { semester }), // Add semester param if not 'all'
             ...(search && { search }),
-            ...(classFilter && classFilter !== "all" && { class: classFilter }),
+            ...(classFilter && classFilter !== 'all' && { class: classFilter }),
         });
 
-        const response = await fetch(`${ADVISOR_API_URL}/members?${queryParams.toString()}`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-        });
+        const response = await fetch(
+            `${ADVISOR_API_URL}/members?${queryParams.toString()}`,
+            {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            },
+        );
 
         if (!response.ok) await handleApiError(response);
         const result = await response.json();
@@ -362,31 +562,138 @@ export const advisorService = {
     getMemberDetail: async (id: number): Promise<AdvisorMember> => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-             await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
-             
-             // Same mock data as getMembers (subset for consistency)
-             const mockMembers = [
-                { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", joinDate: "2024-07-15", attendance: 92 },
-                { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", joinDate: "2024-07-15", attendance: 88 },
-                { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", joinDate: "2024-07-20", attendance: 95 },
-                { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", joinDate: "2024-07-15", attendance: 78 },
-                { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", joinDate: "2024-08-01", attendance: 85 },
-                { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", joinDate: "2024-07-15", attendance: 45 },
-                { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", joinDate: "2024-07-20", attendance: 90 },
-                { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", joinDate: "2024-08-05", attendance: 82 },
-                { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", joinDate: "2024-07-15", attendance: 88 },
-                { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", joinDate: "2024-08-10", attendance: 91 },
-                { id: 11, nis: "2022011", name: "Irfan Hakim", class: "X B", joinDate: "2024-08-12", attendance: 87 },
-                { id: 12, nis: "2022012", name: "Julia Permata", class: "XI A", joinDate: "2024-07-18", attendance: 93 },
-                { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", joinDate: "2024-07-22", attendance: 76 },
-                { id: 14, nis: "2022014", name: "Luna Maya", class: "XII A", joinDate: "2024-07-15", attendance: 89 },
-                { id: 15, nis: "2022015", name: "Mario Bros", class: "X B", joinDate: "2024-08-15", attendance: 95 },
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
+
+            // Same mock data as getMembers (subset for consistency)
+            const mockMembers = [
+                {
+                    id: 1,
+                    nis: '2022001',
+                    name: 'Andi Wijaya',
+                    class: 'XII A',
+                    joinDate: '2024-07-15',
+                    attendance: 92,
+                },
+                {
+                    id: 2,
+                    nis: '2022002',
+                    name: 'Rina Kusuma',
+                    class: 'XI A',
+                    joinDate: '2024-07-15',
+                    attendance: 88,
+                },
+                {
+                    id: 3,
+                    nis: '2022003',
+                    name: 'Doni Pratama',
+                    class: 'XI B',
+                    joinDate: '2024-07-20',
+                    attendance: 95,
+                },
+                {
+                    id: 4,
+                    nis: '2022004',
+                    name: 'Siti Aminah',
+                    class: 'XII B',
+                    joinDate: '2024-07-15',
+                    attendance: 78,
+                },
+                {
+                    id: 5,
+                    nis: '2022005',
+                    name: 'Budi Santoso',
+                    class: 'X A',
+                    joinDate: '2024-08-01',
+                    attendance: 85,
+                },
+                {
+                    id: 6,
+                    nis: '2022006',
+                    name: 'Dewi Lestari',
+                    class: 'XII A',
+                    joinDate: '2024-07-15',
+                    attendance: 45,
+                },
+                {
+                    id: 7,
+                    nis: '2022007',
+                    name: 'Eko Prasetyo',
+                    class: 'XI A',
+                    joinDate: '2024-07-20',
+                    attendance: 90,
+                },
+                {
+                    id: 8,
+                    nis: '2022008',
+                    name: 'Fitri Handayani',
+                    class: 'XI B',
+                    joinDate: '2024-08-05',
+                    attendance: 82,
+                },
+                {
+                    id: 9,
+                    nis: '2022009',
+                    name: 'Gilang Ramadhan',
+                    class: 'XII B',
+                    joinDate: '2024-07-15',
+                    attendance: 88,
+                },
+                {
+                    id: 10,
+                    nis: '2022010',
+                    name: 'Hana Safitri',
+                    class: 'X A',
+                    joinDate: '2024-08-10',
+                    attendance: 91,
+                },
+                {
+                    id: 11,
+                    nis: '2022011',
+                    name: 'Irfan Hakim',
+                    class: 'X B',
+                    joinDate: '2024-08-12',
+                    attendance: 87,
+                },
+                {
+                    id: 12,
+                    nis: '2022012',
+                    name: 'Julia Permata',
+                    class: 'XI A',
+                    joinDate: '2024-07-18',
+                    attendance: 93,
+                },
+                {
+                    id: 13,
+                    nis: '2022013',
+                    name: 'Kevin Anggara',
+                    class: 'XI B',
+                    joinDate: '2024-07-22',
+                    attendance: 76,
+                },
+                {
+                    id: 14,
+                    nis: '2022014',
+                    name: 'Luna Maya',
+                    class: 'XII A',
+                    joinDate: '2024-07-15',
+                    attendance: 89,
+                },
+                {
+                    id: 15,
+                    nis: '2022015',
+                    name: 'Mario Bros',
+                    class: 'X B',
+                    joinDate: '2024-08-15',
+                    attendance: 95,
+                },
             ];
 
-             const member = mockMembers.find(m => m.id === id);
-             if (!member) throw new Error("Member not found");
-             return member;
-         }
+            const member = mockMembers.find((m) => m.id === id);
+            if (!member) throw new Error('Member not found');
+            return member;
+        }
 
         // ===== REAL API IMPLEMENTATION =====
         const response = await fetch(`${ADVISOR_API_URL}/members/${id}`, {
@@ -402,8 +709,13 @@ export const advisorService = {
     addMember: async (memberData: any) => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
-            return { success: true, data: { id: Math.floor(Math.random() * 1000), ...memberData } };
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
+            return {
+                success: true,
+                data: { id: Math.floor(Math.random() * 1000), ...memberData },
+            };
         }
 
         // ===== REAL API IMPLEMENTATION =====
@@ -420,7 +732,9 @@ export const advisorService = {
     deleteMember: async (memberId: number) => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
             return { success: true };
         }
 
@@ -438,34 +752,59 @@ export const advisorService = {
     // ATTENDANCE MANAGEMENT
     // ========================================
 
-    getAttendanceHistory: async (startDate?: string, endDate?: string): Promise<any[]> => {
+    getAttendanceHistory: async (
+        startDate?: string,
+        endDate?: string,
+    ): Promise<any[]> => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
             return [
                 {
                     id: 1,
-                    date: "2025-12-20",
+                    date: '2025-12-20',
                     studentStats: { present: 42, total: 45, percentage: 93 },
-                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:00", status: "hadir" }
+                    advisorStats: {
+                        tutorName: 'Ahmad Fauzi, S.Pd',
+                        startTime: '14:00',
+                        endTime: '16:00',
+                        status: 'hadir',
+                    },
                 },
                 {
                     id: 2,
-                    date: "2025-12-13",
+                    date: '2025-12-13',
                     studentStats: { present: 40, total: 45, percentage: 89 },
-                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:30", status: "hadir" }
+                    advisorStats: {
+                        tutorName: 'Ahmad Fauzi, S.Pd',
+                        startTime: '14:00',
+                        endTime: '16:30',
+                        status: 'hadir',
+                    },
                 },
                 {
                     id: 3,
-                    date: "2025-12-06",
+                    date: '2025-12-06',
                     studentStats: { present: 38, total: 45, percentage: 84 },
-                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:00", status: "hadir" }
+                    advisorStats: {
+                        tutorName: 'Ahmad Fauzi, S.Pd',
+                        startTime: '14:00',
+                        endTime: '16:00',
+                        status: 'hadir',
+                    },
                 },
-                 {
+                {
                     id: 4,
-                    date: "2025-11-29",
+                    date: '2025-11-29',
                     studentStats: { present: 43, total: 45, percentage: 96 },
-                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "15:30", status: "hadir" }
+                    advisorStats: {
+                        tutorName: 'Ahmad Fauzi, S.Pd',
+                        startTime: '14:00',
+                        endTime: '15:30',
+                        status: 'hadir',
+                    },
                 },
             ];
         }
@@ -475,10 +814,13 @@ export const advisorService = {
         if (startDate) params.append('startDate', startDate);
         if (endDate) params.append('endDate', endDate);
 
-        const response = await fetch(`${ADVISOR_API_URL}/attendance?${params}`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-        });
+        const response = await fetch(
+            `${ADVISOR_API_URL}/attendance?${params}`,
+            {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            },
+        );
 
         if (!response.ok) await handleApiError(response);
         const result = await response.json();
@@ -488,7 +830,9 @@ export const advisorService = {
     submitAttendance: async (data: any) => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
             console.log('[Mock] Attendance submitted:', data);
             return { success: true, data: { id: 123 } };
         }
@@ -515,7 +859,9 @@ export const advisorService = {
     getProfile: async (): Promise<AdvisorProfileData> => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
             return mockAdvisorData;
         }
 
@@ -542,7 +888,9 @@ export const advisorService = {
     ): Promise<AdvisorProfileData> => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
             console.log('[Mock] Profile updated:', data);
             return { ...mockAdvisorData, ...data };
         }
@@ -566,12 +914,12 @@ export const advisorService = {
      * POST /extracurricular-advisor/profile/avatar
      * Upload profile picture
      */
-    uploadAvatar: async (
-        file: File,
-    ): Promise<AvatarUploadResponse> => {
+    uploadAvatar: async (file: File): Promise<AvatarUploadResponse> => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
             const mockUrl = URL.createObjectURL(file);
             console.log('[Mock] Avatar uploaded:', file.name);
             return {
@@ -620,11 +968,15 @@ export const advisorService = {
     ): Promise<PasswordUpdateResponse> => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
-            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            await new Promise((resolve) =>
+                setTimeout(resolve, SIMULATED_DELAY_MS),
+            );
 
             // Simulate password validation
             if (data.currentPassword === 'wrong') {
-                const error = new Error('Kata sandi saat ini salah') as Error & { code: number };
+                const error = new Error(
+                    'Kata sandi saat ini salah',
+                ) as Error & { code: number };
                 error.code = 400;
                 throw error;
             }
@@ -646,7 +998,8 @@ export const advisorService = {
             await handleApiError(response);
         }
 
-        const result: ApiResponse<PasswordUpdateResponse> = await response.json();
+        const result: ApiResponse<PasswordUpdateResponse> =
+            await response.json();
         return result.data;
-    }
+    },
 };
