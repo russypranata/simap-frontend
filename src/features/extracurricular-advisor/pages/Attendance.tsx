@@ -149,7 +149,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                     advisorService.getMembers(),
                     advisorService.getProfile()
                 ]);
-                setMembers(membersData);
+                setMembers(membersData.data);
                 setTutorName(profileData.name);
                 
                 // Also fetch history to populate stats
@@ -271,7 +271,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                  advisorService.getMembers(),
                  advisorService.getAttendanceHistory()
             ]);
-            setMembers(membersData);
+            setMembers(membersData.data);
             setHistory(historyData);
             setAttendanceRecords(new Map());
             

@@ -18,6 +18,53 @@ const ADVISOR_API_URL = `${API_BASE_URL}/extracurricular-advisor`;
 const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK !== 'false';
 const SIMULATED_DELAY_MS = 1000;
 
+// ===== SHARED MOCK DATA =====
+const MOCK_MEMBERS_DATA: AdvisorMember[] = [
+    { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", joinDate: "2024-07-15", attendance: 92 },
+    { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", joinDate: "2024-07-15", attendance: 88 },
+    { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", joinDate: "2024-07-20", attendance: 95 },
+    { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", joinDate: "2024-07-15", attendance: 78 },
+    { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", joinDate: "2024-08-01", attendance: 85 },
+    { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", joinDate: "2024-07-15", attendance: 45 },
+    { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", joinDate: "2024-07-20", attendance: 90 },
+    { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", joinDate: "2024-08-05", attendance: 82 },
+    { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", joinDate: "2024-07-15", attendance: 88 },
+    { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", joinDate: "2024-08-10", attendance: 91 },
+    { id: 11, nis: "2022011", name: "Irfan Hakim", class: "X B", joinDate: "2024-08-12", attendance: 87 },
+    { id: 12, nis: "2022012", name: "Julia Permata", class: "XI A", joinDate: "2024-07-18", attendance: 93 },
+    { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", joinDate: "2024-07-22", attendance: 76 },
+    { id: 14, nis: "2022014", name: "Luna Maya", class: "XII A", joinDate: "2024-07-15", attendance: 89 },
+    { id: 15, nis: "2022015", name: "Mario Bros", class: "X B", joinDate: "2024-08-15", attendance: 95 },
+];
+
+const MOCK_HISTORY_24_25: AdvisorMember[] = [
+    { id: 101, nis: "2023001", name: "Alumni Aditya (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 98 }, // Rajin
+    { id: 102, nis: "2023002", name: "Alumni Bayu (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 95 }, // Rajin
+    { id: 103, nis: "2023003", name: "Alumni Citra (24/25)", class: "XII B", joinDate: "2023-07-15", attendance: 92 }, // Rajin (Batas)
+    { id: 104, nis: "2023004", name: "Alumni Diana (24/25)", class: "XII B", joinDate: "2023-07-15", attendance: 88 }, // Average
+    { id: 105, nis: "2023005", name: "Alumni Erik (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 85 }, // Average
+    { id: 106, nis: "2023006", name: "Alumni Fani (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 78 }, // Low
+    { id: 107, nis: "2023007", name: "Alumni Gilang (24/25)", class: "XII B", joinDate: "2023-07-15", attendance: 96 }, // Rajin
+    { id: 108, nis: "2023008", name: "Alumni Hana (24/25)", class: "XII B", joinDate: "2023-07-15", attendance: 90 }, // Rajin (Pas)
+    { id: 109, nis: "2023009", name: "Alumni Indra (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 65 }, // Jarang
+    { id: 110, nis: "2023010", name: "Alumni Joko (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 89 }, // Hampir Rajin
+];
+
+const MOCK_HISTORY_23_24: AdvisorMember[] = [
+    { id: 201, nis: "2022001", name: "Alumni Kiki (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 100 }, // Perfect
+    { id: 202, nis: "2022002", name: "Alumni Lia (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 98 }, // Rajin
+    { id: 203, nis: "2022003", name: "Alumni Mira (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 94 }, // Rajin
+    { id: 204, nis: "2022004", name: "Alumni Nina (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 91 }, // Rajin
+    { id: 205, nis: "2022005", name: "Alumni Omar (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 80 }, // Average
+    { id: 206, nis: "2022006", name: "Alumni Putri (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 75 }, // Average
+    { id: 207, nis: "2022007", name: "Alumni Qori (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 60 }, // Low
+    { id: 208, nis: "2022008", name: "Alumni Rian (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 88 }, // Average
+    { id: 209, nis: "2022009", name: "Alumni Sari (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 89 }, // Hampir Rajin
+    { id: 210, nis: "2022010", name: "Alumni Tina (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 92 }, // Rajin
+    { id: 211, nis: "2022011", name: "Alumni Usman (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 95 }, // Rajin
+    { id: 212, nis: "2022012", name: "Alumni Vivi (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 40 }, // Sangat Jarang
+];
+
 // ============================================
 // TYPES
 // ============================================
@@ -167,25 +214,41 @@ export const advisorService = {
         if (USE_MOCK_DATA) {
             await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
             
-            // Simulate different stats for past years
-            if (academicYear && academicYear !== "2025/2026") {
-                 return {
-                    totalMembers: 30, // Less members in past
-                    lastAttendancePresent: 28,
-                    averageAttendance: 88,
-                    totalMeetings: 10,
-                    activeStudents: 25,
-                    needsAttention: 2
-                };
+            // Determine which dataset to use
+            let targetMembers = MOCK_MEMBERS_DATA;
+            
+            if (academicYear === "2024/2025") {
+                targetMembers = MOCK_HISTORY_24_25;
+            } else if (academicYear === "2023/2024") {
+                targetMembers = MOCK_HISTORY_23_24;
             }
 
+            // Apply Semester Logic to targetMembers (Same as getMembers)
+            if (semester === "2") {
+                targetMembers = targetMembers.map(m => ({
+                    ...m,
+                    attendance: Math.max(0, m.attendance - 5) // Milder drop (5%)
+                }));
+            } else if (semester === "all") { // Note: '1 Tahun Penuh' value is 'all'
+                targetMembers = targetMembers.map(m => ({
+                    ...m,
+                    attendance: Math.round(Math.max(0, m.attendance - 2.5)) // Round to integer
+                }));
+            }
+
+            // Calculate stats dynamically from the filtered/modified data
+            const totalMembers = targetMembers.length;
+            const avgAttendance = Math.round(targetMembers.reduce((acc, m) => acc + m.attendance, 0) / (totalMembers || 1));
+            const activeStudents = targetMembers.filter(m => m.attendance >= 90).length;
+            const needsAttention = targetMembers.filter(m => m.attendance < 75).length;
+
             return {
-                totalMembers: 45,
-                lastAttendancePresent: 42,
-                averageAttendance: 91,
+                totalMembers,
+                lastAttendancePresent: Math.round(totalMembers * 0.9), // rough estimate
+                averageAttendance: avgAttendance,
                 totalMeetings: 12,
-                activeStudents: 38,
-                needsAttention: 7
+                activeStudents,
+                needsAttention
             };
         }
 
@@ -272,42 +335,32 @@ export const advisorService = {
         if (USE_MOCK_DATA) {
             await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
             
-            // Base Mock Data
-            let mockMembers = [
-                { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", joinDate: "2024-07-15", attendance: 92 },
-                { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", joinDate: "2024-07-15", attendance: 88 },
-                { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", joinDate: "2024-07-20", attendance: 95 },
-                { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", joinDate: "2024-07-15", attendance: 78 },
-                { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", joinDate: "2024-08-01", attendance: 85 },
-                { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", joinDate: "2024-07-15", attendance: 45 },
-                { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", joinDate: "2024-07-20", attendance: 90 },
-                { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", joinDate: "2024-08-05", attendance: 82 },
-                { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", joinDate: "2024-07-15", attendance: 88 },
-                { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", joinDate: "2024-08-10", attendance: 91 },
-                { id: 11, nis: "2022011", name: "Irfan Hakim", class: "X B", joinDate: "2024-08-12", attendance: 87 },
-                { id: 12, nis: "2022012", name: "Julia Permata", class: "XI A", joinDate: "2024-07-18", attendance: 93 },
-                { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", joinDate: "2024-07-22", attendance: 76 },
-                { id: 14, nis: "2022014", name: "Luna Maya", class: "XII A", joinDate: "2024-07-15", attendance: 89 },
-                { id: 15, nis: "2022015", name: "Mario Bros", class: "X B", joinDate: "2024-08-15", attendance: 95 },
-            ];
+            // Base Mock Data - Use Shared Source
+            let mockMembers = [...MOCK_MEMBERS_DATA];
 
             // 0. Filter by Academic Year (Mock Logic)
-            if (academicYear !== "2025/2026") {
-                // Return empty or different data for past years to simulate history
-                // For demo purposes, we just return empty to show "No Data" effect or a few dummy alumni
-                mockMembers = [
-                    { id: 99, nis: "2021001", name: "Alumni Budi (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 100 }
-                ];
+            if (academicYear === "2024/2025") {
+                mockMembers = [...MOCK_HISTORY_24_25];
+            } else if (academicYear === "2023/2024") {
+                mockMembers = [...MOCK_HISTORY_23_24];
             }
 
-            // 0.5 Filter by Semester (Mock Logic - Simulate different attendance)
-            if (semester && semester === "2") {
-                // Adjust attendance slightly to show difference between semesters
+            // 0.5 Filter by Semester (Mock Logic - Simulate realistic variations)
+            if (semester === "2") {
+                // Semester 2: Everyone gets slightly less diligent (Attendance drops 5%)
                 mockMembers = mockMembers.map(m => ({
                     ...m,
-                    attendance: Math.max(0, m.attendance - 10) // Simulate generic drop in semester 2 for demo
+                    attendance: Math.max(0, m.attendance - 5) 
+                }));
+            } else if (semester === "all" || !semester) {
+                 // Full Year: Average of Sem 1 (Base) and Sem 2 (Base - 5)
+                 // Result: Attendance drops 2.5% from Base
+                 mockMembers = mockMembers.map(m => ({
+                    ...m,
+                    attendance: Math.round(Math.max(0, m.attendance - 2.5)) // Round to integer
                 }));
             }
+            // Semester 1 (Default): Uses Base Data (Highest)
 
             // 1. Filter by Search
             if (search) {
@@ -365,23 +418,7 @@ export const advisorService = {
              await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
              
              // Same mock data as getMembers (subset for consistency)
-             const mockMembers = [
-                { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", joinDate: "2024-07-15", attendance: 92 },
-                { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", joinDate: "2024-07-15", attendance: 88 },
-                { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", joinDate: "2024-07-20", attendance: 95 },
-                { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", joinDate: "2024-07-15", attendance: 78 },
-                { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", joinDate: "2024-08-01", attendance: 85 },
-                { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", joinDate: "2024-07-15", attendance: 45 },
-                { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", joinDate: "2024-07-20", attendance: 90 },
-                { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", joinDate: "2024-08-05", attendance: 82 },
-                { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", joinDate: "2024-07-15", attendance: 88 },
-                { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", joinDate: "2024-08-10", attendance: 91 },
-                { id: 11, nis: "2022011", name: "Irfan Hakim", class: "X B", joinDate: "2024-08-12", attendance: 87 },
-                { id: 12, nis: "2022012", name: "Julia Permata", class: "XI A", joinDate: "2024-07-18", attendance: 93 },
-                { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", joinDate: "2024-07-22", attendance: 76 },
-                { id: 14, nis: "2022014", name: "Luna Maya", class: "XII A", joinDate: "2024-07-15", attendance: 89 },
-                { id: 15, nis: "2022015", name: "Mario Bros", class: "X B", joinDate: "2024-08-15", attendance: 95 },
-            ];
+             const mockMembers = [...MOCK_MEMBERS_DATA, ...MOCK_HISTORY_24_25, ...MOCK_HISTORY_23_24];
 
              const member = mockMembers.find(m => m.id === id);
              if (!member) throw new Error("Member not found");
