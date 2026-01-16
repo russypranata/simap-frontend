@@ -43,9 +43,9 @@ import { formatDate } from "@/features/shared/utils/dateFormatter";
 
 
 import { advisorService, AdvisorMember } from "../services/advisorService";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MembersSkeleton } from "../components/AdvisorSkeletons";
 import { useDebounce } from "@/hooks/use-debounce";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export const ExtracurricularMembers: React.FC = () => {
     const [members, setMembers] = useState<AdvisorMember[]>([]);
@@ -129,6 +129,7 @@ export const ExtracurricularMembers: React.FC = () => {
     // We'll update the stats cards to use a separate effect or just accept paginated subset stats for now?
     // User asked for "API Ready". Real apps fetch stats separately.
     // I will add a separate fetch for stats to be accurate.
+    const [isStatsLoading, setIsStatsLoading] = useState(true);
     const [stats, setStats] = useState({
         totalMembers: 0,
         avgAttendance: 0,
@@ -148,6 +149,7 @@ export const ExtracurricularMembers: React.FC = () => {
         // Let's use `advisorService.getDashboardStats()` if available? Yes.
         const fetchStats = async () => {
              try {
+                setIsStatsLoading(true);
                 const dashboardStats = await advisorService.getDashboardStats({
                     academicYear: selectedYear,
                     semester: selectedSemester
@@ -160,6 +162,8 @@ export const ExtracurricularMembers: React.FC = () => {
                 });
              } catch (e) {
                  console.log("Stats fetch error", e);
+             } finally {
+                 setIsStatsLoading(false);
              }
         };
         fetchStats();
@@ -230,7 +234,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                     </span>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="1">Semester Ganjil (Aktif)</SelectItem>
+                                    <SelectItem value="1">Semester Ganjil {selectedYear === "2025/2026" ? "(Aktif)" : ""}</SelectItem>
                                     <SelectItem value="2">Semester Genap</SelectItem>
                                     <SelectItem value="all">1 Tahun Penuh</SelectItem>
                                 </SelectContent>
@@ -268,22 +272,27 @@ export const ExtracurricularMembers: React.FC = () => {
                         <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
                             <Users className="h-5 w-5 text-blue-800" />
                         </div>
-                        <p className="text-2xl font-bold text-blue-800">{stats.totalMembers || totalItems}</p>
+                        {isStatsLoading ? (
+                            <p className="text-2xl font-bold text-blue-800 animate-pulse">...</p>
+                        ) : (
+                            <p className="text-2xl font-bold text-blue-800">{stats.totalMembers || totalItems}</p>
+                        )}
                         <p className="text-xs text-muted-foreground">Total Anggota</p>
                     </div>
 
-                    {/* Top Performers - Placeholder since we don't have this in dashboard stats yet */}
-                    {/* Accessing these from 'members' array is now only partial data (current page) */}
-                    {/* So we should either hide them or accept they are just samples */}
-                    {/* For better UX, let's just count from current page for now with a tooltip or just show it */}
+                    {/* Top Performers */}
                     <div className="p-4 text-center">
                         <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
                             <CheckCircle className="h-5 w-5 text-green-600" />
                         </div>
-                        <p className="text-2xl font-bold text-green-600">
-                             {stats.topPerformers}
-                        </p>
-                        <p className="text-xs text-muted-foreground">Siswa Aktif</p>
+                        {isStatsLoading ? (
+                            <p className="text-2xl font-bold text-green-600 animate-pulse">...</p>
+                        ) : (
+                            <p className="text-2xl font-bold text-green-600">
+                                {stats.topPerformers}
+                            </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">Siswa Rajin</p>
                     </div>
 
                     {/* Rata-rata Kehadiran */}
@@ -291,7 +300,11 @@ export const ExtracurricularMembers: React.FC = () => {
                         <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
                             <Activity className="h-5 w-5 text-purple-700" />
                         </div>
-                        <p className="text-2xl font-bold text-purple-700">{stats.avgAttendance}%</p>
+                        {isStatsLoading ? (
+                            <p className="text-2xl font-bold text-purple-700 animate-pulse">...</p>
+                        ) : (
+                            <p className="text-2xl font-bold text-purple-700">{stats.avgAttendance}%</p>
+                        )}
                         <p className="text-xs text-muted-foreground">Rata-rata Kehadiran</p>
                     </div>
 
@@ -300,10 +313,12 @@ export const ExtracurricularMembers: React.FC = () => {
                         <div className="inline-flex p-2.5 bg-red-100 rounded-full mb-2">
                             <AlertCircle className="h-5 w-5 text-red-600" />
                         </div>
-                        <p className="text-2xl font-bold text-red-600">
-                            {stats.needsAttention}
-                        </p>
-                        <p className="text-xs text-muted-foreground">Perlu Bimbingan</p>
+                        {isStatsLoading ? (
+                            <p className="text-2xl font-bold text-red-600 animate-pulse">...</p>
+                        ) : (
+                            <p className="text-2xl font-bold text-red-600">{stats.needsAttention}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground">Perlu Perhatian</p>
                     </div>
                 </div>
             </Card>
