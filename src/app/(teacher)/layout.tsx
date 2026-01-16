@@ -6,49 +6,62 @@ import { TeacherLayout } from '@/features/teacher/components/TeacherLayout';
 import { useRole } from '@/app/context/RoleContext';
 
 export default function TeacherRouteLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-  const { role, isAuthenticated, isLoading } = useRole();
-  const router = useRouter();
+    const { role, isAuthenticated, isLoading } = useRole();
+    const router = useRouter();
 
-  // Role-based auth guard
-  useEffect(() => {
-    // Wait for loading to complete before checking auth
-    if (isLoading) return;
+    // Role-based auth guard
+    useEffect(() => {
+        // Wait for loading to complete before checking auth
+        if (isLoading) return;
 
-    if (!isAuthenticated) {
-      // Redirect to home if not authenticated
-      router.push('/');
-    } else if (role !== 'guru') {
-      // Redirect to appropriate dashboard based on role
-      switch (role) {
-        case 'siswa':
-          router.push('/student/dashboard');
-          break;
-        case 'admin':
-          router.push('/admin/dashboard');
-          break;
-        case 'orang_tua':
-          router.push('/parent/dashboard');
-          break;
-        case 'tutor_ekskul':
-          router.push('/extracurricular-advisor/dashboard');
-          break;
-        case 'pj_mutamayizin':
-          router.push('/mutamayizin-coordinator/dashboard');
-          break;
-        default:
-          router.push('/');
-      }
+        if (!isAuthenticated) {
+            // Redirect to home if not authenticated
+            router.push('/');
+        } else if (
+            role !== 'subject_teacher' &&
+            role !== 'homeroom_teacher' &&
+            role !== 'picket_teacher' &&
+            role !== 'headmaster'
+        ) {
+            // Redirect to appropriate dashboard based on role
+            // Redirect to appropriate dashboard based on role
+            switch (role) {
+                case 'student':
+                    router.push('/student/dashboard');
+                    break;
+                case 'admin':
+                    router.push('/admin/dashboard');
+                    break;
+                case 'parent':
+                    router.push('/parent/dashboard');
+                    break;
+                case 'extracurricular_tutor':
+                    router.push('/extracurricular-advisor/dashboard');
+                    break;
+                case 'mutamayizin_coordinator':
+                    router.push('/mutamayizin-coordinator/dashboard');
+                    break;
+                default:
+                    router.push('/');
+            }
+        }
+    }, [isAuthenticated, role, router, isLoading]);
+
+    // Show nothing while initializing or redirecting
+    if (
+        isLoading ||
+        !isAuthenticated ||
+        (role !== 'subject_teacher' &&
+            role !== 'homeroom_teacher' &&
+            role !== 'picket_teacher' &&
+            role !== 'headmaster')
+    ) {
+        return null;
     }
-  }, [isAuthenticated, role, router, isLoading]);
 
-  // Show nothing while initializing or redirecting
-  if (isLoading || !isAuthenticated || role !== 'guru') {
-    return null;
-  }
-
-  return <TeacherLayout>{children}</TeacherLayout>;
+    return <TeacherLayout>{children}</TeacherLayout>;
 }

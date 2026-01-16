@@ -20,22 +20,25 @@ export default function MutamayizinCoordinatorRouteLayout({
 
         if (!isAuthenticated) {
             router.push('/');
-        } else if (role !== 'pj_mutamayizin') {
+        } else if (role !== 'mutamayizin_coordinator') {
             // Redirect to appropriate dashboard based on role
             switch (role) {
-                case 'guru':
+                case 'subject_teacher':
+                case 'homeroom_teacher':
+                case 'picket_teacher':
+                case 'headmaster':
                     router.push('/teacher/dashboard');
                     break;
-                case 'siswa':
+                case 'student':
                     router.push('/student/dashboard');
                     break;
                 case 'admin':
                     router.push('/admin/dashboard');
                     break;
-                case 'orang_tua':
+                case 'parent':
                     router.push('/parent/dashboard');
                     break;
-                case 'tutor_ekskul':
+                case 'extracurricular_tutor':
                     router.push('/extracurricular-advisor/dashboard');
                     break;
                 default:
@@ -45,7 +48,7 @@ export default function MutamayizinCoordinatorRouteLayout({
     }, [isAuthenticated, role, router, isLoading]);
 
     // Show loading or nothing while initializing
-    if (isLoading || !isAuthenticated || role !== 'pj_mutamayizin') {
+    if (isLoading || !isAuthenticated || role !== 'mutamayizin_coordinator') {
         return null;
     }
 

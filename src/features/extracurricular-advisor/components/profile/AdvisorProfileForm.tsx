@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { AdvisorPhotoRequirementsModal } from "./AdvisorPhotoRequirementsModal";
+import React, { useState, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { AdvisorPhotoRequirementsModal } from './AdvisorPhotoRequirementsModal';
 import {
     User,
     Mail,
@@ -19,8 +19,8 @@ import {
     IdCard,
     Star,
     AtSign,
-} from "lucide-react";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { toast } from 'sonner';
 
 export interface AdvisorProfileData {
     name: string;
@@ -53,7 +53,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -83,7 +83,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
         // 1. Validasi Format
         const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!validTypes.includes(file.type)) {
-            toast.error("Format File Tidak Valid", {
+            toast.error('Format File Tidak Valid', {
                 description: 'Mohon unggah foto dengan format JPG atau PNG.',
             });
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -93,7 +93,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
         // 2. Validasi Ukuran (Max 2MB)
         const maxSize = 2 * 1024 * 1024; // 2MB
         if (file.size > maxSize) {
-            toast.error("File Terlalu Besar", {
+            toast.error('File Terlalu Besar', {
                 description: `Ukuran file ${(file.size / (1024 * 1024)).toFixed(1)}MB melebihi batas maksimal 2MB.`,
             });
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -104,15 +104,15 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
         const objectUrl = URL.createObjectURL(file);
         setFormData((prev) => ({ ...prev, profilePicture: objectUrl }));
         setSelectedFile(file);
-        toast.success("Foto Berhasil Dipilih", {
+        toast.success('Foto Berhasil Dipilih', {
             description: 'Jangan lupa simpan perubahan profil Anda.',
         });
     };
 
     const initials = formData.name
-        .split(" ")
+        .split(' ')
         .map((n) => n[0])
-        .join("")
+        .join('')
         .toUpperCase()
         .substring(0, 2);
 
@@ -120,11 +120,13 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
         <Card>
             <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                         <User className="h-5 w-5" />
                     </div>
                     <div>
-                        <CardTitle className="text-lg">Informasi Profil</CardTitle>
+                        <CardTitle className="text-lg">
+                            Informasi Profil
+                        </CardTitle>
                         <p className="text-sm text-muted-foreground mt-0.5 font-normal">
                             Perbarui detail identitas dan kontak Anda
                         </p>
@@ -146,7 +148,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                                     {initials}
                                 </AvatarFallback>
                             </Avatar>
-                            <div 
+                            <div
                                 onClick={handleImageClick}
                                 className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
                             >
@@ -191,7 +193,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                             <Input
                                 id="name"
                                 name="name"
-                                value={formData.name}
+                                value={formData.name || ''}
                                 onChange={handleInputChange}
                                 placeholder="Masukkan nama lengkap"
                                 required
@@ -210,32 +212,35 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                             <Input
                                 id="username"
                                 name="username"
-                                value={formData.username}
+                                value={formData.username || ''}
                                 onChange={handleInputChange}
                                 placeholder="Masukkan username"
                                 required
                             />
                         </div>
 
-
-
                         {/* Ekstrakurikuler */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
                                 <Star className="h-4 w-4 text-primary" />
-                                <Label htmlFor="extracurricular" className="mb-0">
+                                <Label
+                                    htmlFor="extracurricular"
+                                    className="mb-0"
+                                >
                                     Ekstrakurikuler
                                 </Label>
                             </div>
                             <Input
                                 id="extracurricular"
                                 name="extracurricular"
-                                value={formData.extracurricular}
+                                value={formData.extracurricular || ''}
                                 readOnly
                                 disabled
                                 className="bg-muted"
                             />
-                             <p className="text-xs text-muted-foreground">Ekstrakurikuler tidak dapat diubah</p>
+                            <p className="text-xs text-muted-foreground">
+                                Ekstrakurikuler tidak dapat diubah
+                            </p>
                         </div>
 
                         {/* Email */}
@@ -251,7 +256,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                                 id="email"
                                 name="email"
                                 type="email"
-                                value={formData.email}
+                                value={formData.email || ''}
                                 onChange={handleInputChange}
                                 placeholder="Masukkan email"
                                 required
@@ -271,7 +276,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                                 id="phone"
                                 name="phone"
                                 type="tel"
-                                value={formData.phone}
+                                value={formData.phone || ''}
                                 onChange={handleInputChange}
                                 placeholder="Masukkan nomor telepon"
                                 required
@@ -289,7 +294,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                             <Textarea
                                 id="address"
                                 name="address"
-                                value={formData.address}
+                                value={formData.address || ''}
                                 onChange={handleInputChange}
                                 placeholder="Masukkan alamat lengkap"
                                 rows={3}
@@ -314,7 +319,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                             className="flex-1 sm:flex-none bg-blue-800 hover:bg-blue-900 text-white"
                         >
                             <Save className="h-4 w-4 mr-2" />
-                            {isLoading ? "Menyimpan..." : "Simpan Perubahan"}
+                            {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
                         </Button>
                     </div>
                 </div>
