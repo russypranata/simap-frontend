@@ -36,6 +36,8 @@ import {
     Sparkles,
     PanelRightClose,
     PanelRightOpen,
+    Eye,
+    EyeOff,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authService } from '@/features/auth/services/authService';
@@ -54,6 +56,7 @@ export default function LoginPage() {
     const [view, setView] = useState<'login' | 'forgot_password'>('login');
     const [forgotPasswordData, setForgotPasswordData] = useState({ email: '' });
     const [forgotMessage, setForgotMessage] = useState({ type: '', text: '' });
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleLoginNavigation = (role: string) => {
         switch (role) {
@@ -384,13 +387,24 @@ export default function LoginPage() {
                                                 <Lock className="h-5 w-5" />
                                             </div>
                                             <Input
-                                                type="password"
-                                                className="pl-10 h-14 bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all rounded-xl shadow-sm text-base"
+                                                type={showPassword ? "text" : "password"}
+                                                className="pl-10 pr-10 h-14 bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all rounded-xl shadow-sm text-base"
                                                 placeholder="Masukkan password Anda"
                                                 value={loginData.password}
                                                 onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
                                                 required
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-4 text-slate-400 hover:text-blue-600 transition-colors"
+                                            >
+                                                {showPassword ? (
+                                                    <EyeOff className="h-5 w-5" />
+                                                ) : (
+                                                    <Eye className="h-5 w-5" />
+                                                )}
+                                            </button>
                                         </div>
                                     </div>
                                 </motion.div>

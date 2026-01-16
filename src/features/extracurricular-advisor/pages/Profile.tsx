@@ -1,11 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+} from '@/components/ui/dialog';
 import {
     User,
     Mail,
@@ -20,38 +24,40 @@ import {
     Star,
     BarChart3,
     CheckCircle2,
+    BookOpen,
 } from "lucide-react";
 import { ProfileSkeleton } from "../components/profile";
 
-// Mock data untuk Extracurricular Advisor
-const mockProfileData = {
-    name: "Ahmad Fauzi, S.Pd",
-    email: "ahmad.fauzi@alfityan.sch.id",
-    phone: "+62 812-3456-7890",
-    role: "Tutor Ekstrakurikuler",
-    profilePicture: "",
-    address: "Jl. Pendidikan No. 123, Gowa, Sulawesi Selatan",
-    joinDate: "15 Juli 2020",
-    nip: "198505152010011001",
-    extracurricular: "Pramuka",
-    totalMembers: 45,
-    activeMembers: 42,
-    totalMeetings: 12,
-    avgStudentAttendance: 91,
-};
-
+import {
+    advisorService,
+    AdvisorDashboardStats
+} from "../services/advisorService";
+import { AdvisorProfileData } from "../data/mockAdvisorData";
 
 export const ExtracurricularAdvisorProfile: React.FC = () => {
     const router = useRouter();
-    const [profileData, setProfileData] = React.useState<typeof mockProfileData | null>(null);
-    const [loading, setLoading] = React.useState(true);
+    const [profileData, setProfileData] = useState<AdvisorProfileData | null>(null);
+    const [statsData, setStatsData] = useState<AdvisorDashboardStats | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [isPhotoOpen, setIsPhotoOpen] = useState(false);
 
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setProfileData(mockProfileData);
-            setLoading(false);
-        }, 1500);
-        return () => clearTimeout(timer);
+        const fetchProfile = async () => {
+            try {
+                const [profile, stats] = await Promise.all([
+                    advisorService.getProfile(),
+                    advisorService.getDashboardStats()
+                ]);
+                setProfileData(profile);
+                setStatsData(stats);
+            } catch (error) {
+                console.error("Failed to fetch profile:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProfile();
     }, []);
 
     const handleEditProfile = () => {
@@ -112,61 +118,113 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 <p className="text-sm text-muted-foreground mt-0.5 font-normal">Kelola informasi pribadi dan akun Anda</p>
                             </div>
                         </div>
-                        <Button
-                            onClick={handleEditProfile}
-                            size="sm"
-                            className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white"
-                        >
-                            <Edit className="h-4 w-4" />
-                            <span>Edit Profil</span>
-                        </Button>
+                        <div className="flex items-center gap-3">
+                            <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200 pl-2 pr-3 py-1 hidden sm:flex">
+                                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                                Aktif
+                            </Badge>
+                            <Button
+                                onClick={handleEditProfile}
+                                size="sm"
+                                className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white"
+                            >
+                                <Edit className="h-4 w-4" />
+                                <span>Edit Profil</span>
+                            </Button>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-6">
                         {/* Profile Picture and Basic Info */}
-                        <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-                            <div className="relative group">
-                                <Avatar className="h-32 w-32 border-4 border-primary/10">
+                        <div className="flex flex-col md:flex-row items-center md:items-center space-y-4 md:space-y-0 md:space-x-6">
+                            <div
+                                onClick={() => {
+                                    if (profileData.profilePicture) {
+                                        setIsPhotoOpen(true);
+                                    }
+                                }}
+                                className={`relative group ${profileData.profilePicture ? 'cursor-pointer' : 'cursor-default'}`}
+                            >
+                                <Avatar className="w-32 h-auto aspect-[3/4] rounded-xl border-4 border-primary/10 transition-transform duration-300 group-hover:scale-105">
                                     <AvatarImage
                                         src={profileData.profilePicture}
                                         alt={profileData.name}
+                                        className="object-cover"
                                     />
-                                    <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white">
+                                    <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-xl">
                                         {initials}
                                     </AvatarFallback>
                                 </Avatar>
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer">
-                                    <Camera className="h-8 w-8 text-white" />
-                                </div>
+                                {profileData.profilePicture && (
+                                    <div className="absolute inset-0 bg-black/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                        <div className="bg-white/90 p-2 rounded-full shadow-sm backdrop-blur-sm">
+                                            <Camera className="h-5 w-5 text-gray-800" />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
+
+                            <Dialog
+                                open={isPhotoOpen}
+                                onOpenChange={setIsPhotoOpen}
+                            >
+                                <DialogContent className="max-w-md md:max-w-lg p-1 bg-transparent border-none shadow-none text-transparent">
+                                    <div className="relative rounded-lg overflow-hidden bg-white shadow-2xl">
+                                        {profileData.profilePicture && (
+                                            /* eslint-disable-next-line @next/next/no-img-element */
+                                            <img
+                                                src={profileData.profilePicture}
+                                                alt={`Foto Profil ${profileData.name}`}
+                                                className="w-full h-auto object-contain max-h-[80vh] rounded-lg"
+                                            />
+                                        )}
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
 
                             <div className="flex-1 text-center md:text-left space-y-2">
                                 <h2 className="text-2xl font-bold text-foreground">
                                     {profileData.name}
                                 </h2>
                                 <div className="space-y-2 mt-1">
-                                    <div className="flex items-center justify-center md:justify-start gap-2">
-                                        <Badge className="bg-blue-800 text-white">
-                                            Tutor Ekstrakurikuler {profileData.extracurricular}
+                                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                                        <Badge className="bg-blue-800 text-white pl-2 pr-3 py-1">
+                                            <Award className="h-3.5 w-3.5 mr-1.5" />
+                                            {profileData.role}
                                         </Badge>
-                                    </div>
-                                    <div className="flex items-center justify-center md:justify-start gap-2">
-                                        <span className="text-xs text-muted-foreground font-medium">Status Akun:</span>
-                                        <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200 pl-2 pr-3 py-1">
-                                            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                                            Aktif
+                                        <Badge variant="outline" className="border-blue-200 text-blue-800 bg-blue-50 pl-2 pr-3 py-1">
+                                            <Star className="h-3.5 w-3.5 mr-1.5" />
+                                            {profileData.extracurricular}
                                         </Badge>
                                     </div>
                                 </div>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                    NIP: {profileData.nip}
-                                </p>
+                            </div>
+                        </div>
+
+                        {/* Personal Information */}
+                        <div className="space-y-4 pt-4 border-t">
+                            <h3 className="text-base font-medium text-foreground flex items-center gap-2">
+                                <User className="h-4.5 w-4.5 text-primary" />
+                                Informasi Pribadi
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 col-span-1 md:col-span-2">
+                                    <div className="p-2 rounded-full bg-primary/10">
+                                        <User className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-muted-foreground">Username</p>
+                                        <p className="text-sm font-medium">
+                                            {profileData.username}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         {/* Contact Information */}
-                        <div className="space-y-4 pt-6 border-t mt-2">
+                        <div className="space-y-4 pt-6 border-t">
                             <h3 className="text-base font-medium text-foreground flex items-center gap-2">
                                 <Phone className="h-4.5 w-4.5 text-primary" />
                                 Informasi Kontak
@@ -228,7 +286,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
             </Card>
 
             {/* Extracurricular Statistics */}
-            <Card>
+            <Card className="gap-0">
                 <CardHeader className="pb-4">
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
@@ -248,8 +306,8 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                             </div>
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Total Anggota</p>
-                                <p className="text-lg font-semibold">
-                                    {profileData.totalMembers}
+                                <p className="text-lg font-semibold text-blue-800">
+                                    {statsData?.totalMembers || 0}
                                 </p>
                             </div>
                         </div>
@@ -259,9 +317,9 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 <Activity className="h-5 w-5 text-green-600" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">Anggota Aktif</p>
+                                <p className="text-xs text-muted-foreground">Hadir Terakhir</p>
                                 <p className="text-lg font-semibold">
-                                    {profileData.activeMembers}
+                                    {statsData?.lastAttendancePresent || 0}
                                 </p>
                             </div>
                         </div>
@@ -273,7 +331,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Total Pertemuan</p>
                                 <p className="text-lg font-semibold">
-                                    {profileData.totalMeetings}
+                                    {statsData?.totalMeetings || 0}
                                 </p>
                             </div>
                         </div>
@@ -283,9 +341,9 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 <Star className="h-5 w-5 text-purple-600" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">Kehadiran Siswa</p>
+                                <p className="text-xs text-muted-foreground">Rata-rata Kehadiran</p>
                                 <p className="text-lg font-semibold">
-                                    {profileData.avgStudentAttendance}%
+                                    {statsData?.averageAttendance || 0}%
                                 </p>
                             </div>
                         </div>

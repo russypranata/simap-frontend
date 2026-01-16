@@ -46,7 +46,7 @@ const routeConfig: Record<string, { label: string; icon: React.ComponentType<{ c
     'kartu-pelajar': { label: 'Kartu Pelajar', icon: CreditCard },
     'data-diri': { label: 'Data Diri', icon: User },
     grades: { label: 'Nilai Akademik', icon: GraduationCap },
-    attendance: { label: 'Kehadiran', icon: ClipboardList },
+    attendance: { label: 'Presensi', icon: ClipboardList },
     schedule: { label: 'Jadwal', icon: Calendar },
     announcements: { label: 'Pengumuman', icon: Bell },
     achievements: { label: 'Prestasi', icon: Trophy },
@@ -66,9 +66,11 @@ const routeConfig: Record<string, { label: string; icon: React.ComponentType<{ c
 
     // Extracurricular routes
     'ekstrakurikuler': { label: 'Ekstrakurikuler', icon: Users },
+    'members': { label: 'Anggota', icon: Users },
     'anggota': { label: 'Anggota', icon: Users },
     'presensi': { label: 'Presensi', icon: ClipboardList },
     'tutor-recap': { label: 'Rekap Tutor', icon: ClipboardList },
+    'tutors': { label: 'Tutor', icon: Users },
 
     // Mutamayizin routes
     'mutamayizin': { label: 'Mutamayizin', icon: BookOpen },

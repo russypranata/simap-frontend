@@ -1,14 +1,34 @@
 // Advisor Service
 // This service handles all API interactions for the Extracurricular Advisor role
 
-// TODO: Replace with actual API URL from environment variables
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+import {
+    AdvisorProfileData,
+    mockAdvisorData,
+} from '../data/mockAdvisorData';
+
+// ============================================
+// CONFIGURATION
+// ============================================
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+// Use specific advisor API URL prefix
+const ADVISOR_API_URL = `${API_BASE_URL}/extracurricular-advisor`;
+
+// Development mode flag - defaulting to 'true' if not set, for safety
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK !== 'false';
+const SIMULATED_DELAY_MS = 1000;
+
+// ============================================
+// TYPES
+// ============================================
 
 export interface AdvisorDashboardStats {
     totalMembers: number;
     lastAttendancePresent: number;
     averageAttendance: number;
     totalMeetings: number;
+    activeStudents: number;
+    needsAttention: number;
 }
 
 export interface AdvisorMember {
@@ -20,66 +40,604 @@ export interface AdvisorMember {
     attendance: number;
 }
 
-// Service definition
+// Profile Related Interfaces
+export interface UpdateAdvisorProfileRequest {
+    name: string;
+    username: string;
+    email: string;
+    phone: string;
+    address: string;
+}
+
+export interface UpdatePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}
+
+export interface AvatarUploadResponse {
+    avatar: string;
+    profilePicture: string; // compatibility alias
+    thumbnails: {
+        small: string;
+        medium: string;
+    };
+}
+
+export interface PasswordUpdateResponse {
+    passwordLastChanged: string;
+}
+
+export interface ApiResponse<T> {
+    success: boolean;
+    data: T;
+    message: string;
+}
+
+export interface ApiErrorResponse {
+    success: boolean;
+    error: string;
+    message: string;
+    code: number;
+    errors?: Record<string, string[]>;
+}
+
+// Attendance Related Interfaces
+export interface AttendanceHistoryEntry {
+    id: number;
+    date: string;
+    studentStats: {
+        present: number;
+        total: number;
+        percentage: number;
+    };
+    advisorStats: {
+        tutorName: string;
+        startTime: string;
+        endTime: string;
+        status: string;
+    };
+}
+
+export interface CreateAttendanceRequest {
+    date: string;
+    startTime: string;
+    endTime: string;
+    topic?: string;
+    students: {
+        studentId: number;
+        status: string;
+        note?: string;
+    }[];
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Get authorization headers with Bearer token
+ */
+const getAuthHeaders = (): HeadersInit => {
+    const token =
+        typeof window !== 'undefined'
+            ? localStorage.getItem('authToken')
+            : null;
+    return {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+    };
+};
+
+/**
+ * Handle API error responses
+ */
+const handleApiError = async (response: Response): Promise<never> => {
+    const errorData: ApiErrorResponse = await response.json();
+
+    // Create custom error with API details
+    const error = new Error(errorData.message) as Error & {
+        code: number;
+        errors?: Record<string, string[]>;
+    };
+    error.code = errorData.code;
+    error.errors = errorData.errors;
+
+    throw error;
+};
+
+// ============================================
+// SERVICE EXPORTS
+// ============================================
+
 export const advisorService = {
-    // Dashboard related endpoints
-    getDashboardStats: async (): Promise<AdvisorDashboardStats> => {
-        // Placeholder implementation
-        // const response = await fetch(`${API_BASE_URL}/advisor/dashboard/stats`);
-        // if (!response.ok) throw new Error("Failed to fetch dashboard stats");
-        // return response.json();
+    // ========================================
+    // DASHBOARD & OPERATIONAL
+    // ========================================
 
-        // Return mock data for now
-        return {
-            totalMembers: 45,
-            lastAttendancePresent: 42,
-            averageAttendance: 91,
-            totalMeetings: 12
-        };
+    // ========================================
+    // DASHBOARD & OPERATIONAL
+    // ========================================
+
+    getDashboardStats: async (params: { academicYear?: string; semester?: string } = {}): Promise<AdvisorDashboardStats> => {
+        const { academicYear, semester } = params;
+
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            
+            // Simulate different stats for past years
+            if (academicYear && academicYear !== "2025/2026") {
+                 return {
+                    totalMembers: 30, // Less members in past
+                    lastAttendancePresent: 28,
+                    averageAttendance: 88,
+                    totalMeetings: 10,
+                    activeStudents: 25,
+                    needsAttention: 2
+                };
+            }
+
+            return {
+                totalMembers: 45,
+                lastAttendancePresent: 42,
+                averageAttendance: 91,
+                totalMeetings: 12,
+                activeStudents: 38,
+                needsAttention: 7
+            };
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const queryParams = new URLSearchParams();
+        if (academicYear) queryParams.append('academic_year', academicYear);
+        if (semester && semester !== 'all') queryParams.append('semester', semester);
+
+        const response = await fetch(`${ADVISOR_API_URL}/dashboard/stats?${queryParams.toString()}`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) await handleApiError(response);
+        const result = await response.json();
+        return result.data;
     },
 
-    getUpcomingSchedule: async () => {
-        // const response = await fetch(`${API_BASE_URL}/advisor/schedule/upcoming`);
-        return [];
+    getUpcomingSchedule: async (): Promise<any[]> => {
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            return [
+                { id: 1, day: "Jumat", date: "26 Desember 2025", time: "14:00 - 16:00" },
+                { id: 2, day: "Jumat", date: "09 Januari 2026", time: "14:00 - 16:00" },
+            ];
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const response = await fetch(`${ADVISOR_API_URL}/dashboard/schedule`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) await handleApiError(response);
+        const result = await response.json();
+        return result.data;
     },
 
-    getRecentActivities: async () => {
-        // const response = await fetch(`${API_BASE_URL}/advisor/activities/recent`);
-        return [];
+    getRecentActivities: async (): Promise<any[]> => {
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            return [
+                { id: 1, day: "Jumat", date: "20 Des 2025", time: "14:00 - 16:00", attendance: 93 },
+                { id: 2, day: "Jumat", date: "13 Des 2025", time: "14:00 - 16:30", attendance: 89 },
+                { id: 3, day: "Jumat", date: "06 Des 2025", time: "14:00 - 16:00", attendance: 84 },
+            ];
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const response = await fetch(`${ADVISOR_API_URL}/dashboard/recent-activities`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) await handleApiError(response);
+        const result = await response.json();
+        return result.data;
     },
 
-    // Member management endpoints
-    getMembers: async (academicYear: string): Promise<AdvisorMember[]> => {
-        // const response = await fetch(`${API_BASE_URL}/advisor/members?year=${academicYear}`);
-        return [];
+    // ========================================
+    // MEMBER MANAGEMENT
+    // ========================================
+
+    getMembers: async (params: { 
+        academicYear?: string; 
+        class?: string; 
+        search?: string; 
+        page?: number; 
+        limit?: number;
+        semester?: string;
+    } = {}): Promise<{ data: AdvisorMember[]; meta: { currentPage: number; totalPages: number; totalItems: number } }> => {
+        const { 
+            academicYear = "2025/2026", 
+            class: classFilter, 
+            search, 
+            page = 1, 
+            limit = 10,
+            semester
+        } = params;
+
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            
+            // Base Mock Data
+            let mockMembers = [
+                { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", joinDate: "2024-07-15", attendance: 92 },
+                { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", joinDate: "2024-07-15", attendance: 88 },
+                { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", joinDate: "2024-07-20", attendance: 95 },
+                { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", joinDate: "2024-07-15", attendance: 78 },
+                { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", joinDate: "2024-08-01", attendance: 85 },
+                { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", joinDate: "2024-07-15", attendance: 45 },
+                { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", joinDate: "2024-07-20", attendance: 90 },
+                { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", joinDate: "2024-08-05", attendance: 82 },
+                { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", joinDate: "2024-07-15", attendance: 88 },
+                { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", joinDate: "2024-08-10", attendance: 91 },
+                { id: 11, nis: "2022011", name: "Irfan Hakim", class: "X B", joinDate: "2024-08-12", attendance: 87 },
+                { id: 12, nis: "2022012", name: "Julia Permata", class: "XI A", joinDate: "2024-07-18", attendance: 93 },
+                { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", joinDate: "2024-07-22", attendance: 76 },
+                { id: 14, nis: "2022014", name: "Luna Maya", class: "XII A", joinDate: "2024-07-15", attendance: 89 },
+                { id: 15, nis: "2022015", name: "Mario Bros", class: "X B", joinDate: "2024-08-15", attendance: 95 },
+            ];
+
+            // 0. Filter by Academic Year (Mock Logic)
+            if (academicYear !== "2025/2026") {
+                // Return empty or different data for past years to simulate history
+                // For demo purposes, we just return empty to show "No Data" effect or a few dummy alumni
+                mockMembers = [
+                    { id: 99, nis: "2021001", name: "Alumni Budi (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 100 }
+                ];
+            }
+
+            // 1. Filter by Search
+            if (search) {
+                const lowerSearch = search.toLowerCase();
+                mockMembers = mockMembers.filter(m => 
+                    m.name.toLowerCase().includes(lowerSearch) || 
+                    m.nis.includes(lowerSearch)
+                );
+            }
+
+            // 2. Filter by Class
+            if (classFilter && classFilter !== "all") {
+                mockMembers = mockMembers.filter(m => m.class === classFilter);
+            }
+
+            // 3. Pagination
+            const totalItems = mockMembers.length;
+            const totalPages = Math.ceil(totalItems / limit);
+            const startIndex = (page - 1) * limit;
+            const paginatedData = mockMembers.slice(startIndex, startIndex + limit);
+
+            return {
+                data: paginatedData,
+                meta: {
+                    currentPage: page,
+                    totalPages,
+                    totalItems
+                }
+            };
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const queryParams = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+            academic_year: academicYear,
+            ...(semester && semester !== "all" && { semester }), // Add semester param if not 'all'
+            ...(search && { search }),
+            ...(classFilter && classFilter !== "all" && { class: classFilter }),
+        });
+
+        const response = await fetch(`${ADVISOR_API_URL}/members?${queryParams.toString()}`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) await handleApiError(response);
+        const result = await response.json();
+        return result; // Assuming result structure is { success: true, data: [...], meta: { ... } }
+    },
+
+    getMemberDetail: async (id: number): Promise<AdvisorMember> => {
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+             await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+             
+             // Same mock data as getMembers (subset for consistency)
+             const mockMembers = [
+                { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", joinDate: "2024-07-15", attendance: 92 },
+                { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", joinDate: "2024-07-15", attendance: 88 },
+                { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", joinDate: "2024-07-20", attendance: 95 },
+                { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", joinDate: "2024-07-15", attendance: 78 },
+                { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", joinDate: "2024-08-01", attendance: 85 },
+                { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", joinDate: "2024-07-15", attendance: 45 },
+                { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", joinDate: "2024-07-20", attendance: 90 },
+                { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", joinDate: "2024-08-05", attendance: 82 },
+                { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", joinDate: "2024-07-15", attendance: 88 },
+                { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", joinDate: "2024-08-10", attendance: 91 },
+                { id: 11, nis: "2022011", name: "Irfan Hakim", class: "X B", joinDate: "2024-08-12", attendance: 87 },
+                { id: 12, nis: "2022012", name: "Julia Permata", class: "XI A", joinDate: "2024-07-18", attendance: 93 },
+                { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", joinDate: "2024-07-22", attendance: 76 },
+                { id: 14, nis: "2022014", name: "Luna Maya", class: "XII A", joinDate: "2024-07-15", attendance: 89 },
+                { id: 15, nis: "2022015", name: "Mario Bros", class: "X B", joinDate: "2024-08-15", attendance: 95 },
+            ];
+
+             const member = mockMembers.find(m => m.id === id);
+             if (!member) throw new Error("Member not found");
+             return member;
+         }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const response = await fetch(`${ADVISOR_API_URL}/members/${id}`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) await handleApiError(response);
+        const result = await response.json();
+        return result.data;
     },
 
     addMember: async (memberData: any) => {
-        // const response = await fetch(`${API_BASE_URL}/advisor/members`, {
-        //     method: "POST",
-        //     body: JSON.stringify(memberData)
-        // });
-        return { success: true };
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            return { success: true, data: { id: Math.floor(Math.random() * 1000), ...memberData } };
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const response = await fetch(`${ADVISOR_API_URL}/members`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(memberData),
+        });
+
+        if (!response.ok) await handleApiError(response);
+        return await response.json();
     },
 
     deleteMember: async (memberId: number) => {
-        // const response = await fetch(`${API_BASE_URL}/advisor/members/${memberId}`, {
-        //     method: "DELETE"
-        // });
-        return { success: true };
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            return { success: true };
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const response = await fetch(`${ADVISOR_API_URL}/members/${memberId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) await handleApiError(response);
+        return await response.json();
     },
 
-    // Attendance endpoints
-    getAttendanceHistory: async (filter: any) => {
-        // const response = await fetch(`${API_BASE_URL}/advisor/attendance/history`);
-        return [];
+    // ========================================
+    // ATTENDANCE MANAGEMENT
+    // ========================================
+
+    getAttendanceHistory: async (startDate?: string, endDate?: string): Promise<any[]> => {
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            return [
+                {
+                    id: 1,
+                    date: "2025-12-20",
+                    studentStats: { present: 42, total: 45, percentage: 93 },
+                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:00", status: "hadir" }
+                },
+                {
+                    id: 2,
+                    date: "2025-12-13",
+                    studentStats: { present: 40, total: 45, percentage: 89 },
+                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:30", status: "hadir" }
+                },
+                {
+                    id: 3,
+                    date: "2025-12-06",
+                    studentStats: { present: 38, total: 45, percentage: 84 },
+                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:00", status: "hadir" }
+                },
+                 {
+                    id: 4,
+                    date: "2025-11-29",
+                    studentStats: { present: 43, total: 45, percentage: 96 },
+                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "15:30", status: "hadir" }
+                },
+            ];
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+
+        const response = await fetch(`${ADVISOR_API_URL}/attendance?${params}`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) await handleApiError(response);
+        const result = await response.json();
+        return result.data;
     },
 
     submitAttendance: async (data: any) => {
-        // const response = await fetch(`${API_BASE_URL}/advisor/attendance`, {
-        //     method: "POST",
-        //     body: JSON.stringify(data)
-        // });
-        return { success: true };
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            console.log('[Mock] Attendance submitted:', data);
+            return { success: true, data: { id: 123 } };
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const response = await fetch(`${ADVISOR_API_URL}/attendance`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) await handleApiError(response);
+        return await response.json();
+    },
+
+    // ========================================
+    // PROFILE MANAGEMENT
+    // ========================================
+
+    /**
+     * GET /extracurricular-advisor/profile
+     * Fetch advisor profile data
+     */
+    getProfile: async (): Promise<AdvisorProfileData> => {
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            return mockAdvisorData;
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const response = await fetch(`${ADVISOR_API_URL}/profile`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            await handleApiError(response);
+        }
+
+        const result: ApiResponse<AdvisorProfileData> = await response.json();
+        return result.data;
+    },
+
+    /**
+     * PUT /extracurricular-advisor/profile
+     * Update advisor profile data
+     */
+    updateProfile: async (
+        data: UpdateAdvisorProfileRequest,
+    ): Promise<AdvisorProfileData> => {
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            console.log('[Mock] Profile updated:', data);
+            return { ...mockAdvisorData, ...data };
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const response = await fetch(`${ADVISOR_API_URL}/profile`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            await handleApiError(response);
+        }
+
+        const result: ApiResponse<AdvisorProfileData> = await response.json();
+        return result.data;
+    },
+
+    /**
+     * POST /extracurricular-advisor/profile/avatar
+     * Upload profile picture
+     */
+    uploadAvatar: async (
+        file: File,
+    ): Promise<AvatarUploadResponse> => {
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            const mockUrl = URL.createObjectURL(file);
+            console.log('[Mock] Avatar uploaded:', file.name);
+            return {
+                avatar: mockUrl,
+                profilePicture: mockUrl,
+                thumbnails: {
+                    small: mockUrl,
+                    medium: mockUrl,
+                },
+            };
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const token =
+            typeof window !== 'undefined'
+                ? localStorage.getItem('authToken')
+                : null;
+
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        const response = await fetch(`${ADVISOR_API_URL}/profile/avatar`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json',
+                // Note: Don't set Content-Type for FormData, browser will set it with boundary
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            await handleApiError(response);
+        }
+
+        const result: ApiResponse<AvatarUploadResponse> = await response.json();
+        return result.data;
+    },
+
+    /**
+     * PUT /extracurricular-advisor/profile/password
+     * Change user password
+     */
+    updatePassword: async (
+        data: UpdatePasswordRequest,
+    ): Promise<PasswordUpdateResponse> => {
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+
+            // Simulate password validation
+            if (data.currentPassword === 'wrong') {
+                const error = new Error('Kata sandi saat ini salah') as Error & { code: number };
+                error.code = 400;
+                throw error;
+            }
+
+            console.log('[Mock] Password updated');
+            return {
+                passwordLastChanged: new Date().toISOString(),
+            };
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const response = await fetch(`${ADVISOR_API_URL}/profile/password`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            await handleApiError(response);
+        }
+
+        const result: ApiResponse<PasswordUpdateResponse> = await response.json();
+        return result.data;
     }
 };

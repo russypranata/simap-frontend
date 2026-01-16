@@ -58,7 +58,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLoginClick }) => {
                     fill
                     className="object-cover object-center"
                     priority
-                    quality={85}
+                    quality={75}
                 />
                 <div className="absolute inset-0 bg-white/80"></div>
             </div>

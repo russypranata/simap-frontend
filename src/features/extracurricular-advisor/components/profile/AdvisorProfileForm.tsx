@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { AdvisorPhotoRequirementsModal } from "./AdvisorPhotoRequirementsModal";
 import {
     User,
     Mail,
@@ -16,11 +17,14 @@ import {
     X,
     Camera,
     IdCard,
-    Flag,
+    Star,
+    AtSign,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export interface AdvisorProfileData {
     name: string;
+    username: string;
     email: string;
     phone: string;
     role: string;
@@ -32,7 +36,7 @@ export interface AdvisorProfileData {
 
 interface AdvisorProfileFormProps {
     initialData: AdvisorProfileData;
-    onSave: (data: AdvisorProfileData) => void;
+    onSave: (data: AdvisorProfileData, file: File | null) => void;
     onCancel: () => void;
     isLoading?: boolean;
 }
@@ -44,6 +48,9 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
     isLoading = false,
 }) => {
     const [formData, setFormData] = useState<AdvisorProfileData>(initialData);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [showRequirements, setShowRequirements] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -53,7 +60,53 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
     };
 
     const handleSave = () => {
-        onSave(formData);
+        if (!formData.name || !formData.email || !formData.username) {
+            toast.error('Nama, Username, dan Email wajib diisi');
+            return;
+        }
+        onSave(formData, selectedFile);
+    };
+
+    const handleImageClick = () => {
+        setShowRequirements(true);
+    };
+
+    const handleProceedToUpload = () => {
+        setShowRequirements(false);
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // 1. Validasi Format
+        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!validTypes.includes(file.type)) {
+            toast.error("Format File Tidak Valid", {
+                description: 'Mohon unggah foto dengan format JPG atau PNG.',
+            });
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
+        // 2. Validasi Ukuran (Max 2MB)
+        const maxSize = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSize) {
+            toast.error("File Terlalu Besar", {
+                description: `Ukuran file ${(file.size / (1024 * 1024)).toFixed(1)}MB melebihi batas maksimal 2MB.`,
+            });
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
+        // Preview image
+        const objectUrl = URL.createObjectURL(file);
+        setFormData((prev) => ({ ...prev, profilePicture: objectUrl }));
+        setSelectedFile(file);
+        toast.success("Foto Berhasil Dipilih", {
+            description: 'Jangan lupa simpan perubahan profil Anda.',
+        });
     };
 
     const initials = formData.name
@@ -71,9 +124,9 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                         <User className="h-5 w-5" />
                     </div>
                     <div>
-                        <CardTitle>Informasi Profil</CardTitle>
+                        <CardTitle className="text-lg">Informasi Profil</CardTitle>
                         <p className="text-sm text-muted-foreground mt-0.5 font-normal">
-                            Perbarui detail identitas dan kontak
+                            Perbarui detail identitas dan kontak Anda
                         </p>
                     </div>
                 </div>
@@ -81,35 +134,53 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
             <CardContent>
                 <div className="space-y-6">
                     {/* Profile Picture */}
-                    <div className="flex flex-col items-center space-y-4">
+                    <div className="flex flex-col items-center space-y-4 pb-6 border-b">
                         <div className="relative group">
-                            <Avatar className="h-32 w-32 border-4 border-primary/10">
+                            <Avatar className="h-32 w-32 border-4 border-primary/10 transition-transform duration-300 group-hover:scale-105">
                                 <AvatarImage
                                     src={formData.profilePicture}
                                     alt={formData.name}
+                                    className="object-cover"
                                 />
                                 <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white">
                                     {initials}
                                 </AvatarFallback>
                             </Avatar>
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer">
+                            <div 
+                                onClick={handleImageClick}
+                                className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
+                            >
                                 <Camera className="h-8 w-8 text-white" />
                             </div>
                         </div>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                        />
                         <Button
                             variant="outline"
                             size="sm"
-                            className="text-blue-800 hover:text-blue-900 border-blue-800/30 hover:border-blue-800"
+                            onClick={handleImageClick}
+                            className="text-blue-800 hover:text-blue-900 border-transparent hover:border-transparent hover:bg-blue-50"
                         >
                             <Camera className="h-4 w-4 mr-2" />
                             Ubah Foto Profil
                         </Button>
                     </div>
 
+                    <AdvisorPhotoRequirementsModal
+                        open={showRequirements}
+                        onOpenChange={setShowRequirements}
+                        onProceed={handleProceedToUpload}
+                    />
+
                     {/* Form Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Nama Lengkap */}
-                        <div className="space-y-2 md:col-span-2">
+                        <div className="space-y-2">
                             <div className="flex items-center gap-2">
                                 <User className="h-4 w-4 text-primary" />
                                 <Label htmlFor="name" className="mb-0">
@@ -124,35 +195,34 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                                 onChange={handleInputChange}
                                 placeholder="Masukkan nama lengkap"
                                 required
-                                className=""
                             />
                         </div>
 
-                        {/* NIP */}
+                        {/* Username */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <IdCard className="h-4 w-4 text-primary" />
-                                <Label htmlFor="nip" className="mb-0">
-                                    NIP
+                                <AtSign className="h-4 w-4 text-primary" />
+                                <Label htmlFor="username" className="mb-0">
+                                    Username
                                     <span className="text-red-500 ml-1">*</span>
                                 </Label>
                             </div>
                             <Input
-                                id="nip"
-                                name="nip"
-                                value={formData.nip}
+                                id="username"
+                                name="username"
+                                value={formData.username}
                                 onChange={handleInputChange}
-                                placeholder="Masukkan NIP"
+                                placeholder="Masukkan username"
                                 required
-                                readOnly
-                                className=""
                             />
                         </div>
+
+
 
                         {/* Ekstrakurikuler */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <Flag className="h-4 w-4 text-primary" />
+                                <Star className="h-4 w-4 text-primary" />
                                 <Label htmlFor="extracurricular" className="mb-0">
                                     Ekstrakurikuler
                                 </Label>
@@ -162,8 +232,10 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                                 name="extracurricular"
                                 value={formData.extracurricular}
                                 readOnly
-                                className=""
+                                disabled
+                                className="bg-muted"
                             />
+                             <p className="text-xs text-muted-foreground">Ekstrakurikuler tidak dapat diubah</p>
                         </div>
 
                         {/* Email */}
@@ -183,7 +255,6 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                                 onChange={handleInputChange}
                                 placeholder="Masukkan email"
                                 required
-                                className=""
                             />
                         </div>
 
@@ -204,7 +275,6 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                                 onChange={handleInputChange}
                                 placeholder="Masukkan nomor telepon"
                                 required
-                                className=""
                             />
                         </div>
 
@@ -223,7 +293,6 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                                 onChange={handleInputChange}
                                 placeholder="Masukkan alamat lengkap"
                                 rows={3}
-                                className=""
                             />
                         </div>
                     </div>

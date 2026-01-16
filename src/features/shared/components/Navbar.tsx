@@ -30,6 +30,7 @@ import { User, LogOut, Calendar } from 'lucide-react';
 import { formatDate, getDayName } from '@/features/shared/utils/dateFormatter';
 import { getStudentProfile } from '@/features/student/services/studentProfileService';
 import { StudentProfileData } from '@/features/student/data/mockStudentData';
+import { mockAdvisorData } from '@/features/extracurricular-advisor/data/mockAdvisorData';
 
 interface NavbarProps {
     showNotifications?: boolean;
@@ -40,18 +41,23 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
     const { role, isAuthenticated, logout } = useRole();
     const [studentProfile, setStudentProfile] =
         React.useState<StudentProfileData | null>(null);
+    const [advisorProfile, setAdvisorProfile] = React.useState<typeof mockAdvisorData | null>(null);
 
     React.useEffect(() => {
-        if (isAuthenticated && role === 'siswa') {
-            const fetchProfile = async () => {
-                try {
-                    const data = await getStudentProfile();
-                    setStudentProfile(data);
-                } catch (error) {
-                    console.error('Failed to fetch student profile for navbar', error);
-                }
-            };
-            fetchProfile();
+        if (isAuthenticated) {
+             if (role === 'siswa') {
+                const fetchProfile = async () => {
+                    try {
+                        const data = await getStudentProfile();
+                        setStudentProfile(data);
+                    } catch (error) {
+                        console.error('Failed to fetch student profile for navbar', error);
+                    }
+                };
+                fetchProfile();
+            } else if (role === 'tutor_ekskul') {
+                setAdvisorProfile(mockAdvisorData);
+            }
         }
     }, [isAuthenticated, role]);
 
@@ -138,19 +144,19 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                         <Avatar className="h-9 w-9">
                                             <AvatarImage
                                                 src={
-                                                    studentProfile?.profilePicture ||
+                                                    (role === 'tutor_ekskul' ? advisorProfile?.profilePicture : studentProfile?.profilePicture) ||
                                                     undefined
                                                 }
                                                 alt={
-                                                    studentProfile?.name ||
+                                                    (role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name) ||
                                                     'User'
                                                 }
                                                 className="object-cover"
                                             />
                                             <AvatarFallback className="bg-blue-800 text-white">
-                                                {studentProfile?.name
+                                                {(role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name)
                                                     ? getInitials(
-                                                          studentProfile.name,
+                                                          role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name,
                                                       )
                                                     : getRoleDisplayName(
                                                           role,
@@ -170,15 +176,15 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                                 <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                                                     <AvatarImage
                                                         src={
-                                                            studentProfile?.profilePicture ||
+                                                            (role === 'tutor_ekskul' ? advisorProfile?.profilePicture : studentProfile?.profilePicture) ||
                                                             undefined
                                                         }
                                                         alt="Avatar"
                                                     />
                                                     <AvatarFallback className="bg-blue-800 text-white font-bold">
-                                                        {studentProfile?.name
+                                                        {(role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name)
                                                             ? getInitials(
-                                                                  studentProfile.name,
+                                                                  role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name,
                                                               )
                                                             : getRoleDisplayName(
                                                                   role,
@@ -189,7 +195,7 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                             </div>
                                             <div className="flex flex-col space-y-0.5">
                                                 <p className="text-sm font-bold text-foreground">
-                                                    {studentProfile?.name ||
+                                                    {(role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name) ||
                                                         'Pengguna'}
                                                 </p>
                                                 <div className="flex items-center">

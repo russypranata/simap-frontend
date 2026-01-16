@@ -58,178 +58,8 @@ import { formatDate } from "@/features/shared/utils/dateFormatter";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-// Mock Data
-const mockMembers = [
-    { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A" },
-    { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A" },
-    { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B" },
-    { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B" },
-    { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A" },
-    { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A" },
-    { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A" },
-    { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B" },
-    { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B" },
-    { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A" },
-    { id: 11, nis: "2022011", name: "Indra Gunawan", class: "XII A" },
-    { id: 12, nis: "2022012", name: "Joko Widodo", class: "XI A" },
-    { id: 13, nis: "2022013", name: "Kartika Sari", class: "XI B" },
-    { id: 14, nis: "2022014", name: "Lukman Hakim", class: "XII B" },
-    { id: 15, nis: "2022015", name: "Maya Puspita", class: "X A" },
-    { id: 16, nis: "2022016", name: "Nanda Pratama", class: "XII A" },
-    { id: 17, nis: "2022017", name: "Olivia Putri", class: "XI A" },
-    { id: 18, nis: "2022018", name: "Putra Mahendra", class: "XI B" },
-    { id: 19, nis: "2022019", name: "Qori Azzahra", class: "XII B" },
-    { id: 20, nis: "2022020", name: "Reza Pahlevi", class: "X A" },
-    { id: 21, nis: "2022021", name: "Sinta Dewi", class: "XII A" },
-    { id: 22, nis: "2022022", name: "Taufik Hidayat", class: "XI A" },
-    { id: 23, nis: "2022023", name: "Umar Bakri", class: "XI B" },
-    { id: 24, nis: "2022024", name: "Vina Melati", class: "XII B" },
-    { id: 25, nis: "2022025", name: "Wahyu Nugroho", class: "X A" },
-    { id: 26, nis: "2022026", name: "Xena Pramesti", class: "XII A" },
-    { id: 27, nis: "2022027", name: "Yudi Setiawan", class: "XI A" },
-    { id: 28, nis: "2022028", name: "Zahra Amelia", class: "XI B" },
-    { id: 29, nis: "2022029", name: "Arif Rahman", class: "XII B" },
-    { id: 30, nis: "2022030", name: "Bella Safira", class: "X A" },
-    { id: 31, nis: "2022031", name: "Citra Kirana", class: "XII A" },
-    { id: 32, nis: "2022032", name: "Dimas Aditya", class: "XI A" },
-    { id: 33, nis: "2022033", name: "Elsa Permata", class: "XI B" },
-    { id: 34, nis: "2022034", name: "Fajar Maulana", class: "XII B" },
-    { id: 35, nis: "2022035", name: "Gita Savitri", class: "X A" },
-    { id: 36, nis: "2022036", name: "Hendra Wijaya", class: "XII A" },
-    { id: 37, nis: "2022037", name: "Intan Permatasari", class: "XI A" },
-    { id: 38, nis: "2022038", name: "Jihan Aulia", class: "XI B" },
-    { id: 39, nis: "2022039", name: "Kevin Aprilio", class: "XII B" },
-    { id: 40, nis: "2022040", name: "Linda Maharani", class: "X A" },
-    { id: 41, nis: "2022041", name: "Muhammad Rizki", class: "XII A" },
-    { id: 42, nis: "2022042", name: "Nabila Syakira", class: "XI A" },
-    { id: 43, nis: "2022043", name: "Omar Sharif", class: "XI B" },
-    { id: 44, nis: "2022044", name: "Putri Ayu", class: "XII B" },
-    { id: 45, nis: "2022045", name: "Qonita Rahmawati", class: "X A" },
-];
-
-const unifiedAttendanceHistory = [
-    {
-        id: 1,
-        date: "2025-12-20",
-        studentStats: {
-            present: 42,
-            total: 45,
-            percentage: 93,
-        },
-        advisorStats: {
-            tutorName: "Ahmad Fauzi, S.Pd",
-            startTime: "14:00",
-            endTime: "16:00",
-            status: "hadir",
-        }
-    },
-    {
-        id: 2,
-        date: "2025-12-13",
-        studentStats: {
-            present: 40,
-            total: 45,
-            percentage: 89,
-        },
-        advisorStats: {
-            tutorName: "Ahmad Fauzi, S.Pd",
-            startTime: "14:00",
-            endTime: "16:30",
-            status: "hadir",
-        }
-    },
-    {
-        id: 3,
-        date: "2025-12-06",
-        studentStats: {
-            present: 38,
-            total: 45,
-            percentage: 84,
-        },
-        advisorStats: {
-            tutorName: "Ahmad Fauzi, S.Pd",
-            startTime: "14:00",
-            endTime: "16:00",
-            status: "hadir",
-        }
-    },
-    {
-        id: 4,
-        date: "2025-11-29",
-        studentStats: {
-            present: 43,
-            total: 45,
-            percentage: 96,
-        },
-        advisorStats: {
-            tutorName: "Ahmad Fauzi, S.Pd",
-            startTime: "14:00",
-            endTime: "15:30",
-            status: "hadir",
-        }
-    },
-    {
-        id: 5,
-        date: "2025-11-22",
-        studentStats: {
-            present: 41,
-            total: 45,
-            percentage: 91,
-        },
-        advisorStats: {
-            tutorName: "Ahmad Fauzi, S.Pd",
-            startTime: "14:00",
-            endTime: "16:00",
-            status: "hadir",
-        }
-    },
-    {
-        id: 6,
-        date: "2025-11-15",
-        studentStats: {
-            present: 44,
-            total: 45,
-            percentage: 98,
-        },
-        advisorStats: {
-            tutorName: "Ahmad Fauzi, S.Pd",
-            startTime: "08:00",
-            endTime: "17:00",
-            status: "hadir",
-        }
-    },
-    {
-        id: 7,
-        date: "2025-11-08",
-        studentStats: {
-            present: 39,
-            total: 45,
-            percentage: 87,
-        },
-        advisorStats: {
-            tutorName: "Ahmad Fauzi, S.Pd",
-            startTime: "14:00",
-            endTime: "16:00",
-            status: "hadir",
-        }
-    },
-    {
-        id: 8,
-        date: "2025-11-01",
-        studentStats: {
-            present: 45,
-            total: 45,
-            percentage: 100,
-        },
-        advisorStats: {
-            tutorName: "Ahmad Fauzi, S.Pd",
-            startTime: "07:00",
-            endTime: "18:00",
-            status: "hadir",
-        }
-    },
-];
-
+import { advisorService, AdvisorMember, AttendanceHistoryEntry, CreateAttendanceRequest } from "../services/advisorService";
+import { AttendanceSkeleton } from "../components/AdvisorSkeletons";
 
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa";
 
@@ -240,7 +70,15 @@ interface AttendanceRecord {
 }
 
 export const ExtracurricularAttendance: React.FC = () => {
+    const [members, setMembers] = useState<AdvisorMember[]>([]);
+    const [history, setHistory] = useState<AttendanceHistoryEntry[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
+
+    const [tutorName, setTutorName] = useState("");
+    
+    // Attendance Tab State
     const [selectedDate, setSelectedDate] = useState(() => {
         const today = new Date();
         const year = today.getFullYear();
@@ -248,33 +86,23 @@ export const ExtracurricularAttendance: React.FC = () => {
         const day = String(today.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
     });
-    const [attendanceRecords, setAttendanceRecords] = useState<
-        Map<number, AttendanceRecord>
-    >(new Map());
+    const [startTime, setStartTime] = useState("");
+    const [endTime, setEndTime] = useState("");
+    const [attendanceRecords, setAttendanceRecords] = useState<Map<number, AttendanceRecord>>(new Map());
+    
+    // UI State
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState<"all" | AttendanceStatus>("all");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [isRefreshing, setIsRefreshing] = useState(false);
-
-    // Advisor Attendance State
-    const [tutorName, setTutorName] = useState("Ahmad Fauzi, S.Pd"); // Mock: logged-in tutor name
-    const [startTime, setStartTime] = useState("");
-    const [endTime, setEndTime] = useState("");
-
-    // Active tab state - read from URL query parameter
+    
+    // Tabs & History State
     const searchParams = useSearchParams();
     const tabFromUrl = searchParams.get("tab");
     const [activeTab, setActiveTab] = useState(tabFromUrl === "history" ? "history" : "attendance");
-
-    // Update active tab when URL changes
-    useEffect(() => {
-        if (tabFromUrl === "history") {
-            setActiveTab("history");
-        }
-    }, [tabFromUrl]);
-
-    // History Filter State
+    
+    // History Filters
     const [historyAcademicYear, setHistoryAcademicYear] = useState("2025/2026");
     const [historySemester, setHistorySemester] = useState("Ganjil");
     const [historySearchTerm, setHistorySearchTerm] = useState("");
@@ -307,13 +135,58 @@ export const ExtracurricularAttendance: React.FC = () => {
 
     const handleStatusChange = (studentId: number, status: AttendanceStatus) => {
         setAttendanceRecords((prev) => {
-            const newMap = new Map(prev);
-            newMap.set(studentId, { studentId, status });
-            return newMap;
+             const newMap = new Map(prev);
+             newMap.set(studentId, { studentId, status });
+             return newMap;
         });
     };
 
-    const handleSaveAttendance = () => {
+    // Initial load
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            try {
+                const [membersData, profileData] = await Promise.all([
+                    advisorService.getMembers(),
+                    advisorService.getProfile()
+                ]);
+                setMembers(membersData);
+                setTutorName(profileData.name);
+                
+                // Also fetch history to populate stats
+                const historyData = await advisorService.getAttendanceHistory();
+                setHistory(historyData);
+                
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+                toast.error("Gagal memuat data");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchInitialData();
+    }, []);
+
+    // Fetch history when tab changes
+    useEffect(() => {
+        if (activeTab === "history") {
+            const fetchHistory = async () => {
+                setIsLoading(true);
+                try {
+                    const data = await advisorService.getAttendanceHistory();
+                    setHistory(data);
+                } catch (error) {
+                    console.error("Failed to fetch history:", error);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            fetchHistory();
+        }
+    }, [activeTab]);
+
+
+    const handleSaveAttendance = async () => {
         // 1. Validate Date
         if (!selectedDate) {
             toast.error("Tanggal belum diisi", {
@@ -335,7 +208,7 @@ export const ExtracurricularAttendance: React.FC = () => {
         }
 
         // 3. Validate Student Attendance (Must fill ALL)
-        const totalMembers = mockMembers.length;
+        const totalMembers = members.length;
         const filledRecords = attendanceRecords.size;
 
         if (filledRecords < totalMembers) {
@@ -348,38 +221,72 @@ export const ExtracurricularAttendance: React.FC = () => {
             return;
         }
 
-        const presentCount = Array.from(attendanceRecords.values()).filter(
-            (r) => r.status === "hadir"
-        ).length;
+        setIsSubmitting(true);
+        try {
+            const attendanceList = Array.from(attendanceRecords.entries()).map(([studentId, record]) => ({
+                studentId,
+                status: record.status,
+                note: record.note
+            }));
 
-        // Success Toast matching Teacher Role style (Standard Sonner)
-        // Using description to show details cleanly
-        toast.success("Presensi Berhasil Disimpan", {
-            description: `Tanggal: ${formatDate(selectedDate, "dd MMMM yyyy")} • Hadir: ${presentCount}/${totalMembers} • Waktu: ${startTime}-${endTime}`,
-            duration: 5000,
-            icon: <CheckCircle className="h-5 w-5 !text-green-600" />,
-            className: "!bg-green-50 !border-green-200 !text-green-800",
-        });
+            const payload: CreateAttendanceRequest = {
+                date: selectedDate,
+                startTime,
+                endTime,
+                topic: "Kegiatan Rutin", // Should probably add this field to UI later
+                students: attendanceList
+            };
 
-        // Reset form
-        setAttendanceRecords(new Map());
-        setStartTime("");
-        setEndTime("");
+            await advisorService.submitAttendance(payload);
+
+            const presentCount = attendanceList.filter(r => r.status === "hadir").length;
+
+            toast.success("Presensi Berhasil Disimpan", {
+                description: `Tanggal: ${formatDate(new Date(selectedDate), "dd MMMM yyyy")} • Hadir: ${presentCount}/${totalMembers} • Waktu: ${startTime}-${endTime}`,
+                duration: 5000,
+                icon: <CheckCircle className="h-5 w-5 !text-green-600" />,
+                className: "!bg-green-50 !border-green-200 !text-green-800",
+            });
+
+            // Refresh history and reset form
+            const newHistory = await advisorService.getAttendanceHistory();
+            setHistory(newHistory);
+            setAttendanceRecords(new Map());
+             // Keep date/time for convenience or reset? Let's keep date, reset time maybe?
+            setStartTime("");
+            setEndTime("");
+
+        } catch (error) {
+            console.error("Failed to submit attendance:", error);
+            toast.error("Gagal menyimpan presensi");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleRefresh = () => {
+    const handleRefresh = async () => {
         setIsRefreshing(true);
-        setAttendanceRecords(new Map());
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, "0");
-        const day = String(today.getDate()).padStart(2, "0");
-        setSelectedDate(`${year}-${month}-${day}`);
+        try {
+            const [membersData, historyData] = await Promise.all([
+                 advisorService.getMembers(),
+                 advisorService.getAttendanceHistory()
+            ]);
+            setMembers(membersData);
+            setHistory(historyData);
+            setAttendanceRecords(new Map());
+            
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, "0");
+            const day = String(today.getDate()).padStart(2, "0");
+            setSelectedDate(`${year}-${month}-${day}`);
 
-        setTimeout(() => {
-            setIsRefreshing(false);
             toast.success("Halaman presensi telah di-refresh!");
-        }, 500);
+        } catch (error) {
+             toast.error("Gagal merefresh data");
+        } finally {
+            setIsRefreshing(false);
+        }
     };
 
 
@@ -415,7 +322,7 @@ export const ExtracurricularAttendance: React.FC = () => {
 
     // Filter members based on search and status
     const filteredMembers = React.useMemo(() => {
-        return mockMembers.filter((member) => {
+        return members.filter((member) => {
             const matchesSearch =
                 member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 member.nis.includes(searchTerm) ||
@@ -427,7 +334,7 @@ export const ExtracurricularAttendance: React.FC = () => {
 
             return matchesSearch && matchesStatus;
         });
-    }, [searchTerm, statusFilter, attendanceRecords]);
+    }, [searchTerm, statusFilter, attendanceRecords, members]);
 
     // Paginate filtered members
     const paginatedMembers = React.useMemo(() => {
@@ -439,7 +346,7 @@ export const ExtracurricularAttendance: React.FC = () => {
     const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
 
     const filteredHistory = React.useMemo(() => {
-        return unifiedAttendanceHistory.filter((record) => {
+        return history.filter((record) => {
             // Filter by date range
             let matchesDateRange = true;
             if (historyDateRange.from && historyDateRange.to) {
@@ -459,15 +366,26 @@ export const ExtracurricularAttendance: React.FC = () => {
 
             return matchesDateRange;
         });
-    }, [historyDateRange]);
+    }, [historyDateRange, history]);
+
+    // Latest Stats derivation
+    const latestHistory = history[0];
+    const latestPresent = latestHistory ? latestHistory.studentStats.present : 0;
+    const latestPercentage = latestHistory ? latestHistory.studentStats.percentage : 0;
 
     const presentCount = Array.from(attendanceRecords.values()).filter(
         (r) => r.status === "hadir"
     ).length;
-    const percentage =
-        mockMembers.length > 0
-            ? Math.round((presentCount / mockMembers.length) * 100)
+    
+    // For current session stats (badge in header) which uses mockMembers previously
+    const currentSessionPercentage =
+        members.length > 0
+            ? Math.round((presentCount / members.length) * 100)
             : 0;
+
+    if (isLoading) {
+        return <AttendanceSkeleton />;
+    }
 
     return (
         <div className="space-y-6">
@@ -544,7 +462,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                             <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
                                 <Users className="h-5 w-5 text-blue-600" />
                             </div>
-                            <p className="text-2xl font-bold text-blue-600">{mockMembers.length}</p>
+                            <p className="text-2xl font-bold text-blue-600">{members.length}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Anggota</p>
                         </div>
 
@@ -553,7 +471,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                             <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
                                 <CheckCircle className="h-5 w-5 text-green-600" />
                             </div>
-                            <p className="text-2xl font-bold text-green-600">{unifiedAttendanceHistory[0].studentStats.present}</p>
+                            <p className="text-2xl font-bold text-green-600">{latestPresent}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Hadir Terakhir</p>
                         </div>
 
@@ -561,21 +479,21 @@ export const ExtracurricularAttendance: React.FC = () => {
                         <div className="p-4 text-center">
                             <div className={cn(
                                 "inline-flex p-2.5 rounded-full mb-2",
-                                unifiedAttendanceHistory[0].studentStats.percentage >= 90 ? "bg-green-100" :
-                                    unifiedAttendanceHistory[0].studentStats.percentage >= 75 ? "bg-yellow-100" : "bg-red-100"
+                                latestPercentage >= 90 ? "bg-green-100" :
+                                    latestPercentage >= 75 ? "bg-yellow-100" : "bg-red-100"
                             )}>
                                 <TrendingUp className={cn(
                                     "h-5 w-5",
-                                    unifiedAttendanceHistory[0].studentStats.percentage >= 90 ? "text-green-600" :
-                                        unifiedAttendanceHistory[0].studentStats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
+                                    latestPercentage >= 90 ? "text-green-600" :
+                                        latestPercentage >= 75 ? "text-yellow-600" : "text-red-600"
                                 )} />
                             </div>
                             <p className={cn(
                                 "text-2xl font-bold",
-                                unifiedAttendanceHistory[0].studentStats.percentage >= 90 ? "text-green-600" :
-                                    unifiedAttendanceHistory[0].studentStats.percentage >= 75 ? "text-yellow-600" : "text-red-600"
+                                latestPercentage >= 90 ? "text-green-600" :
+                                    latestPercentage >= 75 ? "text-yellow-600" : "text-red-600"
                             )}>
-                                {unifiedAttendanceHistory[0].studentStats.percentage}%
+                                {latestPercentage}%
                             </p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Rata-rata</p>
                         </div>
@@ -772,21 +690,21 @@ export const ExtracurricularAttendance: React.FC = () => {
                                         <span className="text-sm font-medium text-foreground">
                                             <span className="text-green-600 font-semibold">{presentCount}</span>
                                             <span className="text-muted-foreground mx-1">/</span>
-                                            <span className="font-semibold">{mockMembers.length}</span>
+                                            <span className="font-semibold">{members.length}</span>
                                             <span className="text-muted-foreground ml-1">hadir</span>
                                         </span>
                                     </div>
                                     <div className="h-4 w-[1px] bg-border" />
                                     <Badge
                                         variant="outline"
-                                        className={`font-semibold ${percentage >= 90
+                                        className={`font-semibold ${currentSessionPercentage >= 90
                                             ? 'bg-green-50 text-green-700 border-green-200'
-                                            : percentage >= 75
+                                            : currentSessionPercentage >= 75
                                                 ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
                                                 : 'bg-red-50 text-red-700 border-red-200'
                                             }`}
                                     >
-                                        {percentage}%
+                                        {currentSessionPercentage}%
                                     </Badge>
                                 </div>
                             </div>
@@ -850,7 +768,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                             <SelectItem value="25">25</SelectItem>
                                             <SelectItem value="50">50</SelectItem>
                                             <SelectItem value="100">100</SelectItem>
-                                            <SelectItem value={mockMembers.length.toString()}>Semua</SelectItem>
+                                            <SelectItem value={members.length.toString()}>Semua</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>

@@ -17,33 +17,52 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { advisorService } from "../services/advisorService";
+import { DashboardSkeleton } from "../components/AdvisorSkeletons";
 
-// Mock data for dashboard
-const mockDashboardData = {
-    extracurricular: {
-        name: "Pramuka",
-        advisor: "Ahmad Fauzi, S.Pd",
-        totalMembers: 45,
-        schedule: "Jumat, 14:00 - 16:00",
-    },
-    attendance: {
-        lastAttendancePresent: 42,
-        averageAttendance: 91,
-        totalMeetings: 12,
-    },
-    upcomingSchedules: [
-        { id: 1, day: "Jumat", date: "26 Desember 2025", time: "14:00 - 16:00" },
-        { id: 2, day: "Jumat", date: "09 Januari 2026", time: "14:00 - 16:00" },
-    ],
-    recentActivities: [
-        { id: 1, day: "Jumat", date: "20 Des 2025", time: "14:00 - 16:00", attendance: 93 },
-        { id: 2, day: "Jumat", date: "13 Des 2025", time: "14:00 - 16:30", attendance: 89 },
-        { id: 3, day: "Jumat", date: "06 Des 2025", time: "14:00 - 16:00", attendance: 84 },
-    ],
-};
+
 
 export const ExtracurricularDashboard: React.FC = () => {
     const router = useRouter();
+    const [stats, setStats] = React.useState({
+        totalMembers: 0,
+        lastAttendancePresent: 0,
+        averageAttendance: 0,
+        totalMeetings: 0,
+    });
+    const [upcomingSchedules, setUpcomingSchedules] = React.useState<any[]>([]);
+    const [recentActivities, setRecentActivities] = React.useState<any[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [advisorName, setAdvisorName] = React.useState("Tutor Ekskul");
+
+    // Fetch initial data
+    React.useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const [statsData, scheduleData, activitiesData, profileData] = await Promise.all([
+                    advisorService.getDashboardStats(),
+                    advisorService.getUpcomingSchedule(),
+                    advisorService.getRecentActivities(),
+                    advisorService.getProfile() // To get name and extracurricular info if needed
+                ]);
+
+                setStats(statsData);
+                setUpcomingSchedules(scheduleData);
+                setRecentActivities(activitiesData);
+                setAdvisorName(profileData.name);
+            } catch (error) {
+                console.error("Failed to fetch dashboard data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
+
+    if (isLoading) {
+        return <DashboardSkeleton />;
+    }
 
     return (
         <div className="space-y-6">
@@ -60,7 +79,7 @@ export const ExtracurricularDashboard: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Selamat datang, {mockDashboardData.extracurricular.advisor}
+                        Selamat datang, {advisorName}
                     </p>
                     <div className="flex items-center gap-3 mt-4">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
@@ -99,14 +118,14 @@ export const ExtracurricularDashboard: React.FC = () => {
                                 <Award className="h-7 w-7 text-white" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold text-white">{mockDashboardData.extracurricular.name}</h2>
-                                <p className="text-blue-100 text-sm">Tutor: {mockDashboardData.extracurricular.advisor}</p>
+                                <h2 className="text-xl font-bold text-white">Pramuka</h2>
+                                <p className="text-blue-100 text-sm">Tutor: {advisorName}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
                             <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
                                 <Clock className="h-3.5 w-3.5 mr-1.5" />
-                                {mockDashboardData.extracurricular.schedule}
+                                Jumat, 14:00 - 16:00
                             </Badge>
                         </div>
                     </div>
@@ -120,7 +139,7 @@ export const ExtracurricularDashboard: React.FC = () => {
                             <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
                                 <Users className="h-5 w-5 text-blue-800" />
                             </div>
-                            <p className="text-2xl font-bold text-blue-800">{mockDashboardData.extracurricular.totalMembers}</p>
+                            <p className="text-2xl font-bold text-blue-800">{stats.totalMembers}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Anggota</p>
                         </div>
 
@@ -129,7 +148,7 @@ export const ExtracurricularDashboard: React.FC = () => {
                             <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
                                 <CheckCircle className="h-5 w-5 text-green-600" />
                             </div>
-                            <p className="text-2xl font-bold text-green-600">{mockDashboardData.attendance.lastAttendancePresent}</p>
+                            <p className="text-2xl font-bold text-green-600">{stats.lastAttendancePresent}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Hadir Terakhir</p>
                         </div>
 
@@ -137,20 +156,20 @@ export const ExtracurricularDashboard: React.FC = () => {
                         <div className="p-3 text-center">
                             <div className={cn(
                                 "inline-flex p-2.5 rounded-full mb-2",
-                                mockDashboardData.attendance.averageAttendance >= 90 ? "bg-green-100" :
-                                    mockDashboardData.attendance.averageAttendance >= 75 ? "bg-yellow-100" : "bg-red-100"
+                                stats.averageAttendance >= 90 ? "bg-green-100" :
+                                    stats.averageAttendance >= 75 ? "bg-yellow-100" : "bg-red-100"
                             )}>
                                 <TrendingUp className={cn(
                                     "h-5 w-5",
-                                    mockDashboardData.attendance.averageAttendance >= 90 ? "text-green-600" :
-                                        mockDashboardData.attendance.averageAttendance >= 75 ? "text-yellow-600" : "text-red-600"
+                                    stats.averageAttendance >= 90 ? "text-green-600" :
+                                        stats.averageAttendance >= 75 ? "text-yellow-600" : "text-red-600"
                                 )} />
                             </div>
                             <p className={cn(
                                 "text-2xl font-bold",
-                                mockDashboardData.attendance.averageAttendance >= 90 ? "text-green-600" :
-                                    mockDashboardData.attendance.averageAttendance >= 75 ? "text-yellow-600" : "text-red-600"
-                            )}>{mockDashboardData.attendance.averageAttendance}%</p>
+                                stats.averageAttendance >= 90 ? "text-green-600" :
+                                    stats.averageAttendance >= 75 ? "text-yellow-600" : "text-red-600"
+                            )}>{stats.averageAttendance}%</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Kehadiran</p>
                         </div>
 
@@ -159,7 +178,7 @@ export const ExtracurricularDashboard: React.FC = () => {
                             <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
                                 <Calendar className="h-5 w-5 text-purple-600" />
                             </div>
-                            <p className="text-2xl font-bold text-purple-600">{mockDashboardData.attendance.totalMeetings}</p>
+                            <p className="text-2xl font-bold text-purple-600">{stats.totalMeetings}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Pertemuan</p>
                         </div>
                     </div>
@@ -199,25 +218,27 @@ export const ExtracurricularDashboard: React.FC = () => {
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-xs text-blue-800 font-medium">Jadwal Rutin</p>
-                                        <p className="font-semibold text-blue-900">{mockDashboardData.extracurricular.schedule}</p>
+                                        <p className="font-semibold text-blue-900">Jumat, 14:00 - 16:00</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Jadwal Berikutnya */}
-                            <div className="relative pl-6">
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-800 -ml-1" />
-                                <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-50 border border-blue-800/20">
-                                    <div className="p-2.5 rounded-full bg-blue-100">
-                                        <Calendar className="h-5 w-5 text-blue-800" />
+                            {upcomingSchedules.length > 0 && (
+                                <div className="relative pl-6">
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-800 -ml-1" />
+                                    <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-50 border border-blue-800/20">
+                                        <div className="p-2.5 rounded-full bg-blue-100">
+                                            <Calendar className="h-5 w-5 text-blue-800" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs text-blue-800 font-medium">Pertemuan Berikutnya</p>
+                                            <p className="font-semibold text-blue-900">{upcomingSchedules[0].day}, {upcomingSchedules[0].date}</p>
+                                        </div>
+                                        <p className="text-sm font-medium text-blue-900">{upcomingSchedules[0].time}</p>
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="text-xs text-blue-800 font-medium">Pertemuan Berikutnya</p>
-                                        <p className="font-semibold text-blue-900">{mockDashboardData.upcomingSchedules[0].day}, {mockDashboardData.upcomingSchedules[0].date}</p>
-                                    </div>
-                                    <p className="text-sm font-medium text-blue-900">{mockDashboardData.upcomingSchedules[0].time}</p>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
@@ -252,7 +273,7 @@ export const ExtracurricularDashboard: React.FC = () => {
                     </CardHeader>
                     <CardContent className="pt-0">
                         <div className="space-y-2">
-                            {mockDashboardData.recentActivities.map((activity) => (
+                            {recentActivities.map((activity) => (
                                 <div
                                     key={activity.id}
                                     onClick={() => router.push(`/extracurricular-advisor/attendance/${activity.id}`)}
