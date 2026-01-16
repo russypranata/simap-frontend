@@ -223,6 +223,7 @@ Mengambil daftar anggota dengan filter.
 - **Endpoint**: `GET /extracurricular-advisor/members`
 - **Query Params**:
   - `academicYear` (2025/2026)
+  - `semester` (Filter semester: "1" for Ganjil, "2" for Genap)
   - `class` (Filter kelas, e.g., "X A")
   - `search` (Pencarian nama/NIS)
   - `page` (Pagination)

@@ -226,13 +226,13 @@ export const ExtracurricularMembers: React.FC = () => {
                             <Select value={selectedSemester} onValueChange={setSelectedSemester}>
                                 <SelectTrigger className="h-8 border-none shadow-none bg-transparent px-2 text-sm font-medium text-blue-800 hover:text-blue-900 w-auto gap-2">
                                     <span>
-                                        {selectedSemester === "1" ? "Semester Ganjil" : selectedSemester === "2" ? "Semester Genap" : "Semua Semester"}
+                                        {selectedSemester === "1" ? "Semester Ganjil" : selectedSemester === "2" ? "Semester Genap" : "1 Tahun Penuh"}
                                     </span>
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="1">Semester Ganjil (Aktif)</SelectItem>
                                     <SelectItem value="2">Semester Genap</SelectItem>
-                                    <SelectItem value="all">Semua Semester</SelectItem>
+                                    <SelectItem value="all">1 Tahun Penuh</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

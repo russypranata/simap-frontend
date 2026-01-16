@@ -300,6 +300,15 @@ export const advisorService = {
                 ];
             }
 
+            // 0.5 Filter by Semester (Mock Logic - Simulate different attendance)
+            if (semester && semester === "2") {
+                // Adjust attendance slightly to show difference between semesters
+                mockMembers = mockMembers.map(m => ({
+                    ...m,
+                    attendance: Math.max(0, m.attendance - 10) // Simulate generic drop in semester 2 for demo
+                }));
+            }
+
             // 1. Filter by Search
             if (search) {
                 const lowerSearch = search.toLowerCase();
