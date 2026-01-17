@@ -211,7 +211,7 @@ export const ExtracurricularMembers: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Lihat daftar anggota ekstrakurikuler Pramuka
+                        Menampilkan anggota ekstrakurikuler Pramuka pada Tahun Ajaran aktif
                     </p>
                     <div className="flex items-center gap-3 mt-4">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
@@ -244,7 +244,7 @@ export const ExtracurricularMembers: React.FC = () => {
                         </div>
                         <div>
                             <h3 className="font-bold text-lg text-white">Ringkasan Data</h3>
-                            <p className="text-blue-100 text-sm">Ekstrakurikuler Pramuka</p>
+                            <p className="text-blue-100 text-sm">Rekap keanggotaan dan kehadiran pada Tahun Ajaran berjalan</p>
                         </div>
                     </div>
                 </div>
@@ -317,7 +317,7 @@ export const ExtracurricularMembers: React.FC = () => {
                             </div>
                             <div>
                                 <CardTitle className="text-lg font-semibold">Daftar Anggota Terdaftar</CardTitle>
-                                <CardDescription>Anggota aktif ekstrakurikuler Pramuka</CardDescription>
+                                <CardDescription>Anggota aktif ekstrakurikuler Pramuka pada Tahun Ajaran berjalan</CardDescription>
                             </div>
                         </div>
                         <Badge className="bg-blue-100 text-blue-800 border-blue-200">
@@ -370,19 +370,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                     </th>
                                     <th className="text-left p-4 font-medium text-sm w-36">
                                         <div className="flex items-center gap-1.5">
-                                            Kelas (Saat Bergabung)
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger>
-                                                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p className="max-w-xs">
-                                                            Menunjukkan kelas siswa pada saat pertama bergabung di periode ini, bukan kelas saat ini.
-                                                        </p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
+                                            Kelas
                                         </div>
                                     </th>
                                     <th className="text-left p-4 font-medium text-sm w-36">Tgl Bergabung</th>
@@ -432,12 +420,12 @@ export const ExtracurricularMembers: React.FC = () => {
                                             <td className="p-4 text-sm">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                             <td className="p-4 text-sm font-mono">{member.nis}</td>
                                             <td className="p-4">
-                                                <div className="font-medium">{member.name}</div>
+                                                <div>{member.name}</div>
                                             </td>
                                             <td className="p-4">
                                                 <Badge
                                                     variant="secondary"
-                                                    className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200"
+                                                    className="bg-amber-100 text-amber-700 border-amber-200"
                                                 >
                                                     {member.class}
                                                 </Badge>
@@ -632,15 +620,15 @@ export const ExtracurricularMembers: React.FC = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-1.5">
-                                        <p className="text-xs text-muted-foreground">Kelas (Saat Bergabung)</p>
+                                        <p className="text-xs text-muted-foreground">Kelas</p>
                                     </div>
-                                    <Badge className="bg-blue-50 text-blue-800 border-blue-200">
+                                    <Badge className="bg-amber-100 text-amber-700 border-amber-200">
                                         {selectedMember.class}
                                     </Badge>
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-xs text-muted-foreground">Ekstrakurikuler</p>
-                                    <Badge className="bg-primary/10 text-primary border-primary/20">
+                                    <Badge className="bg-blue-50 text-blue-800 border-blue-200">
                                         Pramuka
                                     </Badge>
                                 </div>
