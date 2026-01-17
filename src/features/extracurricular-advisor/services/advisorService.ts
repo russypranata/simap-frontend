@@ -20,49 +20,67 @@ const SIMULATED_DELAY_MS = 1000;
 
 // ===== SHARED MOCK DATA =====
 const MOCK_MEMBERS_DATA: AdvisorMember[] = [
-    { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", joinDate: "2024-07-15", attendance: 92 },
-    { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", joinDate: "2024-07-15", attendance: 88 },
-    { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", joinDate: "2024-07-20", attendance: 95 },
-    { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", joinDate: "2024-07-15", attendance: 78 },
-    { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", joinDate: "2024-08-01", attendance: 85 },
-    { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", joinDate: "2024-07-15", attendance: 45 },
-    { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", joinDate: "2024-07-20", attendance: 90 },
-    { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", joinDate: "2024-08-05", attendance: 82 },
-    { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", joinDate: "2024-07-15", attendance: 88 },
-    { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", joinDate: "2024-08-10", attendance: 91 },
-    { id: 11, nis: "2022011", name: "Irfan Hakim", class: "X B", joinDate: "2024-08-12", attendance: 87 },
-    { id: 12, nis: "2022012", name: "Julia Permata", class: "XI A", joinDate: "2024-07-18", attendance: 93 },
-    { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", joinDate: "2024-07-22", attendance: 76 },
-    { id: 14, nis: "2022014", name: "Luna Maya", class: "XII A", joinDate: "2024-07-15", attendance: 89 },
-    { id: 15, nis: "2022015", name: "Mario Bros", class: "X B", joinDate: "2024-08-15", attendance: 95 },
+    { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", joinDate: "2024-07-15", attendance: 92, status: "Aktif" },
+    { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", joinDate: "2024-07-15", attendance: 88, status: "Aktif" },
+    { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", joinDate: "2024-07-20", attendance: 95, status: "Aktif" },
+    { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", joinDate: "2024-07-15", attendance: 78, status: "Aktif" },
+    { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", joinDate: "2024-08-01", attendance: 85, status: "Aktif" },
+    { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", joinDate: "2024-07-15", attendance: 45, status: "Aktif" },
+    { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", joinDate: "2024-07-20", attendance: 90, status: "Aktif" },
+    { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", joinDate: "2024-08-05", attendance: 82, status: "Aktif" },
+    { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", joinDate: "2024-07-15", attendance: 88, status: "Aktif" },
+    { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", joinDate: "2024-08-10", attendance: 91, status: "Aktif" },
+    { id: 11, nis: "2022011", name: "Irfan Hakim", class: "X B", joinDate: "2024-08-12", attendance: 87, status: "Aktif" },
+    { id: 12, nis: "2022012", name: "Julia Permata", class: "XI A", joinDate: "2024-07-18", attendance: 93, status: "Aktif" },
+    { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", joinDate: "2024-07-22", attendance: 76, status: "Aktif" },
+    { id: 14, nis: "2022014", name: "Luna Maya", class: "XII A", joinDate: "2024-07-15", attendance: 89, status: "Aktif" },
+    { id: 15, nis: "2022015", name: "Mario Bros", class: "X B", joinDate: "2024-08-15", attendance: 95, status: "Aktif" },
+    // Inactive Members Examples for Audit Trail
+    { 
+        id: 901, 
+        nis: "2022901", 
+        name: "Kenji Satria (Ex)", 
+        class: "XI A", 
+        joinDate: "2024-07-15", 
+        attendance: 60, 
+        status: "Nonaktif",
+        inactiveDate: "2024-10-15",
+        inactiveReason: "Pindah Ekstrakurikuler ke Basket"
+    },
+    { 
+        id: 902, 
+        nis: "2022902", 
+        name: "Lina Marwah (Ex)", 
+        class: "X B", 
+        joinDate: "2024-07-20", 
+        attendance: 40, 
+        status: "Nonaktif",
+        inactiveDate: "2024-09-01",
+        inactiveReason: "Mengundurkan diri (Fokus Akademik)"
+    }
 ];
 
 const MOCK_HISTORY_24_25: AdvisorMember[] = [
-    { id: 101, nis: "2023001", name: "Alumni Aditya (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 98 }, // Rajin
-    { id: 102, nis: "2023002", name: "Alumni Bayu (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 95 }, // Rajin
-    { id: 103, nis: "2023003", name: "Alumni Citra (24/25)", class: "XII B", joinDate: "2023-07-15", attendance: 92 }, // Rajin (Batas)
-    { id: 104, nis: "2023004", name: "Alumni Diana (24/25)", class: "XII B", joinDate: "2023-07-15", attendance: 88 }, // Average
-    { id: 105, nis: "2023005", name: "Alumni Erik (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 85 }, // Average
-    { id: 106, nis: "2023006", name: "Alumni Fani (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 78 }, // Low
-    { id: 107, nis: "2023007", name: "Alumni Gilang (24/25)", class: "XII B", joinDate: "2023-07-15", attendance: 96 }, // Rajin
-    { id: 108, nis: "2023008", name: "Alumni Hana (24/25)", class: "XII B", joinDate: "2023-07-15", attendance: 90 }, // Rajin (Pas)
-    { id: 109, nis: "2023009", name: "Alumni Indra (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 65 }, // Jarang
-    { id: 110, nis: "2023010", name: "Alumni Joko (24/25)", class: "XII A", joinDate: "2023-07-15", attendance: 89 }, // Hampir Rajin
+    // Same students as 25/26 but in previous class (Snapshot Proof)
+    { id: 101, nis: "2022001", name: "Andi Wijaya", class: "XI A", joinDate: "2024-07-15", attendance: 98, status: "Aktif" }, // Was XII A
+    { id: 102, nis: "2022002", name: "Rina Kusuma", class: "X A", joinDate: "2024-07-15", attendance: 95, status: "Aktif" }, // Was XI A
+    { id: 103, nis: "2022003", name: "Doni Pratama", class: "X B", joinDate: "2024-07-15", attendance: 92, status: "Aktif" }, // Was XI B
+    { id: 104, nis: "2022004", name: "Siti Aminah", class: "XI B", joinDate: "2024-07-15", attendance: 88, status: "Aktif" }, // Was XII B
+    
+    // Some students might have left or graduated, key is consistent NIS for those who stay
+    { id: 105, nis: "2023005", name: "Alumni Erik (Lulus)", class: "XII A", joinDate: "2023-07-15", attendance: 85, status: "Aktif" }, 
+    { id: 106, nis: "2023006", name: "Alumni Fani (Lulus)", class: "XII A", joinDate: "2023-07-15", attendance: 78, status: "Aktif" }, 
 ];
 
 const MOCK_HISTORY_23_24: AdvisorMember[] = [
-    { id: 201, nis: "2022001", name: "Alumni Kiki (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 100 }, // Perfect
-    { id: 202, nis: "2022002", name: "Alumni Lia (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 98 }, // Rajin
-    { id: 203, nis: "2022003", name: "Alumni Mira (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 94 }, // Rajin
-    { id: 204, nis: "2022004", name: "Alumni Nina (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 91 }, // Rajin
-    { id: 205, nis: "2022005", name: "Alumni Omar (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 80 }, // Average
-    { id: 206, nis: "2022006", name: "Alumni Putri (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 75 }, // Average
-    { id: 207, nis: "2022007", name: "Alumni Qori (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 60 }, // Low
-    { id: 208, nis: "2022008", name: "Alumni Rian (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 88 }, // Average
-    { id: 209, nis: "2022009", name: "Alumni Sari (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 89 }, // Hampir Rajin
-    { id: 210, nis: "2022010", name: "Alumni Tina (23/24)", class: "XII A", joinDate: "2022-07-15", attendance: 92 }, // Rajin
-    { id: 211, nis: "2022011", name: "Alumni Usman (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 95 }, // Rajin
-    { id: 212, nis: "2022012", name: "Alumni Vivi (23/24)", class: "XII B", joinDate: "2022-07-15", attendance: 40 }, // Sangat Jarang
+    // Andi Wijaya (NIS 2022001) in X A two years ago
+    { id: 201, nis: "2022001", name: "Andi Wijaya", class: "X A", joinDate: "2023-07-15", attendance: 100, status: "Aktif" }, 
+    
+    // Siti Aminah (NIS 2022004) in X B two years ago
+    { id: 204, nis: "2022004", name: "Siti Aminah", class: "X B", joinDate: "2023-07-15", attendance: 91, status: "Aktif" }, 
+
+    // Old alumni
+    { id: 211, nis: "2021001", name: "Alumni Senior 1", class: "XII A", joinDate: "2022-07-15", attendance: 95, status: "Aktif" }, 
 ];
 
 // ============================================
@@ -85,6 +103,9 @@ export interface AdvisorMember {
     class: string;
     joinDate: string;
     attendance: number;
+    status: 'Aktif' | 'Nonaktif';
+    inactiveDate?: string;
+    inactiveReason?: string;
 }
 
 // Profile Related Interfaces
@@ -321,6 +342,7 @@ export const advisorService = {
         page?: number; 
         limit?: number;
         semester?: string;
+        status?: string; // New: 'Aktif' | 'Nonaktif' | 'all'
     } = {}): Promise<{ data: AdvisorMember[]; meta: { currentPage: number; totalPages: number; totalItems: number } }> => {
         const { 
             academicYear = "2025/2026", 
@@ -328,7 +350,8 @@ export const advisorService = {
             search, 
             page = 1, 
             limit = 10,
-            semester
+            semester,
+            status = 'Aktif' // Default to viewing only active members
         } = params;
 
         // ===== MOCK IMPLEMENTATION =====
@@ -376,7 +399,12 @@ export const advisorService = {
                 mockMembers = mockMembers.filter(m => m.class === classFilter);
             }
 
-            // 3. Pagination
+            // 3. Filter by Status (New Audit Trail Logic)
+            if (status && status !== "all") {
+                 mockMembers = mockMembers.filter(m => m.status === status);
+            }
+
+            // 3.5 Pagination
             const totalItems = mockMembers.length;
             const totalPages = Math.ceil(totalItems / limit);
             const startIndex = (page - 1) * limit;

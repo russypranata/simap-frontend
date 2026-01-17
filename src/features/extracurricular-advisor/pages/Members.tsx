@@ -36,8 +36,15 @@ import {
     AlertCircle,
     ChevronLeft,
     ChevronRight,
-    BarChart3
+    BarChart3,
+    HelpCircle
 } from "lucide-react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
 
@@ -52,13 +59,14 @@ export const ExtracurricularMembers: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [classFilter, setClassFilter] = useState("all");
+    const [statusFilter] = useState("Aktif"); // Enforce Active Only
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<AdvisorMember | null>(null);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
     
-    // History Filters
-    const [selectedYear, setSelectedYear] = useState("2025/2026");
-    const [selectedSemester, setSelectedSemester] = useState("1"); // 1=Ganjil, 2=Genap
+    // Enforce Active Period for Advisor
+    const currentYear = "2025/2026";
+    const currentSemester = "1"; // Ganjil
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -79,8 +87,9 @@ export const ExtracurricularMembers: React.FC = () => {
                     limit: itemsPerPage,
                     search: debouncedSearch,
                     class: classFilter,
-                    academicYear: selectedYear
-                    // semester: selectedSemester // (If API supports it)
+                    academicYear: currentYear,
+                    status: "Aktif", // Enforce Active
+                    semester: currentSemester
                 });
                 
                 // Handle response structure difference between Mock/Real if any
@@ -106,12 +115,12 @@ export const ExtracurricularMembers: React.FC = () => {
         };
 
         fetchMembers();
-    }, [currentPage, debouncedSearch, classFilter, selectedYear, selectedSemester]);
+    }, [currentPage, debouncedSearch, classFilter, currentYear, currentSemester, statusFilter]);
 
     // Reset page when filters change
     React.useEffect(() => {
         setCurrentPage(1);
-    }, [debouncedSearch, classFilter, selectedYear]);
+    }, [debouncedSearch, classFilter, currentYear, statusFilter]);
 
     // Stats calculation (Visual only - ideally these come from dashboard stats or separate endpoint)
     // For now we calculate based on CURRENT PAGE which is wrong for "Total Members" stats card if strictly following data
@@ -151,8 +160,8 @@ export const ExtracurricularMembers: React.FC = () => {
              try {
                 setIsStatsLoading(true);
                 const dashboardStats = await advisorService.getDashboardStats({
-                    academicYear: selectedYear,
-                    semester: selectedSemester
+                    academicYear: currentYear,
+                    semester: currentSemester
                 });
                 setStats({
                     totalMembers: dashboardStats.totalMembers,
@@ -167,7 +176,7 @@ export const ExtracurricularMembers: React.FC = () => {
              }
         };
         fetchStats();
-    }, [selectedYear, selectedSemester]);
+    }, [currentYear, currentSemester]);
 
 
     const handleViewDetail = async (memberToCheck: AdvisorMember) => {
@@ -206,40 +215,16 @@ export const ExtracurricularMembers: React.FC = () => {
                         Lihat daftar anggota ekstrakurikuler Pramuka
                     </p>
                     <div className="flex items-center gap-3 mt-4">
-                        {/* Year Selector */}
-                        <div className="relative">
-                            <Select value={selectedYear} onValueChange={setSelectedYear}>
-                                <SelectTrigger className="h-8 rounded-full bg-blue-50 text-blue-800 border-blue-200 font-semibold text-sm gap-2 pl-3 pr-2 w-auto min-w-[180px]">
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="h-3.5 w-3.5" />
-                                        <span>Tahun Ajaran {selectedYear}</span>
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="2025/2026">2025/2026 (Aktif)</SelectItem>
-                                    <SelectItem value="2024/2025">2024/2025</SelectItem>
-                                    <SelectItem value="2023/2024">2023/2024</SelectItem>
-                                </SelectContent>
-                            </Select>
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                            <Calendar className="h-4 w-4" />
+                            <span className="text-sm font-semibold">
+                                Tahun Ajaran {currentYear}
+                            </span>
                         </div>
-                        
                         <div className="h-4 w-[1px] bg-border" />
-                        
-                        {/* Semester Selector */}
-                         <div className="relative">
-                            <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-                                <SelectTrigger className="h-8 border-none shadow-none bg-transparent px-2 text-sm font-medium text-blue-800 hover:text-blue-900 w-auto gap-2">
-                                    <span>
-                                        {selectedSemester === "1" ? "Semester Ganjil" : selectedSemester === "2" ? "Semester Genap" : "1 Tahun Penuh"}
-                                    </span>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="1">Semester Ganjil {selectedYear === "2025/2026" ? "(Aktif)" : ""}</SelectItem>
-                                    <SelectItem value="2">Semester Genap</SelectItem>
-                                    <SelectItem value="all">1 Tahun Penuh</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        <span className="text-sm font-medium text-blue-800">
+                            Semester {currentSemester === "1" ? "Ganjil" : "Genap"}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -379,9 +364,30 @@ export const ExtracurricularMembers: React.FC = () => {
                                 <tr>
                                     <th className="text-left p-4 font-medium text-sm w-12">No</th>
                                     <th className="text-left p-4 font-medium text-sm w-24">NIS</th>
-                                    <th className="text-left p-4 font-medium text-sm min-w-48">Nama</th>
-                                    <th className="text-left p-4 font-medium text-sm w-24">Kelas</th>
+                                    <th className="text-left p-4 font-medium text-sm w-32">
+                                        <div className="flex items-center gap-1.5">
+                                            Nama
+                                        </div>
+                                    </th>
+                                    <th className="text-left p-4 font-medium text-sm w-36">
+                                        <div className="flex items-center gap-1.5">
+                                            Kelas (Saat Bergabung)
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger>
+                                                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p className="max-w-xs">
+                                                            Menunjukkan kelas siswa pada saat pertama bergabung di periode ini, bukan kelas saat ini.
+                                                        </p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        </div>
+                                    </th>
                                     <th className="text-left p-4 font-medium text-sm w-36">Tgl Bergabung</th>
+                                    {/* Status Column Removed for Advisor RBAC */}
                                     <th className="text-left p-4 font-medium text-sm w-32">Kehadiran</th>
                                     <th className="text-center p-4 font-medium text-sm w-24">Aksi</th>
                                 </tr>
@@ -440,6 +446,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                             <td className="p-4 text-sm text-muted-foreground">
                                                 {formatDate(new Date(member.joinDate), "dd MMM yyyy")}
                                             </td>
+                                            {/* Status Badge Removed for Advisor RBAC */}
                                             <td className="p-4">
                                                 <div className="flex flex-col gap-1.5 w-full max-w-[140px]">
                                                     <div className="flex justify-between text-xs">
@@ -625,7 +632,9 @@ export const ExtracurricularMembers: React.FC = () => {
                             {/* Info Grid */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <p className="text-xs text-muted-foreground">Kelas</p>
+                                    <div className="flex items-center gap-1.5">
+                                        <p className="text-xs text-muted-foreground">Kelas (Saat Bergabung)</p>
+                                    </div>
                                     <Badge className="bg-blue-50 text-blue-800 border-blue-200">
                                         {selectedMember.class}
                                     </Badge>
@@ -642,6 +651,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                         {formatDate(new Date(selectedMember.joinDate), "dd MMMM yyyy")}
                                     </p>
                                 </div>
+                                {/* Status Detail Removed for Advisor RBAC */}
                                 <div className="space-y-1">
                                     <p className="text-xs text-muted-foreground">Kehadiran</p>
                                     <div className="flex items-center gap-2">

@@ -103,8 +103,9 @@ export const ExtracurricularAttendance: React.FC = () => {
     const [activeTab, setActiveTab] = useState(tabFromUrl === "history" ? "history" : "attendance");
     
     // History Filters
-    const [historyAcademicYear, setHistoryAcademicYear] = useState("2025/2026");
-    const [historySemester, setHistorySemester] = useState("Ganjil");
+    // History Filters - Enforce Active Period
+    const historyAcademicYear = "2025/2026";
+    const historySemester = "Ganjil";
     const [historySearchTerm, setHistorySearchTerm] = useState("");
     const [historyDateRange, setHistoryDateRange] = useState({ from: "", to: "" });
     const [activeDateFilter, setActiveDateFilter] = useState<"today" | "week" | "month" | null>(null);
@@ -347,6 +348,14 @@ export const ExtracurricularAttendance: React.FC = () => {
 
     const filteredHistory = React.useMemo(() => {
         return history.filter((record) => {
+            // Filter by Search Term
+            let matchesSearch = true;
+            if (historySearchTerm) {
+                const lowerTerm = historySearchTerm.toLowerCase();
+                const dateStr = formatDate(record.date, "dd MMMM yyyy").toLowerCase();
+                matchesSearch = dateStr.includes(lowerTerm);
+            }
+
             // Filter by date range
             let matchesDateRange = true;
             if (historyDateRange.from && historyDateRange.to) {
@@ -364,9 +373,9 @@ export const ExtracurricularAttendance: React.FC = () => {
                 matchesDateRange = recordDate <= toDate;
             }
 
-            return matchesDateRange;
+            return matchesSearch && matchesDateRange;
         });
-    }, [historyDateRange, history]);
+    }, [historyDateRange, history, historySearchTerm]);
 
     // Latest Stats derivation
     const latestHistory = history[0];
@@ -1082,119 +1091,64 @@ export const ExtracurricularAttendance: React.FC = () => {
                         </CardHeader>
 
                         {/* Toolbar - Filters */}
-                        <div className="px-6 py-4 bg-muted/20">
-                            <div className="flex flex-col space-y-4">
-                                {/* Top Row: Main Filter Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
-                                    {/* Year */}
-                                    <div className="lg:col-span-3 space-y-2">
-                                        <Label className="text-sm font-medium">Tahun Ajaran</Label>
-                                        <div className="relative">
-                                            <select
-                                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-8 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                                                value={historyAcademicYear}
-                                                onChange={(e) => setHistoryAcademicYear(e.target.value)}
-                                            >
-                                                <option value="2025/2026">2025/2026</option>
-                                                <option value="2024/2025">2024/2025</option>
-                                            </select>
-                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                        </div>
-                                    </div>
-
-                                    {/* Semester */}
-                                    <div className="lg:col-span-3 space-y-2">
-                                        <Label className="text-sm font-medium">Semester</Label>
-                                        <div className="relative">
-                                            <select
-                                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-8 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                                                value={historySemester}
-                                                onChange={(e) => setHistorySemester(e.target.value)}
-                                            >
-                                                <option value="Ganjil">Ganjil</option>
-                                                <option value="Genap">Genap</option>
-                                            </select>
-                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                        </div>
-                                    </div>
-
-                                    {/* Date Range Start */}
-                                    <div className="lg:col-span-3 space-y-2">
-                                        <Label className="text-sm font-medium">Dari Tanggal</Label>
-                                        <div className="relative">
-                                            <input
-                                                type="date"
-                                                value={historyDateRange.from}
-                                                onChange={(e) => setHistoryDateRange({ ...historyDateRange, from: e.target.value })}
-                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                                                placeholder="Pilih tanggal"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Date Range End */}
-                                    <div className="lg:col-span-3 space-y-2">
-                                        <Label className="text-sm font-medium">Sampai Tanggal</Label>
-                                        <div className="relative">
-                                            <input
-                                                type="date"
-                                                value={historyDateRange.to}
-                                                onChange={(e) => setHistoryDateRange({ ...historyDateRange, to: e.target.value })}
-                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                                                placeholder="Pilih tanggal"
-                                            />
-                                        </div>
-                                    </div>
+                        <div className="px-6 py-3 bg-muted/20">
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                                {/* Search Field */}
+                                <div className="relative w-full md:w-72">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                    <Input
+                                        type="text"
+                                        className="pl-9 h-9"
+                                        placeholder="Cari riwayat tanggal..."
+                                        value={historySearchTerm}
+                                        onChange={(e) => setHistorySearchTerm(e.target.value)}
+                                    />
                                 </div>
 
-                                {/* Bottom Row: Quick Filters & Actions */}
-                                <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-2">
-                                    <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-                                        <span className="text-sm font-medium text-muted-foreground mr-1 whitespace-nowrap">Filter Cepat:</span>
-                                        <Button
-                                            variant="outline"
-                                            className={cn(
-                                                "h-8 px-3 text-sm font-normal",
-                                                activeDateFilter === 'today'
-                                                    ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
-                                                    : ""
-                                            )}
-                                            onClick={setToday}
-                                        >
-                                            Hari Ini
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            className={cn(
-                                                "h-8 px-3 text-sm font-normal",
-                                                activeDateFilter === 'week'
-                                                    ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
-                                                    : ""
-                                            )}
-                                            onClick={setThisWeek}
-                                        >
-                                            Minggu Ini
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            className={cn(
-                                                "h-8 px-3 text-sm font-normal",
-                                                activeDateFilter === 'month'
-                                                    ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
-                                                    : ""
-                                            )}
-                                            onClick={setThisMonth}
-                                        >
-                                            Bulan Ini
-                                        </Button>
-                                    </div>
-
-
+                                {/* Quick Filters */}
+                                <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 justify-end">
+                                    <span className="text-sm font-medium text-muted-foreground mr-1 whitespace-nowrap">Filter Cepat:</span>
+                                    <Button
+                                        variant="outline"
+                                        className={cn(
+                                            "h-7 px-2 text-xs font-normal",
+                                            activeDateFilter === 'today'
+                                                ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
+                                                : ""
+                                        )}
+                                        onClick={setToday}
+                                    >
+                                        Hari Ini
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className={cn(
+                                            "h-7 px-2 text-xs font-normal",
+                                            activeDateFilter === 'week'
+                                                ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
+                                                : ""
+                                        )}
+                                        onClick={setThisWeek}
+                                    >
+                                        Minggu Ini
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className={cn(
+                                            "h-7 px-2 text-xs font-normal",
+                                            activeDateFilter === 'month'
+                                                ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
+                                                : ""
+                                        )}
+                                        onClick={setThisMonth}
+                                    >
+                                        Bulan Ini
+                                    </Button>
                                 </div>
                             </div>
                         </div>
 
-                        <CardContent className="pt-3">
+                        <CardContent className="pt-2">
                             <div className="space-y-3">
                                 {/* Empty State */}
                                 {((filteredHistory.length === 0)) ? (
