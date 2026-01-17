@@ -16,7 +16,6 @@ import {
     Save,
     X,
     Camera,
-    IdCard,
     Star,
     AtSign,
 } from "lucide-react";

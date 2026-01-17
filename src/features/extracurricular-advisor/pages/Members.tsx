@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
     Card,
     CardContent,
@@ -51,7 +51,7 @@ import { formatDate } from "@/features/shared/utils/dateFormatter";
 
 import { advisorService, AdvisorMember } from "../services/advisorService";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MembersSkeleton } from "../components/AdvisorSkeletons";
+
 import { useDebounce } from "@/hooks/use-debounce";
 
 export const ExtracurricularMembers: React.FC = () => {
@@ -98,7 +98,6 @@ export const ExtracurricularMembers: React.FC = () => {
                 // Note: Typescript might complain if service return type wasn't fully updated in all paths, 
                 // but we updated it to return { data, meta } in both mock/real.
                 
-                // @ts-ignore - Service return type was updated but TS might need check
                 const { data, meta } = response;
                 
                 setMembers(data || []);

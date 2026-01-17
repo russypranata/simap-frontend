@@ -30,8 +30,8 @@ export const ExtracurricularDashboard: React.FC = () => {
         averageAttendance: 0,
         totalMeetings: 0,
     });
-    const [upcomingSchedules, setUpcomingSchedules] = React.useState<any[]>([]);
-    const [recentActivities, setRecentActivities] = React.useState<any[]>([]);
+    const [upcomingSchedules, setUpcomingSchedules] = React.useState<{ id: number; day: string; date: string; time: string }[]>([]);
+    const [recentActivities, setRecentActivities] = React.useState<{ id: number; day: string; date: string; time: string; attendance: number }[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [advisorName, setAdvisorName] = React.useState("Tutor Ekskul");
 

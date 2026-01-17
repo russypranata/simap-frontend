@@ -20,7 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+
 import {
     Tabs,
     TabsContent,
@@ -31,13 +31,11 @@ import {
     CheckCircle,
     XCircle,
     AlertCircle,
-    Heart,
     Calendar,
     Users,
     Save,
     Download,
     Search,
-    Filter,
     RefreshCw,
     Clock,
     ChevronLeft,
@@ -45,14 +43,9 @@ import {
     History,
     Award,
     TrendingUp,
-    ChevronDown,
     Eye,
     ChevronsLeft,
     ChevronsRight,
-    FileDown,
-    Edit,
-    Trash2,
-    ArrowDownUp,
 } from "lucide-react";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
 import { toast } from "sonner";
@@ -73,7 +66,7 @@ export const ExtracurricularAttendance: React.FC = () => {
     const [members, setMembers] = useState<AdvisorMember[]>([]);
     const [history, setHistory] = useState<AttendanceHistoryEntry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [, setIsSubmitting] = useState(false);
     const router = useRouter();
 
     const [tutorName, setTutorName] = useState("");
@@ -104,8 +97,7 @@ export const ExtracurricularAttendance: React.FC = () => {
     
     // History Filters
     // History Filters - Enforce Active Period
-    const historyAcademicYear = "2025/2026";
-    const historySemester = "Ganjil";
+    // Note: These could be used for API filtering in the future
     const [historySearchTerm, setHistorySearchTerm] = useState("");
     const [historyDateRange, setHistoryDateRange] = useState({ from: "", to: "" });
     const [activeDateFilter, setActiveDateFilter] = useState<"today" | "week" | "month" | null>(null);
@@ -283,26 +275,13 @@ export const ExtracurricularAttendance: React.FC = () => {
             setSelectedDate(`${year}-${month}-${day}`);
 
             toast.success("Halaman presensi telah di-refresh!");
-        } catch (error) {
+        } catch {
              toast.error("Gagal merefresh data");
         } finally {
             setIsRefreshing(false);
         }
     };
 
-
-    const getStatusIcon = (status: AttendanceStatus) => {
-        switch (status) {
-            case "hadir":
-                return <CheckCircle className="h-5 w-5 text-green-600" />;
-            case "sakit":
-                return <Heart className="h-5 w-5 text-yellow-600" />;
-            case "izin":
-                return <Clock className="h-5 w-5 text-sky-600" />;
-            case "alpa":
-                return <XCircle className="h-5 w-5 text-red-600" />;
-        }
-    };
 
     const getStatusBadgeVariant = (status: AttendanceStatus) => {
         switch (status) {
@@ -317,7 +296,7 @@ export const ExtracurricularAttendance: React.FC = () => {
         }
     };
 
-    const getClassBadgeColor = (className: string) => {
+    const getClassBadgeColor = () => {
         return "bg-blue-50 text-blue-800 border-blue-200";
     };
 
@@ -745,7 +724,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                 </div>
 
                                 {/* Status Filter */}
-                                <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                                <Select value={statusFilter} onValueChange={(value: "all" | AttendanceStatus) => setStatusFilter(value)}>
                                     <SelectTrigger className="w-full lg:w-40">
                                         <SelectValue placeholder="Semua Status" />
                                     </SelectTrigger>
@@ -835,7 +814,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                                             <div className="text-sm font-medium">{member.name}</div>
                                                         </td>
                                                         <td className="p-4">
-                                                            <Badge className={getClassBadgeColor(member.class)}>
+                                                            <Badge className={getClassBadgeColor()}>
                                                                 {member.class}
                                                             </Badge>
                                                         </td>

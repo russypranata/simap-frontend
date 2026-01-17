@@ -29,12 +29,8 @@ import {
     Search,
     XCircle,
     AlertCircle,
-    History,
-    Filter,
-    Download,
     ChevronLeft,
     ChevronRight,
-    Printer,
 } from "lucide-react";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
 import { cn } from "@/lib/utils";
@@ -82,8 +78,7 @@ const uniqueClasses = [...new Set(mockDetailData.students.map(s => s.class))].so
 
 export default function AttendanceDetailPage() {
     const router = useRouter();
-    const params = useParams();
-    const { id } = params;
+    useParams(); // id is used for routing but not needed in component logic
 
     // State
     const [searchTerm, setSearchTerm] = useState("");
@@ -133,7 +128,7 @@ export default function AttendanceDetailPage() {
         }
     };
 
-    const getClassBadgeColor = (className: string) => {
+    const getClassBadgeColor = () => {
         return "bg-blue-50 text-blue-800 border-blue-200";
     };
 
@@ -477,7 +472,7 @@ export default function AttendanceDetailPage() {
                                                     </div>
                                                 </td>
                                                 <td className="p-4">
-                                                    <Badge className={getClassBadgeColor(student.class)}>
+                                                    <Badge className={getClassBadgeColor()}>
                                                         {student.class}
                                                     </Badge>
                                                 </td>

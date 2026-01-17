@@ -288,7 +288,7 @@ export const advisorService = {
         return result.data;
     },
 
-    getUpcomingSchedule: async (): Promise<any[]> => {
+    getUpcomingSchedule: async (): Promise<{ id: number; day: string; date: string; time: string }[]> => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
             await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
@@ -309,7 +309,7 @@ export const advisorService = {
         return result.data;
     },
 
-    getRecentActivities: async (): Promise<any[]> => {
+    getRecentActivities: async (): Promise<{ id: number; day: string; date: string; time: string; attendance: number }[]> => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
             await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
@@ -464,7 +464,7 @@ export const advisorService = {
         return result.data;
     },
 
-    addMember: async (memberData: any) => {
+    addMember: async (memberData: Partial<AdvisorMember>) => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
             await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
@@ -503,7 +503,7 @@ export const advisorService = {
     // ATTENDANCE MANAGEMENT
     // ========================================
 
-    getAttendanceHistory: async (startDate?: string, endDate?: string): Promise<any[]> => {
+    getAttendanceHistory: async (startDate?: string, endDate?: string): Promise<AttendanceHistoryEntry[]> => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
             await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
@@ -550,7 +550,7 @@ export const advisorService = {
         return result.data;
     },
 
-    submitAttendance: async (data: any) => {
+    submitAttendance: async (data: CreateAttendanceRequest) => {
         // ===== MOCK IMPLEMENTATION =====
         if (USE_MOCK_DATA) {
             await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));

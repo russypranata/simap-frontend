@@ -115,15 +115,16 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
 
             form.reset();
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to update password:", error);
             // Handle specific error codes if available, or fallback to message
-            if (error.code === 400 || error.message.includes("salah")) {
+            const err = error as { code?: number; message?: string };
+            if (err.code === 400 || err.message?.includes("salah")) {
                  form.setError("currentPassword", {
                      message: "Kata sandi saat ini salah"
                  });
             } else {
-                setApiError(error.message || "Gagal mengubah kata sandi. Silakan coba lagi.");
+                setApiError(err.message || "Gagal mengubah kata sandi. Silakan coba lagi.");
             }
         } finally {
             setIsLoading(false);
