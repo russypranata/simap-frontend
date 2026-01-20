@@ -185,7 +185,6 @@ Mengambil statistik ringkas (anggota, kehadiran, pertemuan).
 - **Endpoint**: `GET /extracurricular-advisor/dashboard/stats`
 - **Query Params**:
   - `academic_year` (optional, e.g., "2024/2025")
-  - `semester` (optional, value: "1", "2", or "all")
 
 **Response (200 OK):**
 
@@ -269,7 +268,6 @@ Mengambil daftar anggota dengan filter.
 - **Endpoint**: `GET /extracurricular-advisor/members`
 - **Query Params**:
   - `academic_year` (e.g., "2025/2026")
-  - `semester` ("1", "2", or "all")
   - `class` (e.g., "X A", "all")
   - `search` (Nama/NIS)
   - `status` ("Aktif", "Nonaktif", "all")

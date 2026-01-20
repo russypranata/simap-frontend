@@ -55,6 +55,7 @@ import { cn } from "@/lib/utils";
 import { advisorService, AdvisorMember, AttendanceHistoryEntry, CreateAttendanceRequest } from "../services/advisorService";
 import { useAcademicYear } from "@/context/AcademicYearContext";
 import { AttendanceSkeleton } from "../components/AdvisorSkeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa";
 
@@ -1137,9 +1138,13 @@ export const ExtracurricularAttendance: React.FC = () => {
                                             Reset
                                         </Button>
                                     )}
-                                    <Badge className="bg-blue-50 text-blue-800 border-blue-200">
-                                        {filteredHistory.length} Riwayat
-                                    </Badge>
+                                    {isHistoryLoading ? (
+                                        <Skeleton className="h-6 w-24 rounded-full" />
+                                    ) : (
+                                        <Badge className="bg-blue-50 text-blue-800 border-blue-200">
+                                            {filteredHistory.length} Riwayat
+                                        </Badge>
+                                    )}
                                 </div>
                             </div>
                         </CardHeader>
