@@ -90,11 +90,9 @@ export const ExtracurricularMembers: React.FC = () => {
                     limit: itemsPerPage,
                     search: debouncedSearch,
                     class: classFilter,
-                    search: debouncedSearch,
-                    class: classFilter,
+
                     academicYear: academicYear.academicYear,
-                    status: "Aktif", // Enforce Active
-                    semester: academicYear.semester
+                    status: "Aktif" // Enforce Active
                 });
                 
                 // Handle response structure difference between Mock/Real if any
@@ -119,8 +117,7 @@ export const ExtracurricularMembers: React.FC = () => {
         };
 
         fetchMembers();
-        fetchMembers();
-    }, [currentPage, debouncedSearch, classFilter, academicYear.academicYear, academicYear.semester, statusFilter, isConfigLoading]);
+    }, [currentPage, debouncedSearch, classFilter, academicYear.academicYear, statusFilter, isConfigLoading]);
 
     // Reset page when filters change
     React.useEffect(() => {

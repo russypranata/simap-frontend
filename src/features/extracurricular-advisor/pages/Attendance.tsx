@@ -178,7 +178,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                     limit: 100,
                     status: "Aktif",
                     academicYear: academicYear.academicYear,
-                    semester: academicYear.semester
+                    // semester: academicYear.semester
                 });
                 
                 // Assuming membersResponse gives data in unified format now
@@ -225,12 +225,12 @@ export const ExtracurricularAttendance: React.FC = () => {
     // DECISION: Remove automatic refetch on tab switch for now to avoid complexity, 
     // since we fetch all on mount. The manual "Refresh" button exists.
     
-    /* 
     useEffect(() => {
         if (activeTab === "history") {
             const fetchHistory = async () => {
                 setIsHistoryLoading(true);
                 try {
+                   // Add artificial delay for visual feedback if needed, mostly handled by service
                    const historyData = await advisorService.getAttendanceHistory();
                    setHistory(historyData);
                 } catch(e) { console.log(e); } 
@@ -239,7 +239,6 @@ export const ExtracurricularAttendance: React.FC = () => {
             fetchHistory();
         }
     }, [activeTab]);
-    */
 
 
 
@@ -603,7 +602,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                     setActiveTab(value);
                     const newParams = new URLSearchParams(searchParams.toString());
                     newParams.set("tab", value);
-                    router.push(`?${newParams.toString()}`);
+                    router.push(`?${newParams.toString()}`, { scroll: false });
                 }} 
                 className="space-y-6"
             >

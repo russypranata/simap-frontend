@@ -423,15 +423,16 @@ export const advisorService = {
                     ...m,
                     attendance: Math.max(0, m.attendance - 5) 
                 }));
-            } else if (semester === "all" || !semester) {
-                 // Full Year: Average of Sem 1 (Base) and Sem 2 (Base - 5)
+            } else if (semester === "1") {
+                 // Semester 1: Base Data (No change)
+            } else {
+                 // Full Year (Default): Average of Sem 1 (Base) and Sem 2 (Base - 5)
                  // Result: Attendance drops 2.5% from Base
                  mockMembers = mockMembers.map(m => ({
                     ...m,
                     attendance: Math.round(Math.max(0, m.attendance - 2.5)) // Round to integer
                 }));
             }
-            // Semester 1 (Default): Uses Base Data (Highest)
 
             // 1. Filter by Search
             if (search) {
@@ -476,6 +477,7 @@ export const advisorService = {
             ...(semester && semester !== "all" && { semester }), // Add semester param if not 'all'
             ...(search && { search }),
             ...(classFilter && classFilter !== "all" && { class: classFilter }),
+            ...(status && status !== "all" && { status }),
         });
 
         const response = await fetch(`${ADVISOR_API_URL}/members?${queryParams.toString()}`, {

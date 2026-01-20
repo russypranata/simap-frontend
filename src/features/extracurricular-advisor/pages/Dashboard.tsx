@@ -42,7 +42,9 @@ export const ExtracurricularDashboard: React.FC = () => {
         const fetchDashboardData = async () => {
             try {
                 const [statsData, scheduleData, activitiesData, profileData] = await Promise.all([
-                    advisorService.getDashboardStats(),
+                    advisorService.getDashboardStats({
+                        academicYear: academicYear.academicYear
+                    }),
                     advisorService.getUpcomingSchedule(),
                     advisorService.getRecentActivities(),
                     advisorService.getProfile()
@@ -60,7 +62,7 @@ export const ExtracurricularDashboard: React.FC = () => {
         };
 
         fetchDashboardData();
-    }, []);
+    }, [academicYear.academicYear, academicYear.semester]);
 
     if (isLoading) {
         return <DashboardSkeleton />;

@@ -47,7 +47,9 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
             try {
                 const [profile, stats] = await Promise.all([
                     advisorService.getProfile(),
-                    advisorService.getDashboardStats(),
+                    advisorService.getDashboardStats({
+                        academicYear: academicYear.academicYear
+                    }),
                 ]);
                 setProfileData(profile);
                 setStatsData(stats);
@@ -59,7 +61,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
         };
 
         fetchProfile();
-    }, []);
+    }, [academicYear.academicYear, academicYear.semester]);
 
     const handleEditProfile = () => {
         router.push("/extracurricular-advisor/profile/edit");
