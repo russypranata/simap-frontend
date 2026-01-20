@@ -357,6 +357,7 @@ Mengambil riwayat sesi presensi.
         "tutorName": "Ahmad Fauzi",
         "startTime": "14:00",
         "endTime": "16:00",
+        "duration": "2j 0m",
         "status": "hadir"
       }
     }
