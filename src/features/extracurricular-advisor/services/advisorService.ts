@@ -194,6 +194,13 @@ export interface CreateAttendanceRequest {
     }[];
 }
 
+// System Config Interfaces
+export interface ActiveAcademicYear {
+    academicYear: string; // e.g. "2025/2026"
+    semester: string;     // e.g. "1" or "2"
+    label: string;        // e.g. "Ganjil" or "Genap"
+}
+
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
@@ -235,6 +242,32 @@ const handleApiError = async (response: Response): Promise<never> => {
 // ============================================
 
 export const advisorService = {
+    // ========================================
+    // SYSTEM & CONFIGURATION
+    // ========================================
+
+    getActiveAcademicYear: async (): Promise<ActiveAcademicYear> => {
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+            return {
+                academicYear: "2025/2026",
+                semester: "1",
+                label: "Ganjil"
+            };
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const response = await fetch(`${ADVISOR_API_URL}/academic-year/active`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) await handleApiError(response);
+        const result = await response.json();
+        return result.data;
+    },
+
     // ========================================
     // DASHBOARD & OPERATIONAL
     // ========================================

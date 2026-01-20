@@ -46,12 +46,14 @@ import {
     ChevronsLeft,
     ChevronsRight,
     ClipboardCheck,
+    CheckCheck,
 } from "lucide-react";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import { advisorService, AdvisorMember, AttendanceHistoryEntry, CreateAttendanceRequest } from "../services/advisorService";
+import { useAcademicYear } from "@/context/AcademicYearContext";
 import { AttendanceSkeleton } from "../components/AdvisorSkeletons";
 
 type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa";
@@ -71,6 +73,9 @@ export const ExtracurricularAttendance: React.FC = () => {
     const router = useRouter();
 
     const [tutorName, setTutorName] = useState("");
+    const { academicYear, isLoading: isConfigLoading } = useAcademicYear();
+
+
     
     // Attendance Tab State
     const [selectedDate, setSelectedDate] = useState(() => {
@@ -143,23 +148,58 @@ export const ExtracurricularAttendance: React.FC = () => {
         });
     };
 
+    const handleMarkAllPresent = () => {
+        setAttendanceRecords((prev) => {
+            const newMap = new Map(prev);
+            // Only update filtered members (visible ones)
+            filteredMembers.forEach((member) => {
+                 newMap.set(member.id, { studentId: member.id, status: "hadir" });
+            });
+            return newMap;
+        });
+        toast.success("Semua siswa ditandai hadir.");
+    };
+
+    // Initial load
+    // Initial load
     // Initial load
     useEffect(() => {
+        if (isConfigLoading) return;
+
         const fetchInitialData = async () => {
             try {
-                const [membersData, profileData] = await Promise.all([
-                    advisorService.getMembers({ limit: 50, status: "Aktif" }),
-                    advisorService.getProfile()
-                ]);
-                setMembers(membersData.data);
+                // Fetch config first or in parallel
+                const profileData = await advisorService.getProfile();
+
                 setTutorName(profileData.name);
+
+                // Fetch Members for that academic year
+                const membersResponse = await advisorService.getMembers({
+                    limit: 100,
+                    status: "Aktif",
+                    academicYear: academicYear.academicYear,
+                    semester: academicYear.semester
+                });
                 
-                // Also fetch history to populate stats
+                // Assuming membersResponse gives data in unified format now
+                // If getMembers returns { data, meta }
+                const membersData = membersResponse.data || []; 
+
+                setMembers(membersData);
+                
+                setMembers(membersData);
+                
+                // Init records - REMOVED default "hadir" initialization per user request
+                // Default is empty
+                const initialRecords = new Map<number, AttendanceRecord>();
+                setAttendanceRecords(initialRecords);
+
+                // Fetch History for Stats (regardless of tab)
                 const historyData = await advisorService.getAttendanceHistory();
                 setHistory(historyData);
-                
+
             } catch (error) {
-                console.error("Failed to fetch data:", error);
+                console.error("Failed to fetch initial data:", error);
                 toast.error("Gagal memuat data");
             } finally {
                 setIsLoading(false);
@@ -167,25 +207,40 @@ export const ExtracurricularAttendance: React.FC = () => {
         };
 
         fetchInitialData();
-    }, []);
+    }, [isConfigLoading, academicYear]);
 
-    // Fetch history when tab changes
+    // Load History Separate Effect - Re-fetch when tab changes to history if needed, 
+    // but we already fetched on mount. 
+    // Maybe we keep this to "Refresh" when tab is clicked? 
+    // Yes, but let's make sure we don't double fetch on mount if tab is 'history'.
+    // Actually, simple refactor: Just fetch on tab change if we want fresh data, 
+    // but simpler to just rely on the initial fetch + manual refresh button.
+    // However, user might expect fresh data when switching tabs.
+    // Let's keep it but check if it's already loaded? No, easiest is just let it refresh or remove it if initial is enough.
+    // Given the previous bug, "Initial Load" is the priority.
+    // For now, I will COMMENT OUT this specific effect to prevent double fetching on mount 
+    // and rely on the initial fetch + manual refresh.
+    // OR: Only fetch if history is empty?
+    
+    // DECISION: Remove automatic refetch on tab switch for now to avoid complexity, 
+    // since we fetch all on mount. The manual "Refresh" button exists.
+    
+    /* 
     useEffect(() => {
         if (activeTab === "history") {
             const fetchHistory = async () => {
                 setIsHistoryLoading(true);
                 try {
-                    const data = await advisorService.getAttendanceHistory();
-                    setHistory(data);
-                } catch (error) {
-                    console.error("Failed to fetch history:", error);
-                } finally {
-                    setIsHistoryLoading(false);
-                }
+                   const historyData = await advisorService.getAttendanceHistory();
+                   setHistory(historyData);
+                } catch(e) { console.log(e); } 
+                finally { setIsHistoryLoading(false); }
             };
             fetchHistory();
         }
     }, [activeTab]);
+    */
+
 
 
     const handleSaveAttendance = async () => {
@@ -243,11 +298,26 @@ export const ExtracurricularAttendance: React.FC = () => {
 
             const presentCount = attendanceList.filter(r => r.status === "hadir").length;
 
-            toast.success("Presensi Berhasil Disimpan", {
-                description: `Tanggal: ${formatDate(new Date(selectedDate), "dd MMMM yyyy")} • Hadir: ${presentCount}/${totalMembers} • Waktu: ${startTime}-${endTime}`,
+            toast.success("Data Presensi Berhasil Disimpan", {
+                description: (
+                    <div className="mt-2 space-y-1">
+                        <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span>{formatDate(new Date(selectedDate), "EEEE, dd MMMM yyyy")}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                            <Clock className="h-3.5 w-3.5" />
+                            <span>{startTime} - {endTime} WIB</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm font-medium text-green-700">
+                            <Users className="h-3.5 w-3.5" />
+                            <span>{presentCount} dari {totalMembers} siswa hadir</span>
+                        </div>
+                    </div>
+                ),
                 duration: 5000,
-                icon: <CheckCircle className="h-5 w-5 !text-green-600" />,
-                className: "!bg-green-50 !border-green-200 !text-green-800",
+                className: "!bg-green-50 !border-green-200 !text-green-900",
+                icon: <div className="p-1 bg-green-100 rounded-full"><CheckCircle className="h-4 w-4 text-green-600" /></div>,
             });
 
             // Refresh history and reset form
@@ -562,6 +632,8 @@ export const ExtracurricularAttendance: React.FC = () => {
 
                     {/* Tutor Info & Time Section */}
                     {/* Tutor Info & Time Section - Improved Consistency */}
+
+
                     <Card>
                         <CardHeader>
                             <div className="flex items-center gap-3">
@@ -741,6 +813,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                     </div>
                                 </div>
 
+
                                 {/* Status Filter */}
                                 <Select value={statusFilter} onValueChange={(value: "all" | AttendanceStatus) => setStatusFilter(value)}>
                                     <SelectTrigger className="w-full lg:w-40">
@@ -754,6 +827,18 @@ export const ExtracurricularAttendance: React.FC = () => {
                                         <SelectItem value="alpa">Alpa</SelectItem>
                                     </SelectContent>
                                 </Select>
+
+                                <Button
+                                    variant="outline"
+                                    onClick={handleMarkAllPresent}
+                                    disabled={filteredMembers.length === 0}
+                                    className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800 w-full lg:w-auto"
+                                >
+                                    <div className="flex items-center justify-center p-1 bg-green-200/50 rounded-full mr-2">
+                                        <CheckCheck className="h-3.5 w-3.5" />
+                                    </div>
+                                    <span>Tandai {filteredMembers.length > 0 ? filteredMembers.length : ""} Siswa Hadir</span>
+                                </Button>
                             </div>
                         </div>
 

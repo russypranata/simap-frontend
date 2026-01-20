@@ -55,6 +55,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MembersSkeleton } from "../components/AdvisorSkeletons";
 
 import { useDebounce } from "@/hooks/use-debounce";
+import { useAcademicYear } from "@/context/AcademicYearContext";
 
 export const ExtracurricularMembers: React.FC = () => {
     const [members, setMembers] = useState<AdvisorMember[]>([]);
@@ -66,9 +67,7 @@ export const ExtracurricularMembers: React.FC = () => {
     const [selectedMember, setSelectedMember] = useState<AdvisorMember | null>(null);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
     
-    // Enforce Active Period for Advisor
-    const currentYear = "2025/2026";
-    const currentSemester = "1"; // Ganjil
+    const { academicYear, isLoading: isConfigLoading } = useAcademicYear();
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -79,8 +78,10 @@ export const ExtracurricularMembers: React.FC = () => {
     // Debounce search query to prevent spamming API
     const debouncedSearch = useDebounce(searchQuery, 500);
 
-    // Fetch members when dependencies change
+    // Fetch members when dependencies change (only after config is loaded)
     React.useEffect(() => {
+        if (isConfigLoading) return;
+
         const fetchMembers = async () => {
             try {
                 setIsLoading(true);
@@ -89,9 +90,11 @@ export const ExtracurricularMembers: React.FC = () => {
                     limit: itemsPerPage,
                     search: debouncedSearch,
                     class: classFilter,
-                    academicYear: currentYear,
+                    search: debouncedSearch,
+                    class: classFilter,
+                    academicYear: academicYear.academicYear,
                     status: "Aktif", // Enforce Active
-                    semester: currentSemester
+                    semester: academicYear.semester
                 });
                 
                 // Handle response structure difference between Mock/Real if any
@@ -116,12 +119,13 @@ export const ExtracurricularMembers: React.FC = () => {
         };
 
         fetchMembers();
-    }, [currentPage, debouncedSearch, classFilter, currentYear, currentSemester, statusFilter]);
+        fetchMembers();
+    }, [currentPage, debouncedSearch, classFilter, academicYear.academicYear, academicYear.semester, statusFilter, isConfigLoading]);
 
     // Reset page when filters change
     React.useEffect(() => {
         setCurrentPage(1);
-    }, [debouncedSearch, classFilter, currentYear, statusFilter]);
+    }, [debouncedSearch, classFilter, academicYear.academicYear, statusFilter]);
 
 
 
@@ -150,21 +154,14 @@ export const ExtracurricularMembers: React.FC = () => {
     });
 
     React.useEffect(() => {
-        // Fetch global stats for the cards (simulated calculation or separate endpoint)
-        // Since we don't have a specific "getMembersStats" endpoint doc'd, 
-        // we might reuse getDashboardStats OR just trust the metadata for total count
-        // and hide/mock the specific attendance stats for now.
-        // Or better: Let's assume for this task we focus on the Table functionality.
-        // For the stats cards, I will just use the `totalItems` from metadata for "Total Anggota".
-        // For others, I'll calculate based on the current fetched batch (it's a trade-off)
-        // OR better: Fetch all members just for stats? No that defeats the purpose.
-        // Let's use `advisorService.getDashboardStats()` if available? Yes.
+        if (isConfigLoading) return;
+        // Fetch global stats for the cards
         const fetchStats = async () => {
              try {
                 setIsStatsLoading(true);
                 const dashboardStats = await advisorService.getDashboardStats({
-                    academicYear: currentYear,
-                    semester: currentSemester
+                    academicYear: academicYear.academicYear,
+                    semester: academicYear.semester
                 });
                 setStats({
                     totalMembers: dashboardStats.totalMembers,
@@ -179,7 +176,7 @@ export const ExtracurricularMembers: React.FC = () => {
              }
         };
         fetchStats();
-    }, [currentYear, currentSemester]);
+    }, [academicYear.academicYear, academicYear.semester, isConfigLoading]);
 
 
     const handleViewDetail = async (memberToCheck: AdvisorMember) => {
@@ -225,12 +222,12 @@ export const ExtracurricularMembers: React.FC = () => {
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                             <Calendar className="h-4 w-4" />
                             <span className="text-sm font-semibold">
-                                Tahun Ajaran {currentYear}
+                                Tahun Ajaran {academicYear.academicYear}
                             </span>
                         </div>
                         <div className="h-4 w-[1px] bg-border" />
                         <span className="text-sm font-medium text-blue-800">
-                            Semester {currentSemester === "1" ? "Ganjil" : "Genap"}
+                            Semester {academicYear.label}
                         </span>
                     </div>
                 </div>

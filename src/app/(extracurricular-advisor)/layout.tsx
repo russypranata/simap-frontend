@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { AdvisorLayout } from '@/features/extracurricular-advisor/components/AdvisorLayout';
 import { useRole } from '@/app/context/RoleContext';
 
+import { AcademicYearProvider } from '@/context/AcademicYearContext';
+
 export default function ExtracurricularAdvisorRouteLayout({
     children,
 }: {
@@ -47,8 +49,12 @@ export default function ExtracurricularAdvisorRouteLayout({
 
     // Show nothing while initializing or redirecting
     if (isLoading || !isAuthenticated || role !== 'tutor_ekskul') {
-        return null;
+        return null; // Or a loading spinner
     }
 
-    return <AdvisorLayout>{children}</AdvisorLayout>;
+    return (
+        <AcademicYearProvider>
+            <AdvisorLayout>{children}</AdvisorLayout>
+        </AcademicYearProvider>
+    );
 }

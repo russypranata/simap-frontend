@@ -32,6 +32,7 @@ import {
     AdvisorDashboardStats
 } from "../services/advisorService";
 import { AdvisorProfileData } from "../data/mockAdvisorData";
+import { useAcademicYear } from "@/context/AcademicYearContext";
 
 export const ExtracurricularAdvisorProfile: React.FC = () => {
     const router = useRouter();
@@ -39,13 +40,14 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
     const [statsData, setStatsData] = useState<AdvisorDashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [isPhotoOpen, setIsPhotoOpen] = useState(false);
+    const { academicYear } = useAcademicYear();
 
     React.useEffect(() => {
         const fetchProfile = async () => {
             try {
                 const [profile, stats] = await Promise.all([
                     advisorService.getProfile(),
-                    advisorService.getDashboardStats()
+                    advisorService.getDashboardStats(),
                 ]);
                 setProfileData(profile);
                 setStatsData(stats);
@@ -93,12 +95,12 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                             <Calendar className="h-4 w-4" />
                             <span className="text-sm font-semibold">
-                                Tahun Ajaran 2025/2026
+                                Tahun Ajaran {academicYear.academicYear}
                             </span>
                         </div>
                         <div className="h-4 w-[1px] bg-border" />
                         <span className="text-sm font-medium text-blue-800">
-                            Semester Ganjil
+                            Semester {academicYear.label}
                         </span>
                     </div>
                 </div>

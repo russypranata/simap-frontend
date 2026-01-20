@@ -8,7 +8,33 @@ Dokumen ini menjelaskan endpoint API lengkap untuk Role **Tutor Ekstrakurikuler*
 
 ---
 
-## I. Authentication
+## I. System Configuration
+
+Endpoint untuk konfigurasi sistem global.
+
+### 1. Get Active Academic Year
+
+Mengambil Tahun Ajaran dan Semester yang sedang aktif.
+
+- **Endpoint**: `GET /extracurricular-advisor/academic-year/active`
+- **Headers**: `Authorization: Bearer <token>`
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "academicYear": "2025/2026",
+    "semester": "1",
+    "label": "Ganjil"
+  }
+}
+```
+
+---
+
+## II. Authentication
 
 Endpoint umum untuk otentikasi pengguna.
 
@@ -75,7 +101,7 @@ Keluar dari sistem dan menghapus sesi (token invalidation).
 
 ---
 
-## II. Profile Management
+## III. Profile Management
 
 Fitur pengelolaan profil tutor.
 
@@ -148,7 +174,7 @@ Mengubah kata sandi akun.
 
 ---
 
-## III. Dashboard
+## IV. Dashboard
 
 Data ringkasan untuk halaman utama dashboard.
 
@@ -158,7 +184,7 @@ Mengambil statistik ringkas (anggota, kehadiran, pertemuan).
 
 - **Endpoint**: `GET /extracurricular-advisor/dashboard/stats`
 - **Query Params**:
-  - `academicYear` (optional, e.g., "2024/2025")
+  - `academic_year` (optional, e.g., "2024/2025")
   - `semester` (optional, value: "1", "2", or "all")
 
 **Response (200 OK):**
@@ -194,27 +220,45 @@ Mengambil jadwal kegiatan mendatang.
       "day": "Jumat",
       "date": "26 Desember 2025",
       "time": "14:00 - 16:00"
-    },
-    {
-      "id": 2,
-      "day": "Jumat",
-      "date": "09 Januari 2026",
-      "time": "14:00 - 16:00"
     }
+    // ...
   ]
 }
 ```
 
 ### 3. Get Recent Activities
 
-Mengambil riwayat aktivitas (presensi) terakhir untuk widget dashboard.
+Mengambil riwayat aktivitas (presensi) terakhir.
 
 - **Endpoint**: `GET /extracurricular-advisor/dashboard/recent-activities`
-- **Response**: Array dari ringkasan presensi (ID, Tanggal, Jumlah Hadir).
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "day": "Jumat",
+      "date": "20 Des 2025",
+      "time": "14:00 - 16:00",
+      "attendance": 93
+    },
+    {
+      "id": 2,
+      "day": "Jumat",
+      "date": "13 Des 2025",
+      "time": "14:00 - 16:30",
+      "attendance": 89
+    }
+  ]
+}
+```
 
 ---
 
-## IV. Member Management (Anggota)
+## V. Member Management (Anggota)
 
 Pengelolaan data siswa anggota ekstrakurikuler.
 
@@ -224,12 +268,13 @@ Mengambil daftar anggota dengan filter.
 
 - **Endpoint**: `GET /extracurricular-advisor/members`
 - **Query Params**:
-  - `academicYear` (2025/2026)
-  - `semester` (Filter semester: "1", "2", or "all" for 1 Tahun Penuh)
-  - `class` (Filter kelas, e.g., "X A")
-  - `search` (Pencarian nama/NIS)
-  - `page` (Pagination)
-  - `limit` (Items per page)
+  - `academic_year` (e.g., "2025/2026")
+  - `semester` ("1", "2", or "all")
+  - `class` (e.g., "X A", "all")
+  - `search` (Nama/NIS)
+  - `status` ("Aktif", "Nonaktif", "all")
+  - `page` (int)
+  - `limit` (int)
 
 **Response (200 OK):**
 
@@ -243,9 +288,9 @@ Mengambil daftar anggota dengan filter.
       "name": "Andi Wijaya",
       "class": "XII A",
       "joinDate": "2024-07-15",
-      "attendance": 92 // Persentase kehadiran total
+      "attendance": 92,
+      "status": "Aktif"
     }
-    // ...
   ],
   "meta": {
     "currentPage": 1,
@@ -257,35 +302,41 @@ Mengambil daftar anggota dengan filter.
 
 ### 2. Get Member Detail
 
-Mengambil detail satu anggota beserta riwayat kehadirannya.
+Mengambil detail satu anggota.
 
 - **Endpoint**: `GET /extracurricular-advisor/members/:id`
 
-**Response (200 OK):**
+### 3. Add Member
+
+Menambahkan anggota baru (manual).
+
+- **Endpoint**: `POST /extracurricular-advisor/members`
+- **Request Body**:
 
 ```json
 {
-  "success": true,
-  "data": {
-    "id": 1,
-    "nis": "2022001",
-    "name": "Andi Wijaya",
-    "class": "XII A",
-    "joinDate": "2024-07-15",
-    "attendance": 92
-  }
+  "nis": "2025001",
+  "name": "Siswa Baru",
+  "class": "X A",
+  "joinDate": "2025-07-15"
 }
 ```
 
+### 4. Delete Member
+
+Menghapus anggota.
+
+- **Endpoint**: `DELETE /extracurricular-advisor/members/:id`
+
 ---
 
-## V. Attendance (Presensi)
+## VI. Attendance (Presensi)
 
 Fitur pencatatan kehadiran siswa.
 
 ### 1. Get Attendance History
 
-Mengambil riwayat sesi presensi yang sudah dilakukan.
+Mengambil riwayat sesi presensi.
 
 - **Endpoint**: `GET /extracurricular-advisor/attendance`
 - **Query Params**:
@@ -313,9 +364,9 @@ Mengambil riwayat sesi presensi yang sudah dilakukan.
 }
 ```
 
-### 2. Submit Attendance (Create)
+### 2. Submit Attendance
 
-Menyimpan data presensi baru (Siswa & Tutor).
+Menyimpan data presensi baru.
 
 - **Endpoint**: `POST /extracurricular-advisor/attendance`
 - **Request Body**:
@@ -325,7 +376,7 @@ Menyimpan data presensi baru (Siswa & Tutor).
   "date": "2025-12-26",
   "startTime": "14:00",
   "endTime": "16:00",
-  "tutorStatus": "hadir", // Status kehadiran tutor
+  "topic": "Kegiatan Rutin",
   "students": [
     { "studentId": 1, "status": "hadir" },
     { "studentId": 2, "status": "sakit", "note": "Demam" },
@@ -334,19 +385,9 @@ Menyimpan data presensi baru (Siswa & Tutor).
 }
 ```
 
-**Response (201 Created):**
-
-```json
-{
-  "success": true,
-  "message": "Presensi berhasil disimpan",
-  "data": { "id": 123 } // ID presensi yang baru dibuat
-}
-```
-
 ### 3. Get Attendance Detail
 
-Mengambil detail satu sesi presensi (siapa saja yang hadir/tidak).
+Mengambil detail satu sesi presensi.
 
 - **Endpoint**: `GET /extracurricular-advisor/attendance/:id`
 
