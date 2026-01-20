@@ -41,11 +41,11 @@ import {
     ChevronLeft,
     ChevronRight,
     History,
-    Award,
     TrendingUp,
     Eye,
     ChevronsLeft,
     ChevronsRight,
+    ClipboardCheck,
 } from "lucide-react";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
 import { toast } from "sonner";
@@ -66,6 +66,7 @@ export const ExtracurricularAttendance: React.FC = () => {
     const [members, setMembers] = useState<AdvisorMember[]>([]);
     const [history, setHistory] = useState<AttendanceHistoryEntry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isHistoryLoading, setIsHistoryLoading] = useState(false);
     const [, setIsSubmitting] = useState(false);
     const router = useRouter();
 
@@ -94,6 +95,12 @@ export const ExtracurricularAttendance: React.FC = () => {
     const searchParams = useSearchParams();
     const tabFromUrl = searchParams.get("tab");
     const [activeTab, setActiveTab] = useState(tabFromUrl === "history" ? "history" : "attendance");
+
+    useEffect(() => {
+        if (tabFromUrl) {
+            setActiveTab(tabFromUrl);
+        }
+    }, [tabFromUrl]);
     
     // History Filters
     // History Filters - Enforce Active Period
@@ -101,6 +108,8 @@ export const ExtracurricularAttendance: React.FC = () => {
     const [historySearchTerm, setHistorySearchTerm] = useState("");
     const [historyDateRange, setHistoryDateRange] = useState({ from: "", to: "" });
     const [activeDateFilter, setActiveDateFilter] = useState<"today" | "week" | "month" | null>(null);
+    const [historyPage, setHistoryPage] = useState(1);
+    const [historyItemsPerPage, setHistoryItemsPerPage] = useState(10);
 
     const setToday = () => {
         const today = new Date().toISOString().split('T')[0];
@@ -139,7 +148,7 @@ export const ExtracurricularAttendance: React.FC = () => {
         const fetchInitialData = async () => {
             try {
                 const [membersData, profileData] = await Promise.all([
-                    advisorService.getMembers(),
+                    advisorService.getMembers({ limit: 50, status: "Aktif" }),
                     advisorService.getProfile()
                 ]);
                 setMembers(membersData.data);
@@ -164,14 +173,14 @@ export const ExtracurricularAttendance: React.FC = () => {
     useEffect(() => {
         if (activeTab === "history") {
             const fetchHistory = async () => {
-                setIsLoading(true);
+                setIsHistoryLoading(true);
                 try {
                     const data = await advisorService.getAttendanceHistory();
                     setHistory(data);
                 } catch (error) {
                     console.error("Failed to fetch history:", error);
                 } finally {
-                    setIsLoading(false);
+                    setIsHistoryLoading(false);
                 }
             };
             fetchHistory();
@@ -258,10 +267,11 @@ export const ExtracurricularAttendance: React.FC = () => {
     };
 
     const handleRefresh = async () => {
-        setIsRefreshing(true);
+        setIsLoading(true);
+        // setIsRefreshing(true); // Optional: keep if you want button state update before unmount
         try {
             const [membersData, historyData] = await Promise.all([
-                 advisorService.getMembers(),
+                 advisorService.getMembers({ limit: 50, status: "Aktif" }),
                  advisorService.getAttendanceHistory()
             ]);
             setMembers(membersData.data);
@@ -278,7 +288,8 @@ export const ExtracurricularAttendance: React.FC = () => {
         } catch {
              toast.error("Gagal merefresh data");
         } finally {
-            setIsRefreshing(false);
+            setIsLoading(false);
+            // setIsRefreshing(false);
         }
     };
 
@@ -356,10 +367,29 @@ export const ExtracurricularAttendance: React.FC = () => {
         });
     }, [historyDateRange, history, historySearchTerm]);
 
+    // Paginate history
+    const paginatedHistory = React.useMemo(() => {
+        const startIndex = (historyPage - 1) * historyItemsPerPage;
+        const endIndex = startIndex + historyItemsPerPage;
+        return filteredHistory.slice(startIndex, endIndex);
+    }, [filteredHistory, historyPage, historyItemsPerPage]);
+
+    const totalHistoryPages = Math.ceil(filteredHistory.length / historyItemsPerPage);
+
+    // Reset history page when filters change
+    useEffect(() => {
+        setHistoryPage(1);
+    }, [historySearchTerm, historyDateRange, historyItemsPerPage]);
+
     // Latest Stats derivation
     const latestHistory = history[0];
     const latestPresent = latestHistory ? latestHistory.studentStats.present : 0;
-    const latestPercentage = latestHistory ? latestHistory.studentStats.percentage : 0;
+    // Calculate overall average attendance percentage from history
+    const overallAveragePercentage = history.length > 0
+        ? Math.round(
+            history.reduce((acc, curr) => acc + curr.studentStats.percentage, 0) / history.length
+          )
+        : 0;
 
     const presentCount = Array.from(attendanceRecords.values()).filter(
         (r) => r.status === "hadir"
@@ -390,7 +420,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Kelola presensi anggota dan kegiatan ekstrakurikuler Pramuka
+                        Kelola presensi dan kegiatan ekstrakurikuler pada Tahun Ajaran aktif
                     </p>
                     <div className="flex items-center gap-3 mt-4">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
@@ -420,25 +450,23 @@ export const ExtracurricularAttendance: React.FC = () => {
                 </div>
             </div>
 
-            {/* Stats Cards - Global for all tabs */}
-            <Card className="overflow-hidden p-0">
-                {/* Header Section with Decorative Pattern */}
-                <div className="bg-blue-800 p-5 relative overflow-hidden">
-                    {/* Decorative Geometric Pattern */}
-                    <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
-                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
+            {/* Stats Card */}
+            <Card className="overflow-hidden p-0 gap-0">
+                {/* Header */}
+                <div className="bg-blue-800 p-4 rounded-t-lg relative overflow-hidden">
+                    {/* Decorative circles */}
+                    {/* Decorative Icon */}
+                    <div className="absolute -right-6 -bottom-6 text-white/10 transform rotate-12">
+                        <ClipboardCheck className="w-32 h-32" />
                     </div>
 
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                                <Award className="h-7 w-7 text-white" />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-bold text-white">Statistik Kehadiran</h2>
-                                <p className="text-blue-100 text-sm">Ringkasan performa kehadiran semester ini</p>
-                            </div>
+                    <div className="flex items-center gap-3 relative z-10">
+                        <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-lg">
+                            <ClipboardCheck className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-lg text-white">Ringkasan Kehadiran</h3>
+                            <p className="text-blue-100 text-sm">Ringkasan data kehadiran siswa pada Tahun Ajaran aktif</p>
                         </div>
                     </div>
                 </div>
@@ -448,9 +476,9 @@ export const ExtracurricularAttendance: React.FC = () => {
                         {/* Total Anggota */}
                         <div className="p-4 text-center">
                             <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
-                                <Users className="h-5 w-5 text-blue-600" />
+                                <Users className="h-5 w-5 text-blue-800" />
                             </div>
-                            <p className="text-2xl font-bold text-blue-600">{members.length}</p>
+                            <p className="text-xl font-bold text-blue-800">{members.length}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Anggota</p>
                         </div>
 
@@ -459,31 +487,31 @@ export const ExtracurricularAttendance: React.FC = () => {
                             <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
                                 <CheckCircle className="h-5 w-5 text-green-600" />
                             </div>
-                            <p className="text-2xl font-bold text-green-600">{latestPresent}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Hadir Terakhir</p>
+                            <p className="text-xl font-bold text-green-600">{latestPresent}</p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Kehadiran Terakhir</p>
                         </div>
 
                         {/* Rata-rata Kehadiran */}
                         <div className="p-4 text-center">
                             <div className={cn(
                                 "inline-flex p-2.5 rounded-full mb-2",
-                                latestPercentage >= 90 ? "bg-green-100" :
-                                    latestPercentage >= 75 ? "bg-yellow-100" : "bg-red-100"
+                                overallAveragePercentage >= 90 ? "bg-green-100" :
+                                    overallAveragePercentage >= 75 ? "bg-yellow-100" : "bg-red-100"
                             )}>
                                 <TrendingUp className={cn(
                                     "h-5 w-5",
-                                    latestPercentage >= 90 ? "text-green-600" :
-                                        latestPercentage >= 75 ? "text-yellow-600" : "text-red-600"
+                                    overallAveragePercentage >= 90 ? "text-green-600" :
+                                        overallAveragePercentage >= 75 ? "text-yellow-600" : "text-red-600"
                                 )} />
                             </div>
                             <p className={cn(
-                                "text-2xl font-bold",
-                                latestPercentage >= 90 ? "text-green-600" :
-                                    latestPercentage >= 75 ? "text-yellow-600" : "text-red-600"
+                                "text-xl font-bold",
+                                overallAveragePercentage >= 90 ? "text-green-600" :
+                                    overallAveragePercentage >= 75 ? "text-yellow-600" : "text-red-600"
                             )}>
-                                {latestPercentage}%
+                                {overallAveragePercentage}%
                             </p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Rata-rata</p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Rata-rata Kehadiran</p>
                         </div>
 
                         {/* Tanggal Pertemuan Terakhir */}
@@ -491,7 +519,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                             <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
                                 <Calendar className="h-5 w-5 text-purple-600" />
                             </div>
-                            <p className="text-2xl font-bold text-purple-600">12</p>
+                            <p className="text-xl font-bold text-purple-600">{history.length}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Pertemuan</p>
                         </div>
                     </div>
@@ -499,14 +527,23 @@ export const ExtracurricularAttendance: React.FC = () => {
             </Card>
 
             {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <Tabs 
+                value={activeTab} 
+                onValueChange={(value) => {
+                    setActiveTab(value);
+                    const newParams = new URLSearchParams(searchParams.toString());
+                    newParams.set("tab", value);
+                    router.push(`?${newParams.toString()}`);
+                }} 
+                className="space-y-6"
+            >
                 <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1.5 gap-1">
                     <TabsTrigger
                         value="attendance"
                         className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=active]:hover:bg-blue-900 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
                     >
                         <CheckCircle className="h-4 w-4 mr-2" />
-                        Presensi Hari Ini
+                        Isi Presensi
                     </TabsTrigger>
                     <TabsTrigger
                         value="history"
@@ -521,48 +558,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                 <TabsContent value="attendance" className="space-y-6">
                     {/* Date Selector - Improved */}
                     {/* Date Selector - Improved Consistency */}
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                                    <Calendar className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                        Tanggal Kegiatan
-                                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-normal">
-                                            Wajib Diisi
-                                        </Badge>
-                                    </CardTitle>
-                                    <CardDescription className="text-sm text-muted-foreground">
-                                        Pilih tanggal kegiatan untuk memulai pencatatan presensi
-                                    </CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="attendance-date" className="text-sm font-medium">
-                                        Pilih Tanggal
-                                    </Label>
-                                    <Input
-                                        id="attendance-date"
-                                        type="date"
-                                        value={selectedDate}
-                                        onChange={(e) => setSelectedDate(e.target.value)}
-                                        className="h-11"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm font-medium">Tahun Ajaran & Semester</Label>
-                                    <div className="flex items-center gap-3 h-11 px-3 bg-muted/30 rounded-md border text-sm text-muted-foreground">
-                                        <span>Tahun Ajaran 2025/2026 - Ganjil</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+
 
                     {/* Tutor Info & Time Section */}
                     {/* Tutor Info & Time Section - Improved Consistency */}
@@ -574,13 +570,10 @@ export const ExtracurricularAttendance: React.FC = () => {
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                        Presensi Tutor & Waktu
-                                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-normal">
-                                            Wajib Diisi
-                                        </Badge>
+                                        Informasi Kegiatan
                                     </CardTitle>
                                     <CardDescription className="text-sm text-muted-foreground">
-                                        Konfirmasi kehadiran Anda sebagai tutor dan tentukan waktu pelaksanaan kegiatan
+                                        Lengkapi detail waktu dan tanggal pelaksanaan kegiatan ekstrakurikuler
                                     </CardDescription>
                                 </div>
                             </div>
@@ -615,36 +608,55 @@ export const ExtracurricularAttendance: React.FC = () => {
 
                                 {/* Right: Time Fields */}
                                 <div className="space-y-4">
+                                    {/* Date Input moved here */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="start-time" className="text-sm font-semibold text-gray-900">
-                                            Waktu Mulai <span className="text-red-500">*</span>
+                                        <Label htmlFor="attendance-date" className="text-sm font-semibold text-gray-900">
+                                            Tanggal Kegiatan <span className="text-red-500">*</span>
                                         </Label>
                                         <div className="relative">
-                                            <Clock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                                            <Calendar className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                                             <Input
-                                                id="start-time"
-                                                type="time"
-                                                value={startTime}
-                                                onChange={(e) => setStartTime(e.target.value)}
+                                                id="attendance-date"
+                                                type="date"
+                                                value={selectedDate}
+                                                onChange={(e) => setSelectedDate(e.target.value)}
                                                 className="h-11 pl-10"
-                                                required
                                             />
                                         </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="end-time" className="text-sm font-semibold text-gray-900">
-                                            Waktu Selesai <span className="text-red-500">*</span>
-                                        </Label>
-                                        <div className="relative">
-                                            <Clock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                                            <Input
-                                                id="end-time"
-                                                type="time"
-                                                value={endTime}
-                                                onChange={(e) => setEndTime(e.target.value)}
-                                                className="h-11 pl-10"
-                                                required
-                                            />
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="start-time" className="text-sm font-semibold text-gray-900">
+                                                Waktu Mulai <span className="text-red-500">*</span>
+                                            </Label>
+                                            <div className="relative">
+                                                <Clock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                                                <Input
+                                                    id="start-time"
+                                                    type="time"
+                                                    value={startTime}
+                                                    onChange={(e) => setStartTime(e.target.value)}
+                                                    className="h-11 pl-10"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="end-time" className="text-sm font-semibold text-gray-900">
+                                                Waktu Selesai <span className="text-red-500">*</span>
+                                            </Label>
+                                            <div className="relative">
+                                                <Clock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                                                <Input
+                                                    id="end-time"
+                                                    type="time"
+                                                    value={endTime}
+                                                    onChange={(e) => setEndTime(e.target.value)}
+                                                    className="h-11 pl-10"
+                                                    required
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -663,7 +675,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                     </div>
                                     <div>
                                         <CardTitle className="text-lg font-semibold text-gray-900">
-                                            Daftar Anggota ({filteredMembers.length})
+                                            Daftar Anggota
                                         </CardTitle>
                                         <CardDescription className="text-sm text-muted-foreground">
                                             Catat status kehadiran (Hadir, Sakit, Izin, Alpa) untuk setiap anggota
@@ -671,29 +683,35 @@ export const ExtracurricularAttendance: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* Attendance Stats in Header */}
-                                <div className="flex items-center gap-3 bg-muted/30 px-3 py-2 rounded-lg border">
-                                    <div className="flex items-center gap-2">
-                                        <Users className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-sm font-medium text-foreground">
-                                            <span className="text-green-600 font-semibold">{presentCount}</span>
-                                            <span className="text-muted-foreground mx-1">/</span>
-                                            <span className="font-semibold">{members.length}</span>
-                                            <span className="text-muted-foreground ml-1">hadir</span>
-                                        </span>
-                                    </div>
-                                    <div className="h-4 w-[1px] bg-border" />
-                                    <Badge
-                                        variant="outline"
-                                        className={`font-semibold ${currentSessionPercentage >= 90
-                                            ? 'bg-green-50 text-green-700 border-green-200'
-                                            : currentSessionPercentage >= 75
-                                                ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                                : 'bg-red-50 text-red-700 border-red-200'
-                                            }`}
-                                    >
-                                        {currentSessionPercentage}%
+                                <div className="flex items-center gap-2">
+                                    <Badge className="bg-blue-50 text-blue-800 border-blue-200">
+                                        {filteredMembers.length} Anggota
                                     </Badge>
+
+                                    {/* Attendance Stats in Header */}
+                                    <div className="flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-lg border">
+                                        <div className="flex items-center gap-2">
+                                            <Users className="h-4 w-4 text-muted-foreground" />
+                                            <span className="text-sm font-medium text-foreground">
+                                                <span className="text-green-600 font-semibold">{presentCount}</span>
+                                                <span className="text-muted-foreground mx-1">/</span>
+                                                <span className="font-semibold">{members.length}</span>
+                                                <span className="text-muted-foreground ml-1">hadir</span>
+                                            </span>
+                                        </div>
+                                        <div className="h-4 w-[1px] bg-border" />
+                                        <Badge
+                                            variant="outline"
+                                            className={`font-semibold ${currentSessionPercentage >= 90
+                                                ? 'bg-green-50 text-green-700 border-green-200'
+                                                : currentSessionPercentage >= 75
+                                                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                    : 'bg-red-50 text-red-700 border-red-200'
+                                                }`}
+                                        >
+                                            {currentSessionPercentage}%
+                                        </Badge>
+                                    </div>
                                 </div>
                             </div>
                         </CardHeader>
@@ -736,30 +754,6 @@ export const ExtracurricularAttendance: React.FC = () => {
                                         <SelectItem value="alpa">Alpa</SelectItem>
                                     </SelectContent>
                                 </Select>
-
-                                {/* Items per page */}
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground whitespace-nowrap">Show:</span>
-                                    <Select
-                                        value={itemsPerPage.toString()}
-                                        onValueChange={(value) => {
-                                            setItemsPerPage(parseInt(value));
-                                            setCurrentPage(1);
-                                        }}
-                                    >
-                                        <SelectTrigger className="w-24">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="5">5</SelectItem>
-                                            <SelectItem value="10">10</SelectItem>
-                                            <SelectItem value="25">25</SelectItem>
-                                            <SelectItem value="50">50</SelectItem>
-                                            <SelectItem value="100">100</SelectItem>
-                                            <SelectItem value={members.length.toString()}>Semua</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
                             </div>
                         </div>
 
@@ -1010,10 +1004,7 @@ export const ExtracurricularAttendance: React.FC = () => {
 
                                     {/* Action Buttons */}
                                     <div className="flex gap-2">
-                                        <Button variant="outline" className="flex items-center gap-2">
-                                            <Download className="h-4 w-4" />
-                                            Export
-                                        </Button>
+
                                         <Button onClick={handleSaveAttendance} className="flex items-center gap-2 bg-blue-800 text-white hover:bg-blue-900 hover:text-white">
                                             <Save className="h-4 w-4" />
                                             Simpan Presensi
@@ -1037,10 +1028,10 @@ export const ExtracurricularAttendance: React.FC = () => {
                                     </div>
                                     <div>
                                         <CardTitle className="text-lg font-semibold text-gray-900">
-                                            Riwayat Kegiatan
+                                            Riwayat Presensi
                                         </CardTitle>
                                         <CardDescription className="text-sm text-muted-foreground">
-                                            Riwayat kegiatan dan presensi lengkap tahun ajaran ini
+                                            Riwayat kegiatan dan presensi lengkap pada Tahun Ajaran aktif
                                         </CardDescription>
                                     </div>
                                 </div>
@@ -1062,7 +1053,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                             Reset
                                         </Button>
                                     )}
-                                    <Badge variant="outline" className="text-sm bg-blue-50 text-blue-700 border-blue-200">
+                                    <Badge className="bg-blue-50 text-blue-800 border-blue-200">
                                         {filteredHistory.length} Riwayat
                                     </Badge>
                                 </div>
@@ -1085,52 +1076,71 @@ export const ExtracurricularAttendance: React.FC = () => {
                                 </div>
 
                                 {/* Quick Filters */}
-                                <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 justify-end">
+                                {/* Quick Filters - Segmented Control Style */}
+                                <div className="flex items-center gap-2 w-full md:w-auto justify-end">
                                     <span className="text-sm font-medium text-muted-foreground mr-1 whitespace-nowrap">Filter Cepat:</span>
-                                    <Button
-                                        variant="outline"
-                                        className={cn(
-                                            "h-7 px-2 text-xs font-normal",
-                                            activeDateFilter === 'today'
-                                                ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
-                                                : ""
-                                        )}
-                                        onClick={setToday}
-                                    >
-                                        Hari Ini
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className={cn(
-                                            "h-7 px-2 text-xs font-normal",
-                                            activeDateFilter === 'week'
-                                                ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
-                                                : ""
-                                        )}
-                                        onClick={setThisWeek}
-                                    >
-                                        Minggu Ini
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className={cn(
-                                            "h-7 px-2 text-xs font-normal",
-                                            activeDateFilter === 'month'
-                                                ? "bg-blue-800 text-white hover:bg-blue-900 hover:text-white border-blue-800"
-                                                : ""
-                                        )}
-                                        onClick={setThisMonth}
-                                    >
-                                        Bulan Ini
-                                    </Button>
+                                    <div className="flex items-center bg-muted/50 p-1 rounded-lg border border-border/50">
+                                        <button
+                                            onClick={setToday}
+                                            className={cn(
+                                                "px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200",
+                                                activeDateFilter === 'today'
+                                                    ? "bg-blue-800 text-white shadow-sm"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                            )}
+                                        >
+                                            Hari Ini
+                                        </button>
+                                        <div className="w-[1px] h-4 bg-border/50 mx-1" />
+                                        <button
+                                            onClick={setThisWeek}
+                                            className={cn(
+                                                "px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200",
+                                                activeDateFilter === 'week'
+                                                    ? "bg-blue-800 text-white shadow-sm"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                            )}
+                                        >
+                                            Minggu Ini
+                                        </button>
+                                        <div className="w-[1px] h-4 bg-border/50 mx-1" />
+                                        <button
+                                            onClick={setThisMonth}
+                                            className={cn(
+                                                "px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200",
+                                                activeDateFilter === 'month'
+                                                    ? "bg-blue-800 text-white shadow-sm"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                            )}
+                                        >
+                                            Bulan Ini
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <CardContent className="pt-2">
                             <div className="space-y-3">
-                                {/* Empty State */}
-                                {((filteredHistory.length === 0)) ? (
+                                {isHistoryLoading ? (
+                                    // Local Skeleton for History Items
+                                    Array.from({ length: 3 }).map((_, i) => (
+                                        <div key={i} className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg gap-4 animate-pulse">
+                                            <div className="flex items-center space-x-4 min-w-[200px]">
+                                                <div className="h-10 w-10 rounded-full bg-slate-200" />
+                                                <div className="space-y-2">
+                                                    <div className="h-4 w-32 bg-slate-200 rounded" />
+                                                    <div className="h-3 w-20 bg-slate-200 rounded" />
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-6">
+                                                <div className="h-12 w-24 bg-slate-200 rounded" />
+                                                <div className="h-12 w-24 bg-slate-200 rounded" />
+                                            </div>
+                                            <div className="h-9 w-24 bg-slate-200 rounded" />
+                                        </div>
+                                    ))
+                                ) : ((filteredHistory.length === 0)) ? (
                                     <div className="flex flex-col items-center justify-center py-12 text-center">
                                         <div className="p-4 rounded-full bg-muted mb-4">
                                             <Calendar className="h-8 w-8 text-muted-foreground" />
@@ -1160,7 +1170,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                         )}
                                     </div>
                                 ) : (
-                                    filteredHistory.map((record) => {
+                                    paginatedHistory.map((record) => {
                                         // Calculate duration
                                         const start = new Date(`2000-01-01 ${record.advisorStats.startTime}`);
                                         const end = new Date(`2000-01-01 ${record.advisorStats.endTime}`);
@@ -1177,7 +1187,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                                                         <Calendar className="h-5 w-5" />
                                                     </div>
                                                     <div>
-                                                        <p className="font-medium text-gray-900">
+                                                        <p className="text-sm font-medium text-gray-900">
                                                             {formatDate(record.date, "dd MMMM yyyy")}
                                                         </p>
                                                     </div>
@@ -1219,10 +1229,9 @@ export const ExtracurricularAttendance: React.FC = () => {
                                                         <div>
                                                             <span className="text-sm font-medium text-gray-700 block">Status Tutor</span>
                                                             <div className="flex items-center gap-2 mt-0.5">
-                                                                <Badge className="bg-blue-100 text-blue-700 border-blue-200 font-normal text-[10px] px-1.5 h-5">
+                                                                <Badge className="bg-blue-50 text-blue-800 border-blue-200 font-normal text-[10px] px-1.5 h-5">
                                                                     {record.advisorStats.startTime} - {record.advisorStats.endTime}
                                                                 </Badge>
-                                                                <span className="text-xs text-muted-foreground">({duration})</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1232,9 +1241,9 @@ export const ExtracurricularAttendance: React.FC = () => {
                                                 <div className="flex items-center justify-end">
                                                     <Button
                                                         size="sm"
-                                                        variant="outline"
-                                                        className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
-                                                        onClick={() => router.push(`/extracurricular-advisor/attendance/${record.id}`)}
+                                                        variant="ghost"
+                                                        className="h-8 px-3 bg-blue-50 hover:bg-blue-100 text-blue-800 hover:text-blue-900 rounded-lg gap-2"
+                                                        onClick={() => router.push(`/extracurricular-advisor/attendance/${record.id}?tab=${activeTab}`)}
                                                     >
                                                         <Eye className="h-4 w-4" />
                                                         Detail
@@ -1246,39 +1255,85 @@ export const ExtracurricularAttendance: React.FC = () => {
                                 )}
                             </div>
 
-                            {/* Pagination (Mock) */}
-                            <div className="flex items-center justify-between pt-4 border-t mt-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="text-sm text-muted-foreground">
-                                        Menampilkan {filteredHistory.length === 0 ? 0 : 1}-{filteredHistory.length} dari {filteredHistory.length} data
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm text-muted-foreground">Baris:</span>
-                                        <select
-                                            className="h-8 w-16 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                        >
-                                            <option value={10}>10</option>
-                                            <option value={20}>20</option>
-                                            <option value={50}>50</option>
-                                        </select>
-                                    </div>
+                            {/* Pagination (History) */}
+                            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 mt-4 bg-muted/20">
+                                {/* Left: Pagination Info */}
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <span>Menampilkan</span>
+                                    <span className="font-medium text-foreground">
+                                        {filteredHistory.length === 0 ? 0 : (historyPage - 1) * historyItemsPerPage + 1}
+                                    </span>
+                                    <span>-</span>
+                                    <span className="font-medium text-foreground">
+                                        {Math.min(historyPage * historyItemsPerPage, filteredHistory.length)}
+                                    </span>
+                                    <span>dari</span>
+                                    <span className="font-medium text-foreground">{filteredHistory.length}</span>
+                                    <span>data</span>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                    <Button variant="outline" size="sm" disabled>
-                                        <ChevronsLeft className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="outline" size="sm" disabled>
-                                        <ChevronLeft className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="default" size="sm" className="min-w-[40px] bg-blue-800 hover:bg-blue-900">
-                                        1
-                                    </Button>
-                                    <Button variant="outline" size="sm" disabled>
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="outline" size="sm" disabled>
-                                        <ChevronsRight className="h-4 w-4" />
-                                    </Button>
+
+                                {/* Right: Pagination & Action Buttons */}
+                                <div className="flex flex-col sm:flex-row items-center gap-3">
+                                    {totalHistoryPages > 1 && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-muted-foreground">
+                                                Hal {historyPage}/{totalHistoryPages}
+                                            </span>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setHistoryPage((prev) => Math.max(1, prev - 1))}
+                                                disabled={historyPage === 1}
+                                                className="h-8 w-8 p-0"
+                                            >
+                                                <ChevronLeft className="h-4 w-4" />
+                                            </Button>
+                                            <div className="flex items-center space-x-1">
+                                                {Array.from({ length: Math.min(5, totalHistoryPages) }, (_, i) => {
+                                                    const pageNumber = i + 1;
+                                                    return (
+                                                        <Button
+                                                            key={pageNumber}
+                                                            variant={historyPage === pageNumber ? "default" : "outline"}
+                                                            size="sm"
+                                                            onClick={() => setHistoryPage(pageNumber)}
+                                                            className={cn(
+                                                                "w-8 h-8 p-0",
+                                                                historyPage === pageNumber && "bg-blue-800 hover:bg-blue-900 text-white"
+                                                            )}
+                                                        >
+                                                            {pageNumber}
+                                                        </Button>
+                                                    );
+                                                })}
+                                                {totalHistoryPages > 5 && (
+                                                    <>
+                                                        <span className="text-sm text-muted-foreground">...</span>
+                                                        <Button
+                                                            variant={historyPage === totalHistoryPages ? "default" : "outline"}
+                                                            size="sm"
+                                                            onClick={() => setHistoryPage(totalHistoryPages)}
+                                                            className={cn(
+                                                                "w-8 h-8 p-0",
+                                                                historyPage === totalHistoryPages && "bg-blue-800 hover:bg-blue-900 text-white"
+                                                            )}
+                                                        >
+                                                            {totalHistoryPages}
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            </div>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setHistoryPage((prev) => Math.min(totalHistoryPages, prev + 1))}
+                                                disabled={historyPage === totalHistoryPages}
+                                                className="h-8 w-8 p-0"
+                                            >
+                                                <ChevronRight className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </CardContent>

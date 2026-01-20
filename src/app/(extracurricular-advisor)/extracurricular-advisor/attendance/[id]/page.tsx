@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { useRouter, useParams } from "next/navigation";
+import React, { useState, useMemo, useEffect } from "react";
+import { useParams } from "next/navigation";
 import {
     Card,
     CardContent,
@@ -21,7 +21,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
-    ArrowLeft,
+
     Calendar,
     CheckCircle,
     Clock,
@@ -35,68 +35,70 @@ import {
 import { formatDate } from "@/features/shared/utils/dateFormatter";
 import { cn } from "@/lib/utils";
 
-// Mock Data for Detail
-const mockDetailData = {
-    id: 1,
-    date: "2025-12-20",
-    activity: "Pertemuan Rutin",
-    ekstrakurikuler: "Pramuka",
-    tutor: "Ahmad Fauzi, S.Pd",
-    startTime: "14:00",
-    endTime: "16:00",
-    students: [
-        { id: 1, nis: "2022001", name: "Andi Wijaya", class: "XII A", status: "hadir" },
-        { id: 2, nis: "2022002", name: "Rina Kusuma", class: "XI A", status: "sakit" },
-        { id: 3, nis: "2022003", name: "Doni Pratama", class: "XI B", status: "hadir" },
-        { id: 4, nis: "2022004", name: "Siti Aminah", class: "XII B", status: "izin" },
-        { id: 5, nis: "2022005", name: "Budi Santoso", class: "X A", status: "hadir" },
-        { id: 6, nis: "2022006", name: "Dewi Lestari", class: "XII A", status: "hadir" },
-        { id: 7, nis: "2022007", name: "Eko Prasetyo", class: "XI A", status: "hadir" },
-        { id: 8, nis: "2022008", name: "Fitri Handayani", class: "XI B", status: "sakit" },
-        { id: 9, nis: "2022009", name: "Gilang Ramadhan", class: "XII B", status: "hadir" },
-        { id: 10, nis: "2022010", name: "Hana Safitri", class: "X A", status: "hadir" },
-        { id: 11, nis: "2022011", name: "Indra Permana", class: "XII A", status: "hadir" },
-        { id: 12, nis: "2022012", name: "Jihan Aulia", class: "XI A", status: "hadir" },
-        { id: 13, nis: "2022013", name: "Kevin Anggara", class: "XI B", status: "alpa" },
-        { id: 14, nis: "2022014", name: "Lina Marlina", class: "XII B", status: "hadir" },
-        { id: 15, nis: "2022015", name: "Muhamad Rizky", class: "X A", status: "hadir" },
-        { id: 16, nis: "2022016", name: "Nadia Putri", class: "XII A", status: "hadir" },
-        { id: 17, nis: "2022017", name: "Oscar Wijaya", class: "XI A", status: "izin" },
-        { id: 18, nis: "2022018", name: "Putri Ayu", class: "XI B", status: "hadir" },
-        { id: 19, nis: "2022019", name: "Qori Azzahra", class: "XII B", status: "hadir" },
-        { id: 20, nis: "2022020", name: "Reza Pahlevi", class: "X A", status: "hadir" },
-        { id: 21, nis: "2022021", name: "Sinta Dewi", class: "XII A", status: "hadir" },
-        { id: 22, nis: "2022022", name: "Taufik Hidayat", class: "XI A", status: "hadir" },
-        { id: 23, nis: "2022023", name: "Umar Bakri", class: "XI B", status: "hadir" },
-        { id: 24, nis: "2022024", name: "Vina Melati", class: "XII B", status: "hadir" },
-        { id: 25, nis: "2022025", name: "Wahyu Pratama", class: "X A", status: "hadir" },
-    ]
-};
+import { AttendanceDetailSkeleton } from "@/features/extracurricular-advisor/components/AdvisorSkeletons";
 
-// Get unique classes from students
-const uniqueClasses = [...new Set(mockDetailData.students.map(s => s.class))].sort();
+import { advisorService, AttendanceDetail } from "@/features/extracurricular-advisor/services/advisorService";
+import { toast } from "sonner";
 
 export default function AttendanceDetailPage() {
-    const router = useRouter();
-    useParams(); // id is used for routing but not needed in component logic
+    const params = useParams();
+    const id = Number(params.id);
 
     // State
+    const [isLoading, setIsLoading] = useState(true);
+    const [attendanceDetail, setAttendanceDetail] = useState<AttendanceDetail | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [classFilter, setClassFilter] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const data = await advisorService.getAttendanceDetail(id);
+                setAttendanceDetail(data);
+            } catch (error) {
+                console.error("Failed to fetch attendance detail:", error);
+                toast.error("Gagal memuat detail presensi");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (id) {
+            fetchData();
+        }
+    }, [id]);
+
+    // Derived State
+    const students = attendanceDetail?.students || [];
+    const uniqueClasses = useMemo(() => [...new Set(students.map(s => s.class))].sort(), [students]);
+
     // Calculate stats
     const stats = useMemo(() => {
-        const present = mockDetailData.students.filter(s => s.status === "hadir").length;
-        const sick = mockDetailData.students.filter(s => s.status === "sakit").length;
-        const permit = mockDetailData.students.filter(s => s.status === "izin").length;
-        const absent = mockDetailData.students.filter(s => s.status === "alpa").length;
-        const total = mockDetailData.students.length;
-        const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+        if (!attendanceDetail) return { present: 0, sick: 0, permit: 0, absent: 0, total: 0, percentage: 0 };
+        
+        // Use stats from the record directly if available and accurate, or recalculate from list
+        // Let's rely on the record's stats for the summary cards to match history exactly
+        // But for the break down (Sakit, Izin, Alpa) we might need to count if the history object doesn't have it broken down
+        // The history object has: present, total, percentage.
+        // It does NOT have sick/permit/absent counts in the summary.
+        // So we must count them from the student list.
+        
+        const present = students.filter(s => s.status === "hadir").length;
+        const sick = students.filter(s => s.status === "sakit").length;
+        const permit = students.filter(s => s.status === "izin").length;
+        const absent = students.filter(s => s.status === "alpa").length;
+        const total = students.length;
+        
+        // Re-calculate percentage to be sure or use from detail?
+        // Let's use detail percentage for consistency with history card
+        const percentage = attendanceDetail.studentStats.percentage;
+
         return { present, sick, permit, absent, total, percentage };
-    }, []);
+    }, [attendanceDetail, students]);
 
     const getStatusBadgeVariant = (status: string) => {
         switch (status) {
@@ -134,14 +136,14 @@ export default function AttendanceDetailPage() {
 
     // Filter students
     const filteredStudents = useMemo(() => {
-        return mockDetailData.students.filter(student => {
+        return students.filter(student => {
             const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 student.nis.includes(searchTerm);
             const matchesStatus = statusFilter === "all" || student.status === statusFilter;
             const matchesClass = classFilter === "all" || student.class === classFilter;
             return matchesSearch && matchesStatus && matchesClass;
         });
-    }, [searchTerm, statusFilter, classFilter]);
+    }, [students, searchTerm, statusFilter, classFilter]);
 
     // Paginate filtered students
     const paginatedStudents = useMemo(() => {
@@ -157,45 +159,63 @@ export default function AttendanceDetailPage() {
         setCurrentPage(1);
     }, [searchTerm, statusFilter, classFilter, itemsPerPage]);
 
+    if (isLoading) {
+        return <AttendanceDetailSkeleton />;
+    }
+
+    if (!attendanceDetail) {
+         return (
+             <div className="flex flex-col items-center justify-center py-12">
+                 <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+                 <h2 className="text-lg font-semibold text-gray-900">Data Tidak Ditemukan</h2>
+                 <p className="text-muted-foreground">Detail presensi tidak dapat ditemukan atau terjadi kesalahan.</p>
+                 <Button onClick={() => window.location.reload()} variant="outline" className="mt-4">
+                     Coba Lagi
+                 </Button>
+             </div>
+         );
+    }
+
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div className="flex items-center space-x-4">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => router.back()}
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <div>
+                <div>
+                    <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
                             <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Detail Riwayat </span>
                             <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Presensi</span>
                         </h1>
-                        <p className="text-muted-foreground mt-1">
-                            Informasi detail kehadiran siswa pada pertemuan ekstrakurikuler
-                        </p>
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                            <CheckCircle className="h-5 w-5" />
+                        </div>
                     </div>
+                    <p className="text-muted-foreground mt-1">
+                        Rincian lengkap data kehadiran siswa pada pertemuan ekstrakurikuler
+                    </p>
                 </div>
             </div>
 
             {/* Activity Info Card with Stats */}
             <Card className="overflow-hidden p-0 gap-0">
                 {/* Header */}
-                <div className="bg-blue-800 p-4 rounded-t-lg">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="bg-blue-800 p-4 rounded-t-lg relative overflow-hidden">
+                    {/* Decorative Icon */}
+                    <div className="absolute -right-6 -bottom-6 text-white/10 transform rotate-12">
+                        <Calendar className="w-32 h-32" />
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 relative z-10">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-lg">
                                 <Calendar className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg text-white">{mockDetailData.activity}</h3>
-                                <p className="text-blue-100 text-sm">Ekstrakurikuler {mockDetailData.ekstrakurikuler}</p>
+                                <h3 className="font-bold text-lg text-white">{attendanceDetail.topic || "Kegiatan Rutin"}</h3>
+                                <p className="text-blue-100 text-sm">Ekstrakurikuler Pramuka</p>
                             </div>
                         </div>
-                        <Badge className="bg-green-500 text-white border-0 gap-1 px-2.5 py-1 text-xs font-medium">
+                        <Badge className="bg-green-500 text-white border-0 gap-1 px-2.5 py-1 text-xs font-medium w-fit">
                             <CheckCircle className="h-3.5 w-3.5" />
                             Presensi Lengkap
                         </Badge>
@@ -211,7 +231,7 @@ export default function AttendanceDetailPage() {
                         </div>
                         <div>
                             <p className="text-xs text-muted-foreground">Tanggal</p>
-                            <p className="text-sm font-semibold text-gray-900">{formatDate(mockDetailData.date, "dd MMMM yyyy")}</p>
+                            <p className="text-sm font-semibold text-gray-900">{formatDate(attendanceDetail.date, "dd MMMM yyyy")}</p>
                         </div>
                     </div>
 
@@ -222,7 +242,7 @@ export default function AttendanceDetailPage() {
                         </div>
                         <div>
                             <p className="text-xs text-muted-foreground">Waktu</p>
-                            <p className="text-sm font-semibold text-gray-900">{mockDetailData.startTime} - {mockDetailData.endTime} WIB</p>
+                            <p className="text-sm font-semibold text-gray-900">{attendanceDetail.advisorStats.startTime} - {attendanceDetail.advisorStats.endTime} WIB</p>
                         </div>
                     </div>
 
@@ -233,7 +253,10 @@ export default function AttendanceDetailPage() {
                         </div>
                         <div>
                             <p className="text-xs text-muted-foreground">Tutor</p>
-                            <p className="text-sm font-semibold text-gray-900">{mockDetailData.tutor}</p>
+                            <p className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
+                                {attendanceDetail.advisorStats.tutorName}
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                            </p>
                         </div>
                     </div>
 
@@ -241,21 +264,21 @@ export default function AttendanceDetailPage() {
                     <div className="px-3 py-4 flex items-center gap-3">
                         <div className={cn(
                             "p-1.5 rounded-lg",
-                            stats.percentage >= 90 ? "bg-green-50" :
-                                stats.percentage >= 75 ? "bg-orange-50" : "bg-rose-50"
+                            stats.percentage >= 90 ? "bg-green-100" :
+                                stats.percentage >= 75 ? "bg-amber-100" : "bg-red-100"
                         )}>
                             <CheckCircle className={cn(
                                 "h-4 w-4",
-                                stats.percentage >= 90 ? "text-green-600" :
-                                    stats.percentage >= 75 ? "text-orange-600" : "text-rose-600"
+                                stats.percentage >= 90 ? "text-green-700" :
+                                    stats.percentage >= 75 ? "text-amber-700" : "text-red-700"
                             )} />
                         </div>
                         <div>
                             <p className="text-xs text-muted-foreground">Kehadiran</p>
                             <p className={cn(
                                 "text-sm font-semibold",
-                                stats.percentage >= 90 ? "text-green-600" :
-                                    stats.percentage >= 75 ? "text-orange-600" : "text-rose-600"
+                                stats.percentage >= 90 ? "text-green-700" :
+                                    stats.percentage >= 75 ? "text-amber-700" : "text-red-700"
                             )}>
                                 {stats.present}/{stats.total} ({stats.percentage}%)
                             </p>
@@ -268,9 +291,9 @@ export default function AttendanceDetailPage() {
                     {/* Total */}
                     <div className="p-3 text-center">
                         <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
-                            <Users className="h-4 w-4 text-blue-600" />
+                            <Users className="h-4 w-4 text-blue-800" />
                         </div>
-                        <p className="text-xl font-bold text-gray-900">{stats.total}</p>
+                        <p className="text-xl font-bold text-blue-800">{stats.total}</p>
                         <p className="text-xs text-muted-foreground">Total</p>
                     </div>
 
@@ -380,33 +403,12 @@ export default function AttendanceDetailPage() {
                                         </SelectContent>
                                     </Select>
                                 </div>
-
-                                <div className="flex items-center gap-2">
-                                    <Label className="text-sm whitespace-nowrap">Tampilkan:</Label>
-                                    <Select value={itemsPerPage.toString()} onValueChange={(v) => setItemsPerPage(parseInt(v))}>
-                                        <SelectTrigger className="w-[80px]">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="5">5</SelectItem>
-                                            <SelectItem value="10">10</SelectItem>
-                                            <SelectItem value="25">25</SelectItem>
-                                            <SelectItem value="50">50</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
                             </div>
                         </div>
 
                         {/* Active Filters Info */}
-                        <div className="flex items-center justify-between mt-4">
-                            <div className="text-sm text-muted-foreground">
-                                Menampilkan {paginatedStudents.length} dari {filteredStudents.length} siswa
-                                {(searchTerm || statusFilter !== "all" || classFilter !== "all") && (
-                                    <span className="text-primary"> (difilter dari {stats.total} total)</span>
-                                )}
-                            </div>
-                            {(searchTerm || statusFilter !== "all" || classFilter !== "all") && (
+                        {(searchTerm || statusFilter !== "all" || classFilter !== "all") && (
+                            <div className="flex items-center justify-end mt-4">
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -419,8 +421,8 @@ export default function AttendanceDetailPage() {
                                 >
                                     Reset Filter
                                 </Button>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Table */}
@@ -462,14 +464,7 @@ export default function AttendanceDetailPage() {
                                                 <td className="p-4 text-sm">{globalIndex}</td>
                                                 <td className="p-4 text-sm font-mono">{student.nis}</td>
                                                 <td className="p-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                                            <span className="text-sm font-medium text-primary">
-                                                                {student.name.charAt(0)}
-                                                            </span>
-                                                        </div>
-                                                        <span className="font-medium">{student.name}</span>
-                                                    </div>
+                                                    <span className="text-sm font-medium">{student.name}</span>
                                                 </td>
                                                 <td className="p-4">
                                                     <Badge className={getClassBadgeColor()}>
@@ -491,82 +486,92 @@ export default function AttendanceDetailPage() {
                     </div>
 
                     {/* Footer with Pagination */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t bg-muted/20">
-                        {/* Info */}
-                        <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2">
-                                <Users className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm">
-                                    Halaman <span className="font-semibold">{currentPage}</span> dari <span className="font-semibold">{totalPages || 1}</span>
-                                </span>
-                            </div>
+                    <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 border-t bg-muted/20">
+                        {/* Left: Pagination Info */}
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>Menampilkan</span>
+                            <span className="font-medium text-foreground">
+                                {filteredStudents.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}
+                            </span>
+                            <span>-</span>
+                            <span className="font-medium text-foreground">
+                                {Math.min(currentPage * itemsPerPage, filteredStudents.length)}
+                            </span>
+                            <span>dari</span>
+                            <span className="font-medium text-foreground">{filteredStudents.length}</span>
+                            <span>data</span>
                         </div>
 
-                        {/* Pagination */}
+                        {/* Right: Pagination */}
                         {totalPages > 1 && (
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                    disabled={currentPage === 1}
-                                    className="h-8 w-8 p-0"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </Button>
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        let pageNumber: number;
-                                        if (totalPages <= 5) {
-                                            pageNumber = i + 1;
-                                        } else if (currentPage <= 3) {
-                                            pageNumber = i + 1;
-                                        } else if (currentPage >= totalPages - 2) {
-                                            pageNumber = totalPages - 4 + i;
-                                        } else {
-                                            pageNumber = currentPage - 2 + i;
-                                        }
-                                        return (
-                                            <Button
-                                                key={pageNumber}
-                                                variant={currentPage === pageNumber ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setCurrentPage(pageNumber)}
-                                                className={cn(
-                                                    "w-8 h-8 p-0",
-                                                    currentPage === pageNumber && "bg-blue-800 hover:bg-blue-900 text-white"
-                                                )}
-                                            >
-                                                {pageNumber}
-                                            </Button>
-                                        );
-                                    })}
-                                    {totalPages > 5 && currentPage < totalPages - 2 && (
-                                        <>
-                                            <span className="text-sm text-muted-foreground px-1">...</span>
-                                            <Button
-                                                variant={currentPage === totalPages ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setCurrentPage(totalPages)}
-                                                className={cn(
-                                                    "w-8 h-8 p-0",
-                                                    currentPage === totalPages && "bg-blue-800 hover:bg-blue-900 text-white"
-                                                )}
-                                            >
-                                                {totalPages}
-                                            </Button>
-                                        </>
-                                    )}
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm text-muted-foreground">
+                                    Hal {currentPage}/{totalPages}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <div className="flex items-center gap-1">
+                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                            let pageNumber: number;
+                                            if (totalPages <= 5) {
+                                                pageNumber = i + 1;
+                                            } else if (currentPage <= 3) {
+                                                pageNumber = i + 1;
+                                            } else if (currentPage >= totalPages - 2) {
+                                                pageNumber = totalPages - 4 + i;
+                                            } else {
+                                                pageNumber = currentPage - 2 + i;
+                                            }
+                                            return (
+                                                <Button
+                                                    key={pageNumber}
+                                                    variant={currentPage === pageNumber ? "default" : "outline"}
+                                                    size="sm"
+                                                    onClick={() => setCurrentPage(pageNumber)}
+                                                    className={cn(
+                                                        "w-8 h-8 p-0",
+                                                        currentPage === pageNumber && "bg-blue-800 hover:bg-blue-900 text-white"
+                                                    )}
+                                                >
+                                                    {pageNumber}
+                                                </Button>
+                                            );
+                                        })}
+                                        {totalPages > 5 && currentPage < totalPages - 2 && (
+                                            <>
+                                                <span className="text-sm text-muted-foreground px-1">...</span>
+                                                <Button
+                                                    variant={currentPage === totalPages ? "default" : "outline"}
+                                                    size="sm"
+                                                    onClick={() => setCurrentPage(totalPages)}
+                                                    className={cn(
+                                                        "w-8 h-8 p-0",
+                                                        currentPage === totalPages && "bg-blue-800 hover:bg-blue-900 text-white"
+                                                    )}
+                                                >
+                                                    {totalPages}
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="h-8 w-8 p-0"
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
                                 </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="h-8 w-8 p-0"
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
                             </div>
                         )}
                     </div>

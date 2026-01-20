@@ -145,18 +145,18 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 }}
                                 className={`relative group ${profileData.profilePicture ? 'cursor-pointer' : 'cursor-default'}`}
                             >
-                                <Avatar className="w-32 h-auto aspect-[3/4] rounded-xl border-4 border-primary/10 transition-transform duration-300 group-hover:scale-105">
+                                <Avatar className="w-32 h-32 rounded-full border-4 border-primary/10 transition-transform duration-300 group-hover:scale-105">
                                     <AvatarImage
                                         src={profileData.profilePicture}
                                         alt={profileData.name}
                                         className="object-cover"
                                     />
-                                    <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-xl">
+                                    <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-full">
                                         {initials}
                                     </AvatarFallback>
                                 </Avatar>
                                 {profileData.profilePicture && (
-                                    <div className="absolute inset-0 bg-black/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                         <div className="bg-white/90 p-2 rounded-full shadow-sm backdrop-blur-sm">
                                             <Camera className="h-5 w-5 text-gray-800" />
                                         </div>
@@ -208,7 +208,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                 Informasi Pribadi
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 col-span-1 md:col-span-2">
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
                                     <div className="p-2 rounded-full bg-primary/10">
                                         <User className="h-5 w-5 text-primary" />
                                     </div>
@@ -219,6 +219,20 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                                         </p>
                                     </div>
                                 </div>
+
+                                {profileData.nip && (
+                                    <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
+                                        <div className="p-2 rounded-full bg-primary/10">
+                                            <User className="h-5 w-5 text-primary" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs text-muted-foreground">NIP</p>
+                                            <p className="text-sm font-medium">
+                                                {profileData.nip}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

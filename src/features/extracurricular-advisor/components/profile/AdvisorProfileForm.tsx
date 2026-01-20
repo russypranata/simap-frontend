@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AdvisorPhotoRequirementsModal } from "./AdvisorPhotoRequirementsModal";
+import { ImageCropper } from "@/components/ui/image-cropper";
 import {
     User,
     Mail,
@@ -29,7 +30,7 @@ export interface AdvisorProfileData {
     role: string;
     profilePicture: string;
     address: string;
-    nip: string;
+    nip?: string;
     extracurricular: string;
 }
 
@@ -48,6 +49,8 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
 }) => {
     const [formData, setFormData] = useState<AdvisorProfileData>(initialData);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [imageSrc, setImageSrc] = useState<string | null>(null);
+    const [isCropperOpen, setIsCropperOpen] = useState(false);
     const [showRequirements, setShowRequirements] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -75,36 +78,44 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
         fileInputRef.current?.click();
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // 1. Validasi Format
+        // 1. Basic Format Validation
         const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!validTypes.includes(file.type)) {
             toast.error("Format File Tidak Valid", {
                 description: 'Mohon unggah foto dengan format JPG atau PNG.',
             });
-            if (fileInputRef.current) fileInputRef.current.value = '';
             return;
         }
 
-        // 2. Validasi Ukuran (Max 2MB)
-        const maxSize = 2 * 1024 * 1024; // 2MB
-        if (file.size > maxSize) {
-            toast.error("File Terlalu Besar", {
-                description: `Ukuran file ${(file.size / (1024 * 1024)).toFixed(1)}MB melebihi batas maksimal 2MB.`,
-            });
-            if (fileInputRef.current) fileInputRef.current.value = '';
-            return;
-        }
+        // 2. Read file to trigger cropper
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+            setImageSrc(reader.result?.toString() || null);
+            setIsCropperOpen(true);
+        });
+        reader.readAsDataURL(file);
+        
+        // Reset input value so same file can be selected again if needed
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
 
-        // Preview image
-        const objectUrl = URL.createObjectURL(file);
+    const handleCropComplete = (croppedBlob: Blob) => {
+        // Create URL for preview
+        const objectUrl = URL.createObjectURL(croppedBlob);
+        
+        // Update form data with preview
         setFormData((prev) => ({ ...prev, profilePicture: objectUrl }));
+        
+        // Update selected file for upload
+        const file = new File([croppedBlob], "profile_picture.jpg", { type: "image/jpeg" });
         setSelectedFile(file);
-        toast.success("Foto Berhasil Dipilih", {
-            description: 'Jangan lupa simpan perubahan profil Anda.',
+        
+        toast.success("Foto Berhasil Diperbarui", {
+            description: 'Jangan lupa tekan Simpan Perubahan.',
         });
     };
 
@@ -135,13 +146,13 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                     {/* Profile Picture */}
                     <div className="flex flex-col items-center space-y-4 pb-6 border-b">
                         <div className="relative group">
-                            <Avatar className="h-32 w-32 border-4 border-primary/10 transition-transform duration-300 group-hover:scale-105">
+                            <Avatar className="h-32 w-32 rounded-full border-4 border-primary/10 transition-transform duration-300 group-hover:scale-105">
                                 <AvatarImage
                                     src={formData.profilePicture}
                                     alt={formData.name}
                                     className="object-cover"
                                 />
-                                <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white">
+                                <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-full">
                                     {initials}
                                 </AvatarFallback>
                             </Avatar>
@@ -176,6 +187,14 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                         onProceed={handleProceedToUpload}
                     />
 
+                    <ImageCropper
+                        open={isCropperOpen}
+                        onOpenChange={setIsCropperOpen}
+                        imageSrc={imageSrc}
+                        onCropComplete={handleCropComplete}
+                        aspect={1} // Square crop for round avatar
+                    />
+
                     {/* Form Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Nama Lengkap */}
@@ -194,6 +213,23 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                                 onChange={handleInputChange}
                                 placeholder="Masukkan nama lengkap"
                                 required
+                            />
+                        </div>
+
+                        {/* NIP (Optional) */}
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-primary" />
+                                <Label htmlFor="nip" className="mb-0">
+                                    NIP <span className="text-muted-foreground font-normal text-xs">(Opsional)</span>
+                                </Label>
+                            </div>
+                            <Input
+                                id="nip"
+                                name="nip"
+                                value={formData.nip || ""}
+                                onChange={handleInputChange}
+                                placeholder="Masukkan NIP (jika ada)"
                             />
                         </div>
 

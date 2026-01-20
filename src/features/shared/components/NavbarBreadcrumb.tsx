@@ -133,10 +133,19 @@ export const NavbarBreadcrumb: React.FC = () => {
                 const config = routeConfig[segment];
                 const label = config?.label || formatSegmentLabel(segment);
                 const icon = config?.icon || CircleDot;
+                
+                // Preserve tab query param for attendance page
+                let href = currentPath;
+                if (segment === 'attendance') {
+                     const tabParam = new URLSearchParams(window.location.search).get('tab');
+                     if (tabParam) {
+                         href += `?tab=${tabParam}`;
+                     }
+                }
 
                 breadcrumbs.push({
                     label,
-                    href: currentPath,
+                    href,
                     isLast: false,
                     icon,
                 });

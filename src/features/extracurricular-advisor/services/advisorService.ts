@@ -163,8 +163,23 @@ export interface AttendanceHistoryEntry {
         tutorName: string;
         startTime: string;
         endTime: string;
+        duration: string;
         status: string;
     };
+}
+
+export interface AttendanceStudent {
+    id: number;
+    nis: string;
+    name: string;
+    class: string;
+    status: string; // 'hadir' | 'sakit' | 'izin' | 'alpa'
+    note?: string;
+}
+
+export interface AttendanceDetail extends AttendanceHistoryEntry {
+    topic?: string;
+    students: AttendanceStudent[];
 }
 
 export interface CreateAttendanceRequest {
@@ -511,26 +526,26 @@ export const advisorService = {
                 {
                     id: 1,
                     date: "2025-12-20",
-                    studentStats: { present: 42, total: 45, percentage: 93 },
-                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:00", status: "hadir" }
+                    studentStats: { present: 14, total: 15, percentage: 93 },
+                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:00", duration: "2j 0m", status: "hadir" }
                 },
                 {
                     id: 2,
                     date: "2025-12-13",
-                    studentStats: { present: 40, total: 45, percentage: 89 },
-                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:30", status: "hadir" }
+                    studentStats: { present: 13, total: 15, percentage: 87 },
+                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:30", duration: "2j 30m", status: "hadir" }
                 },
                 {
                     id: 3,
                     date: "2025-12-06",
-                    studentStats: { present: 38, total: 45, percentage: 84 },
-                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:00", status: "hadir" }
+                    studentStats: { present: 12, total: 15, percentage: 80 },
+                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "16:00", duration: "2j 0m", status: "hadir" }
                 },
                  {
                     id: 4,
                     date: "2025-11-29",
-                    studentStats: { present: 43, total: 45, percentage: 96 },
-                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "15:30", status: "hadir" }
+                    studentStats: { present: 15, total: 15, percentage: 100 },
+                    advisorStats: { tutorName: "Ahmad Fauzi, S.Pd", startTime: "14:00", endTime: "15:30", duration: "1j 30m", status: "hadir" }
                 },
             ];
         }
@@ -541,6 +556,85 @@ export const advisorService = {
         if (endDate) params.append('endDate', endDate);
 
         const response = await fetch(`${ADVISOR_API_URL}/attendance?${params}`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) await handleApiError(response);
+        const result = await response.json();
+        return result.data;
+    },
+
+    getAttendanceDetail: async (id: number): Promise<AttendanceDetail> => {
+        // ===== MOCK IMPLEMENTATION =====
+        if (USE_MOCK_DATA) {
+            await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+
+            // 1. Get the base history entry to ensure stats match
+            const history = await advisorService.getAttendanceHistory();
+            const entry = history.find(h => h.id === Number(id));
+
+            if (!entry) {
+                throw new Error("Data presensi tidak ditemukan");
+            }
+
+            // 2. Generate student list that matches the stats
+            // We'll use the MOCK_MEMBERS_DATA as a base
+            const { present, total } = entry.studentStats;
+            
+            // Calculate how many non-present needed
+            const nonPresentCount = total - present;
+            
+            // Distribute non-present statuses (simplified logic)
+            // If we have non-present, let's make some sick, some permit, some absent
+            let sickCount = 0;
+            let permitCount = 0;
+            let absentCount = 0;
+
+            if (nonPresentCount > 0) {
+                if (nonPresentCount === 1) {
+                    absentCount = 1;
+                } else {
+                     sickCount = Math.floor(nonPresentCount * 0.4); // 40% sick
+                     permitCount = Math.floor(nonPresentCount * 0.4); // 40% permit
+                     absentCount = nonPresentCount - sickCount - permitCount; // rest absent
+                }
+            }
+
+            // Create status map for deterministic result based on ID
+            // We use MOCK_MEMBERS_DATA keys to assign status
+            const students: AttendanceStudent[] = MOCK_MEMBERS_DATA.slice(0, total).map((member, index) => {
+                let status = "hadir";
+                
+                // Assign non-present statuses to the last few members
+                if (index >= present) {
+                    const relativeIndex = index - present;
+                    if (relativeIndex < sickCount) status = "sakit";
+                    else if (relativeIndex < sickCount + permitCount) status = "izin";
+                    else status = "alpa";
+                }
+
+                return {
+                    id: member.id,
+                    nis: member.nis,
+                    name: member.name,
+                    class: member.class,
+                    status,
+                };
+            });
+            
+            // Shuffle slightly based on ID so different dates look different? 
+            // For now, simple deterministic assignment is safer for verifying counts.
+
+            return {
+                ...entry,
+                topic: "Kegiatan Rutin Ekstrakurikuler",
+                students: students
+            };
+        }
+
+        // ===== REAL API IMPLEMENTATION =====
+        const response = await fetch(`${ADVISOR_API_URL}/attendance/${id}`, {
             method: 'GET',
             headers: getAuthHeaders(),
         });

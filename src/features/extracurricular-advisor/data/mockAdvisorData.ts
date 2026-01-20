@@ -7,7 +7,7 @@ export interface AdvisorProfileData {
     profilePicture: string;
     address: string;
     joinDate: string;
-    nip: string;
+    nip?: string;
     extracurricular: string;
     totalMembers: number;
     activeMembers: number;

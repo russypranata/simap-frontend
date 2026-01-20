@@ -37,7 +37,8 @@ import {
     ChevronLeft,
     ChevronRight,
     BarChart3,
-    HelpCircle
+    HelpCircle,
+    FileText
 } from "lucide-react";
 import {
     Tooltip,
@@ -51,6 +52,7 @@ import { formatDate } from "@/features/shared/utils/dateFormatter";
 
 import { advisorService, AdvisorMember } from "../services/advisorService";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MembersSkeleton } from "../components/AdvisorSkeletons";
 
 import { useDebounce } from "@/hooks/use-debounce";
 
@@ -120,6 +122,8 @@ export const ExtracurricularMembers: React.FC = () => {
     React.useEffect(() => {
         setCurrentPage(1);
     }, [debouncedSearch, classFilter, currentYear, statusFilter]);
+
+
 
     // Stats calculation (Visual only - ideally these come from dashboard stats or separate endpoint)
     // For now we calculate based on CURRENT PAGE which is wrong for "Total Members" stats card if strictly following data
@@ -196,6 +200,10 @@ export const ExtracurricularMembers: React.FC = () => {
 
 
 
+    if (isLoading && members.length === 0) {
+        return <MembersSkeleton />;
+    }
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -203,8 +211,8 @@ export const ExtracurricularMembers: React.FC = () => {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Daftar </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Anggota Ekskul</span>
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Anggota </span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Ekstrakurikuler Pramuka</span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
                             <Users className="h-5 w-5" />
@@ -235,16 +243,16 @@ export const ExtracurricularMembers: React.FC = () => {
                     {/* Decorative circles */}
                     {/* Decorative Icon */}
                     <div className="absolute -right-6 -bottom-6 text-white/10 transform rotate-12">
-                        <BarChart3 className="w-32 h-32" />
+                        <Users className="w-32 h-32" />
                     </div>
 
                     <div className="flex items-center gap-3 relative z-10">
                         <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-lg">
-                            <BarChart3 className="h-6 w-6 text-white" />
+                            <Users className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-lg text-white">Ringkasan Data</h3>
-                            <p className="text-blue-100 text-sm">Rekap keanggotaan dan kehadiran pada Tahun Ajaran berjalan</p>
+                            <h3 className="font-bold text-lg text-white">Ringkasan Anggota</h3>
+                            <p className="text-blue-100 text-sm">Rekap keanggotaan dan kehadiran pada Tahun Ajaran aktif</p>
                         </div>
                     </div>
                 </div>
@@ -257,9 +265,9 @@ export const ExtracurricularMembers: React.FC = () => {
                             <Users className="h-5 w-5 text-blue-800" />
                         </div>
                         {isStatsLoading ? (
-                            <p className="text-2xl font-bold text-blue-800 animate-pulse">...</p>
+                            <p className="text-xl font-bold text-blue-800 animate-pulse">...</p>
                         ) : (
-                            <p className="text-2xl font-bold text-blue-800">{stats.totalMembers || totalItems}</p>
+                            <p className="text-xl font-bold text-blue-800">{stats.totalMembers || totalItems}</p>
                         )}
                         <p className="text-xs text-muted-foreground">Total Anggota</p>
                     </div>
@@ -270,9 +278,9 @@ export const ExtracurricularMembers: React.FC = () => {
                             <CheckCircle className="h-5 w-5 text-green-600" />
                         </div>
                         {isStatsLoading ? (
-                            <p className="text-2xl font-bold text-green-600 animate-pulse">...</p>
+                            <p className="text-xl font-bold text-green-600 animate-pulse">...</p>
                         ) : (
-                            <p className="text-2xl font-bold text-green-600">
+                            <p className="text-xl font-bold text-green-600">
                                 {stats.topPerformers}
                             </p>
                         )}
@@ -285,9 +293,9 @@ export const ExtracurricularMembers: React.FC = () => {
                             <Activity className="h-5 w-5 text-purple-700" />
                         </div>
                         {isStatsLoading ? (
-                            <p className="text-2xl font-bold text-purple-700 animate-pulse">...</p>
+                            <p className="text-xl font-bold text-purple-700 animate-pulse">...</p>
                         ) : (
-                            <p className="text-2xl font-bold text-purple-700">{stats.avgAttendance}%</p>
+                            <p className="text-xl font-bold text-purple-700">{stats.avgAttendance}%</p>
                         )}
                         <p className="text-xs text-muted-foreground">Rata-rata Kehadiran</p>
                     </div>
@@ -298,9 +306,9 @@ export const ExtracurricularMembers: React.FC = () => {
                             <AlertCircle className="h-5 w-5 text-red-600" />
                         </div>
                         {isStatsLoading ? (
-                            <p className="text-2xl font-bold text-red-600 animate-pulse">...</p>
+                            <p className="text-xl font-bold text-red-600 animate-pulse">...</p>
                         ) : (
-                            <p className="text-2xl font-bold text-red-600">{stats.needsAttention}</p>
+                            <p className="text-xl font-bold text-red-600">{stats.needsAttention}</p>
                         )}
                         <p className="text-xs text-muted-foreground">Perlu Perhatian</p>
                     </div>
@@ -317,7 +325,7 @@ export const ExtracurricularMembers: React.FC = () => {
                             </div>
                             <div>
                                 <CardTitle className="text-lg font-semibold">Daftar Anggota Terdaftar</CardTitle>
-                                <CardDescription>Anggota aktif ekstrakurikuler Pramuka pada Tahun Ajaran berjalan</CardDescription>
+                                <CardDescription>Anggota aktif ekstrakurikuler Pramuka pada Tahun Ajaran aktif</CardDescription>
                             </div>
                         </div>
                         <Badge className="bg-blue-100 text-blue-800 border-blue-200">
@@ -365,7 +373,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                     <th className="text-left p-4 font-medium text-sm w-24">NIS</th>
                                     <th className="text-left p-4 font-medium text-sm w-32">
                                         <div className="flex items-center gap-1.5">
-                                            Nama
+                                            Nama Siswa
                                         </div>
                                     </th>
                                     <th className="text-left p-4 font-medium text-sm w-36">
@@ -420,18 +428,27 @@ export const ExtracurricularMembers: React.FC = () => {
                                             <td className="p-4 text-sm">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                             <td className="p-4 text-sm font-mono">{member.nis}</td>
                                             <td className="p-4">
-                                                <div>{member.name}</div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center">
+                                                        <span className="text-xs font-medium text-blue-800">
+                                                            {member.name.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-sm font-medium">{member.name}</div>
+                                                </div>
                                             </td>
                                             <td className="p-4">
                                                 <Badge
                                                     variant="secondary"
-                                                    className="bg-amber-100 text-amber-700 border-amber-200"
+                                                    className="bg-blue-50 text-blue-800 border-blue-200"
                                                 >
                                                     {member.class}
                                                 </Badge>
                                             </td>
-                                            <td className="p-4 text-sm text-muted-foreground">
-                                                {formatDate(new Date(member.joinDate), "dd MMM yyyy")}
+                                            <td className="p-4">
+                                                <div className="text-sm font-mono text-muted-foreground">
+                                                    {formatDate(new Date(member.joinDate), "dd MMM yyyy")}
+                                                </div>
                                             </td>
                                             {/* Status Badge Removed for Advisor RBAC */}
                                             <td className="p-4">
@@ -456,7 +473,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="h-8 px-3 bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary rounded-lg"
+                                                    className="h-8 px-3 bg-blue-50 hover:bg-blue-100 text-blue-800 hover:text-blue-900 rounded-lg"
                                                     onClick={() => handleViewDetail(member)}
                                                 >
                                                     <Eye className="h-4 w-4 mr-1.5" />
@@ -612,7 +629,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-lg">{selectedMember.name}</h3>
-                                    <p className="text-sm text-muted-foreground">NIS: {selectedMember.nis}</p>
+                                    <p className="text-sm text-muted-foreground">NIS: <span className="font-mono">{selectedMember.nis}</span></p>
                                 </div>
                             </div>
 
@@ -622,7 +639,7 @@ export const ExtracurricularMembers: React.FC = () => {
                                     <div className="flex items-center gap-1.5">
                                         <p className="text-xs text-muted-foreground">Kelas</p>
                                     </div>
-                                    <Badge className="bg-amber-100 text-amber-700 border-amber-200">
+                                    <Badge className="bg-blue-50 text-blue-800 border-blue-200">
                                         {selectedMember.class}
                                     </Badge>
                                 </div>
@@ -640,7 +657,10 @@ export const ExtracurricularMembers: React.FC = () => {
                                 </div>
                                 {/* Status Detail Removed for Advisor RBAC */}
                                 <div className="space-y-1">
-                                    <p className="text-xs text-muted-foreground">Kehadiran</p>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-xs text-muted-foreground">Kehadiran</p>
+                                        <span className="text-xs font-medium text-muted-foreground">Total: 14 Pertemuan</span>
+                                    </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm font-bold">{selectedMember.attendance}%</span>
                                         <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
@@ -658,17 +678,39 @@ export const ExtracurricularMembers: React.FC = () => {
                             </div>
 
                             {/* Attendance Status */}
-                            <div className="p-3 rounded-lg border bg-card">
-                                <p className="text-xs text-muted-foreground mb-2">Status Kehadiran</p>
-                                <p className={cn(
-                                    "text-sm font-medium",
-                                    selectedMember.attendance >= 90 ? "text-green-600" :
-                                        selectedMember.attendance >= 75 ? "text-amber-600" : "text-red-600"
-                                )}>
-                                    {selectedMember.attendance >= 90 ? "Sangat Baik - Anggota rajin hadir" :
-                                        selectedMember.attendance >= 75 ? "Cukup Baik - Perlu ditingkatkan" :
-                                            "Perlu Perhatian - Kehadiran rendah"}
-                                </p>
+                            {/* Detailed Attendance Stats */}
+                            <div className="space-y-2">
+                                <h4 className="text-xs text-muted-foreground mt-4 mb-2">Detail Kehadiran</h4>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="flex items-center justify-between p-2 bg-green-50 border border-green-100 rounded-md">
+                                        <div className="flex items-center gap-2">
+                                            <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                                            <span className="text-xs font-medium text-green-700">Hadir</span>
+                                        </div>
+                                        <span className="text-sm font-bold text-green-800">{Math.round((selectedMember.attendance / 100) * 14)}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between p-2 bg-red-50 border border-red-100 rounded-md">
+                                        <div className="flex items-center gap-2">
+                                            <AlertCircle className="h-3.5 w-3.5 text-red-600" />
+                                            <span className="text-xs font-medium text-red-700">Alpa</span>
+                                        </div>
+                                        <span className="text-sm font-bold text-red-800">{14 - Math.round((selectedMember.attendance / 100) * 14)}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between p-2 bg-blue-50 border border-blue-100 rounded-md">
+                                        <div className="flex items-center gap-2">
+                                            <FileText className="h-3.5 w-3.5 text-blue-600" />
+                                            <span className="text-xs font-medium text-blue-700">Izin</span>
+                                        </div>
+                                        <span className="text-sm font-bold text-blue-800">0</span>
+                                    </div>
+                                    <div className="flex items-center justify-between p-2 bg-orange-50 border border-orange-100 rounded-md">
+                                        <div className="flex items-center gap-2">
+                                            <Activity className="h-3.5 w-3.5 text-orange-600" />
+                                            <span className="text-xs font-medium text-orange-700">Sakit</span>
+                                        </div>
+                                        <span className="text-sm font-bold text-orange-800">0</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ) : (

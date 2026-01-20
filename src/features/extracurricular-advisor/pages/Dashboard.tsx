@@ -72,14 +72,14 @@ export const ExtracurricularDashboard: React.FC = () => {
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
                             <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Dashboard </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Tutor Ekskul</span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Tutor Ekstrakurikuler</span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
                             <Award className="h-5 w-5" />
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Selamat datang, {advisorName}
+                        Selamat datang, <span className="font-medium text-foreground">{advisorName}</span>
                     </p>
                     <div className="flex items-center gap-3 mt-4">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
@@ -103,30 +103,22 @@ export const ExtracurricularDashboard: React.FC = () => {
             </div>
 
             {/* Extracurricular Info + Stats Card */}
-            <Card className="overflow-hidden p-0">
+            <Card className="overflow-hidden p-0 gap-0">
                 {/* Header Section with Decorative Pattern */}
-                <div className="bg-blue-800 p-5 relative overflow-hidden">
+                <div className="bg-blue-800 p-4 rounded-t-lg relative overflow-hidden">
                     {/* Decorative Geometric Pattern */}
-                    <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
-                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
+                    {/* Decorative Icon */}
+                    <div className="absolute -right-6 -bottom-6 text-white/10 transform rotate-12">
+                        <Award className="w-32 h-32" />
                     </div>
 
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                                <Award className="h-7 w-7 text-white" />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-bold text-white">Pramuka</h2>
-                                <p className="text-blue-100 text-sm">Tutor: {advisorName}</p>
-                            </div>
+                    <div className="flex items-center gap-3 relative z-10">
+                        <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-lg">
+                            <Award className="h-6 w-6 text-white" />
                         </div>
-                        <div className="flex items-center gap-3">
-                            <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
-                                <Clock className="h-3.5 w-3.5 mr-1.5" />
-                                Jumat, 14:00 - 16:00
-                            </Badge>
+                        <div>
+                            <h2 className="font-bold text-lg text-white">Ekstrakurikuler Pramuka</h2>
+                            <p className="text-blue-100 text-sm">Tutor: {advisorName}</p>
                         </div>
                     </div>
                 </div>
@@ -135,25 +127,25 @@ export const ExtracurricularDashboard: React.FC = () => {
                 <CardContent className="p-0">
                     <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x">
                         {/* Total Anggota */}
-                        <div className="p-3 text-center">
+                        <div className="p-4 text-center">
                             <div className="inline-flex p-2.5 bg-blue-100 rounded-full mb-2">
                                 <Users className="h-5 w-5 text-blue-800" />
                             </div>
-                            <p className="text-2xl font-bold text-blue-800">{stats.totalMembers}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Anggota</p>
+                            <p className="text-xl font-bold text-blue-800">{stats.totalMembers}</p>
+                            <p className="text-xs text-muted-foreground">Total Anggota</p>
                         </div>
 
                         {/* Kehadiran Terakhir */}
-                        <div className="p-3 text-center">
+                        <div className="p-4 text-center">
                             <div className="inline-flex p-2.5 bg-green-100 rounded-full mb-2">
                                 <CheckCircle className="h-5 w-5 text-green-600" />
                             </div>
-                            <p className="text-2xl font-bold text-green-600">{stats.lastAttendancePresent}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Hadir Terakhir</p>
+                            <p className="text-xl font-bold text-green-600">{stats.lastAttendancePresent}</p>
+                            <p className="text-xs text-muted-foreground">Hadir Terakhir</p>
                         </div>
 
                         {/* Rata-rata Kehadiran */}
-                        <div className="p-3 text-center">
+                        <div className="p-4 text-center">
                             <div className={cn(
                                 "inline-flex p-2.5 rounded-full mb-2",
                                 stats.averageAttendance >= 90 ? "bg-green-100" :
@@ -166,20 +158,20 @@ export const ExtracurricularDashboard: React.FC = () => {
                                 )} />
                             </div>
                             <p className={cn(
-                                "text-2xl font-bold",
+                                "text-xl font-bold",
                                 stats.averageAttendance >= 90 ? "text-green-600" :
                                     stats.averageAttendance >= 75 ? "text-yellow-600" : "text-red-600"
                             )}>{stats.averageAttendance}%</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Kehadiran</p>
+                            <p className="text-xs text-muted-foreground">Kehadiran</p>
                         </div>
 
                         {/* Total Pertemuan */}
-                        <div className="p-3 text-center">
+                        <div className="p-4 text-center">
                             <div className="inline-flex p-2.5 bg-purple-100 rounded-full mb-2">
                                 <Calendar className="h-5 w-5 text-purple-600" />
                             </div>
-                            <p className="text-2xl font-bold text-purple-600">{stats.totalMeetings}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Pertemuan</p>
+                            <p className="text-xl font-bold text-purple-600">{stats.totalMeetings}</p>
+                            <p className="text-xs text-muted-foreground">Pertemuan</p>
                         </div>
                     </div>
                 </CardContent>
@@ -212,13 +204,13 @@ export const ExtracurricularDashboard: React.FC = () => {
                             {/* Jadwal Rutin */}
                             <div className="relative pl-6 pb-3">
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-800 -ml-1" />
-                                <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-50 border border-dashed border-blue-800">
-                                    <div className="p-2.5 rounded-full bg-blue-100 border border-blue-800">
+                                <div className="flex items-center gap-4 p-4 rounded-lg bg-blue-50 border border-blue-800/20">
+                                    <div className="p-2.5 rounded-full bg-blue-100">
                                         <Clock className="h-5 w-5 text-blue-800" />
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-xs text-blue-800 font-medium">Jadwal Rutin</p>
-                                        <p className="font-semibold text-blue-900">Jumat, 14:00 - 16:00</p>
+                                        <p className="text-sm font-semibold text-blue-900">Jumat, 14:00 - 16:00</p>
                                     </div>
                                 </div>
                             </div>
@@ -233,7 +225,7 @@ export const ExtracurricularDashboard: React.FC = () => {
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-xs text-blue-800 font-medium">Pertemuan Berikutnya</p>
-                                            <p className="font-semibold text-blue-900">{upcomingSchedules[0].day}, {upcomingSchedules[0].date}</p>
+                                            <p className="text-sm font-semibold text-blue-900">{upcomingSchedules[0].day}, {upcomingSchedules[0].date}</p>
                                         </div>
                                         <p className="text-sm font-medium text-blue-900">{upcomingSchedules[0].time}</p>
                                     </div>

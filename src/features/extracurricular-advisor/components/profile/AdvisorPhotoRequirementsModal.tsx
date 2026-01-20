@@ -58,7 +58,7 @@ export const AdvisorPhotoRequirementsModal: React.FC<AdvisorPhotoRequirementsMod
                                 Persyaratan Wajib
                             </h3>
                         </div>
-                        <div className="space-y-2.5 pl-8">
+                        <div className="space-y-4 pl-8">
                             {/* Format File */}
                             <div className="flex items-start gap-3">
                                 <div className="mt-0.5">
@@ -72,26 +72,13 @@ export const AdvisorPhotoRequirementsModal: React.FC<AdvisorPhotoRequirementsMod
                                         JPG, JPEG, atau PNG
                                     </p>
                                     <div className="flex gap-2 mt-1.5">
-                                        <Badge
-                                            variant="outline"
-                                            className="bg-green-50 text-green-700 border-green-200 h-5 px-1.5 text-[10px]"
-                                        >
+                                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 h-5 px-1.5 text-[10px]">
                                             <CheckCircle2 className="h-2.5 w-2.5 mr-1" />
                                             .jpg
                                         </Badge>
-                                        <Badge
-                                            variant="outline"
-                                            className="bg-green-50 text-green-700 border-green-200 h-5 px-1.5 text-[10px]"
-                                        >
+                                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 h-5 px-1.5 text-[10px]">
                                             <CheckCircle2 className="h-2.5 w-2.5 mr-1" />
                                             .png
-                                        </Badge>
-                                        <Badge
-                                            variant="outline"
-                                            className="bg-red-50 text-red-700 border-red-200 h-5 px-1.5 text-[10px]"
-                                        >
-                                            <XCircle className="h-2.5 w-2.5 mr-1" />
-                                            .gif
                                         </Badge>
                                     </div>
                                 </div>
@@ -107,7 +94,7 @@ export const AdvisorPhotoRequirementsModal: React.FC<AdvisorPhotoRequirementsMod
                                         Ukuran File
                                     </p>
                                     <p className="text-sm text-gray-600 leading-tight">
-                                        Maksimal 2 MB (2048 KB)
+                                        Maksimal 2 MB
                                     </p>
                                 </div>
                             </div>
