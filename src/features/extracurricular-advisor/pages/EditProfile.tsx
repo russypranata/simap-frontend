@@ -41,11 +41,11 @@ export const EditExtracurricularAdvisorProfile: React.FC = () => {
         try {
             // 1. Update Profile Data
             const updatePayload = {
-                name: data.name,
-                username: data.username,
-                email: data.email,
-                phone: data.phone,
-                address: data.address,
+                name: data.name || "",
+                username: data.username || "",
+                email: data.email || "",
+                phone: data.phone || "",
+                address: data.address || "",
             };
             
             await advisorService.updateProfile(updatePayload);
@@ -57,8 +57,9 @@ export const EditExtracurricularAdvisorProfile: React.FC = () => {
 
             toast.success("Profil berhasil diperbarui!");
             router.push("/extracurricular-advisor/profile");
-        } catch (error) {
-            toast.error("Gagal menyimpan perubahan");
+        } catch (error: any) {
+            const errorMessage = error instanceof Error ? error.message : "Gagal menyimpan perubahan";
+            toast.error(errorMessage);
             console.error(error);
         } finally {
             setIsLoading(false);
@@ -82,10 +83,10 @@ export const EditExtracurricularAdvisorProfile: React.FC = () => {
                         <div>
                             <div className="flex items-center gap-3">
                                 <h1 className="text-3xl font-bold tracking-tight">
-                                    <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
+                                    <span className="bg-linear-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
                                         Edit{" "}
                                     </span>
-                                    <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
+                                    <span className="bg-linear-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
                                         Profil
                                     </span>
                                 </h1>

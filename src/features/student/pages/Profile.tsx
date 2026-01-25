@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     Dialog,
     DialogContent,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -49,6 +51,7 @@ export const StudentProfile: React.FC = () => {
     });
     const [loading, setLoading] = useState(true);
     const [isPhotoOpen, setIsPhotoOpen] = useState(false);
+    const [imageError, setImageError] = useState(false);
     const barcodeRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -193,12 +196,8 @@ export const StudentProfile: React.FC = () => {
                         {/* Profile Picture and Basic Info */}
                         <div className="flex flex-col md:flex-row items-center md:items-center space-y-4 md:space-y-0 md:space-x-6">
                             <div
-                                onClick={() => {
-                                    if (profileData.profilePicture) {
-                                        setIsPhotoOpen(true);
-                                    }
-                                }}
-                                className={`relative group ${profileData.profilePicture ? 'cursor-pointer' : 'cursor-default'}`}
+                                onClick={() => setIsPhotoOpen(true)}
+                                className="relative group cursor-pointer"
                             >
                                 <Avatar className="w-32 h-auto aspect-3/4 rounded-xl border-4 border-primary/10 transition-transform duration-300 group-hover:scale-105">
                                     <AvatarImage
@@ -210,44 +209,69 @@ export const StudentProfile: React.FC = () => {
                                         {initials}
                                     </AvatarFallback>
                                 </Avatar>
-                                {profileData.profilePicture && (
-                                    <div className="absolute inset-0 bg-black/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                        <div className="bg-white/90 p-2 rounded-full shadow-sm backdrop-blur-sm">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width="20"
-                                                height="20"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className="text-gray-800"
-                                            >
-                                                <circle cx="11" cy="11" r="8" />
-                                                <path d="m21 21-4.3-4.3" />
-                                                <path d="M11 8v6" />
-                                                <path d="M8 11h6" />
-                                            </svg>
-                                        </div>
+                                <div className="absolute inset-0 bg-black/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                    <div className="bg-white/90 p-2 rounded-full shadow-sm backdrop-blur-sm">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            className="text-gray-800"
+                                        >
+                                            <circle cx="11" cy="11" r="8" />
+                                            <path d="m21 21-4.3-4.3" />
+                                            <path d="M11 8v6" />
+                                            <path d="M8 11h6" />
+                                        </svg>
                                     </div>
-                                )}
+                                </div>
                             </div>
 
                             <Dialog
                                 open={isPhotoOpen}
-                                onOpenChange={setIsPhotoOpen}
+                                onOpenChange={(open) => {
+                                    setIsPhotoOpen(open);
+                                    if (open) setImageError(false); // Reset error state on open
+                                }}
                             >
-                                <DialogContent className="max-w-md md:max-w-lg p-1 bg-transparent border-none shadow-none text-transparent">
-                                    <div className="relative rounded-lg overflow-hidden bg-white shadow-2xl">
-                                        {profileData.profilePicture && (
+                                <DialogContent className="max-w-md md:max-w-lg p-0 bg-white border-none shadow-2xl overflow-hidden">
+                                    <DialogHeader className="p-4 border-b">
+                                        <DialogTitle>Foto Profil - {profileData.name}</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="relative flex items-center justify-center bg-slate-50 min-h-[300px]">
+                                        {profileData.profilePicture && !imageError ? (
                                             /* eslint-disable-next-line @next/next/no-img-element */
                                             <img
                                                 src={profileData.profilePicture}
+                                                onError={() => setImageError(true)}
                                                 alt={`Foto Profil ${profileData.name}`}
-                                                className="w-full h-auto object-contain max-h-[80vh] rounded-lg"
+                                                className="w-full h-auto object-contain max-h-[70vh]"
                                             />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center p-12 w-full aspect-3/4">
+                                                <div className="w-48 h-48 rounded-full bg-blue-50 text-blue-300 flex items-center justify-center shadow-xl border-8 border-white">
+                                                    <User className="h-24 w-24" />
+                                                </div>
+                                                <div className="mt-8 text-center max-w-xs">
+                                                    <p className="text-lg font-semibold text-slate-900">Belum Ada Foto Profil</p>
+                                                    <p className="text-sm text-slate-500 mt-2">
+                                                        Silakan unggah foto profil Anda untuk melengkapi data diri.
+                                                    </p>
+                                                    <Button 
+                                                        onClick={() => router.push('/student/profile/edit')}
+                                                        className="mt-4 bg-blue-800 hover:bg-blue-900"
+                                                        size="sm"
+                                                    >
+                                                        <Edit className="h-3.5 w-3.5 mr-2" />
+                                                        Unggah Foto
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
                                 </DialogContent>

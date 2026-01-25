@@ -10,7 +10,9 @@ import {
 // CONFIGURATION
 // ============================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+// Force relative path to use Next.js proxy (avoids CORS)
+const API_BASE_URL = "/api/v1"; 
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api/v1";
 // Use specific advisor API URL prefix
 const ADVISOR_API_URL = `${API_BASE_URL}/extracurricular-advisor`;
 
@@ -326,14 +328,19 @@ export const advisorService = {
         if (academicYear) queryParams.append('academic_year', academicYear);
         if (semester && semester !== 'all') queryParams.append('semester', semester);
 
-        const response = await fetch(`${ADVISOR_API_URL}/dashboard/stats?${queryParams.toString()}`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-        });
+        try {
+            const response = await fetch(`${ADVISOR_API_URL}/dashboard/stats?${queryParams.toString()}`, {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            });
 
-        if (!response.ok) await handleApiError(response);
-        const result = await response.json();
-        return result.data;
+            if (!response.ok) await handleApiError(response);
+            const result = await response.json();
+            return result.data;
+        } catch (error) {
+            console.error("Dashboard Stats Fetch Error:", error);
+            throw error;
+        }
     },
 
     getUpcomingSchedule: async (): Promise<{ id: number; day: string; date: string; time: string }[]> => {
@@ -347,14 +354,19 @@ export const advisorService = {
         }
 
         // ===== REAL API IMPLEMENTATION =====
-        const response = await fetch(`${ADVISOR_API_URL}/dashboard/schedule`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-        });
+        try {
+            const response = await fetch(`${ADVISOR_API_URL}/dashboard/schedule`, {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            });
 
-        if (!response.ok) await handleApiError(response);
-        const result = await response.json();
-        return result.data;
+            if (!response.ok) await handleApiError(response);
+            const result = await response.json();
+            return result.data;
+        } catch (error) {
+            console.error("Schedule Fetch Error:", error);
+            throw error;
+        }
     },
 
     getRecentActivities: async (): Promise<{ id: number; day: string; date: string; time: string; attendance: number }[]> => {
@@ -369,14 +381,19 @@ export const advisorService = {
         }
 
         // ===== REAL API IMPLEMENTATION =====
-        const response = await fetch(`${ADVISOR_API_URL}/dashboard/recent-activities`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-        });
+        try {
+            const response = await fetch(`${ADVISOR_API_URL}/dashboard/recent-activities`, {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            });
 
-        if (!response.ok) await handleApiError(response);
-        const result = await response.json();
-        return result.data;
+            if (!response.ok) await handleApiError(response);
+            const result = await response.json();
+            return result.data;
+        } catch (error) {
+            console.error("Recent Activities Fetch Error:", error);
+            throw error;
+        }
     },
 
     // ========================================
@@ -480,14 +497,19 @@ export const advisorService = {
             ...(status && status !== "all" && { status }),
         });
 
-        const response = await fetch(`${ADVISOR_API_URL}/members?${queryParams.toString()}`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-        });
+        try {
+            const response = await fetch(`${ADVISOR_API_URL}/members?${queryParams.toString()}`, {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            });
 
-        if (!response.ok) await handleApiError(response);
-        const result = await response.json();
-        return result; // Assuming result structure is { success: true, data: [...], meta: { ... } }
+            if (!response.ok) await handleApiError(response);
+            const result = await response.json();
+            return result.data; 
+        } catch (error) {
+            console.error("Members Fetch Error:", error);
+            throw error;
+        }
     },
 
     getMemberDetail: async (id: number): Promise<AdvisorMember> => {
@@ -504,14 +526,19 @@ export const advisorService = {
          }
 
         // ===== REAL API IMPLEMENTATION =====
-        const response = await fetch(`${ADVISOR_API_URL}/members/${id}`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-        });
+        try {
+            const response = await fetch(`${ADVISOR_API_URL}/members/${id}`, {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            });
 
-        if (!response.ok) await handleApiError(response);
-        const result = await response.json();
-        return result.data;
+            if (!response.ok) await handleApiError(response);
+            const result = await response.json();
+            return result.data;
+        } catch (error) {
+            console.error("Member Detail Fetch Error:", error);
+            throw error;
+        }
     },
 
     addMember: async (memberData: Partial<AdvisorMember>) => {

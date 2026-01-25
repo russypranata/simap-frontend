@@ -1,7 +1,7 @@
 import { UserRole } from '@/app/context/RoleContext';
 
-const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = '/api/v1';
+    // process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== 'false'; // Default to true if not set
 
 export interface LoginRequest {
@@ -101,13 +101,18 @@ export const authService = {
             const result = await response.json();
             const payload = result.data;
 
-            // Normalize role to lowercase to match frontend expectations
-            // Backend returns "Siswa", "Guru", etc. but frontend expects "siswa", "guru", etc.
+            // Normalize role from backend to frontend expectations
+            const backendRole = payload.user.role;
+            const normalizedRole = this.normalizeRole(backendRole);
+            
+            console.log(`[Auth] Role normalized: ${backendRole} -> ${normalizedRole}`);
+
             const normalizedResult: LoginResponse = {
                 token: payload.token,
                 user: {
                     ...payload.user,
-                    role: payload.user.role?.toLowerCase() as UserRole,
+                    role: normalizedRole,
+                    originalRole: backendRole // Keep tracking of original role if needed
                 },
             };
 
@@ -124,6 +129,33 @@ export const authService = {
         } catch (error) {
             throw error;
         }
+    },
+
+    normalizeRole(backendRole: string): UserRole {
+        if (!backendRole) return null;
+        
+        const roleMap: Record<string, UserRole> = {
+            // Backend role mappings
+            'student': 'siswa',
+            'subject_teacher': 'guru',
+            'picket_teacher': 'guru',
+            'homeroom_teacher': 'guru',
+            'extracurricular_tutor': 'tutor_ekskul',
+            'mutamayizin_coordinator': 'pj_mutamayizin',
+            'parent': 'orang_tua',
+            'admin': 'admin',
+            'headmaster': 'admin', // Mapping headmaster to admin based on 'staff' profile type
+            
+            // Legacy/Direct mappings (just in case)
+            'siswa': 'siswa',
+            'guru': 'guru',
+            'orang_tua': 'orang_tua',
+            'tutor_ekskul': 'tutor_ekskul',
+            'pj_mutamayizin': 'pj_mutamayizin'
+        };
+
+        const lowerRole = backendRole.toLowerCase();
+        return roleMap[lowerRole] || null;
     },
 
     async logout(): Promise<void> {

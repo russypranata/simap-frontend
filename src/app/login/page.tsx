@@ -79,7 +79,12 @@ export default function LoginPage() {
                 router.push('/mutamayizin-coordinator/dashboard');
                 break;
             default:
-                router.push('/teacher/dashboard');
+                // Handle unknown or unauthorized roles safely
+                console.warn('Login successful but role is unrecognized:', role);
+                // Instead of defaulting to teacher, we should probably stay on login and show error
+                // or redirect to a generic "Role Unauthorized" page.
+                // For now, let's keep it safe by NOT redirecting to a protected route randomly.
+                throw new Error(`Role tidak dikenali: ${role}`);
         }
     };
 
@@ -148,7 +153,7 @@ export default function LoginPage() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm"
+                        className="fixed inset-0 z-100 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm"
                     >
                         {/* Spiral Flow Spinner */}
                         <motion.div
@@ -299,13 +304,13 @@ export default function LoginPage() {
                 </button>
 
                 {/* Background Decorations */}
-                <div className="absolute top-10 left-10 text-slate-900/[0.03] pointer-events-none -z-0">
+                <div className="absolute top-10 left-10 text-slate-900/3 pointer-events-none z-0">
                     <School className="w-64 h-64" strokeWidth={0.5} />
                 </div>
-                <div className="absolute bottom-10 right-10 text-slate-900/[0.03] pointer-events-none -z-0">
+                <div className="absolute bottom-10 right-10 text-slate-900/3 pointer-events-none z-0">
                     <BookOpen className="w-48 h-48" strokeWidth={0.5} />
                 </div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-900/[0.015] pointer-events-none -z-0">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-900/1.5 pointer-events-none z-0">
                     <GraduationCap className="w-96 h-96" strokeWidth={0.5} />
                 </div>
 
@@ -327,12 +332,12 @@ export default function LoginPage() {
                                     initial={{ scale: 0.8, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
-                                    className="mx-auto w-20 h-20 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-2xl flex items-center justify-center mb-6 cursor-pointer"
+                                    className="mx-auto w-20 h-20 bg-linear-to-tr from-blue-600 to-blue-400 rounded-2xl flex items-center justify-center mb-6 cursor-pointer"
                                 >
                                     <School className="h-10 w-10 text-white" />
                                 </motion.div>
                                 <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                                    Selamat Datang di <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400">SIMAP</span>
+                                    Selamat Datang di <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-blue-400">SIMAP</span>
                                 </h1>
                                 <p className="text-slate-600 text-sm leading-relaxed">
                                     Akses layanan akademik dan administrasi sekolah dalam satu pintu
@@ -416,7 +421,7 @@ export default function LoginPage() {
                                 >
                                     <Button
                                         type="submit"
-                                        className="w-full h-12 text-base font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white transition-all hover:scale-[1.01] active:scale-[0.99] rounded-xl shadow-md"
+                                        className="w-full h-12 text-base font-bold bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white transition-all hover:scale-[1.01] active:scale-[0.99] rounded-xl shadow-md"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? (
@@ -486,7 +491,7 @@ export default function LoginPage() {
                                 <div className="space-y-3 pt-2">
                                     <Button
                                         type="submit"
-                                        className="w-full h-12 text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white transition-all hover:scale-[1.01] active:scale-[0.99] rounded-xl shadow-md"
+                                        className="w-full h-12 text-lg font-bold bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white transition-all hover:scale-[1.01] active:scale-[0.99] rounded-xl shadow-md"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? (
@@ -537,7 +542,7 @@ export default function LoginPage() {
                             className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 h-[80%] w-[2px] flex-col items-center justify-center pointer-events-none select-none"
                         >
                             {/* Top Fade Line */}
-                            <div className="w-full flex-1 bg-gradient-to-b from-transparent via-slate-200 to-blue-300"></div>
+                            <div className="w-full flex-1 bg-linear-to-b from-transparent via-slate-200 to-blue-300"></div>
 
                             {/* Center Decor */}
                             <div className="py-4 flex flex-col items-center gap-2">
@@ -547,7 +552,7 @@ export default function LoginPage() {
                             </div>
 
                             {/* Bottom Fade Line */}
-                            <div className="w-full flex-1 bg-gradient-to-b from-blue-300 via-slate-200 to-transparent"></div>
+                            <div className="w-full flex-1 bg-linear-to-b from-blue-300 via-slate-200 to-transparent"></div>
                         </motion.div>
 
                         {/* Right Side - Image/Background */}
@@ -556,7 +561,7 @@ export default function LoginPage() {
                             animate={{ width: "50%", opacity: 1 }}
                             exit={{ width: 0, opacity: 0 }}
                             transition={{ duration: 0.5, ease: "easeInOut" }}
-                            className="hidden lg:flex relative bg-gradient-to-b from-white to-slate-50 overflow-hidden items-center justify-center"
+                            className="hidden lg:flex relative bg-linear-to-b from-white to-slate-50 overflow-hidden items-center justify-center"
                         >
                             <div className="min-w-[50vw] h-full relative flex items-center justify-center"> {/* Container to prevent content squishing during transition */}
                                 {/* Background Image - Optimized with Next.js Image */}
@@ -586,7 +591,7 @@ export default function LoginPage() {
                                             </span>
                                         </div>
                                         <h2 className="text-3xl font-extrabold text-slate-900 leading-tight">
-                                            <span className="bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
+                                            <span className="bg-linear-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
                                                 Akses Otomatis
                                             </span>
                                             {' '}
@@ -594,7 +599,7 @@ export default function LoginPage() {
                                         </h2>
                                         <div className="flex gap-3 items-start mt-2.5">
                                             {/* Yellow Divider */}
-                                            <div className="w-0.5 h-12 bg-yellow-500 rounded-full flex-shrink-0"></div>
+                                            <div className="w-0.5 h-12 bg-yellow-500 rounded-full shrink-0"></div>
 
                                             {/* Description Text */}
                                             <p className="text-sm text-slate-600 leading-relaxed">
@@ -631,7 +636,7 @@ export default function LoginPage() {
                                                 {/* Main Content Container - Colored Background */}
                                                 <div className={`relative h-full backdrop-blur-sm ${role.color.split(' ')[0]} border ${role.borderColor} rounded-xl overflow-visible transition-all duration-500 group-hover:scale-105 group-hover:-translate-y-1 shadow-sm group-hover:shadow-md`}>
                                                     {/* Gradient Overlay */}
-                                                    <div className={`absolute inset-0 bg-gradient-to-br ${role.gradient} opacity-30 group-hover:opacity-50 transition-opacity duration-500 rounded-xl`}></div>
+                                                    <div className={`absolute inset-0 bg-linear-to-br ${role.gradient} opacity-30 group-hover:opacity-50 transition-opacity duration-500 rounded-xl`}></div>
 
                                                     {/* Floating Icon - Outside the box */}
                                                     <div className="absolute -top-5 left-2.5 z-20">
@@ -670,7 +675,7 @@ export default function LoginPage() {
 
                                                     {/* Shimmer Effect on Hover */}
                                                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-xl overflow-hidden">
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                                                     </div>
                                                 </div>
                                             </motion.div>

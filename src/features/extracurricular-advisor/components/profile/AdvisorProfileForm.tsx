@@ -62,8 +62,8 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
     };
 
     const handleSave = () => {
-        if (!formData.name || !formData.email || !formData.username) {
-            toast.error('Nama, Username, dan Email wajib diisi');
+        if (!formData.name || !formData.email || !formData.username || !formData.phone) {
+            toast.error('Nama, Username, Email, dan Telepon wajib diisi');
             return;
         }
         onSave(formData, selectedFile);
@@ -130,7 +130,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
         <Card>
             <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                         <User className="h-5 w-5" />
                     </div>
                     <div>
@@ -209,7 +209,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                             <Input
                                 id="name"
                                 name="name"
-                                value={formData.name}
+                                value={formData.name || ""}
                                 onChange={handleInputChange}
                                 placeholder="Masukkan nama lengkap"
                                 required
@@ -245,7 +245,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                             <Input
                                 id="username"
                                 name="username"
-                                value={formData.username}
+                                value={formData.username || ""}
                                 onChange={handleInputChange}
                                 placeholder="Masukkan username"
                                 required
@@ -265,7 +265,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                             <Input
                                 id="extracurricular"
                                 name="extracurricular"
-                                value={formData.extracurricular}
+                                value={formData.extracurricular || ""}
                                 readOnly
                                 disabled
                                 className="bg-muted"
@@ -286,7 +286,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                                 id="email"
                                 name="email"
                                 type="email"
-                                value={formData.email}
+                                value={formData.email || ""}
                                 onChange={handleInputChange}
                                 placeholder="Masukkan email"
                                 required
@@ -306,7 +306,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                                 id="phone"
                                 name="phone"
                                 type="tel"
-                                value={formData.phone}
+                                value={formData.phone || ""}
                                 onChange={handleInputChange}
                                 placeholder="Masukkan nomor telepon"
                                 required
@@ -324,7 +324,7 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                             <Textarea
                                 id="address"
                                 name="address"
-                                value={formData.address}
+                                value={formData.address || ""}
                                 onChange={handleInputChange}
                                 placeholder="Masukkan alamat lengkap"
                                 rows={3}
