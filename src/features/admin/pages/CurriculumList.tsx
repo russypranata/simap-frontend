@@ -1,13 +1,56 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import {
+    BookOpen,
+    Search,
+    Plus,
+    Filter,
+    MoreVertical,
+    FileText,
+    CheckCircle,
+    XCircle,
+    Clock,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BookOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Filter } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { MOCK_CURRICULUM } from '../data/mockCurriculumData';
+import { CurriculumStatus } from '../types/curriculum';
+
+const statusColors: Record<CurriculumStatus, string> = {
+    active: 'bg-green-100 text-green-700 border-green-200',
+    inactive: 'bg-slate-100 text-slate-700 border-slate-200',
+    draft: 'bg-amber-100 text-amber-700 border-amber-200',
+};
+
+const statusLabels: Record<CurriculumStatus, string> = {
+    active: 'Aktif',
+    inactive: 'Tidak Aktif',
+    draft: 'Draft',
+};
 
 export const CurriculumList: React.FC = () => {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredData = MOCK_CURRICULUM.filter((item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.code.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -26,12 +69,12 @@ export const CurriculumList: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Kelola struktur kurikulum (K13/Merdeka).
+                        Kelola struktur kurikulum (K13/Merdeka) yang berlaku.
                     </p>
                 </div>
                 <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all">
                     <Plus className="h-4 w-4 mr-2" />
-                    Tambah Data
+                    Tambah Kurikulum
                 </Button>
             </div>
 
@@ -40,14 +83,14 @@ export const CurriculumList: React.FC = () => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
-                                <BookOpen className="h-5 w-5" />
+                                <FileText className="h-5 w-5" />
                             </div>
                             <div>
                                 <CardTitle className="text-lg font-semibold text-gray-900">
                                     Daftar Kurikulum
                                 </CardTitle>
                                 <CardDescription>
-                                    Manajemen data kurikulum
+                                    Total {MOCK_CURRICULUM.length} kurikulum terdaftar
                                 </CardDescription>
                             </div>
                         </div>
@@ -57,8 +100,10 @@ export const CurriculumList: React.FC = () => {
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Cari data..."
+                                placeholder="Cari nama atau kode kurikulum..."
                                 className="pl-9 w-full"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                         <Button variant="outline" className="w-[100px]">
@@ -67,15 +112,65 @@ export const CurriculumList: React.FC = () => {
                         </Button>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col items-center justify-center py-12 text-center border-t border-slate-200 bg-slate-50/50">
-                        <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                            <BookOpen className="h-8 w-8 text-slate-300" />
-                        </div>
-                        <h3 className="text-lg font-medium text-slate-900">Belum ada data</h3>
-                        <p className="text-slate-500 max-w-sm mt-1 mb-4">
-                            Silakan tambahkan data baru untuk memulai manajemen kurikulum.
-                        </p>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                                <tr>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Nama Kurikulum</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Tahun Ajaran</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Total Mapel</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-center">Status</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {filteredData.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                                            Data tidak ditemukan
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredData.map((item) => (
+                                        <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="font-medium text-slate-900">{item.name}</div>
+                                                <div className="text-xs text-slate-500">{item.code}</div>
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600">
+                                                {item.academicYearName}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600">
+                                                {item.totalSubjects} Mata Pelajaran
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <Badge
+                                                    variant="outline"
+                                                    className={`uppercase text-[10px] tracking-wider font-semibold ${statusColors[item.status]}`}
+                                                >
+                                                    {statusLabels[item.status]}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                            <MoreVertical className="h-4 w-4 text-slate-400" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem>Detail</DropdownMenuItem>
+                                                        <DropdownMenuItem>Edit Struktur</DropdownMenuItem>
+                                                        <DropdownMenuItem className="text-red-600">Hapus</DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </CardContent>
             </Card>

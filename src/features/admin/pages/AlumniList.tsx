@@ -1,13 +1,31 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import {
+    Award,
+    Search,
+    Filter,
+    Download,
+    GraduationCap,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Award } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Filter } from 'lucide-react';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { MOCK_ALUMNI } from '../data/mockAlumniData';
 
 export const AlumniList: React.FC = () => {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredData = MOCK_ALUMNI.filter((item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -26,12 +44,12 @@ export const AlumniList: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Database siswa yang telah lulus.
+                        Arsip data siswa yang telah lulus (Alumni).
                     </p>
                 </div>
-                <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Tambah Data
+                <Button variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Data
                 </Button>
             </div>
 
@@ -40,14 +58,14 @@ export const AlumniList: React.FC = () => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
-                                <Award className="h-5 w-5" />
+                                <GraduationCap className="h-5 w-5" />
                             </div>
                             <div>
                                 <CardTitle className="text-lg font-semibold text-gray-900">
-                                    Arsip Lulusan
+                                    Daftar Alumni
                                 </CardTitle>
                                 <CardDescription>
-                                    Manajemen data alumni
+                                    Total {MOCK_ALUMNI.length} alumni terdata
                                 </CardDescription>
                             </div>
                         </div>
@@ -57,8 +75,10 @@ export const AlumniList: React.FC = () => {
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Cari data..."
+                                placeholder="Cari nama alumni..."
                                 className="pl-9 w-full"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                         <Button variant="outline" className="w-[100px]">
@@ -67,15 +87,51 @@ export const AlumniList: React.FC = () => {
                         </Button>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col items-center justify-center py-12 text-center border-t border-slate-200 bg-slate-50/50">
-                        <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                            <Award className="h-8 w-8 text-slate-300" />
-                        </div>
-                        <h3 className="text-lg font-medium text-slate-900">Belum ada data</h3>
-                        <p className="text-slate-500 max-w-sm mt-1 mb-4">
-                            Silakan tambahkan data baru untuk memulai manajemen alumni.
-                        </p>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                                <tr>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Nama & NISN</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Tahun Lulus</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Kelas Terakhir</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Karir / Studi Lanjut</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {filteredData.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                                            Data tidak ditemukan
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredData.map((item) => (
+                                        <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="font-medium text-slate-900">{item.name}</div>
+                                                <div className="text-xs text-slate-500">{item.nisn}</div>
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600">
+                                                {item.graduationYear}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600">
+                                                {item.className}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600 italic">
+                                                {item.university || item.job || '-'}
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
+                                                    Lihat Profil
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </CardContent>
             </Card>

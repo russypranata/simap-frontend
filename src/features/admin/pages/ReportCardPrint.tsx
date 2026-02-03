@@ -1,11 +1,35 @@
 'use client';
 
 import React from 'react';
+import {
+    Printer,
+    Search,
+    Filter,
+    Download,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Printer } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Filter } from 'lucide-react';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { MOCK_REPORT_CARDS } from '../data/mockAssessmentData';
+
+const statusColors: Record<string, string> = {
+    ready: 'text-green-600 bg-green-50 border-green-200',
+    processing: 'text-amber-600 bg-amber-50 border-amber-200',
+    pending: 'text-slate-600 bg-slate-100 border-slate-200',
+};
+
+const statusLabels: Record<string, string> = {
+    ready: 'Siap Cetak',
+    processing: 'Proses',
+    pending: 'Belum Siap',
+};
 
 export const ReportCardPrint: React.FC = () => {
     return (
@@ -26,13 +50,9 @@ export const ReportCardPrint: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Cetak rapor hasil belajar siswa.
+                        Generate dan cetak laporan hasil belajar siswa (Rapor).
                     </p>
                 </div>
-                <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Tambah Data
-                </Button>
             </div>
 
             <Card className="border-slate-200 shadow-sm">
@@ -44,10 +64,10 @@ export const ReportCardPrint: React.FC = () => {
                             </div>
                             <div>
                                 <CardTitle className="text-lg font-semibold text-gray-900">
-                                    Generate Rapor
+                                    Daftar Kelas
                                 </CardTitle>
                                 <CardDescription>
-                                    Manajemen data rapor
+                                    Pilih kelas untuk mencetak rapor
                                 </CardDescription>
                             </div>
                         </div>
@@ -57,7 +77,7 @@ export const ReportCardPrint: React.FC = () => {
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Cari data..."
+                                placeholder="Cari kelas atau wali kelas..."
                                 className="pl-9 w-full"
                             />
                         </div>
@@ -67,15 +87,56 @@ export const ReportCardPrint: React.FC = () => {
                         </Button>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col items-center justify-center py-12 text-center border-t border-slate-200 bg-slate-50/50">
-                        <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                            <Printer className="h-8 w-8 text-slate-300" />
-                        </div>
-                        <h3 className="text-lg font-medium text-slate-900">Belum ada data</h3>
-                        <p className="text-slate-500 max-w-sm mt-1 mb-4">
-                            Silakan tambahkan data baru untuk memulai manajemen rapor.
-                        </p>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                                <tr>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Kelas</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Wali Kelas</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Periode</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Siap Cetak</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-center">Status</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {MOCK_REPORT_CARDS.map((item) => (
+                                    <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="font-bold text-lg text-slate-900">{item.className}</div>
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-600">
+                                            {item.homeroomTeacher}
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-600">
+                                            {item.academicYear} - {item.semester}
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-600">
+                                            <span className="font-medium text-slate-900">{item.generatedReports}</span> / {item.totalStudents} Siswa
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <Badge
+                                                variant="outline"
+                                                className={`uppercase text-[10px] tracking-wider font-semibold ${statusColors[item.status]}`}
+                                            >
+                                                {statusLabels[item.status]}
+                                            </Badge>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <Button
+                                                size="sm"
+                                                className="bg-blue-800 hover:bg-blue-900 text-white"
+                                                disabled={item.status === 'pending'}
+                                            >
+                                                <Download className="h-3 w-3 mr-2" />
+                                                Unduh PDF
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </CardContent>
             </Card>

@@ -1,13 +1,31 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import {
+    UserCheck,
+    Search,
+    Edit,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { UserCheck } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Filter } from 'lucide-react';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { MOCK_HOMEROOM_CLASSES } from '../data/mockHomeroomData';
 
 export const HomeroomList: React.FC = () => {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredData = MOCK_HOMEROOM_CLASSES.filter((item) =>
+        item.className.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.homeroomTeacherName && item.homeroomTeacherName.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -26,13 +44,9 @@ export const HomeroomList: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Penugasan guru sebagai wali kelas.
+                        Atur penugasan wali kelas untuk setiap rombongan belajar.
                     </p>
                 </div>
-                <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Tambah Data
-                </Button>
             </div>
 
             <Card className="border-slate-200 shadow-sm">
@@ -47,7 +61,7 @@ export const HomeroomList: React.FC = () => {
                                     Daftar Wali Kelas
                                 </CardTitle>
                                 <CardDescription>
-                                    Manajemen data kelas
+                                    Tahun Ajaran 2024/2025
                                 </CardDescription>
                             </div>
                         </div>
@@ -57,25 +71,61 @@ export const HomeroomList: React.FC = () => {
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Cari data..."
+                                placeholder="Cari kelas atau nama guru..."
                                 className="pl-9 w-full"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <Button variant="outline" className="w-[100px]">
-                            <Filter className="h-4 w-4 mr-2" />
-                            Filter
-                        </Button>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col items-center justify-center py-12 text-center border-t border-slate-200 bg-slate-50/50">
-                        <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                            <UserCheck className="h-8 w-8 text-slate-300" />
-                        </div>
-                        <h3 className="text-lg font-medium text-slate-900">Belum ada data</h3>
-                        <p className="text-slate-500 max-w-sm mt-1 mb-4">
-                            Silakan tambahkan data baru untuk memulai manajemen kelas.
-                        </p>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                                <tr>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Kelas</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Wali Kelas</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Total Siswa</th>
+                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {filteredData.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                                            Data tidak ditemukan
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredData.map((item) => (
+                                        <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="font-bold text-lg text-slate-900">{item.className}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {item.homeroomTeacherName ? (
+                                                    <span className="font-medium text-slate-700">{item.homeroomTeacherName}</span>
+                                                ) : (
+                                                    <Badge variant="outline" className="text-red-600 bg-red-50 border-red-200">
+                                                        Belum Ditentukan
+                                                    </Badge>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600">
+                                                {item.totalStudents} Siswa
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <Button variant="outline" size="sm">
+                                                    <Edit className="h-3 w-3 mr-2" />
+                                                    Ubah
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </CardContent>
             </Card>

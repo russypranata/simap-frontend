@@ -1,11 +1,19 @@
 'use client';
 
 import React from 'react';
+import {
+    ArrowUpCircle,
+    CheckCircle2,
+    AlertCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowUpCircle } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Search, Plus, Filter } from 'lucide-react';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 
 export const PromotionWorkflow: React.FC = () => {
     return (
@@ -26,59 +34,54 @@ export const PromotionWorkflow: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Workflow kenaikan kelas massal.
+                        Workflow proses kenaikan kelas siswa secara massal.
                     </p>
                 </div>
-                <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Tambah Data
-                </Button>
             </div>
 
-            <Card className="border-slate-200 shadow-sm">
-                <CardHeader className="pb-4 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
-                                <ArrowUpCircle className="h-5 w-5" />
-                            </div>
-                            <div>
-                                <CardTitle className="text-lg font-semibold text-gray-900">
-                                    Proses Kenaikan
-                                </CardTitle>
-                                <CardDescription>
-                                    Manajemen data kelas
-                                </CardDescription>
-                            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="border-slate-200 shadow-sm md:col-span-2">
+                    <CardHeader>
+                        <CardTitle>Proses Kenaikan Kelas</CardTitle>
+                        <CardDescription>
+                            Pilih kelas asal dan kelas tujuan untuk memproses kenaikan.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                         <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50 border border-dashed border-slate-300 rounded-lg">
+                            <ArrowUpCircle className="h-12 w-12 text-slate-300 mb-3" />
+                            <h3 className="text-lg font-medium text-slate-900">Pilih Tingkat Kelas</h3>
+                            <p className="text-slate-500 max-w-sm mt-1 mb-4">
+                                Silakan pilih tingkat kelas yang akan diproses kenaikannya.
+                            </p>
+                            <Button>Mulai Proses</Button>
                         </div>
-                    </div>
+                    </CardContent>
+                </Card>
 
-                    <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-slate-100">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Cari data..."
-                                className="pl-9 w-full"
-                            />
-                        </div>
-                        <Button variant="outline" className="w-[100px]">
-                            <Filter className="h-4 w-4 mr-2" />
-                            Filter
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col items-center justify-center py-12 text-center border-t border-slate-200 bg-slate-50/50">
-                        <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                            <ArrowUpCircle className="h-8 w-8 text-slate-300" />
-                        </div>
-                        <h3 className="text-lg font-medium text-slate-900">Belum ada data</h3>
-                        <p className="text-slate-500 max-w-sm mt-1 mb-4">
-                            Silakan tambahkan data baru untuk memulai manajemen kelas.
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
+                <Card className="border-slate-200 shadow-sm">
+                    <CardHeader>
+                        <CardTitle>Status Kenaikan</CardTitle>
+                        <CardDescription>Ringkasan proses berjalan</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                         <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-100">
+                            <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                            <div>
+                                <h4 className="font-medium text-green-900 text-sm">Kelas X Selesai</h4>
+                                <p className="text-green-700 text-xs mt-0.5">Semua siswa kelas X telah diproses.</p>
+                            </div>
+                         </div>
+                         <div className="flex items-start gap-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
+                            <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                            <div>
+                                <h4 className="font-medium text-amber-900 text-sm">Kelas XI Pending</h4>
+                                <p className="text-amber-700 text-xs mt-0.5">Menunggu konfirmasi wali kelas.</p>
+                            </div>
+                         </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 };

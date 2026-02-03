@@ -1,0 +1,40 @@
+import { Curriculum } from '../types/curriculum';
+
+export const MOCK_CURRICULUM: Curriculum[] = [
+    {
+        id: 'curr-001',
+        name: 'Kurikulum Merdeka',
+        code: 'KM-MERDEKA',
+        description: 'Kurikulum Operasional Satuan Pendidikan (KOSP) berbasis Merdeka Belajar.',
+        academicYearId: 'ay-2024-2025',
+        academicYearName: '2024/2025',
+        status: 'active',
+        totalSubjects: 15,
+        createdAt: '2024-01-15T00:00:00Z',
+        updatedAt: '2024-06-20T00:00:00Z',
+    },
+    {
+        id: 'curr-002',
+        name: 'Kurikulum 2013 (Revisi)',
+        code: 'K13-REV',
+        description: 'Kurikulum 2013 edisi revisi untuk tingkat akhir.',
+        academicYearId: 'ay-2023-2024',
+        academicYearName: '2023/2024',
+        status: 'inactive',
+        totalSubjects: 14,
+        createdAt: '2023-01-10T00:00:00Z',
+        updatedAt: '2023-12-20T00:00:00Z',
+    },
+    {
+        id: 'curr-003',
+        name: 'Kurikulum Merdeka (Draft 2025)',
+        code: 'KM-2025-DRAFT',
+        description: 'Draft kurikulum untuk tahun ajaran mendatang.',
+        academicYearId: 'ay-2025-2026',
+        academicYearName: '2025/2026',
+        status: 'draft',
+        totalSubjects: 16,
+        createdAt: '2025-01-05T00:00:00Z',
+        updatedAt: '2025-01-05T00:00:00Z',
+    },
+];
