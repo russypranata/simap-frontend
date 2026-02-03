@@ -30,30 +30,30 @@ curl -X GET http://localhost:8000/api/v1/student/profile \
 
 ```json
 {
-    "code": 200,
-    "status": "success",
-    "message": "Profile data retrieved successfully",
-    "data": {
-        "id": 1,
-        "name": "Ahmad Fauzan",
-        "nis": "12345678",
-        "nisn": "12345678",
-        "class": "XII IPA 1",
-        "email": "ahmad@example.com",
-        "phone": "08123456789",
-        "address": "Test Address",
-        "birthPlace": "Jakarta",
-        "birthDate": "2007-05-15",
-        "religion": "Islam",
-        "joinDate": "January 2026",
-        "role": "Student",
-        "validUntil": "31 June 2028",
-        "profilePicture": "http://localhost:8000/storage/avatars/default.jpg",
-        "avatar": "http://localhost:8000/storage/avatars/default.jpg",
-        "passwordLastChanged": "2026-01-13T15:00:00+00:00",
-        "createdAt": "2026-01-13T15:00:00+00:00",
-        "updatedAt": "2026-01-13T15:00:00+00:00"
-    }
+  "code": 200,
+  "status": "success",
+  "message": "Profile data retrieved successfully",
+  "data": {
+    "id": 1,
+    "name": "Ahmad Fauzan",
+    "nis": "12345678",
+    "nisn": "12345678",
+    "class": "XII IPA 1",
+    "email": "ahmad@example.com",
+    "phone": "08123456789",
+    "address": "Test Address",
+    "birthPlace": "Jakarta",
+    "birthDate": "2007-05-15",
+    "religion": "Islam",
+    "joinDate": "January 2026",
+    "role": "Student",
+    "validUntil": "31 June 2028",
+    "profilePicture": "http://localhost:8000/storage/avatars/default.jpg",
+    "avatar": "http://localhost:8000/storage/avatars/default.jpg",
+    "passwordLastChanged": "2026-01-13T15:00:00+00:00",
+    "createdAt": "2026-01-13T15:00:00+00:00",
+    "updatedAt": "2026-01-13T15:00:00+00:00"
+  }
 }
 ```
 
@@ -130,12 +130,12 @@ curl -X POST http://localhost:8000/api/v1/student/profile/avatar \
 
 ```json
 {
-    "code": 200,
-    "status": "success",
-    "message": "Avatar updated successfully",
-    "data": {
-        "avatar_url": "http://..."
-    }
+  "code": 200,
+  "status": "success",
+  "message": "Avatar updated successfully",
+  "data": {
+    "avatar_url": "http://..."
+  }
 }
 ```
 
@@ -172,15 +172,125 @@ curl -X PUT http://localhost:8000/api/v1/student/profile/password \
 
 ```json
 {
-    "code": 200,
-    "status": "success",
-    "message": "Password updated successfully"
+  "code": 200,
+  "status": "success",
+  "message": "Password updated successfully"
 }
 ```
 
 ---
 
-## 2. Admin Profile Management
+## 2. Admin Self-Service Profile
+
+**Base URL**: `/admin/profile`  
+**Auth Required**: Yes (Bearer Token - Admin Role)
+
+### Get Profile
+
+Retrieve the authenticated admin's profile information.
+
+- **URL**: `/admin/profile`
+- **Method**: `GET`
+
+#### Response (200 OK)
+
+```json
+{
+  "code": 200,
+  "status": "success",
+  "message": "Admin profile retrieved successfully",
+  "data": {
+    "id": 1,
+    "name": "Dr. Ahmad Suryadi, M.Pd",
+    "username": "admin.suryadi",
+    "email": "admin@sman1.sch.id",
+    "phone": "08119876543",
+    "role": "Administrator",
+    "department": "Tata Usaha",
+    "joinDate": "Januari 2020",
+    "profilePicture": "http://...",
+    "avatar": "http://...",
+    "passwordLastChanged": "2025-01-10T10:30:00Z"
+  }
+}
+```
+
+### Update Profile
+
+- **URL**: `/admin/profile`
+- **Method**: `PUT`
+
+#### Request Body
+
+| Field      | Type   | Required | Description     |
+| :--------- | :----- | :------- | :-------------- |
+| `name`     | string | Yes      | Full name       |
+| `username` | string | Yes      | Unique identity |
+| `email`    | string | Yes      | Valid email     |
+| `phone`    | string | Yes      | Phone number    |
+
+### Upload Avatar
+
+- **URL**: `/admin/profile/avatar`
+- **Method**: `POST`
+- **Body**: `multipart/form-data` (`avatar` file)
+
+### Change Password
+
+- **URL**: `/admin/profile/password`
+- **Method**: `PUT`
+
+---
+
+## 3. Extracurricular Advisor Profile
+
+**Base URL**: `/extracurricular-advisor/profile`  
+**Auth Required**: Yes (Bearer Token - Advisor Role)
+
+### Get Profile
+
+- **URL**: `/extracurricular-advisor/profile`
+- **Method**: `GET`
+
+#### Response (200 OK)
+
+```json
+{
+  "code": 200,
+  "status": "success",
+  "message": "Advisor profile retrieved successfully",
+  "data": {
+    "id": 1,
+    "name": "Ahmad Fauzi, S.Pd",
+    "email": "fauzi@example.com",
+    "phone": "081234567890",
+    "address": "Jl. Pendidikan No. 45, Jakarta",
+    "joinDate": "Juli 2024",
+    "role": "Pembina Ekstrakurikuler",
+    "extracurricular": "Pramuka",
+    "profilePicture": "http://..."
+  }
+}
+```
+
+### Update Profile
+
+- **URL**: `/extracurricular-advisor/profile`
+- **Method**: `PUT`
+
+### Upload Avatar
+
+- **URL**: `/extracurricular-advisor/profile/avatar`
+- **Method**: `POST`
+
+### Change Password
+
+- **URL**: `/extracurricular-advisor/profile/password`
+- **Method**: `PUT`
+
+---
+
+## 4. Admin Management of Profiles (Global)
 
 Manage role-specific profiles. All endpoints require **Admin** privileges.
 
@@ -211,9 +321,9 @@ curl -X POST http://localhost:8000/api/v1/student-profiles \
 
 ```json
 {
-    "user_id": 2,
-    "admission_number": "STU-001",
-    "dob": "2005-01-01"
+  "user_id": 2,
+  "admission_number": "STU-001",
+  "dob": "2005-01-01"
 }
 ```
 
@@ -289,9 +399,9 @@ curl -X POST http://localhost:8000/api/v1/teacher-profiles \
 
 ```json
 {
-    "user_id": 3,
-    "employee_id": "TCH-001",
-    "qualifications": "PhD in Education"
+  "user_id": 3,
+  "employee_id": "TCH-001",
+  "qualifications": "PhD in Education"
 }
 ```
 
@@ -349,9 +459,9 @@ curl -X POST http://localhost:8000/api/v1/staff-profiles \
 
 ```json
 {
-    "user_id": 4,
-    "department": "HR",
-    "job_title": "Manager"
+  "user_id": 4,
+  "department": "HR",
+  "job_title": "Manager"
 }
 ```
 

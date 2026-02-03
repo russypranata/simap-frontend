@@ -21,7 +21,8 @@ import {
     Wallet,
     Pencil,
     CircleDot,
-    ArrowLeft
+    ArrowLeft,
+    School
 } from 'lucide-react';
 import {
     Breadcrumb,
@@ -76,6 +77,14 @@ const routeConfig: Record<string, { label: string; icon: React.ComponentType<{ c
     'mutamayizin': { label: 'Mutamayizin', icon: BookOpen },
 
     // Admin routes
+    'academic-year': { label: 'Tahun Ajaran', icon: Calendar },
+    'class': { label: 'Daftar Kelas', icon: School },
+    'subject': { label: 'Mata Pelajaran', icon: BookOpen },
+    'new': { label: 'Tambah Baru', icon: Pencil },
+    'users': { label: 'Manajemen Pengguna', icon: Users },
+    'teachers': { label: 'Guru & Staff', icon: Users },
+    'students': { label: 'Data Siswa', icon: GraduationCap },
+    'parents': { label: 'Wali Murid', icon: Users },
     'kelola-pengguna': { label: 'Kelola Pengguna', icon: Users },
     'pengaturan': { label: 'Pengaturan', icon: Settings },
 
@@ -91,7 +100,8 @@ const roleSegments = [
     'parent',
     'extracurricular-advisor',
     'mutamayizin-coordinator',
-    'admin'
+    'admin',
+    'users'
 ];
 
 interface BreadcrumbData {
@@ -125,13 +135,39 @@ export const NavbarBreadcrumb: React.FC = () => {
         let currentPath = '';
 
         // Rebuild path with correct href
-        segments.forEach((segment) => {
+        let skippedLabel = '';
+        
+        segments.forEach((segment, index) => {
             currentPath += `/${segment}`;
 
             // Only add to breadcrumbs if not a role segment
             if (!roleSegments.includes(segment)) {
+                
+                // Smart Logic: Check if this is an ID followed immediately by 'edit'
+                const isIdSegment = segment.match(/^[0-9a-f-]{36}$/i) || /^\d+$/.test(segment) || segment.startsWith('ay-') || segment.startsWith('c-') || segment.startsWith('subj-');
+                const nextSegment = segments[index + 1];
+                
+                if (isIdSegment && nextSegment === 'edit') {
+                    // Start: Capture semantic label for the Edit page before skipping
+                    if (segment.startsWith('ay-')) {
+                        const parts = segment.split('-');
+                        if (parts.length >= 3) skippedLabel = `T.A. ${parts[1]}/${parts[2]}`;
+                    } else {
+                         skippedLabel = formatSegmentLabel(segment);
+                    }
+                    // End: Skip adding this ID segment to breadcrumb list
+                    return; 
+                }
+
                 const config = routeConfig[segment];
-                const label = config?.label || formatSegmentLabel(segment);
+                let label = config?.label || formatSegmentLabel(segment);
+                
+                // If this is the 'edit' segment and we skipped the previous ID, merge the label
+                if (segment === 'edit' && skippedLabel) {
+                    label = `Edit ${skippedLabel.replace('Detail ', '')}`; // Remove "Detail" prefix if exists
+                    skippedLabel = ''; // Reset
+                }
+
                 const icon = config?.icon || CircleDot;
                 
                 // Preserve tab query param for attendance page
@@ -170,6 +206,26 @@ export const NavbarBreadcrumb: React.FC = () => {
         // Handle numeric IDs
         if (/^\d+$/.test(segment)) {
             return 'Detail';
+        }
+
+        // Handle Academic Year IDs (ay-...)
+        if (segment.startsWith('ay-')) {
+            // Parse ay-2025-2026 to T.A. 2025/2026
+            const parts = segment.split('-');
+            if (parts.length >= 3) {
+                return `T.A. ${parts[1]}/${parts[2]}`;
+            }
+            return 'Detail Tahun Ajaran';
+        }
+
+        // Handle Class IDs (c-...)
+        if (segment.startsWith('c-')) {
+            return 'Detail Kelas';
+        }
+
+        // Handle Subject IDs (subj-...)
+        if (segment.startsWith('subj-')) {
+            return 'Detail Mata Pelajaran';
         }
 
         // Convert kebab-case to Title Case
