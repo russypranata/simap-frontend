@@ -10,8 +10,8 @@ const generateSemesterId = (yearId: string, code: "1" | "2") => `${yearId}-sem-$
  * - Semester Genap: Januari - Juni
  *
  * Skenario saat ini:
- * - Tanggal simulasi: Februari 2025
- * - Tahun Ajaran Aktif: 2024/2025
+ * - Tanggal simulasi: Februari 2026
+ * - Tahun Ajaran Aktif: 2025/2026
  * - Semester Aktif: Genap
  */
 export const mockAcademicYears: AcademicYear[] = [
@@ -20,7 +20,7 @@ export const mockAcademicYears: AcademicYear[] = [
         name: '2025/2026',
         startDate: '2025-07-14', // Senin minggu ke-2/3 Juli
         endDate: '2026-06-20',   // Sabtu minggu ke-3 Juni
-        isActive: false, // Tahun depan (Future)
+        isActive: true, // TAHUN AJARAN SAAT INI (Active)
         semesters: [
             {
                 id: generateSemesterId('ay-2025-2026', '1'),
@@ -28,7 +28,7 @@ export const mockAcademicYears: AcademicYear[] = [
                 code: '1',
                 startDate: '2025-07-14',
                 endDate: '2025-12-19',
-                isActive: false,
+                isActive: false, // Sudah lewat
                 createdAt: '2025-01-01T00:00:00Z',
                 updatedAt: '2025-01-01T00:00:00Z',
             },
@@ -38,7 +38,7 @@ export const mockAcademicYears: AcademicYear[] = [
                 code: '2',
                 startDate: '2026-01-05',
                 endDate: '2026-06-20',
-                isActive: false,
+                isActive: true, // SEMESTER SAAT INI (Active)
                 createdAt: '2025-01-01T00:00:00Z',
                 updatedAt: '2025-01-01T00:00:00Z',
             },
@@ -51,7 +51,7 @@ export const mockAcademicYears: AcademicYear[] = [
         name: '2024/2025',
         startDate: '2024-07-15',
         endDate: '2025-06-21',
-        isActive: true, // TAHUN AJARAN SAAT INI (Active)
+        isActive: false, // Sudah lewat (Past)
         semesters: [
             {
                 id: generateSemesterId('ay-2024-2025', '1'),
@@ -59,7 +59,7 @@ export const mockAcademicYears: AcademicYear[] = [
                 code: '1',
                 startDate: '2024-07-15',
                 endDate: '2024-12-20',
-                isActive: false, // Sudah lewat
+                isActive: false,
                 createdAt: '2024-06-01T00:00:00Z',
                 updatedAt: '2024-06-01T00:00:00Z',
             },
@@ -69,7 +69,7 @@ export const mockAcademicYears: AcademicYear[] = [
                 code: '2',
                 startDate: '2025-01-06',
                 endDate: '2025-06-21',
-                isActive: true, // SEMESTER SAAT INI (Active)
+                isActive: false,
                 createdAt: '2024-06-01T00:00:00Z',
                 updatedAt: '2025-01-06T00:00:00Z',
             },
