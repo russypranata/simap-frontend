@@ -30,6 +30,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MOCK_PARENTS } from '../data/mockParentData';
 import { Parent } from '../types/parent';
+import { ParentForm } from '../components/forms/ParentForm';
+import { ParentFormValues } from '../schemas/parentSchema';
+import { toast } from 'sonner';
 
 const statusColors: Record<string, string> = {
     active: 'bg-green-100 text-green-700 border-green-200',
@@ -43,12 +46,44 @@ const statusLabels: Record<string, string> = {
 
 export const ParentList: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [data, setData] = useState<Parent[]>(MOCK_PARENTS);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
-    const filteredData = MOCK_PARENTS.filter((item) =>
+    const filteredData = data.filter((item) =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.children.some(child => child.name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
+
+    const handleCreate = (values: ParentFormValues) => {
+        const newItem: Parent = {
+            id: `par-${Date.now()}`,
+            ...values,
+            children: [], // Defaults to no children, needs linking logic separately
+        };
+        setData([newItem, ...data]);
+        toast.success('Wali murid berhasil ditambahkan');
+    };
+
+    const handleUpdate = (values: ParentFormValues) => {
+        if (!editingId) return;
+        setData(prev => prev.map(item => item.id === editingId ? { ...item, ...values } : item));
+        toast.success('Data wali murid diperbarui');
+        setEditingId(null);
+    };
+
+    const handleDelete = (id: string) => {
+        if (confirm('Hapus data wali murid ini?')) {
+            setData(prev => prev.filter(item => item.id !== id));
+            toast.success('Wali murid dihapus');
+        }
+    };
+
+    const openEdit = (item: Parent) => {
+        setEditingId(item.id);
+        setIsFormOpen(true);
+    };
 
     return (
         <div className="space-y-6">
@@ -76,8 +111,11 @@ export const ParentList: React.FC = () => {
                         <Download className="h-4 w-4 mr-2" />
                         Export
                     </Button>
-                    <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all">
-                        Undang Wali Murid
+                    <Button
+                        onClick={() => { setEditingId(null); setIsFormOpen(true); }}
+                        className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all"
+                    >
+                        Tambah Wali Murid
                     </Button>
                 </div>
             </div>
@@ -94,7 +132,7 @@ export const ParentList: React.FC = () => {
                                     Daftar Wali Murid
                                 </CardTitle>
                                 <CardDescription>
-                                    Total {MOCK_PARENTS.length} orang tua terdaftar
+                                    Total {data.length} orang tua terdaftar
                                 </CardDescription>
                             </div>
                         </div>
@@ -145,7 +183,7 @@ export const ParentList: React.FC = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col gap-1">
-                                                    {item.children.map((child) => (
+                                                    {item.children.length > 0 ? item.children.map((child) => (
                                                         <div key={child.id} className="flex items-center gap-1.5">
                                                             <div className="h-1.5 w-1.5 rounded-full bg-blue-400"></div>
                                                             <span className="text-slate-700 font-medium text-xs">
@@ -155,7 +193,9 @@ export const ParentList: React.FC = () => {
                                                                 {child.className}
                                                             </Badge>
                                                         </div>
-                                                    ))}
+                                                    )) : (
+                                                        <span className="text-xs text-slate-400 italic">Belum ada siswa</span>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
@@ -194,11 +234,10 @@ export const ParentList: React.FC = () => {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem>
-                                                            <Eye className="h-3.5 w-3.5 mr-2" /> Detail Profil
+                                                        <DropdownMenuItem onClick={() => openEdit(item)}>
+                                                            Edit Profil
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem>Reset Password</DropdownMenuItem>
-                                                        <DropdownMenuItem className="text-red-600">Nonaktifkan Akun</DropdownMenuItem>
+                                                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(item.id)}>Nonaktifkan Akun</DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </td>
@@ -210,6 +249,16 @@ export const ParentList: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
+
+            <ParentForm
+                open={isFormOpen}
+                onOpenChange={(open) => {
+                    setIsFormOpen(open);
+                    if (!open) setEditingId(null);
+                }}
+                initialData={editingId ? data.find(d => d.id === editingId) : null}
+                onSubmit={editingId ? handleUpdate : handleCreate}
+            />
         </div>
     );
 };

@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
     CalendarDays,
     Plus,
     Calendar as CalendarIcon,
     MoreHorizontal,
     Clock,
+    Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,7 +19,10 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MOCK_CALENDAR_EVENTS } from '../data/mockCalendarData';
-import { EventType } from '../types/calendar';
+import { CalendarEvent, EventType } from '../types/calendar';
+import { CalendarEventForm } from '../components/forms/CalendarEventForm';
+import { CalendarEventFormValues } from '../schemas/calendarSchema';
+import { toast } from 'sonner';
 
 const typeColors: Record<EventType, string> = {
     holiday: 'bg-red-100 text-red-700 border-red-200',
@@ -35,8 +39,12 @@ const typeLabels: Record<EventType, string> = {
 };
 
 export const AcademicCalendar: React.FC = () => {
+    const [events, setEvents] = useState<CalendarEvent[]>(MOCK_CALENDAR_EVENTS);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
+
     // Sort events by date
-    const sortedEvents = [...MOCK_CALENDAR_EVENTS].sort((a, b) =>
+    const sortedEvents = [...events].sort((a, b) =>
         new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
     );
 
@@ -47,6 +55,35 @@ export const AcademicCalendar: React.FC = () => {
             month: 'long',
             year: 'numeric',
         });
+    };
+
+    const handleCreate = (values: CalendarEventFormValues) => {
+        const newItem: CalendarEvent = {
+            id: `cal-${Date.now()}`,
+            ...values,
+        };
+        setEvents([...events, newItem]);
+        toast.success('Kegiatan berhasil ditambahkan');
+    };
+
+    const handleUpdate = (values: CalendarEventFormValues) => {
+        if (!editingId) return;
+        setEvents(prev => prev.map(item => item.id === editingId ? { ...item, ...values } : item));
+        toast.success('Kegiatan berhasil diperbarui');
+        setEditingId(null);
+    };
+
+    const handleDelete = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (confirm('Hapus kegiatan ini?')) {
+            setEvents(prev => prev.filter(item => item.id !== id));
+            toast.success('Kegiatan dihapus');
+        }
+    };
+
+    const openEdit = (item: CalendarEvent) => {
+        setEditingId(item.id);
+        setIsFormOpen(true);
     };
 
     return (
@@ -70,7 +107,10 @@ export const AcademicCalendar: React.FC = () => {
                         Daftar agenda kegiatan dan hari libur akademik.
                     </p>
                 </div>
-                <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all">
+                <Button
+                    onClick={() => { setEditingId(null); setIsFormOpen(true); }}
+                    className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all"
+                >
                     <Plus className="h-4 w-4 mr-2" />
                     Tambah Kegiatan
                 </Button>
@@ -112,47 +152,70 @@ export const AcademicCalendar: React.FC = () => {
                         </CardHeader>
                         <CardContent className="p-0">
                             <div className="divide-y divide-slate-100">
-                                {sortedEvents.map((event) => (
-                                    <div key={event.id} className="p-4 hover:bg-slate-50 transition-colors flex items-start justify-between group">
-                                        <div className="flex gap-4">
-                                            <div className="flex flex-col items-center justify-center bg-slate-100 rounded-lg w-16 h-16 shrink-0 border border-slate-200">
-                                                <span className="text-xs font-semibold text-slate-500 uppercase">
-                                                    {new Date(event.startDate).toLocaleDateString('id-ID', { month: 'short' })}
-                                                </span>
-                                                <span className="text-2xl font-bold text-slate-800">
-                                                    {new Date(event.startDate).getDate()}
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold text-slate-900">{event.title}</h4>
-                                                <p className="text-sm text-slate-500 mt-0.5">{event.description}</p>
-                                                <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
-                                                    <Clock className="h-3 w-3" />
-                                                    <span>
-                                                        {formatDate(event.startDate)}
-                                                        {event.startDate !== event.endDate && ` - ${formatDate(event.endDate)}`}
+                                {sortedEvents.length === 0 ? (
+                                    <div className="p-8 text-center text-slate-500">Belum ada agenda</div>
+                                ) : (
+                                    sortedEvents.map((event) => (
+                                        <div
+                                            key={event.id}
+                                            className="p-4 hover:bg-slate-50 transition-colors flex items-start justify-between group cursor-pointer"
+                                            onClick={() => openEdit(event)}
+                                        >
+                                            <div className="flex gap-4">
+                                                <div className="flex flex-col items-center justify-center bg-slate-100 rounded-lg w-16 h-16 shrink-0 border border-slate-200">
+                                                    <span className="text-xs font-semibold text-slate-500 uppercase">
+                                                        {new Date(event.startDate).toLocaleDateString('id-ID', { month: 'short' })}
+                                                    </span>
+                                                    <span className="text-2xl font-bold text-slate-800">
+                                                        {new Date(event.startDate).getDate()}
                                                     </span>
                                                 </div>
+                                                <div>
+                                                    <h4 className="font-semibold text-slate-900">{event.title}</h4>
+                                                    <p className="text-sm text-slate-500 mt-0.5">{event.description}</p>
+                                                    <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
+                                                        <Clock className="h-3 w-3" />
+                                                        <span>
+                                                            {formatDate(event.startDate)}
+                                                            {event.startDate !== event.endDate && ` - ${formatDate(event.endDate)}`}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-2">
+                                                <Badge
+                                                    variant="outline"
+                                                    className={`uppercase text-[10px] tracking-wider font-semibold ${typeColors[event.type]}`}
+                                                >
+                                                    {typeLabels[event.type]}
+                                                </Badge>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600"
+                                                    onClick={(e) => handleDelete(event.id, e)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col items-end gap-2">
-                                            <Badge
-                                                variant="outline"
-                                                className={`uppercase text-[10px] tracking-wider font-semibold ${typeColors[event.type]}`}
-                                            >
-                                                {typeLabels[event.type]}
-                                            </Badge>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
                         </CardContent>
                     </Card>
                 </div>
             </div>
+
+            <CalendarEventForm
+                open={isFormOpen}
+                onOpenChange={(open) => {
+                    setIsFormOpen(open);
+                    if (!open) setEditingId(null);
+                }}
+                initialData={editingId ? events.find(e => e.id === editingId) : null}
+                onSubmit={editingId ? handleUpdate : handleCreate}
+            />
         </div>
     );
 };

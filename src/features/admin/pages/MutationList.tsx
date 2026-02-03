@@ -7,6 +7,8 @@ import {
     Filter,
     ArrowRightCircle,
     ArrowLeftCircle,
+    MoreVertical,
+    Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,8 +20,17 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { MOCK_MUTATIONS } from '../data/mockMutationData';
-import { MutationType, MutationStatus } from '../types/mutation';
+import { MutationType, MutationStatus, StudentMutation } from '../types/mutation';
+import { MutationForm } from '../components/forms/MutationForm';
+import { MutationFormValues } from '../schemas/mutationSchema';
+import { toast } from 'sonner';
 
 const typeIcons: Record<MutationType, React.ReactNode> = {
     in: <ArrowRightCircle className="h-4 w-4 text-green-600" />,
@@ -39,11 +50,35 @@ const statusColors: Record<MutationStatus, string> = {
 
 export const MutationList: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [data, setData] = useState<StudentMutation[]>(MOCK_MUTATIONS);
+    const [isFormOpen, setIsFormOpen] = useState(false);
 
-    const filteredData = MOCK_MUTATIONS.filter((item) =>
+    const filteredData = data.filter((item) =>
         item.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.nisn.includes(searchTerm)
     );
+
+    const handleCreate = (values: MutationFormValues) => {
+        const newItem: StudentMutation = {
+            id: `mut-${Date.now()}`,
+            ...values,
+        };
+        setData([newItem, ...data]);
+        toast.success('Data mutasi berhasil ditambahkan');
+        setIsFormOpen(false);
+    };
+
+    const handleDelete = (id: string) => {
+        if (confirm('Hapus data mutasi ini?')) {
+            setData(prev => prev.filter(item => item.id !== id));
+            toast.success('Data mutasi dihapus');
+        }
+    };
+
+    const handleApprove = (id: string) => {
+        setData(prev => prev.map(item => item.id === id ? { ...item, status: 'approved' } : item));
+        toast.success('Mutasi disetujui');
+    };
 
     return (
         <div className="space-y-6">
@@ -66,7 +101,11 @@ export const MutationList: React.FC = () => {
                         Riwayat perpindahan siswa masuk dan keluar (Mutasi).
                     </p>
                 </div>
-                <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all">
+                <Button
+                    onClick={() => setIsFormOpen(true)}
+                    className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all"
+                >
+                    <Plus className="h-4 w-4 mr-2" />
                     Input Mutasi Baru
                 </Button>
             </div>
@@ -83,7 +122,7 @@ export const MutationList: React.FC = () => {
                                     Daftar Mutasi
                                 </CardTitle>
                                 <CardDescription>
-                                    Total {MOCK_MUTATIONS.length} data mutasi
+                                    Total {data.length} data mutasi
                                 </CardDescription>
                             </div>
                         </div>
@@ -159,9 +198,21 @@ export const MutationList: React.FC = () => {
                                                 </Badge>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
-                                                    Detail
-                                                </Button>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900">
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        {item.status === 'pending' && (
+                                                            <DropdownMenuItem onClick={() => handleApprove(item.id)} className="text-green-600">
+                                                                Setujui Mutasi
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(item.id)}>Hapus</DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </td>
                                         </tr>
                                     ))
@@ -171,6 +222,12 @@ export const MutationList: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
+
+            <MutationForm
+                open={isFormOpen}
+                onOpenChange={setIsFormOpen}
+                onSubmit={handleCreate}
+            />
         </div>
     );
 };

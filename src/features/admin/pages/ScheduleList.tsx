@@ -10,6 +10,7 @@ import {
     User,
     MapPin,
     MoreHorizontal,
+    Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,17 +28,29 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { MOCK_SCHEDULES } from '../data/mockScheduleData';
-import { DayOfWeek } from '../types/schedule';
+import { DayOfWeek, Schedule } from '../types/schedule';
+import { ScheduleForm } from '../components/forms/ScheduleForm';
+import { ScheduleFormValues } from '../schemas/scheduleSchema';
+import { toast } from 'sonner';
 
 export const ScheduleList: React.FC = () => {
     const [selectedDay, setSelectedDay] = useState<string>('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [data, setData] = useState<Schedule[]>(MOCK_SCHEDULES);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     const days: DayOfWeek[] = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
-    const filteredData = MOCK_SCHEDULES.filter((item) => {
+    const filteredData = data.filter((item) => {
         const matchesDay = selectedDay === 'all' || item.day === selectedDay;
         const matchesSearch =
             item.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -45,6 +58,34 @@ export const ScheduleList: React.FC = () => {
             item.teacherName.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesDay && matchesSearch;
     });
+
+    const handleCreate = (values: ScheduleFormValues) => {
+        const newItem: Schedule = {
+            id: `sch-${Date.now()}`,
+            ...values,
+        };
+        setData([newItem, ...data]);
+        toast.success('Jadwal berhasil ditambahkan');
+    };
+
+    const handleUpdate = (values: ScheduleFormValues) => {
+        if (!editingId) return;
+        setData(prev => prev.map(item => item.id === editingId ? { ...item, ...values } : item));
+        toast.success('Jadwal berhasil diperbarui');
+        setEditingId(null);
+    };
+
+    const handleDelete = (id: string) => {
+        if (confirm('Hapus jadwal ini?')) {
+            setData(prev => prev.filter(item => item.id !== id));
+            toast.success('Jadwal berhasil dihapus');
+        }
+    };
+
+    const openEdit = (item: Schedule) => {
+        setEditingId(item.id);
+        setIsFormOpen(true);
+    };
 
     return (
         <div className="space-y-6">
@@ -69,7 +110,10 @@ export const ScheduleList: React.FC = () => {
                 </div>
                 <div className="flex gap-2">
                     <Button variant="outline">Import Jadwal</Button>
-                    <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all">
+                    <Button
+                        onClick={() => { setEditingId(null); setIsFormOpen(true); }}
+                        className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all"
+                    >
                         <Plus className="h-4 w-4 mr-2" />
                         Buat Jadwal
                     </Button>
@@ -169,9 +213,17 @@ export const ScheduleList: React.FC = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900">
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => openEdit(item)}>Edit Jadwal</DropdownMenuItem>
+                                                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(item.id)}>Hapus</DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </td>
                                         </tr>
                                     ))
@@ -181,6 +233,16 @@ export const ScheduleList: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
+
+            <ScheduleForm
+                open={isFormOpen}
+                onOpenChange={(open) => {
+                    setIsFormOpen(open);
+                    if (!open) setEditingId(null);
+                }}
+                initialData={editingId ? data.find(d => d.id === editingId) : null}
+                onSubmit={editingId ? handleUpdate : handleCreate}
+            />
         </div>
     );
 };

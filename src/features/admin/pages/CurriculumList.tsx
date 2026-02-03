@@ -8,9 +8,6 @@ import {
     Filter,
     MoreVertical,
     FileText,
-    CheckCircle,
-    XCircle,
-    Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +26,10 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MOCK_CURRICULUM } from '../data/mockCurriculumData';
-import { CurriculumStatus } from '../types/curriculum';
+import { Curriculum, CurriculumStatus } from '../types/curriculum';
+import { CurriculumForm } from '../components/forms/CurriculumForm';
+import { CurriculumFormValues } from '../schemas/curriculumSchema';
+import { toast } from 'sonner';
 
 const statusColors: Record<CurriculumStatus, string> = {
     active: 'bg-green-100 text-green-700 border-green-200',
@@ -45,11 +45,55 @@ const statusLabels: Record<CurriculumStatus, string> = {
 
 export const CurriculumList: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [data, setData] = useState<Curriculum[]>(MOCK_CURRICULUM);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
-    const filteredData = MOCK_CURRICULUM.filter((item) =>
+    const filteredData = data.filter((item) =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const handleCreate = (values: CurriculumFormValues) => {
+        const newItem: Curriculum = {
+            id: `curr-${Date.now()}`,
+            ...values,
+            academicYearName: values.academicYearId === 'ay-2024-2025' ? '2024/2025' : '2025/2026',
+            totalSubjects: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+        setData([newItem, ...data]);
+        toast.success('Kurikulum berhasil ditambahkan');
+    };
+
+    const handleUpdate = (values: CurriculumFormValues) => {
+        if (!editingId) return;
+        setData(prev => prev.map(item =>
+            item.id === editingId
+                ? {
+                    ...item,
+                    ...values,
+                    academicYearName: values.academicYearId === 'ay-2024-2025' ? '2024/2025' : '2025/2026',
+                    updatedAt: new Date().toISOString()
+                  }
+                : item
+        ));
+        toast.success('Kurikulum berhasil diperbarui');
+        setEditingId(null);
+    };
+
+    const handleDelete = (id: string) => {
+        if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+            setData(prev => prev.filter(item => item.id !== id));
+            toast.success('Kurikulum berhasil dihapus');
+        }
+    };
+
+    const openEdit = (item: Curriculum) => {
+        setEditingId(item.id);
+        setIsFormOpen(true);
+    };
 
     return (
         <div className="space-y-6">
@@ -72,7 +116,10 @@ export const CurriculumList: React.FC = () => {
                         Kelola struktur kurikulum (K13/Merdeka) yang berlaku.
                     </p>
                 </div>
-                <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all">
+                <Button
+                    onClick={() => { setEditingId(null); setIsFormOpen(true); }}
+                    className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all"
+                >
                     <Plus className="h-4 w-4 mr-2" />
                     Tambah Kurikulum
                 </Button>
@@ -90,7 +137,7 @@ export const CurriculumList: React.FC = () => {
                                     Daftar Kurikulum
                                 </CardTitle>
                                 <CardDescription>
-                                    Total {MOCK_CURRICULUM.length} kurikulum terdaftar
+                                    Total {data.length} kurikulum terdaftar
                                 </CardDescription>
                             </div>
                         </div>
@@ -160,9 +207,8 @@ export const CurriculumList: React.FC = () => {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem>Detail</DropdownMenuItem>
-                                                        <DropdownMenuItem>Edit Struktur</DropdownMenuItem>
-                                                        <DropdownMenuItem className="text-red-600">Hapus</DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => openEdit(item)}>Edit Struktur</DropdownMenuItem>
+                                                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(item.id)}>Hapus</DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </td>
@@ -174,6 +220,16 @@ export const CurriculumList: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
+
+            <CurriculumForm
+                open={isFormOpen}
+                onOpenChange={(open) => {
+                    setIsFormOpen(open);
+                    if (!open) setEditingId(null);
+                }}
+                initialData={editingId ? data.find(d => d.id === editingId) : null}
+                onSubmit={editingId ? handleUpdate : handleCreate}
+            />
         </div>
     );
 };

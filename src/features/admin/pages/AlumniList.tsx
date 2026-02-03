@@ -7,6 +7,8 @@ import {
     Filter,
     Download,
     GraduationCap,
+    MoreVertical,
+    Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,14 +19,55 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { MOCK_ALUMNI } from '../data/mockAlumniData';
+import { Alumni } from '../types/alumni';
+import { AlumniForm } from '../components/forms/AlumniForm';
+import { AlumniFormValues } from '../schemas/alumniSchema';
+import { toast } from 'sonner';
 
 export const AlumniList: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [data, setData] = useState<Alumni[]>(MOCK_ALUMNI);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
-    const filteredData = MOCK_ALUMNI.filter((item) =>
+    const filteredData = data.filter((item) =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const handleCreate = (values: AlumniFormValues) => {
+        const newItem: Alumni = {
+            id: `alum-${Date.now()}`,
+            ...values,
+        };
+        setData([newItem, ...data]);
+        toast.success('Data alumni berhasil ditambahkan');
+    };
+
+    const handleUpdate = (values: AlumniFormValues) => {
+        if (!editingId) return;
+        setData(prev => prev.map(item => item.id === editingId ? { ...item, ...values } : item));
+        toast.success('Data alumni diperbarui');
+        setEditingId(null);
+    };
+
+    const handleDelete = (id: string) => {
+        if (confirm('Hapus data alumni ini?')) {
+            setData(prev => prev.filter(item => item.id !== id));
+            toast.success('Data alumni dihapus');
+        }
+    };
+
+    const openEdit = (item: Alumni) => {
+        setEditingId(item.id);
+        setIsFormOpen(true);
+    };
 
     return (
         <div className="space-y-6">
@@ -47,10 +90,19 @@ export const AlumniList: React.FC = () => {
                         Arsip data siswa yang telah lulus (Alumni).
                     </p>
                 </div>
-                <Button variant="outline">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Data
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline">
+                        <Download className="h-4 w-4 mr-2" />
+                        Export Data
+                    </Button>
+                    <Button
+                        onClick={() => { setEditingId(null); setIsFormOpen(true); }}
+                        className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all"
+                    >
+                         <Plus className="h-4 w-4 mr-2" />
+                        Tambah Alumni
+                    </Button>
+                </div>
             </div>
 
             <Card className="border-slate-200 shadow-sm">
@@ -65,7 +117,7 @@ export const AlumniList: React.FC = () => {
                                     Daftar Alumni
                                 </CardTitle>
                                 <CardDescription>
-                                    Total {MOCK_ALUMNI.length} alumni terdata
+                                    Total {data.length} alumni terdata
                                 </CardDescription>
                             </div>
                         </div>
@@ -123,9 +175,17 @@ export const AlumniList: React.FC = () => {
                                                 {item.university || item.job || '-'}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50">
-                                                    Lihat Profil
-                                                </Button>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900">
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => openEdit(item)}>Edit Data</DropdownMenuItem>
+                                                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(item.id)}>Hapus</DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </td>
                                         </tr>
                                     ))
@@ -135,6 +195,16 @@ export const AlumniList: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
+
+            <AlumniForm
+                open={isFormOpen}
+                onOpenChange={(open) => {
+                    setIsFormOpen(open);
+                    if (!open) setEditingId(null);
+                }}
+                initialData={editingId ? data.find(d => d.id === editingId) : null}
+                onSubmit={editingId ? handleUpdate : handleCreate}
+            />
         </div>
     );
 };

@@ -10,7 +10,7 @@ import {
     Mail,
     Phone,
     UserCog,
-    Contact,
+    Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +29,10 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MOCK_STAFF } from '../data/mockStaffData';
-import { StaffStatus } from '../types/staff';
+import { Staff, StaffStatus } from '../types/staff';
+import { StaffForm } from '../components/forms/StaffForm';
+import { StaffFormValues } from '../schemas/staffSchema';
+import { toast } from 'sonner';
 
 const statusColors: Record<StaffStatus, string> = {
     active: 'bg-green-100 text-green-700 border-green-200',
@@ -45,11 +48,42 @@ const statusLabels: Record<StaffStatus, string> = {
 
 export const StaffList: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [data, setData] = useState<Staff[]>(MOCK_STAFF);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
-    const filteredData = MOCK_STAFF.filter((item) =>
+    const filteredData = data.filter((item) =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.nip.includes(searchTerm)
     );
+
+    const handleCreate = (values: StaffFormValues) => {
+        const newItem: Staff = {
+            id: `stf-${Date.now()}`,
+            ...values,
+        };
+        setData([newItem, ...data]);
+        toast.success('Pegawai berhasil ditambahkan');
+    };
+
+    const handleUpdate = (values: StaffFormValues) => {
+        if (!editingId) return;
+        setData(prev => prev.map(item => item.id === editingId ? { ...item, ...values } : item));
+        toast.success('Data pegawai diperbarui');
+        setEditingId(null);
+    };
+
+    const handleDelete = (id: string) => {
+        if (confirm('Hapus data pegawai ini?')) {
+            setData(prev => prev.filter(item => item.id !== id));
+            toast.success('Pegawai dihapus');
+        }
+    };
+
+    const openEdit = (item: Staff) => {
+        setEditingId(item.id);
+        setIsFormOpen(true);
+    };
 
     return (
         <div className="space-y-6">
@@ -72,10 +106,19 @@ export const StaffList: React.FC = () => {
                         Kelola data guru dan tenaga kependidikan (Tendik).
                     </p>
                 </div>
-                <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Tambah Pegawai
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline">
+                        <Download className="h-4 w-4 mr-2" />
+                        Export
+                    </Button>
+                    <Button
+                        onClick={() => { setEditingId(null); setIsFormOpen(true); }}
+                        className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all"
+                    >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Tambah Pegawai
+                    </Button>
+                </div>
             </div>
 
             <Card className="border-slate-200 shadow-sm">
@@ -90,7 +133,7 @@ export const StaffList: React.FC = () => {
                                     Daftar Pegawai
                                 </CardTitle>
                                 <CardDescription>
-                                    Total {MOCK_STAFF.length} pegawai terdaftar
+                                    Total {data.length} pegawai terdaftar
                                 </CardDescription>
                             </div>
                         </div>
@@ -178,9 +221,8 @@ export const StaffList: React.FC = () => {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem>Lihat Detail</DropdownMenuItem>
-                                                        <DropdownMenuItem>Edit Data</DropdownMenuItem>
-                                                        <DropdownMenuItem className="text-red-600">Hapus</DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => openEdit(item)}>Edit Data</DropdownMenuItem>
+                                                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(item.id)}>Hapus</DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </td>
@@ -192,6 +234,16 @@ export const StaffList: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
+
+            <StaffForm
+                open={isFormOpen}
+                onOpenChange={(open) => {
+                    setIsFormOpen(open);
+                    if (!open) setEditingId(null);
+                }}
+                initialData={editingId ? data.find(d => d.id === editingId) : null}
+                onSubmit={editingId ? handleUpdate : handleCreate}
+            />
         </div>
     );
 };
