@@ -88,7 +88,7 @@ export const ReportCardPrint: React.FC = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto border-t border-slate-200">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                                 <tr>
@@ -102,18 +102,22 @@ export const ReportCardPrint: React.FC = () => {
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {MOCK_REPORT_CARDS.map((item) => (
-                                    <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                    <tr key={item.id} className="hover:bg-slate-50/60 transition-colors group">
                                         <td className="px-6 py-4">
-                                            <div className="font-bold text-lg text-slate-900">{item.className}</div>
+                                            <div className="font-bold text-lg text-slate-900 bg-slate-100 w-12 h-12 flex items-center justify-center rounded-lg border border-slate-200 group-hover:border-blue-200 transition-colors">
+                                                {item.className}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 text-slate-600">
                                             {item.homeroomTeacher}
                                         </td>
                                         <td className="px-6 py-4 text-slate-600">
-                                            {item.academicYear} - {item.semester}
+                                            <Badge variant="outline" className="bg-white font-normal">
+                                                {item.academicYear} • {item.semester}
+                                            </Badge>
                                         </td>
                                         <td className="px-6 py-4 text-slate-600">
-                                            <span className="font-medium text-slate-900">{item.generatedReports}</span> / {item.totalStudents} Siswa
+                                            <span className="font-bold text-slate-900">{item.generatedReports}</span> <span className="text-slate-400">/</span> {item.totalStudents} Siswa
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <Badge
@@ -126,7 +130,7 @@ export const ReportCardPrint: React.FC = () => {
                                         <td className="px-6 py-4 text-right">
                                             <Button
                                                 size="sm"
-                                                className="bg-blue-800 hover:bg-blue-900 text-white"
+                                                className="bg-blue-800 hover:bg-blue-900 text-white shadow-sm"
                                                 disabled={item.status === 'pending'}
                                             >
                                                 <Download className="h-3 w-3 mr-2" />

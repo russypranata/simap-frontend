@@ -161,7 +161,7 @@ export const CurriculumList: React.FC = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto border-t border-slate-200">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                                 <tr>
@@ -176,21 +176,26 @@ export const CurriculumList: React.FC = () => {
                                 {filteredData.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                                            Data tidak ditemukan
+                                            <div className="flex flex-col items-center justify-center">
+                                                <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+                                                    <FileText className="h-8 w-8 text-slate-300" />
+                                                </div>
+                                                <p className="text-slate-500 font-medium">Data tidak ditemukan</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
                                     filteredData.map((item) => (
-                                        <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                        <tr key={item.id} className="hover:bg-slate-50/60 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="font-medium text-slate-900">{item.name}</div>
-                                                <div className="text-xs text-slate-500">{item.code}</div>
+                                                <div className="text-xs text-slate-500 font-mono mt-0.5 bg-slate-100 w-fit px-1 rounded">{item.code}</div>
                                             </td>
                                             <td className="px-6 py-4 text-slate-600">
                                                 {item.academicYearName}
                                             </td>
                                             <td className="px-6 py-4 text-slate-600">
-                                                {item.totalSubjects} Mata Pelajaran
+                                                <span className="font-medium text-slate-900">{item.totalSubjects}</span> Mata Pelajaran
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <Badge

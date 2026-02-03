@@ -89,7 +89,7 @@ export const AssessmentInput: React.FC = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto border-t border-slate-200">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                                 <tr>
@@ -102,20 +102,27 @@ export const AssessmentInput: React.FC = () => {
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {MOCK_ASSESSMENT_CLASSES.map((item) => (
-                                    <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                    <tr key={item.id} className="hover:bg-slate-50/60 transition-colors group">
                                         <td className="px-6 py-4">
-                                            <div className="font-medium text-slate-900">{item.className}</div>
-                                            <div className="text-blue-600 text-xs font-medium">{item.subjectName}</div>
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-slate-900 text-lg">{item.className}</span>
+                                                <span className="text-blue-600 text-xs font-semibold bg-blue-50 px-2 py-0.5 rounded w-fit">{item.subjectName}</span>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 text-slate-600">
-                                            {item.teacherName}
+                                            <div className="flex items-center gap-2">
+                                                <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">
+                                                    {item.teacherName.substring(0, 2).toUpperCase()}
+                                                </div>
+                                                {item.teacherName}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 min-w-[200px]">
-                                            <div className="flex justify-between text-xs mb-1">
+                                            <div className="flex justify-between text-xs mb-1.5">
                                                 <span className="text-slate-500">{item.gradedStudents}/{item.totalStudents} Siswa</span>
-                                                <span className="font-medium text-slate-700">{Math.round((item.gradedStudents / item.totalStudents) * 100)}%</span>
+                                                <span className="font-bold text-slate-700">{Math.round((item.gradedStudents / item.totalStudents) * 100)}%</span>
                                             </div>
-                                            <Progress value={(item.gradedStudents / item.totalStudents) * 100} className="h-2" />
+                                            <Progress value={(item.gradedStudents / item.totalStudents) * 100} className="h-2 bg-slate-100" indicatorClassName="bg-blue-600" />
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <Badge
@@ -126,7 +133,7 @@ export const AssessmentInput: React.FC = () => {
                                             </Badge>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <Button size="sm" variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700">
+                                            <Button size="sm" variant="ghost" className="text-blue-600 hover:bg-blue-50 hover:text-blue-700 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-slate-200">
                                                 Input Nilai <ArrowRight className="h-3 w-3 ml-1" />
                                             </Button>
                                         </td>

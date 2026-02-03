@@ -164,7 +164,7 @@ export const ScheduleList: React.FC = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto border-t border-slate-200">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                                 <tr>
@@ -180,15 +180,20 @@ export const ScheduleList: React.FC = () => {
                                 {filteredData.length === 0 ? (
                                     <tr>
                                         <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                                            Jadwal tidak ditemukan
+                                            <div className="flex flex-col items-center justify-center">
+                                                <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+                                                    <Calendar className="h-8 w-8 text-slate-300" />
+                                                </div>
+                                                <p className="text-slate-500 font-medium">Jadwal tidak ditemukan</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
                                     filteredData.map((item) => (
-                                        <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                        <tr key={item.id} className="hover:bg-slate-50/60 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="font-medium text-slate-900">{item.day}</div>
-                                                <div className="text-xs text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded w-fit mt-1">
+                                                <div className="text-[11px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded w-fit mt-1 border border-slate-200">
                                                     {item.startTime} - {item.endTime}
                                                 </div>
                                             </td>
@@ -196,26 +201,26 @@ export const ScheduleList: React.FC = () => {
                                                 {item.subjectName}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <Badge variant="outline" className="bg-white">
+                                                <Badge variant="outline" className="bg-white text-slate-700 border-slate-300 font-normal">
                                                     {item.className}
                                                 </Badge>
                                             </td>
                                             <td className="px-6 py-4 text-slate-600">
                                                 <div className="flex items-center gap-2">
                                                     <User className="h-3.5 w-3.5 text-slate-400" />
-                                                    {item.teacherName}
+                                                    <span className="text-xs">{item.teacherName}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-slate-600">
                                                 <div className="flex items-center gap-2">
                                                     <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                                                    {item.room}
+                                                    <span className="text-xs font-mono">{item.room}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900">
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900 hover:bg-slate-100">
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>

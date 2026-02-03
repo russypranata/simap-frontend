@@ -156,7 +156,7 @@ export const StaffList: React.FC = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto border-t border-slate-200">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                                 <tr>
@@ -171,19 +171,24 @@ export const StaffList: React.FC = () => {
                                 {filteredData.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                                            Data tidak ditemukan
+                                            <div className="flex flex-col items-center justify-center">
+                                                <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+                                                    <UserCog className="h-8 w-8 text-slate-300" />
+                                                </div>
+                                                <p className="text-slate-500 font-medium">Data tidak ditemukan</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
                                     filteredData.map((item) => (
-                                        <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                        <tr key={item.id} className="hover:bg-slate-50/60 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="font-medium text-slate-900">{item.name}</div>
-                                                <div className="text-xs text-slate-500 font-mono mt-0.5">{item.nip}</div>
+                                                <div className="text-xs text-slate-500 font-mono mt-0.5 bg-slate-100 w-fit px-1 rounded">{item.nip}</div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
-                                                    <Badge variant="outline" className="capitalize bg-white">
+                                                    <Badge variant="outline" className="capitalize bg-white text-slate-700 border-slate-300 font-normal">
                                                         {item.role}
                                                     </Badge>
                                                     {item.subject && (
@@ -216,7 +221,7 @@ export const StaffList: React.FC = () => {
                                             <td className="px-6 py-4 text-right">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900">
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900 hover:bg-slate-100">
                                                             <MoreVertical className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>

@@ -69,9 +69,9 @@ export const AttendanceDashboard: React.FC = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="border-slate-200 shadow-sm">
+                <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-6 flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                        <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
                             <Users className="h-6 w-6" />
                         </div>
                         <div>
@@ -80,21 +80,21 @@ export const AttendanceDashboard: React.FC = () => {
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-slate-200 shadow-sm">
+                <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-6 flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                        <div className="h-12 w-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600 border border-green-100">
                             <UserCheck className="h-6 w-6" />
                         </div>
                         <div>
                             <p className="text-sm font-medium text-slate-500">Hadir</p>
                             <h3 className="text-2xl font-bold text-slate-900">{MOCK_ATTENDANCE_STATS.present}</h3>
-                            <span className="text-xs text-green-600 font-medium">{MOCK_ATTENDANCE_STATS.attendanceRate}% Kehadiran</span>
+                            <span className="text-xs text-green-600 font-medium bg-green-50 px-1.5 py-0.5 rounded-full border border-green-100">{MOCK_ATTENDANCE_STATS.attendanceRate}% Kehadiran</span>
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-slate-200 shadow-sm">
+                <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-6 flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                        <div className="h-12 w-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600 border border-red-100">
                             <UserX className="h-6 w-6" />
                         </div>
                         <div>
@@ -103,9 +103,9 @@ export const AttendanceDashboard: React.FC = () => {
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-slate-200 shadow-sm">
+                <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-6 flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                        <div className="h-12 w-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-100">
                             <Clock className="h-6 w-6" />
                         </div>
                         <div>

@@ -80,7 +80,7 @@ export const HomeroomList: React.FC = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto border-t border-slate-200">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                                 <tr>
@@ -94,30 +94,44 @@ export const HomeroomList: React.FC = () => {
                                 {filteredData.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
-                                            Data tidak ditemukan
+                                            <div className="flex flex-col items-center justify-center">
+                                                <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+                                                    <UserCheck className="h-8 w-8 text-slate-300" />
+                                                </div>
+                                                <p className="text-slate-500 font-medium">Data tidak ditemukan</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
                                     filteredData.map((item) => (
-                                        <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                        <tr key={item.id} className="hover:bg-slate-50/60 transition-colors group">
                                             <td className="px-6 py-4">
-                                                <div className="font-bold text-lg text-slate-900">{item.className}</div>
+                                                <div className="font-bold text-lg text-slate-900 bg-slate-100 w-12 h-12 flex items-center justify-center rounded-lg border border-slate-200">
+                                                    {item.className}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 {item.homeroomTeacherName ? (
-                                                    <span className="font-medium text-slate-700">{item.homeroomTeacherName}</span>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">
+                                                            {item.homeroomTeacherName.substring(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <span className="font-medium text-slate-700">{item.homeroomTeacherName}</span>
+                                                    </div>
                                                 ) : (
-                                                    <Badge variant="outline" className="text-red-600 bg-red-50 border-red-200">
+                                                    <Badge variant="outline" className="text-red-600 bg-red-50 border-red-200 font-normal">
                                                         Belum Ditentukan
                                                     </Badge>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-slate-600">
-                                                {item.totalStudents} Siswa
+                                                <Badge variant="secondary" className="font-normal">
+                                                    {item.totalStudents} Siswa
+                                                </Badge>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <Button variant="outline" size="sm">
-                                                    <Edit className="h-3 w-3 mr-2" />
+                                                <Button variant="ghost" size="sm" className="hover:bg-slate-100 text-slate-600">
+                                                    <Edit className="h-4 w-4 mr-2" />
                                                     Ubah
                                                 </Button>
                                             </td>

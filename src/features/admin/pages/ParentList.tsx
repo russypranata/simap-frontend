@@ -155,7 +155,7 @@ export const ParentList: React.FC = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto border-t border-slate-200">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                                 <tr>
@@ -171,25 +171,30 @@ export const ParentList: React.FC = () => {
                                 {filteredData.length === 0 ? (
                                     <tr>
                                         <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                                            Data tidak ditemukan
+                                            <div className="flex flex-col items-center justify-center">
+                                                <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+                                                    <UserCircle className="h-8 w-8 text-slate-300" />
+                                                </div>
+                                                <p className="text-slate-500 font-medium">Data tidak ditemukan</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
                                     filteredData.map((item) => (
-                                        <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                        <tr key={item.id} className="hover:bg-slate-50/60 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="font-medium text-slate-900">{item.name}</div>
                                                 <div className="text-xs text-slate-500 mt-0.5 max-w-[200px] truncate">{item.address}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex flex-col gap-1">
+                                                <div className="flex flex-col gap-1.5">
                                                     {item.children.length > 0 ? item.children.map((child) => (
-                                                        <div key={child.id} className="flex items-center gap-1.5">
+                                                        <div key={child.id} className="flex items-center gap-2">
                                                             <div className="h-1.5 w-1.5 rounded-full bg-blue-400"></div>
                                                             <span className="text-slate-700 font-medium text-xs">
                                                                 {child.name}
                                                             </span>
-                                                            <Badge variant="outline" className="text-[10px] h-4 px-1 py-0 border-slate-200 text-slate-500">
+                                                            <Badge variant="outline" className="text-[10px] h-4 px-1 py-0 border-slate-200 text-slate-500 font-normal bg-white">
                                                                 {child.className}
                                                             </Badge>
                                                         </div>
@@ -229,7 +234,7 @@ export const ParentList: React.FC = () => {
                                             <td className="px-6 py-4 text-right">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900">
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900 hover:bg-slate-100">
                                                             <MoreVertical className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
