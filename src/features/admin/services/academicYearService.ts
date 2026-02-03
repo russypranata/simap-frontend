@@ -11,7 +11,7 @@ import { apiClient } from '@/lib/api-client';
 // CONFIGURATION
 // ============================================
 
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK !== 'false';
 const SIMULATED_DELAY_MS = 600;
 
 // Local copy for mock mutations
