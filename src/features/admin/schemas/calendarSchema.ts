@@ -6,7 +6,7 @@ export const calendarEventSchema = z.object({
     startDate: z.string().min(1, 'Tanggal mulai harus diisi'),
     endDate: z.string().min(1, 'Tanggal selesai harus diisi'),
     type: z.enum(['holiday', 'exam', 'event', 'meeting']),
-    isHoliday: z.boolean().default(false),
+    isHoliday: z.boolean(),
 });
 
 export type CalendarEventFormValues = z.infer<typeof calendarEventSchema>;

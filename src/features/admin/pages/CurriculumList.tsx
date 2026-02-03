@@ -58,6 +58,7 @@ export const CurriculumList: React.FC = () => {
         const newItem: Curriculum = {
             id: `curr-${Date.now()}`,
             ...values,
+            description: values.description || '',
             academicYearName: values.academicYearId === 'ay-2024-2025' ? '2024/2025' : '2025/2026',
             totalSubjects: 0,
             createdAt: new Date().toISOString(),
