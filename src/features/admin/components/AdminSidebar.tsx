@@ -165,6 +165,11 @@ export const AdminSidebar: React.FC = () => {
                     icon: GraduationCap,
                 },
                 {
+                    title: 'Wali Murid',
+                    href: '/admin/users/parents',
+                    icon: Users,
+                },
+                {
                     title: 'PPDB / Calon',
                     href: '/admin/users/ppdb',
                     icon: UserPlus,
@@ -195,11 +200,6 @@ export const AdminSidebar: React.FC = () => {
                     title: 'Tendik / Staf',
                     href: '/admin/users/staff',
                     icon: Contact,
-                },
-                {
-                    title: 'Wali Murid',
-                    href: '/admin/users/parents',
-                    icon: Users,
                 },
             ],
         },
