@@ -1,0 +1,14 @@
+
+> simap-frontend@0.1.0 dev
+> next dev
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Local:         http://localhost:3000
+   - Network:       http://192.168.0.2:3000
+
+ ✓ Starting...
+ ✓ Ready in 1562ms
+ ○ Compiling / ...
+ GET / 200 in 4.8s (compile: 4.4s, render: 380ms)
+ GET /admin/dashboard 200 in 2.5s (compile: 2.3s, render: 199ms)

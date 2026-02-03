@@ -41,6 +41,7 @@ export interface SidebarItem {
     isExternal?: boolean;
     defaultOpen?: boolean;
     isGroup?: boolean;
+    sectionHeader?: boolean;
 }
 
 interface SidebarBaseProps {
@@ -123,6 +124,19 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
                     <div className="pl-2 pr-4 py-3 space-y-1">
                         <nav>
                             {filteredMenuItems.map((item) => {
+                                if (item.sectionHeader) {
+                                    if (collapsed) {
+                                        return <div key={item.title} className="my-2 border-t border-border/50" />;
+                                    }
+                                    return (
+                                        <div key={item.title} className="px-4 py-2 mt-4 mb-2">
+                                            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                {item.title}
+                                            </h3>
+                                        </div>
+                                    );
+                                }
+
                                 const isActive =
                                     pathname === item.href ||
                                     (item.href !== "/" && pathname?.startsWith(item.href)) ||
@@ -180,12 +194,14 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
                                                                     "bg-primary text-primary-foreground hover:bg-primary/90"
                                                                 )}
                                                             >
-                                                                <SubIcon
-                                                                    className={cn(
-                                                                        "h-4 w-4 mr-3",
-                                                                        isSubActive ? "" : "opacity-70"
-                                                                    )}
-                                                                />
+                                                                {SubIcon && (
+                                                                    <SubIcon
+                                                                        className={cn(
+                                                                            "h-4 w-4 mr-3",
+                                                                            isSubActive ? "" : "opacity-70"
+                                                                        )}
+                                                                    />
+                                                                )}
                                                                 <span className="flex-1 text-left truncate">
                                                                     {subItem.title}
                                                                 </span>
@@ -273,12 +289,14 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
                                                                     : "text-foreground hover:bg-muted/50"
                                                             )}
                                                         >
-                                                            <SubIcon
-                                                                className={cn(
-                                                                    "h-4 w-4 mr-3",
-                                                                    isSubActive ? "text-primary" : "opacity-70"
-                                                                )}
-                                                            />
+                                                            {SubIcon && (
+                                                                <SubIcon
+                                                                    className={cn(
+                                                                        "h-4 w-4 mr-3",
+                                                                        isSubActive ? "text-primary" : "opacity-70"
+                                                                    )}
+                                                                />
+                                                            )}
                                                             <span className="flex-1 text-left truncate">
                                                                 {subItem.title}
                                                             </span>
