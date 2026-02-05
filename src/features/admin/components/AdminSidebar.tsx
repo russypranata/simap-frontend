@@ -209,7 +209,7 @@ export const AdminSidebar: React.FC = () => {
             icon: Shield,
             subItems: [
                 {
-                    title: 'User Management',
+                    title: 'Manajemen Pengguna',
                     href: '/admin/users/management',
                     icon: Shield,
                 },
