@@ -86,9 +86,9 @@ export const TimeSlotList: React.FC<TimeSlotListProps> = ({ day, initialSlots, o
     };
 
     return (
-        <div className="space-y-4">
+        <div>
             {/* Header with gradient removed, keeping it clean as per SubjectList style (Card embedded) */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 p-4 rounded-lg border border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-4 border-b border-slate-100">
                 <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
                         <span className="text-xs font-bold">{day.substring(0, 3)}</span>
@@ -121,29 +121,28 @@ export const TimeSlotList: React.FC<TimeSlotListProps> = ({ day, initialSlots, o
                 </div>
             </div>
 
-            <div className="border rounded-md overflow-hidden bg-white shadow-sm">
+            <div className="overflow-hidden">
                 <Table>
                     <TableHeader className="bg-slate-50 border-b border-slate-200">
                         <TableRow className="hover:bg-slate-50">
-                            <TableHead className="w-[50px] text-center font-semibold text-xs uppercase tracking-wider text-slate-600">No</TableHead>
-                            <TableHead className="w-[200px] font-semibold text-xs uppercase tracking-wider text-slate-600">Label</TableHead>
-                            <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wider text-slate-600">Mulai</TableHead>
-                            <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wider text-slate-600">Selesai</TableHead>
-                            <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wider text-slate-600">Tipe</TableHead>
-                            <TableHead className="w-[100px] text-center font-semibold text-xs uppercase tracking-wider text-slate-600">Aksi</TableHead>
+                            <TableHead className="w-[50px] text-center font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">No</TableHead>
+                            <TableHead className="w-[200px] font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">Label</TableHead>
+                            <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">Mulai</TableHead>
+                            <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">Selesai</TableHead>
+                            <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">Tipe</TableHead>
+                            <TableHead className="w-[100px] text-center font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">Aksi</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {slots.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground italic bg-slate-50/30">
-                                    <div className="flex flex-col items-center justify-center gap-2">
-                                        <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
-                                            <Save className="h-6 w-6 opacity-50" /> 
-                                            {/* Reuse generic icon or clock */}
+                                <TableCell colSpan={6} className="text-center py-12">
+                                    <div className="flex flex-col items-center justify-center">
+                                        <div className="h-14 w-14 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                            <Save className="h-6 w-6 text-slate-300" />
                                         </div>
-                                        <p>Belum ada slot waktu untuk hari {day}</p>
-                                        <Button variant="link" size="sm" onClick={handleAdd} className="text-blue-600">
+                                        <p className="text-slate-500 font-medium text-sm">Belum ada slot waktu untuk {day}</p>
+                                        <Button variant="link" size="sm" onClick={handleAdd} className="text-blue-600 mt-1">
                                             + Tambah Slot Pertama
                                         </Button>
                                     </div>

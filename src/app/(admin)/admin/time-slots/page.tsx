@@ -27,7 +27,6 @@ const TimeSlotConfigPage = () => {
     const handleSave = (day: string, newSlots: TimeSlot[]) => {
         // In a real app, this would be an API call
         // await scheduleService.updateTimeSlots(day, newSlots);
-        console.log(`Saving slots for ${day}:`, newSlots);
         
         switch(day) {
             case 'Senin': setMondaySlots(newSlots); break;
@@ -66,34 +65,38 @@ const TimeSlotConfigPage = () => {
             </div>
 
             <Card className="border-slate-200 shadow-sm">
-                <CardHeader className="pb-4 space-y-4 border-b border-slate-100">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
-                            <Clock className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <CardTitle className="text-lg font-semibold text-gray-900">
-                                Master Slot Waktu
-                            </CardTitle>
-                            <CardDescription>
-                                Atur jam mulai dan selesai. Perubahan akan berdampak pada jadwal pelajaran.
-                            </CardDescription>
+                <CardHeader className="pb-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
+                                <Clock className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-semibold text-gray-900">
+                                    Master Slot Waktu
+                                </CardTitle>
+                                <CardDescription>
+                                    Atur jam mulai dan selesai. Perubahan akan berdampak pada jadwal pelajaran.
+                                </CardDescription>
+                            </div>
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-0">
                     <Tabs defaultValue="Senin" className="w-full">
-                        <TabsList className="grid w-full grid-cols-6 mb-8 bg-slate-100/80 p-1 rounded-lg">
-                            {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(day => (
-                                <TabsTrigger 
-                                    key={day} 
-                                    value={day}
-                                    className="data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm data-[state=active]:font-semibold transition-all"
-                                >
-                                    {day}
-                                </TabsTrigger>
-                            ))}
-                        </TabsList>
+                        <div className="px-6 pt-4">
+                            <TabsList className="grid w-full grid-cols-6 h-9">
+                                {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(day => (
+                                    <TabsTrigger
+                                        key={day}
+                                        value={day}
+                                        className="text-xs data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900"
+                                    >
+                                        {day}
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                        </div>
 
                         <TabsContent value="Senin" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
                             <TimeSlotList day="Senin" initialSlots={mondaySlots} onSave={handleSave} />
