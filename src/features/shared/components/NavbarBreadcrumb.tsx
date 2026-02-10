@@ -22,7 +22,8 @@ import {
     Pencil,
     CircleDot,
     ArrowLeft,
-    School
+    School,
+    Clock
 } from 'lucide-react';
 import {
     Breadcrumb,
@@ -37,7 +38,7 @@ import { cn } from '@/lib/utils';
 // Route configuration with labels and icons
 const routeConfig: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
     // Dashboard
-    dashboard: { label: 'Dashboard', icon: LayoutDashboard },
+    dashboard: { label: 'Dasbor', icon: LayoutDashboard },
 
     // Profile
     profile: { label: 'Profil', icon: User },
@@ -79,6 +80,8 @@ const routeConfig: Record<string, { label: string; icon: React.ComponentType<{ c
     // Admin routes
     'academic-year': { label: 'Tahun Ajaran', icon: Calendar },
     'class': { label: 'Daftar Kelas', icon: School },
+    'class-management': { label: 'Manajemen Kelas', icon: School },
+    'placement': { label: 'Penempatan Kelas', icon: Users },
     'subject': { label: 'Mata Pelajaran', icon: BookOpen },
     'new': { label: 'Tambah Baru', icon: Pencil },
     'users': { label: 'Manajemen Pengguna', icon: Users },
@@ -86,6 +89,10 @@ const routeConfig: Record<string, { label: string; icon: React.ComponentType<{ c
     'students': { label: 'Data Siswa', icon: GraduationCap },
     'parents': { label: 'Wali Murid', icon: Users },
     'kelola-pengguna': { label: 'Kelola Pengguna', icon: Users },
+    'calendar': { label: 'Kalender Akademik', icon: Calendar },
+    'homeroom': { label: 'Wali Kelas', icon: Users },
+    'schedule-management': { label: 'Jadwal Pelajaran', icon: Calendar },
+    'time-slots': { label: 'Pengaturan Jam', icon: Clock },
     'pengaturan': { label: 'Pengaturan', icon: Settings },
 
     // General
@@ -111,11 +118,28 @@ interface BreadcrumbData {
     icon: React.ComponentType<{ className?: string }>;
 }
 
-export const NavbarBreadcrumb: React.FC = () => {
+export interface NavbarBreadcrumbProps {
+    items?: {
+        label: string;
+        href: string;
+        icon?: React.ComponentType<{ className?: string }>;
+    }[];
+}
+
+export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => {
     const pathname = usePathname();
 
     // Generate breadcrumb items from pathname
     const generateBreadcrumbs = (): BreadcrumbData[] => {
+        if (items) {
+             return items.map((item, index) => ({
+                label: item.label,
+                href: item.href,
+                isLast: index === items.length - 1,
+                icon: item.icon || CircleDot,
+            }));
+        }
+
         if (!pathname || pathname === '/') {
             return [];
         }

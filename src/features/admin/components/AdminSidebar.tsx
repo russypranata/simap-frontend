@@ -24,6 +24,7 @@ import {
     ArrowLeftRight,
     Award,
     Contact,
+    Clock,
 } from 'lucide-react';
 
 export const AdminSidebar: React.FC = () => {
@@ -66,9 +67,9 @@ export const AdminSidebar: React.FC = () => {
                     icon: BookOpen,
                 },
                 {
-                    title: 'Kurikulum',
-                    href: '/admin/curriculum',
-                    icon: FileText,
+                    title: 'Pengaturan Jam',
+                    href: '/admin/time-slots',
+                    icon: Clock,
                 },
             ],
         },
@@ -112,10 +113,10 @@ export const AdminSidebar: React.FC = () => {
             ],
         },
 
-        // KEMANASISWAAN
+        // KESISWAAN
         {
-            title: 'Kemanasiswaan',
-            href: '#kemanasiswaan',
+            title: 'Kesiswaan',
+            href: '#kesiswaan',
             icon: School,
             sectionHeader: true,
         },

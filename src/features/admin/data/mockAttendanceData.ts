@@ -24,7 +24,7 @@ export const MOCK_RECENT_ATTENDANCE: RecentAttendanceLog[] = [
     {
         id: 'att-002',
         studentName: 'Budi Santoso',
-        className: 'XI-IPA-2',
+        className: 'XI-B',
         status: 'sick',
         time: '06:55',
         date: new Date().toISOString().split('T')[0],
@@ -33,7 +33,7 @@ export const MOCK_RECENT_ATTENDANCE: RecentAttendanceLog[] = [
     {
         id: 'att-003',
         studentName: 'Citra Kirana',
-        className: 'XII-IPS-1',
+        className: 'XII-B',
         status: 'permission',
         time: '06:50',
         date: new Date().toISOString().split('T')[0],
@@ -50,7 +50,7 @@ export const MOCK_RECENT_ATTENDANCE: RecentAttendanceLog[] = [
     {
         id: 'att-005',
         studentName: 'Eko Prasetyo',
-        className: 'XI-IPA-1',
+        className: 'XI-A',
         status: 'present',
         time: '06:45',
         date: new Date().toISOString().split('T')[0],

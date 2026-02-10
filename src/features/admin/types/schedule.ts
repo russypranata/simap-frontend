@@ -11,4 +11,9 @@ export interface Schedule {
     room: string;
     academicYear: string;
     semester: string;
+    
+    // Relations (IDs)
+    subjectId?: string;
+    classId?: string;
+    teacherId?: string;
 }

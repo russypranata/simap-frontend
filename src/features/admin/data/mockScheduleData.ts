@@ -1,64 +1,18 @@
 import { Schedule } from '../types/schedule';
+import { expandSchedule } from './schedules/transformer';
+import { MONDAY_SCHEDULE } from './schedules/monday';
+import { TUESDAY_SCHEDULE } from './schedules/tuesday';
 
+// Export flat schedules (backward compatible)
 export const MOCK_SCHEDULES: Schedule[] = [
-    {
-        id: 'sch-001',
-        day: 'Senin',
-        startTime: '07:00',
-        endTime: '08:30',
-        subjectName: 'Matematika Wajib',
-        className: 'X-A',
-        teacherName: 'Budi Santoso, S.Pd',
-        room: 'R. 101',
-        academicYear: '2024/2025',
-        semester: 'Ganjil',
-    },
-    {
-        id: 'sch-002',
-        day: 'Senin',
-        startTime: '08:30',
-        endTime: '10:00',
-        subjectName: 'Bahasa Indonesia',
-        className: 'X-A',
-        teacherName: 'Siti Aminah, S.Pd',
-        room: 'R. 101',
-        academicYear: '2024/2025',
-        semester: 'Ganjil',
-    },
-    {
-        id: 'sch-003',
-        day: 'Senin',
-        startTime: '07:00',
-        endTime: '08:30',
-        subjectName: 'Fisika',
-        className: 'XI-IPA-1',
-        teacherName: 'Dr. Rina Wati',
-        room: 'Lab Fisika',
-        academicYear: '2024/2025',
-        semester: 'Ganjil',
-    },
-    {
-        id: 'sch-004',
-        day: 'Selasa',
-        startTime: '10:15',
-        endTime: '11:45',
-        subjectName: 'Biologi',
-        className: 'X-B',
-        teacherName: 'Ahmad Dahlan, M.Sc',
-        room: 'Lab Biologi',
-        academicYear: '2024/2025',
-        semester: 'Ganjil',
-    },
-    {
-        id: 'sch-005',
-        day: 'Rabu',
-        startTime: '07:00',
-        endTime: '08:30',
-        subjectName: 'Kimia',
-        className: 'XII-IPA-2',
-        teacherName: 'Dewi Sartika, S.Si',
-        room: 'R. 302',
-        academicYear: '2024/2025',
-        semester: 'Ganjil',
-    },
+    ...expandSchedule(MONDAY_SCHEDULE),
+    ...expandSchedule(TUESDAY_SCHEDULE),
+    // Add other days here when ready:
+    // ...expandSchedule(WEDNESDAY_SCHEDULE),
+    // etc.
 ];
+
+// Also export compact schedules for direct access
+export { MONDAY_SCHEDULE } from './schedules/monday';
+export { TUESDAY_SCHEDULE } from './schedules/tuesday';
+

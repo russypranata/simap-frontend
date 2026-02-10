@@ -7,6 +7,13 @@ export const calendarEventSchema = z.object({
     endDate: z.string().min(1, 'Tanggal selesai harus diisi'),
     type: z.enum(['holiday', 'exam', 'event', 'meeting']),
     isHoliday: z.boolean(),
+}).refine((data) => {
+    const start = new Date(data.startDate);
+    const end = new Date(data.endDate);
+    return end >= start;
+}, {
+    message: "Tanggal selesai tidak boleh sebelum tanggal mulai",
+    path: ["endDate"],
 });
 
 export type CalendarEventFormValues = z.infer<typeof calendarEventSchema>;

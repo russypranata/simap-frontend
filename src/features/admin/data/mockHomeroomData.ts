@@ -19,7 +19,7 @@ export const MOCK_HOMEROOM_CLASSES: ClassHomeroom[] = [
     },
     {
         id: 'cls-003',
-        className: 'XI-IPA-1',
+        className: 'XI-A',
         academicYear: '2024/2025',
         homeroomTeacherId: 'stf-003',
         homeroomTeacherName: 'Ahmad Dahlan, M.Sc',
@@ -27,7 +27,7 @@ export const MOCK_HOMEROOM_CLASSES: ClassHomeroom[] = [
     },
     {
         id: 'cls-004',
-        className: 'XI-IPS-1',
+        className: 'XI-B',
         academicYear: '2024/2025',
         homeroomTeacherId: null,
         homeroomTeacherName: null, // Vacant

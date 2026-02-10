@@ -17,7 +17,15 @@ import {
     User,
     FileSpreadsheet,
     FileUp,
+    ArrowRightLeft, // Import icon for mutation
 } from 'lucide-react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'; // Import Select components
 import { cn } from '@/lib/utils';
 import {
     Card,
@@ -50,9 +58,11 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { ClassListSkeleton } from '../components/class';
 
+
+
 import { Class, Student } from '../types/class';
 import { classService } from '../services/classService';
-import { MOCK_STUDENTS } from '../data/mockClassData';
+import { MOCK_STUDENTS, MOCK_CLASSES } from '../data/mockClassData'; // Import MOCK_CLASSES
 
 import { academicYearService } from '../services/academicYearService';
 
@@ -69,6 +79,11 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({ id }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [removeStudentId, setRemoveStudentId] = useState<string | null>(null);
     const [isRemoving, setIsRemoving] = useState(false);
+
+    // Mutation State
+    const [moveStudentId, setMoveStudentId] = useState<string | null>(null);
+    const [targetClassId, setTargetClassId] = useState<string>('');
+    const [isMoving, setIsMoving] = useState(false);
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -114,6 +129,29 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({ id }) => {
         } finally {
             setIsRemoving(false);
             setRemoveStudentId(null);
+        }
+    };
+
+    const handleMoveStudent = async () => {
+        if (!moveStudentId || !targetClassId) return;
+
+        try {
+            setIsMoving(true);
+            // Mock move API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Remove from current list
+            setStudents(prev => prev.filter(s => s.id !== moveStudentId));
+            
+            const targetClass = MOCK_CLASSES.find(c => c.id === targetClassId);
+            toast.success(`Siswa berhasil dipindahkan ke kelas ${targetClass?.name || 'baru'}`);
+        } catch (error) {
+            console.error('Failed to move student:', error);
+            toast.error('Gagal memindahkan siswa');
+        } finally {
+            setIsMoving(false);
+            setMoveStudentId(null);
+            setTargetClassId('');
         }
     };
 
@@ -385,12 +423,19 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({ id }) => {
                                                             <MoreVertical className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-[160px]">
+                                                    <DropdownMenuContent align="end" className="w-[180px]">
                                                         <DropdownMenuLabel>Aksi Siswa</DropdownMenuLabel>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem className="cursor-pointer">
                                                             <Edit className="mr-2 h-4 w-4 text-slate-400" /> Edit Detail
                                                         </DropdownMenuItem>
+                                                        <DropdownMenuItem 
+                                                            onClick={() => setMoveStudentId(student.id)}
+                                                            className="cursor-pointer text-blue-600 focus:text-blue-700 focus:bg-blue-50"
+                                                        >
+                                                            <ArrowRightLeft className="mr-2 h-4 w-4" /> Pindahkan
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
                                                         <DropdownMenuItem 
                                                             onClick={() => setRemoveStudentId(student.id)}
                                                             className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
@@ -408,6 +453,61 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({ id }) => {
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Move Student Dialog */}
+            <AlertDialog open={!!moveStudentId} onOpenChange={(open) => !open && setMoveStudentId(null)}>
+                <AlertDialogContent className="max-w-[450px]">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Pindahkan Siswa</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Pilih kelas tujuan untuk memindahkan siswa ini. Data kehadiran dan nilai akan ikut dipindahkan.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    
+                    <div className="py-4 space-y-4">
+                        <div className="space-y-2">
+                            <span className="text-sm font-medium text-slate-700">Kelas Tujuan</span>
+                            <Select value={targetClassId} onValueChange={setTargetClassId}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Pilih kelas..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {MOCK_CLASSES
+                                        .filter(c => c.id !== id) // Exclude current class
+                                        .map((c) => (
+                                        <SelectItem key={c.id} value={c.id}>
+                                            {c.name} (Sisa: {c.capacity - c.totalStudents})
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        
+                        {targetClassId && (
+                            <div className="text-xs text-blue-600 bg-blue-50 p-3 rounded-md border border-blue-100 flex items-start gap-2">
+                                <ArrowRightLeft className="h-4 w-4 mt-0.5 shrink-0" />
+                                <span>
+                                    Siswa akan dipindahkan dari <strong>{classData.name}</strong> ke <strong>{MOCK_CLASSES.find(c => c.id === targetClassId)?.name}</strong>.
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isMoving}>Batal</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleMoveStudent();
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            disabled={isMoving || !targetClassId}
+                        >
+                            {isMoving ? 'Memindahkan...' : 'Pindahkan Siswa'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
             {/* Remove Student Confirmation Dialog */}
             <AlertDialog open={!!removeStudentId} onOpenChange={(open) => !open && setRemoveStudentId(null)}>

@@ -11,8 +11,16 @@ export interface Student {
     dateOfBirth: string;
     
     // Academic
-    classId?: string;    // ID Kelas saat ini
-    className?: string;  // Nama Kelas (e.g., "X IPA 1")
+    classId?: string;    // ID Kelas Reguler (Induk)
+    className?: string;  // Nama Kelas Reguler
+    
+    // Peminatan Classes (Moving Class) - Many to Many
+    peminatanClasses?: {
+        id: string;
+        name: string;
+        subjectId?: string; // Optional: Link to subject
+    }[];
+
     generation: string;  // Angkatan (Tahun Masuk)
     status: StudentStatus;
     

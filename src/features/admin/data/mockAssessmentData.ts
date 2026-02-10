@@ -23,7 +23,7 @@ export const MOCK_ASSESSMENT_CLASSES: AssessmentClass[] = [
     },
     {
         id: 'ac-003',
-        className: 'XI-IPA-1',
+        className: 'XI-A',
         subjectName: 'Fisika',
         teacherName: 'Dr. Rina Wati',
         totalStudents: 30,
@@ -56,7 +56,7 @@ export const MOCK_REPORT_CARDS: ReportCardClass[] = [
     },
     {
         id: 'rc-003',
-        className: 'XI-IPA-1',
+        className: 'XI-A',
         homeroomTeacher: 'Dr. Rina Wati',
         totalStudents: 30,
         generatedReports: 10,

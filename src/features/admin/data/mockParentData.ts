@@ -47,7 +47,7 @@ export const MOCK_PARENTS: Parent[] = [
         occupation: 'Dosen',
         address: 'Jl. Dago No. 88, Bandung',
         children: [
-             { id: 'std-004', name: 'Indah Pertiwi', className: 'XI-IPA-1', nis: '2023001' }
+             { id: 'std-004', name: 'Indah Pertiwi', className: 'XI-A', nis: '2023001' }
         ],
         status: 'active',
         lastLogin: '2025-01-20T14:00:00Z',
@@ -60,7 +60,7 @@ export const MOCK_PARENTS: Parent[] = [
         occupation: 'Atlet',
         address: 'Jl. Senayan No. 1, Jakarta Pusat',
         children: [
-             { id: 'std-005', name: 'Alan Budikusuma', className: 'XI-IPS-1', nis: '2023002' },
+             { id: 'std-005', name: 'Alan Budikusuma', className: 'XI-B', nis: '2023002' },
              { id: 'std-006', name: 'Rio Haryanto', className: 'X-B', nis: '2024005' }
         ],
         status: 'active',

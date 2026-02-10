@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import {
     Form,
     FormControl,
@@ -29,6 +29,7 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog';
+import { CalendarPlus, Save, X } from 'lucide-react';
 import { CalendarEventFormValues, calendarEventSchema } from '../../schemas/calendarSchema';
 import { CalendarEvent } from '../../types/calendar';
 
@@ -36,7 +37,8 @@ interface CalendarEventFormProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     initialData?: CalendarEvent | null;
-    onSubmit: (data: CalendarEventFormValues) => void;
+    onSubmit: (data: CalendarEventFormValues) => Promise<void> | void;
+    isLoading?: boolean;
 }
 
 export const CalendarEventForm: React.FC<CalendarEventFormProps> = ({
@@ -44,6 +46,7 @@ export const CalendarEventForm: React.FC<CalendarEventFormProps> = ({
     onOpenChange,
     initialData,
     onSubmit,
+    isLoading = false,
 }) => {
     const form = useForm<CalendarEventFormValues>({
         resolver: zodResolver(calendarEventSchema),
@@ -79,6 +82,12 @@ export const CalendarEventForm: React.FC<CalendarEventFormProps> = ({
         }
     }, [initialData, form, open]);
 
+    // Auto-set isHoliday based on type
+    const type = form.watch('type');
+    useEffect(() => {
+        form.setValue('isHoliday', type === 'holiday');
+    }, [type, form]);
+
     const handleSubmit = (values: CalendarEventFormValues) => {
         onSubmit(values);
         onOpenChange(false);
@@ -86,22 +95,44 @@ export const CalendarEventForm: React.FC<CalendarEventFormProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[550px]">
                 <DialogHeader>
-                    <DialogTitle>
-                        {initialData ? 'Edit Kegiatan' : 'Tambah Kegiatan'}
-                    </DialogTitle>
+                    <div className="flex items-center gap-4 pb-2">
+                        <div className="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                            <CalendarPlus className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                            <DialogTitle className="text-xl">
+                                {initialData?.id 
+                                    ? (initialData.type === 'holiday' ? 'Edit Hari Libur' : 'Edit Kegiatan')
+                                    : (initialData?.type === 'holiday' ? 'Set Hari Libur' : 'Tambah Kegiatan Baru')
+                                }
+                            </DialogTitle>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                {type === 'holiday' 
+                                    ? 'Isi detail hari libur nasional atau cuti bersama.' 
+                                    : 'Isi form berikut untuk menambah kegiatan akademik.'}
+                            </p>
+                        </div>
+                    </div>
                 </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+
+                <div className="py-4">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
                             name="title"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Nama Kegiatan</FormLabel>
+                                    <FormLabel>
+                                        {type === 'holiday' ? 'Nama Hari Libur' : 'Nama Kegiatan'}
+                                    </FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Contoh: Ujian Tengah Semester" {...field} />
+                                        <Input 
+                                            placeholder={type === 'holiday' ? "Contoh: Tahun Baru Islam 1447 H" : "Contoh: Ujian Tengah Semester"} 
+                                            {...field} 
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -135,6 +166,8 @@ export const CalendarEventForm: React.FC<CalendarEventFormProps> = ({
                                 )}
                             />
                         </div>
+                        
+                        {type !== 'holiday' && (
                         <FormField
                             control={form.control}
                             name="type"
@@ -149,7 +182,6 @@ export const CalendarEventForm: React.FC<CalendarEventFormProps> = ({
                                         </FormControl>
                                         <SelectContent>
                                             <SelectItem value="event">Kegiatan Sekolah</SelectItem>
-                                            <SelectItem value="holiday">Hari Libur</SelectItem>
                                             <SelectItem value="exam">Ujian</SelectItem>
                                             <SelectItem value="meeting">Rapat</SelectItem>
                                         </SelectContent>
@@ -158,25 +190,8 @@ export const CalendarEventForm: React.FC<CalendarEventFormProps> = ({
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="isHoliday"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                    <FormControl>
-                                        <Checkbox
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                        />
-                                    </FormControl>
-                                    <div className="space-y-1 leading-none">
-                                        <FormLabel>
-                                            Tandai sebagai Hari Libur
-                                        </FormLabel>
-                                    </div>
-                                </FormItem>
-                            )}
-                        />
+                        )}
+
                         <FormField
                             control={form.control}
                             name="description"
@@ -190,14 +205,37 @@ export const CalendarEventForm: React.FC<CalendarEventFormProps> = ({
                                 </FormItem>
                             )}
                         />
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                        <DialogFooter className="gap-3">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={() => onOpenChange(false)}
+                                disabled={isLoading}
+                            >
+                                <X className="h-4 w-4 mr-2" />
                                 Batal
                             </Button>
-                            <Button type="submit">Simpan</Button>
+                            <Button 
+                                type="submit" 
+                                className="bg-blue-800 hover:bg-blue-900 text-white min-w-[100px]"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <span className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                        Menyimpan...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="h-4 w-4 mr-2" />
+                                        Simpan
+                                    </>
+                                )}
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form>
+            </div>
             </DialogContent>
         </Dialog>
     );
