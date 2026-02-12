@@ -19,96 +19,43 @@ export const MOCK_STUDENTS: Student[] = [
     { id: 's-5', name: 'Ali', nisn: '0051234571', status: 'ACTIVE' },
 ];
 
-// Mock Classes (10-12, A/B)
+const generateClassesForYear = (yearId: string) => {
+    const classes: Class[] = [];
+    const grades = [10, 11, 12];
+    const sections = ['A', 'B'];
+    const teachers = [...MOCK_TEACHERS];
+
+    grades.forEach((grade, gIdx) => {
+        sections.forEach((section, sIdx) => {
+            const roman = grade === 10 ? 'X' : grade === 11 ? 'XI' : 'XII';
+            const teacher = teachers[(gIdx * 2 + sIdx) % teachers.length];
+            classes.push({
+                id: `c-${yearId}-${grade}${section.toLowerCase()}`,
+                name: `${roman}-${section}`,
+                grade,
+                type: 'REGULER',
+                academicYearId: yearId,
+                homeroomTeacherId: teacher.id,
+                homeroomTeacherName: teacher.name,
+                capacity: 30,
+                totalStudents: 25 + Math.floor(Math.random() * 6),
+                genderCategory: sIdx === 0 ? 'PUTRA' : 'PUTRI',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            });
+        });
+    });
+    return classes;
+};
+
+// Comprehensive Mock Classes across 3 years
 export const MOCK_CLASSES: Class[] = [
-    // Kelas 10 (X) - Reguler
-    {
-        id: 'c-10a',
-        name: 'X-A',
-        grade: 10,
-        type: 'REGULER',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-1',
-        homeroomTeacherName: 'Ahmad Dahlan',
-        capacity: 30,
-        totalStudents: 28,
-        genderCategory: 'PUTRA',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: 'c-10b',
-        name: 'X-B',
-        grade: 10,
-        type: 'REGULER',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-2',
-        homeroomTeacherName: 'Siti Aminah',
-        capacity: 30,
-        totalStudents: 25,
-        genderCategory: 'PUTRI',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    // Kelas 11 (XI) - Reguler (Kelas Induk)
-    {
-        id: 'c-11a',
-        name: 'XI-A',
-        grade: 11,
-        type: 'REGULER',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-3',
-        homeroomTeacherName: 'Budi Santoso',
-        capacity: 30,
-        totalStudents: 32,
-        genderCategory: 'PUTRA',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: 'c-11b',
-        name: 'XI-B',
-        grade: 11,
-        type: 'REGULER',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-4',
-        homeroomTeacherName: 'Dewi Sartika',
-        capacity: 30,
-        totalStudents: 30,
-        genderCategory: 'PUTRI',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    // Kelas 12 (XII) - Reguler (Kelas Induk)
-    {
-        id: 'c-12a',
-        name: 'XII-A',
-        grade: 12,
-        type: 'REGULER',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-5',
-        homeroomTeacherName: 'Umar Bakri',
-        capacity: 35,
-        totalStudents: 33,
-        genderCategory: 'PUTRA',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: 'c-12b',
-        name: 'XII-B',
-        grade: 12,
-        type: 'REGULER',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-6',
-        homeroomTeacherName: 'Khadijah',
-        capacity: 35,
-        totalStudents: 31,
-        genderCategory: 'PUTRI',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    // Kelas Peminatan (Sample Subject Classes)
+    ...generateClassesForYear('ay-2023-2024'),
+    ...generateClassesForYear('ay-2024-2025'),
+    ...generateClassesForYear('ay-2025-2026'),
+    ...generateClassesForYear('ay-2026-2027'),
+    
+    // Add some Peminatan classes for 2025/2026 to keep diversity
     {
         id: 'c-bio-11-ikh',
         name: 'BIOLOGI XI PEM IKH',
@@ -123,82 +70,5 @@ export const MOCK_CLASSES: Class[] = [
         genderCategory: 'PUTRA',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-    },
-    {
-        id: 'c-bio-11-akh',
-        name: 'BIOLOGI XI PEM AKH',
-        grade: 11,
-        type: 'PEMINATAN',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-2',
-        homeroomTeacherName: 'Siti Aminah',
-        capacity: 40,
-        totalStudents: 20,
-        peminatanCategory: 'AKH',
-        genderCategory: 'PUTRI',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: 'c-fis-11-ikh',
-        name: 'FISIKA XI PEM IKH',
-        grade: 11,
-        type: 'PEMINATAN',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-3',
-        homeroomTeacherName: 'Budi Santoso',
-        capacity: 40,
-        totalStudents: 10,
-        peminatanCategory: 'IKH',
-        genderCategory: 'PUTRA',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: 'c-kim-11-ikh',
-        name: 'KIMIA XI PEM IKH',
-        grade: 11,
-        type: 'PEMINATAN',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-4',
-        homeroomTeacherName: 'Dewi Sartika',
-        capacity: 40,
-        totalStudents: 12,
-        peminatanCategory: 'IKH',
-        genderCategory: 'PUTRA',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: 'c-eko-11-ikh',
-        name: 'EKONOMI XI PEM IKH',
-        grade: 11,
-        type: 'PEMINATAN',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-5',
-        homeroomTeacherName: 'Umar Bakri',
-        capacity: 40,
-        totalStudents: 25,
-        peminatanCategory: 'IKH',
-        genderCategory: 'PUTRA',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: 'c-geo-11-ikh',
-        name: 'GEOGRAFI XI PEM IKH',
-        grade: 11,
-        type: 'PEMINATAN',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-6',
-        homeroomTeacherName: 'Khadijah',
-        capacity: 40,
-        totalStudents: 18,
-        peminatanCategory: 'IKH',
-        genderCategory: 'PUTRA',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    // Kelas Tahun Lalu (2024/2025) - Untuk testing filter
-
+    }
 ];

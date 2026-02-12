@@ -303,26 +303,6 @@ export const ScheduleList: React.FC = () => {
                     <p className="text-muted-foreground mt-1">
                         Kelola jadwal mata pelajaran per kelas dan guru.
                     </p>
-
-                    {/* Active Year Badge */}
-                    {activeYear && (
-                        <div className="flex items-center gap-3 mt-4">
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                                <CalendarDays className="h-4 w-4" />
-                                <span className="text-sm font-semibold">
-                                    T.A. {activeYear}
-                                </span>
-                            </div>
-                            {activeSemester && (
-                                <>
-                                    <div className="h-4 w-[1px] bg-border" />
-                                    <span className="text-sm font-medium text-blue-800">
-                                        Semester {activeSemester}
-                                    </span>
-                                </>
-                            )}
-                        </div>
-                    )}
                 </div>
 
                 <div className="flex gap-2">

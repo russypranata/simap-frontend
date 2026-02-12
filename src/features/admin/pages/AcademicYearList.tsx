@@ -129,25 +129,6 @@ export const AcademicYearList: React.FC = () => {
                         Kelola tahun ajaran dan semester aktif untuk sistem akademik
                     </p>
                     
-                    {/* Active Year Badge */}
-                    {!isLoading && academicYears.find(y => y.isActive) && (
-                        <div className="flex items-center gap-3 mt-4">
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                                <Calendar className="h-4 w-4" />
-                                <span className="text-sm font-semibold">
-                                    T.A. {academicYears.find(y => y.isActive)?.name}
-                                </span>
-                            </div>
-                            {academicYears.find(y => y.isActive)?.semesters.find(s => s.isActive) && (
-                                <>
-                                    <div className="h-4 w-[1px] bg-border" />
-                                    <span className="text-sm font-medium text-blue-800">
-                                        Semester {academicYears.find(y => y.isActive)?.semesters.find(s => s.isActive)?.name}
-                                    </span>
-                                </>
-                            )}
-                        </div>
-                    )}
                 </div>
                 <Button
                     onClick={() => router.push('/admin/academic-year/new')}

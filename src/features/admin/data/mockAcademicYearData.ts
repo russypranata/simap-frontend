@@ -16,6 +16,37 @@ const generateSemesterId = (yearId: string, code: "1" | "2") => `${yearId}-sem-$
  */
 export const mockAcademicYears: AcademicYear[] = [
     {
+        id: 'ay-2026-2027',
+        name: '2026/2027',
+        startDate: '2026-07-13',
+        endDate: '2027-06-19',
+        isActive: false, // Future year
+        semesters: [
+            {
+                id: generateSemesterId('ay-2026-2027', '1'),
+                name: 'Ganjil',
+                code: '1',
+                startDate: '2026-07-13',
+                endDate: '2026-12-18',
+                isActive: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            },
+            {
+                id: generateSemesterId('ay-2026-2027', '2'),
+                name: 'Genap',
+                code: '2',
+                startDate: '2027-01-04',
+                endDate: '2027-06-19',
+                isActive: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
         id: 'ay-2025-2026',
         name: '2025/2026',
         startDate: '2025-07-14', // Senin minggu ke-2/3 Juli
