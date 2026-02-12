@@ -10,17 +10,20 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Plus, Save } from 'lucide-react';
+import { Trash2, Plus, Save, Calendar, PlusCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { TimeSlot } from '@/features/admin/data/mockTimeSlots';
+import { timeSlotSchema } from '@/features/admin/schemas/timeSlotSchema';
+import { TimeSlotSkeleton } from './TimeSlotSkeleton';
 
 interface TimeSlotListProps {
     day: string;
     initialSlots: TimeSlot[];
     onSave: (day: string, slots: TimeSlot[]) => void;
+    isLoading?: boolean;
 }
 
-export const TimeSlotList: React.FC<TimeSlotListProps> = ({ day, initialSlots, onSave }) => {
+export const TimeSlotList: React.FC<TimeSlotListProps> = ({ day, initialSlots, onSave, isLoading = false }) => {
     const [slots, setSlots] = useState<TimeSlot[]>(initialSlots);
     const [isDirty, setIsDirty] = useState(false);
 
@@ -43,7 +46,7 @@ export const TimeSlotList: React.FC<TimeSlotListProps> = ({ day, initialSlots, o
     };
 
     const handleAdd = () => {
-        const newId = `${day.toLowerCase()}-${Date.now()}`;
+        const newId = `${day.toLowerCase()}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         const lastSlot = slots[slots.length - 1];
         
         // Simple logic to guess next start time (add 40 mins)
@@ -72,52 +75,56 @@ export const TimeSlotList: React.FC<TimeSlotListProps> = ({ day, initialSlots, o
     };
 
     const handleSave = () => {
-        // Basic validation
+        // Robust Validation with Zod
         for (const slot of slots) {
-            if (slot.endTime <= slot.startTime) {
-                toast.error(`Jam selesai harus lebih besar dari jam mulai pada ${slot.label}`);
+            const result = timeSlotSchema.safeParse(slot);
+            if (!result.success) {
+                // Get the first error message
+                const errorMessage = result.error.issues[0].message;
+                toast.error(`Error pada ${slot.label}: ${errorMessage}`);
                 return;
             }
         }
         
         onSave(day, slots);
         setIsDirty(false);
-        toast.success(`Jadwal hari ${day} berhasil disimpan`);
     };
+
+    if (isLoading) {
+        return <TimeSlotSkeleton />;
+    }
 
     return (
         <div>
             {/* Header with gradient removed, keeping it clean as per SubjectList style (Card embedded) */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-4 border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
-                        <span className="text-xs font-bold">{day.substring(0, 3)}</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5 border-b border-slate-100 bg-slate-50/30">
+                <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-600 flex items-center justify-center border border-blue-200/50 shadow-sm">
+                        <Calendar className="h-5 w-5" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-slate-800">Konfigurasi {day}</h3>
-                        <p className="text-xs text-slate-500">Atur urutan dan durasi jam pelajaran.</p>
+                        <h3 className="font-semibold text-slate-900 tracking-tight">Konfigurasi Hari {day}</h3>
+                        <p className="text-sm text-slate-500">Atur urutan dan durasi jam pelajaran.</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button 
-                        variant="outline" 
-                        size="sm"
                         onClick={handleAdd} 
-                        className="h-9 border-dashed border-slate-300 text-slate-600 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200"
+                        size="sm"
+                        className="bg-blue-800 hover:bg-blue-900 text-white shadow-sm transition-all"
                     >
-                        <Plus className="h-4 w-4 mr-2" />
+                        <PlusCircle className="h-4 w-4 mr-2" />
                         Tambah Slot
                     </Button>
-                    {isDirty && (
-                        <Button 
-                            onClick={handleSave} 
-                            size="sm"
-                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all animate-in fade-in zoom-in duration-300"
-                        >
-                            <Save className="h-4 w-4 mr-2" />
-                            Simpan
-                        </Button>
-                    )}
+                    <Button 
+                        onClick={handleSave} 
+                        size="sm"
+                        disabled={!isDirty || isLoading}
+                        className="bg-blue-800 hover:bg-blue-900 text-white shadow-sm transition-all"
+                    >
+                        {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                        Simpan
+                    </Button>
                 </div>
             </div>
 
@@ -125,18 +132,17 @@ export const TimeSlotList: React.FC<TimeSlotListProps> = ({ day, initialSlots, o
                 <Table>
                     <TableHeader className="bg-slate-50 border-b border-slate-200">
                         <TableRow className="hover:bg-slate-50">
-                            <TableHead className="w-[50px] text-center font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">No</TableHead>
-                            <TableHead className="w-[200px] font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">Label</TableHead>
+                            <TableHead className="w-[200px] font-semibold text-xs uppercase tracking-wider text-slate-700 py-3 pl-6">Label</TableHead>
                             <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">Mulai</TableHead>
                             <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">Selesai</TableHead>
                             <TableHead className="w-[150px] font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">Tipe</TableHead>
-                            <TableHead className="w-[100px] text-center font-semibold text-xs uppercase tracking-wider text-slate-700 py-3">Aksi</TableHead>
+                            <TableHead className="w-[100px] text-center font-semibold text-xs uppercase tracking-wider text-slate-700 py-3 pr-6">Aksi</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {slots.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-12">
+                                <TableCell colSpan={5} className="text-center py-12">
                                     <div className="flex flex-col items-center justify-center">
                                         <div className="h-14 w-14 rounded-full bg-slate-50 flex items-center justify-center mb-3">
                                             <Save className="h-6 w-6 text-slate-300" />
@@ -150,71 +156,64 @@ export const TimeSlotList: React.FC<TimeSlotListProps> = ({ day, initialSlots, o
                             </TableRow>
                         ) : (
                             slots.map((slot, index) => (
-                                <TableRow key={slot.id} className="hover:bg-slate-50/60 transition-colors group border-b border-slate-100 last:border-0">
-                                    <TableCell className="text-center font-medium text-slate-500 text-xs">
-                                        {index + 1}
-                                    </TableCell>
-                                    <TableCell>
+                                <TableRow key={slot.id} className="hover:bg-blue-50/30 transition-colors group border-b border-slate-100 last:border-0">
+                                    <TableCell className="py-3 pl-6">
                                         <Input 
                                             value={slot.label} 
                                             onChange={(e) => handleChange(slot.id, 'label', e.target.value)}
-                                            className="h-8 border-transparent hover:border-slate-300 focus:border-blue-500 bg-transparent focus:bg-white transition-all shadow-none font-medium text-slate-700"
-                                            placeholder="Contoh: Jam Ke-1"
+                                            className="h-9 border-slate-100 focus:border-blue-500 bg-white hover:border-slate-200 transition-all shadow-sm focus:shadow-md font-semibold text-slate-700 placeholder:text-slate-300"
+                                            placeholder="Contoh: Jam Pelajaran 1"
                                         />
                                     </TableCell>
-                                    <TableCell>
-                                        <Input 
-                                            type="time" 
-                                            value={slot.startTime} 
-                                            onChange={(e) => handleChange(slot.id, 'startTime', e.target.value)}
-                                            className="h-8 w-full font-mono text-xs text-slate-600 border-slate-200 focus:border-blue-500 bg-slate-50/50 focus:bg-white"
-                                        />
+                                    <TableCell className="py-3">
+                                        <div className="relative">
+                                            <Input 
+                                                type="time" 
+                                                value={slot.startTime} 
+                                                onChange={(e) => handleChange(slot.id, 'startTime', e.target.value)}
+                                                className="h-9 w-full font-mono text-sm text-slate-700 border-slate-100 focus:border-blue-500 bg-white hover:border-slate-200 transition-all pl-3 shadow-sm focus:shadow-md"
+                                            />
+                                        </div>
                                     </TableCell>
-                                    <TableCell>
-                                        <Input 
-                                            type="time" 
-                                            value={slot.endTime} 
-                                            onChange={(e) => handleChange(slot.id, 'endTime', e.target.value)}
-                                            className="h-8 w-full font-mono text-xs text-slate-600 border-slate-200 focus:border-blue-500 bg-slate-50/50 focus:bg-white"
-                                        />
+                                    <TableCell className="py-3">
+                                        <div className="relative">
+                                            <Input 
+                                                type="time" 
+                                                value={slot.endTime} 
+                                                onChange={(e) => handleChange(slot.id, 'endTime', e.target.value)}
+                                                className="h-9 w-full font-mono text-sm text-slate-700 border-slate-100 focus:border-blue-500 bg-white hover:border-slate-200 transition-all pl-3 shadow-sm focus:shadow-md"
+                                            />
+                                        </div>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="py-3">
                                         <Select 
                                             value={slot.type} 
                                             onValueChange={(val) => handleChange(slot.id, 'type', val)}
                                         >
-                                            <SelectTrigger className="h-8 border-transparent hover:border-slate-300 focus:border-blue-500 bg-transparent focus:bg-white shadow-none data-[placeholder]:text-muted-foreground">
+                                            <SelectTrigger className="h-9 border-slate-100 focus:border-blue-500 bg-white hover:border-slate-200 shadow-sm focus:shadow-md transition-all">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="lesson">
-                                                    <span className="flex items-center gap-2">
-                                                        <span className="h-2 w-2 rounded-full bg-blue-500" /> Pelajaran
-                                                    </span>
+                                                <SelectItem value="lesson" className="focus:bg-blue-50">
+                                                    <span className="text-sm font-medium text-slate-700">Pelajaran</span>
                                                 </SelectItem>
-                                                <SelectItem value="break">
-                                                    <span className="flex items-center gap-2">
-                                                        <span className="h-2 w-2 rounded-full bg-amber-500" /> Istirahat
-                                                    </span>
+                                                <SelectItem value="break" className="focus:bg-amber-50">
+                                                    <span className="text-sm font-medium text-slate-700">Istirahat</span>
                                                 </SelectItem>
-                                                <SelectItem value="ceremony">
-                                                    <span className="flex items-center gap-2">
-                                                        <span className="h-2 w-2 rounded-full bg-slate-500" /> Upacara
-                                                    </span>
+                                                <SelectItem value="ceremony" className="focus:bg-slate-100">
+                                                    <span className="text-sm font-medium text-slate-700">Upacara</span>
                                                 </SelectItem>
-                                                <SelectItem value="ishoma">
-                                                    <span className="flex items-center gap-2">
-                                                        <span className="h-2 w-2 rounded-full bg-emerald-500" /> Ishoma
-                                                    </span>
+                                                <SelectItem value="ishoma" className="focus:bg-emerald-50">
+                                                    <span className="text-sm font-medium text-slate-700">Ishoma</span>
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                    <TableCell className="text-center">
+                                    <TableCell className="text-center py-3 pr-6">
                                         <Button 
                                             variant="ghost" 
                                             size="icon" 
-                                            className="h-8 w-8 text-slate-300 hover:text-red-600 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                                            className="h-9 w-9 text-red-500 bg-red-50/50 border-red-100/50 border hover:text-red-700 hover:bg-red-100 hover:border-red-200 transition-all"
                                             onClick={() => handleDelete(slot.id)}
                                         >
                                             <Trash2 className="h-4 w-4" />

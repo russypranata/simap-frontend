@@ -2,76 +2,49 @@ import { Schedule } from '../types/schedule';
 import { MOCK_TIME_SLOTS, MOCK_FRIDAY_SLOTS, MOCK_MONDAY_SLOTS, MOCK_TUESDAY_SLOTS, MOCK_WEDNESDAY_SLOTS } from '../data/mockTimeSlots';
 import { SubjectCategory } from '../types/subject';
 
+// Palette for dynamic coloring (Tailwind classes)
+const COLOR_PALETTE = [
+    { bg: 'from-violet-50 to-violet-100', border: 'border-violet-200', text: 'text-violet-900', subtext: 'text-violet-600' },
+    { bg: 'from-emerald-50 to-emerald-100', border: 'border-emerald-200', text: 'text-emerald-900', subtext: 'text-emerald-600' },
+    { bg: 'from-sky-50 to-sky-100', border: 'border-sky-200', text: 'text-sky-900', subtext: 'text-sky-600' },
+    { bg: 'from-amber-50 to-amber-100', border: 'border-amber-200', text: 'text-amber-900', subtext: 'text-amber-600' },
+    { bg: 'from-rose-50 to-rose-100', border: 'border-rose-200', text: 'text-rose-900', subtext: 'text-rose-600' },
+    { bg: 'from-cyan-50 to-cyan-100', border: 'border-cyan-200', text: 'text-cyan-900', subtext: 'text-cyan-600' },
+    { bg: 'from-orange-50 to-orange-100', border: 'border-orange-200', text: 'text-orange-900', subtext: 'text-orange-600' },
+    { bg: 'from-pink-50 to-pink-100', border: 'border-pink-200', text: 'text-pink-900', subtext: 'text-pink-600' },
+    { bg: 'from-indigo-50 to-indigo-100', border: 'border-indigo-200', text: 'text-indigo-900', subtext: 'text-indigo-600' },
+    { bg: 'from-blue-50 to-blue-100', border: 'border-blue-200', text: 'text-blue-900', subtext: 'text-blue-600' },
+    { bg: 'from-teal-50 to-teal-100', border: 'border-teal-200', text: 'text-teal-900', subtext: 'text-teal-600' },
+    { bg: 'from-fuchsia-50 to-fuchsia-100', border: 'border-fuchsia-200', text: 'text-fuchsia-900', subtext: 'text-fuchsia-600' },
+];
+
+/**
+ * Simple hash function to generate a consistent index from a string
+ */
+const getStringHash = (str: string): number => {
+    let hash = 0;
+    if (str.length === 0) return hash;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+};
+
 // Helper to get color based on Subject Name (Priority) or Category (Fallback)
 export const getSubjectColor = (subjectName: string, category?: SubjectCategory | string) => {
-    const name = subjectName.toLowerCase();
-
-    // 1. Name-based Overrides (Restoring original vibrant palette)
-    if (name.includes('matematika') || name.includes('mtk')) 
-        return { bg: 'from-violet-50 to-violet-100', border: 'border-violet-200', text: 'text-violet-900', subtext: 'text-violet-600' };
-    
-    if (name.includes('fisika') || name.includes('kimia') || name.includes('biologi') || name.includes('ipa')) 
-        return { bg: 'from-emerald-50 to-emerald-100', border: 'border-emerald-200', text: 'text-emerald-900', subtext: 'text-emerald-600' };
-    
-    if (name.includes('inggris') || name.includes('arab') || name.includes('indonesia') || name.includes('bahasa')) 
-        return { bg: 'from-sky-50 to-sky-100', border: 'border-sky-200', text: 'text-sky-900', subtext: 'text-sky-600' };
-    
-    if (name.includes('tajwid') || name.includes('fikih') || name.includes('pai') || name.includes('sjr') || name.includes('sejarah') || name.includes('quran')) 
-        return { bg: 'from-amber-50 to-amber-100', border: 'border-amber-200', text: 'text-amber-900', subtext: 'text-amber-600' };
-    
-    if (name.includes('penjaskes') || name.includes('seni') || name.includes('sbd') || name.includes('pjok')) 
-        return { bg: 'from-rose-50 to-rose-100', border: 'border-rose-200', text: 'text-rose-900', subtext: 'text-rose-600' };
-    
-    if (name.includes('informatika') || name.includes('koding') || name.includes('komputer')) 
-        return { bg: 'from-cyan-50 to-cyan-100', border: 'border-cyan-200', text: 'text-cyan-900', subtext: 'text-cyan-600' };
-    
-    if (name.includes('ekonomi') || name.includes('sosiologi') || name.includes('geografi') || name.includes('ips')) 
-        return { bg: 'from-orange-50 to-orange-100', border: 'border-orange-200', text: 'text-orange-900', subtext: 'text-orange-600' };
-    
-    if (name.includes('bk') || name.includes('bimbel')) 
-        return { bg: 'from-pink-50 to-pink-100', border: 'border-pink-200', text: 'text-pink-900', subtext: 'text-pink-600' };
-    
-    if (name.includes('pkn') || name.includes('ppkn') || name.includes('pancasila')) 
-        return { bg: 'from-indigo-50 to-indigo-100', border: 'border-indigo-200', text: 'text-indigo-900', subtext: 'text-indigo-600' };
-
-    // 2. Category Fallback
-    switch (category) {
-        case 'AGAMA':
-            return {
-                bg: 'from-amber-50 to-amber-100',
-                border: 'border-amber-200',
-                text: 'text-amber-900',
-                subtext: 'text-amber-600'
-            };
-        case 'KEJURUAN':
-        case 'PEMINATAN':
-            return {
-                bg: 'from-blue-50 to-blue-100',
-                border: 'border-blue-200',
-                text: 'text-blue-900',
-                subtext: 'text-blue-600'
-            };
-        case 'EKSKUL':
-            return {
-                bg: 'from-orange-50 to-orange-100',
-                border: 'border-orange-200',
-                text: 'text-orange-900',
-                subtext: 'text-orange-600'
-            };
-        case 'UMUM':
-        default:
-            return {
-                bg: 'from-slate-50 to-slate-100',
-                border: 'border-slate-200',
-                text: 'text-slate-900',
-                subtext: 'text-slate-500'
-            };
-    }
+    // If we have a category, we might want to group colors by category logic 
+    // But for now, let's use the subject name to ensure variety even within same category
+    const index = getStringHash(subjectName) % COLOR_PALETTE.length;
+    return COLOR_PALETTE[index];
 };
 
 export interface ConflictResult {
     hasConflict: boolean;
+    type?: 'teacher' | 'class';
     message?: string;
+    conflictingSchedule?: Schedule;
 }
 
 /**
@@ -85,7 +58,7 @@ export const checkScheduleConflict = (
     existingSchedules: Schedule[],
     excludeId?: string
 ): ConflictResult => {
-    if (!newSchedule.day || !newSchedule.startTime || !newSchedule.endTime || !newSchedule.teacherId || !newSchedule.classId) {
+    if (!newSchedule.day || !newSchedule.startTime || !newSchedule.endTime) {
         return { hasConflict: false };
     }
 
@@ -101,18 +74,22 @@ export const checkScheduleConflict = (
 
     for (const existing of overlappingSchedules) {
         // Check Teacher Conflict
-        if (existing.teacherId === newSchedule.teacherId) {
+        if (newSchedule.teacherId && existing.teacherId === newSchedule.teacherId) {
             return {
                 hasConflict: true,
-                message: `Bentrok Guru: ${existing.teacherName} sudah mengajar di kelas ${existing.className} pada jam ini.`
+                type: 'teacher',
+                message: `Guru ${existing.teacherName} sudah mengajar di kelas ${existing.className} pada jam ini.`,
+                conflictingSchedule: existing
             };
         }
 
         // Check Class Conflict
-        if (existing.classId === newSchedule.classId) {
+        if (newSchedule.classId && existing.classId === newSchedule.classId) {
             return {
                 hasConflict: true,
-                message: `Bentrok Kelas: Kelas ${existing.className} sudah ada pelajaran ${existing.subjectName} pada jam ini.`
+                type: 'class',
+                message: `Kelas ${existing.className} sudah ada pelajaran ${existing.subjectName} pada jam ini.`,
+                conflictingSchedule: existing
             };
         }
     }
@@ -133,8 +110,9 @@ export const getTimeSlotOptions = (day: string = 'Senin') => {
     
     return slots.filter(s => s.type === 'lesson').map(slot => ({
         label: `${slot.label} (${slot.startTime} - ${slot.endTime})`,
-        value: slot.id,
+        value: slot.startTime, // Changed: Use startTime as value directly for simpler matching
         startTime: slot.startTime,
-        endTime: slot.endTime
+        endTime: slot.endTime,
+        originalLabel: slot.label
     }));
 };

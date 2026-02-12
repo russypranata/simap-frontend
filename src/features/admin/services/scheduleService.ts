@@ -1,4 +1,4 @@
-import { Schedule } from '../types/schedule';
+import { Schedule, DayOfWeek } from '../types/schedule';
 import { MOCK_SCHEDULES } from '../data/mockScheduleData';
 
 const SIMULATED_DELAY = 500;
@@ -48,6 +48,47 @@ export const scheduleService = {
             setTimeout(() => {
                 schedules = schedules.filter(s => s.id !== id);
                 resolve();
+            }, SIMULATED_DELAY);
+        });
+    },
+
+    copyDaySchedule: async (sourceDay: string, targetDay: DayOfWeek): Promise<Schedule[]> => {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                // Get source schedules
+                const sourceSchedules = schedules.filter(s => s.day === sourceDay);
+                
+                // Create copies with new IDs and target day
+                const newSchedules = sourceSchedules.map(s => ({
+                    ...s,
+                    id: `sch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    day: targetDay
+                }));
+
+                // Append to store
+                schedules = [...newSchedules, ...schedules];
+                resolve(newSchedules);
+            }, SIMULATED_DELAY);
+        });
+    },
+
+    copyClassSchedule: async (sourceClassId: string, targetClassId: string, targetClassName: string): Promise<Schedule[]> => {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                // Get source schedules
+                const sourceSchedules = schedules.filter(s => s.classId === sourceClassId);
+                
+                // Create copies with new IDs and target class
+                const newSchedules = sourceSchedules.map(s => ({
+                    ...s,
+                    id: `sch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    classId: targetClassId,
+                    className: targetClassName
+                }));
+
+                // Append to store
+                schedules = [...newSchedules, ...schedules];
+                resolve(newSchedules);
             }, SIMULATED_DELAY);
         });
     }

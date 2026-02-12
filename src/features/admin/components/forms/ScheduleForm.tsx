@@ -13,7 +13,8 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form';
-import { CalendarPlus, Save, X } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle, CalendarPlus, Save, X } from 'lucide-react';
 
 
 import {
@@ -43,7 +44,8 @@ import { Subject } from '../../types/subject';
 import { teacherService } from '../../services/teacherService';
 import { classService } from '../../services/classService';
 import { subjectService } from '../../services/subjectService';
-import { checkScheduleConflict, getTimeSlotOptions } from '../../utils/scheduleUtils';
+
+import { checkScheduleConflict, getTimeSlotOptions, ConflictResult } from '../../utils/scheduleUtils';
 
 interface ScheduleFormProps {
     open: boolean;
@@ -82,6 +84,28 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
             semester: 'Ganjil',
         },
     });
+
+    // Real-time Conflict Detection
+    const [conflict, setConflict] = useState<ConflictResult>({ hasConflict: false });
+    const watchedValues = form.watch();
+
+    useEffect(() => {
+        const { day, startTime, endTime, teacherId, classId } = watchedValues;
+        
+        if (day && startTime && endTime && (teacherId || classId)) {
+            const payload = {
+                day,
+                startTime,
+                endTime,
+                teacherId,
+                classId,
+            };
+            const result = checkScheduleConflict(payload as any, existingSchedules, initialData?.id);
+            setConflict(result);
+        } else {
+            setConflict({ hasConflict: false });
+        }
+    }, [watchedValues.day, watchedValues.startTime, watchedValues.endTime, watchedValues.teacherId, watchedValues.classId, existingSchedules, initialData]);
 
     // Watch 'day' to update time slots dynamically
     const selectedDay = form.watch('day');
@@ -186,6 +210,17 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
                 <div className="py-4">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                            
+                            {/* Conflict Alert */}
+                            {conflict.hasConflict && (
+                                <Alert variant="destructive" className="bg-red-50 text-red-900 border-red-200">
+                                    <AlertTriangle className="h-4 w-4 text-red-600" />
+                                    <AlertTitle className="text-red-800 font-semibold ml-2">Bentrok Jadwal Terdeteksi!</AlertTitle>
+                                    <AlertDescription className="text-red-700 ml-2 mt-1">
+                                        {conflict.message}
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                             
                             {/* Section 1: Informasi Akademik */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

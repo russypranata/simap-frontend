@@ -15,10 +15,13 @@ import {
     FileX,
     Settings,
     CalendarPlus,
+
     Edit,
     BookOpen,
     Grid3X3,
     List,
+    Copy,
+    ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +39,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription,
+} from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     DropdownMenu,
@@ -111,6 +122,12 @@ export const ScheduleList: React.FC = () => {
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [isBulkDelete, setIsBulkDelete] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Copy State
+    const [isCopyDialogOpen, setIsCopyDialogOpen] = useState(false);
+    const [isCopying, setIsCopying] = useState(false);
+    const [copySource, setCopySource] = useState<DayOfWeek>('Senin');
+    const [copyTarget, setCopyTarget] = useState<DayOfWeek>('Selasa');
 
     const days: DayOfWeek[] = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
@@ -235,6 +252,25 @@ export const ScheduleList: React.FC = () => {
         }
     };
 
+    const handleCopySchedule = async () => {
+        if (copySource === copyTarget) {
+            toast.error('Hari asal dan tujuan tidak boleh sama');
+            return;
+        }
+
+        try {
+            setIsCopying(true);
+            const newSchedules = await scheduleService.copyDaySchedule(copySource, copyTarget);
+            setData(prev => [...newSchedules, ...prev]);
+            toast.success(`Jadwal ${copySource} berhasil disalin ke ${copyTarget}`);
+            setIsCopyDialogOpen(false);
+        } catch (error) {
+            toast.error('Gagal menyalin jadwal');
+        } finally {
+            setIsCopying(false);
+        }
+    };
+
     const openEdit = (item: Schedule) => {
         setEditingId(item.id);
         setIsFormOpen(true);
@@ -288,7 +324,16 @@ export const ScheduleList: React.FC = () => {
                         </div>
                     )}
                 </div>
+
                 <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsCopyDialogOpen(true)}
+                        className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                    >
+                        <Copy className="h-4 w-4 mr-2" />
+                        Salin Jadwal
+                    </Button>
                     <Button
                         onClick={() => { setEditingId(null); setIsFormOpen(true); }}
                         className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all"
@@ -781,6 +826,67 @@ export const ScheduleList: React.FC = () => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            
+            {/* Copy Schedule Dialog */}
+            <Dialog open={isCopyDialogOpen} onOpenChange={setIsCopyDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Salin Jadwal Harian</DialogTitle>
+                        <DialogDescription>
+                            Salin semua jadwal dari satu hari ke hari lain. Jadwal yang sudah ada di hari tujuan tidak akan dihapus (ditambahkan).
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-2 gap-4 items-center justify-items-center">
+                            <div className="w-full space-y-2">
+                                <span className="text-sm font-medium text-slate-700">Dari Hari</span>
+                                <Select value={copySource} onValueChange={(v) => setCopySource(v as DayOfWeek)}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {days.map(d => (
+                                            <SelectItem key={d} value={d}>{d}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            
+                            <ArrowRight className="h-5 w-5 text-slate-400 mt-6" />
+
+                            <div className="w-full space-y-2">
+                                <span className="text-sm font-medium text-slate-700">Ke Hari</span>
+                                <Select value={copyTarget} onValueChange={(v) => setCopyTarget(v as DayOfWeek)}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {days.map(d => (
+                                            <SelectItem key={d} value={d} disabled={d === copySource}>
+                                                {d}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsCopyDialogOpen(false)}>
+                            Batal
+                        </Button>
+                        <Button 
+                            onClick={handleCopySchedule} 
+                            disabled={isCopying || copySource === copyTarget}
+                            className="bg-blue-800 hover:bg-blue-900 text-white"
+                        >
+                            {isCopying ? 'Menyalin...' : 'Salin Jadwal'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
+
+

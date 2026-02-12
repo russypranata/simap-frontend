@@ -147,6 +147,28 @@ export const AdminSidebar: React.FC = () => {
                 },
             ],
         },
+        {
+            title: 'Manajemen Ekskul',
+            href: '/admin/extracurricular-management',
+            icon: Award,
+            subItems: [
+                {
+                    title: 'Daftar Ekskul',
+                    href: '/admin/extracurricular',
+                    icon: Award,
+                },
+                {
+                    title: 'Keanggotaan',
+                    href: '/admin/extracurricular/members',
+                    icon: Users,
+                },
+                {
+                    title: 'Rekap Presensi',
+                    href: '/admin/extracurricular/attendance',
+                    icon: ClipboardCheck,
+                },
+            ],
+        },
 
         // PENGGUNA
         {

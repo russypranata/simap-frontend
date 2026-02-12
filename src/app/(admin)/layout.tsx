@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRole } from '@/app/context/RoleContext';
 import { AdminLayout } from '@/features/admin/components/AdminLayout';
+import { AcademicYearProvider } from '@/context/AcademicYearContext';
 
 export default function AdminRootLayout({
     children,
@@ -43,5 +44,9 @@ export default function AdminRootLayout({
         return null;
     }
 
-    return <AdminLayout>{children}</AdminLayout>;
+    return (
+        <AcademicYearProvider>
+            <AdminLayout>{children}</AdminLayout>
+        </AcademicYearProvider>
+    );
 }
