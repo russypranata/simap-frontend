@@ -309,10 +309,10 @@ export default function ExtracurricularMembersPage() {
                             <CardContent className="p-0">
                                 <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-slate-100 bg-slate-50/10">
                                     <div className="relative flex-1">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
                                             placeholder="Cari nama, NIS, atau kelas..."
-                                            className="pl-9 bg-white border-slate-200"
+                                            className="pl-9 w-full"
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
@@ -329,13 +329,13 @@ export default function ExtracurricularMembersPage() {
 
                                 <div className="overflow-x-auto">
                                     <Table>
-                                        <TableHeader className="bg-slate-50/50">
-                                            <TableRow className="hover:bg-transparent">
-                                                <TableHead className="w-[80px] font-bold text-slate-500 text-[10px] uppercase tracking-wider">NO</TableHead>
-                                                <TableHead className="font-bold text-slate-500 text-[10px] uppercase tracking-wider">NAMA SISWA</TableHead>
-                                                <TableHead className="font-bold text-slate-500 text-[10px] uppercase tracking-wider">NIS / KELAS</TableHead>
-                                                <TableHead className="font-bold text-slate-500 text-[10px] uppercase tracking-wider">TGL BERGABUNG</TableHead>
-                                                <TableHead className="text-right font-bold text-slate-500 text-[10px] uppercase tracking-wider pr-6">AKSI</TableHead>
+                                        <TableHeader className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                                            <TableRow className="hover:bg-transparent border-none">
+                                                <TableHead className="w-[80px] px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">NO</TableHead>
+                                                <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">NAMA SISWA</TableHead>
+                                                <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">NIS / KELAS</TableHead>
+                                                <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">TGL BERGABUNG</TableHead>
+                                                <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right pr-6 text-slate-700">AKSI</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -367,25 +367,25 @@ export default function ExtracurricularMembersPage() {
                                                 </TableRow>
                                             ) : (
                                                 filteredMembers.map((member, index) => (
-                                                    <TableRow key={member.id} className="hover:bg-slate-50 transition-colors group">
-                                                        <TableCell className="font-medium text-slate-400 pl-6">{(index + 1).toString().padStart(2, '0')}</TableCell>
-                                                        <TableCell className="font-bold text-slate-800 uppercase tracking-tight group-hover:text-blue-800 transition-colors">{member.studentName}</TableCell>
-                                                        <TableCell>
+                                                    <TableRow key={member.id} className="hover:bg-slate-50/60 transition-colors group border-b border-slate-50">
+                                                        <TableCell className="font-medium text-slate-400 pl-6 py-4">{(index + 1).toString().padStart(2, '0')}</TableCell>
+                                                        <TableCell className="font-semibold text-slate-900 text-sm uppercase tracking-tight group-hover:text-blue-800 transition-colors py-4">{member.studentName}</TableCell>
+                                                        <TableCell className="py-4">
                                                             <div className="flex flex-col">
                                                                 <span className="text-xs font-semibold text-slate-500">{member.nis}</span>
-                                                                <Badge variant="secondary" className="w-fit text-[9px] h-4 px-1 bg-slate-100 text-slate-400 border-none font-bold">
+                                                                <Badge variant="secondary" className="w-fit text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-500 border-none font-medium mt-1">
                                                                     {member.class}
                                                                 </Badge>
                                                             </div>
                                                         </TableCell>
-                                                        <TableCell className="text-slate-500 font-medium text-xs">
+                                                        <TableCell className="text-slate-500 font-medium text-sm py-4">
                                                             {new Date(member.joinDate).toLocaleDateString('id-ID', {
                                                                 day: 'numeric',
                                                                 month: 'long',
                                                                 year: 'numeric'
                                                             })}
                                                         </TableCell>
-                                                        <TableCell className="text-right pr-6">
+                                                        <TableCell className="text-right pr-6 py-4">
                                                             <Button 
                                                                 variant="ghost" 
                                                                 size="sm" 

@@ -166,10 +166,10 @@ export default function AttendanceRecapPage() {
                             Statistik Per Kegiatan
                         </CardTitle>
                         <div className="relative w-full sm:w-[300px]">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Cari nama ekskul..."
-                                className="pl-9 bg-slate-50/50 border-slate-200"
+                                className="pl-9 w-full"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -179,14 +179,14 @@ export default function AttendanceRecapPage() {
                 <CardContent className="p-0">
                     <div className="overflow-x-auto">
                         <Table>
-                            <TableHeader className="bg-slate-50/50">
+                            <TableHeader className="bg-slate-50 text-slate-700 border-b border-slate-200">
                                 <TableRow>
-                                    <TableHead className="w-[80px]">Rank</TableHead>
-                                    <TableHead>Nama Ekstrakurikuler</TableHead>
-                                    <TableHead>Kategori</TableHead>
-                                    <TableHead className="text-center">Sesi</TableHead>
-                                    <TableHead className="text-center">Trend Presensi</TableHead>
-                                    <TableHead className="text-right">Aksi</TableHead>
+                                    <TableHead className="w-[80px] px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">Rank</TableHead>
+                                    <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">Nama Ekstrakurikuler</TableHead>
+                                    <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">Kategori</TableHead>
+                                    <TableHead className="text-center px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">Sesi</TableHead>
+                                    <TableHead className="text-center px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">Trend Presensi</TableHead>
+                                    <TableHead className="text-right px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">Aksi</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -198,26 +198,26 @@ export default function AttendanceRecapPage() {
                                     </TableRow>
                                 ) : (
                                     filteredRecaps.map((recap, index) => (
-                                        <TableRow key={recap.extracurricularId} className="hover:bg-slate-50 transition-colors">
-                                            <TableCell className="font-bold text-slate-400">#{(index + 1).toString().padStart(2, '0')}</TableCell>
-                                            <TableCell>
+                                        <TableRow key={recap.extracurricularId} className="hover:bg-slate-50/60 transition-colors border-b border-slate-50">
+                                            <TableCell className="font-medium text-slate-400 pl-6 py-4">#{(index + 1).toString().padStart(2, '0')}</TableCell>
+                                            <TableCell className="py-4">
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-800 uppercase tracking-tight">{recap.extracurricularName}</span>
+                                                    <span className="font-semibold text-slate-900 text-sm uppercase tracking-tight">{recap.extracurricularName}</span>
                                                     <span className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5 uppercase font-medium">
                                                         <Calendar className="h-3 w-3" />
                                                         Terakhir: {new Date(recap.lastActivity).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
-                                                <Badge variant="outline" className="text-[10px] font-bold uppercase border-slate-200">
+                                            <TableCell className="py-4">
+                                                <Badge variant="outline" className="text-[10px] font-medium uppercase border-slate-200 bg-slate-50">
                                                     {recap.category}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="text-center font-semibold text-slate-600">
+                                            <TableCell className="text-center font-semibold text-slate-600 text-sm py-4">
                                                 {recap.totalSessions}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="py-4">
                                                 <div className="flex flex-col items-center gap-1">
                                                     <div className="flex items-center gap-2">
                                                         <span className={cn(
