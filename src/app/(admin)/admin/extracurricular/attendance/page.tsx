@@ -19,6 +19,7 @@ import {
     CardContent,
     CardHeader,
     CardTitle,
+    CardDescription
 } from '@/components/ui/card';
 import {
     Table,
@@ -125,51 +126,68 @@ export default function AttendanceRecapPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="border-slate-200 shadow-sm border-l-4 border-l-blue-600">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wider">Rata-rata Kehadiran</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-slate-900">89.4%</span>
-                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none">
-                                <TrendingUp className="h-3 w-3 mr-1" /> +2.1%
-                            </Badge>
+                <Card className="border-slate-200 shadow-sm">
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                            <Users className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">Rata-rata Kehadiran</p>
+                            <div className="flex items-baseline gap-2">
+                                <span className="font-bold text-slate-900 text-xl">89.4%</span>
+                                <Badge className="bg-green-50 text-green-700 border-none text-[10px] px-1.5 py-0">
+                                    <TrendingUp className="h-3 w-3 mr-1" /> +2.1%
+                                </Badge>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-slate-200 shadow-sm border-l-4 border-l-slate-400">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Sesi Pertemuan</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <span className="text-3xl font-bold text-slate-900">142</span>
-                        <p className="text-xs text-slate-500 mt-1">Seluruh ekskul di Semester Ganjil</p>
+
+                <Card className="border-slate-200 shadow-sm">
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                            <ClipboardCheck className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">Total Sesi Pertemuan</p>
+                            <p className="font-bold text-slate-900 text-xl">142</p>
+                        </div>
                     </CardContent>
                 </Card>
-                <Card className="border-slate-200 shadow-sm border-l-4 border-l-amber-500">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wider">Ekskul Teraktif</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <span className="text-xl font-bold text-slate-800 uppercase">PRAMUKA</span>
-                        <p className="text-xs text-slate-500 mt-1">98% Kehadiran Rata-rata</p>
+
+                <Card className="border-slate-200 shadow-sm">
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                            <TrendingUp className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">Ekskul Teraktif</p>
+                            <p className="font-bold text-slate-900 text-xl">PRAMUKA</p>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
 
-            <Card className="border-slate-200 shadow-md">
-                <CardHeader className="pb-3 border-b border-slate-100">
-                    <div className="flex flex-col sm:flex-row gap-3 justify-between items-center text-center">
-                        <CardTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <FileBarChart className="h-5 w-5 text-blue-800" />
-                            Statistik Per Kegiatan
-                        </CardTitle>
-                        <div className="relative w-full sm:w-[300px]">
+            <Card className="border-slate-200 shadow-sm">
+                <CardHeader className="pb-4 border-b border-slate-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
+                                <FileBarChart className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-semibold text-gray-900">Statistik Per Kegiatan</CardTitle>
+                                <CardDescription className="text-sm text-slate-500">
+                                    Detail presensi per ekstrakurikuler
+                                </CardDescription>
+                            </div>
+                        </div>
+
+                        <div className="relative w-full sm:w-[250px]">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Cari nama ekskul..."
-                                className="pl-9 w-full"
+                                className="pl-9 w-full bg-slate-50/50 focus:bg-white transition-colors"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />

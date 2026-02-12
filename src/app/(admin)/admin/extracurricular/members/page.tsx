@@ -12,7 +12,10 @@ import {
     UserPlus,
     CheckCircle2,
     Info,
-    Calendar
+    Calendar,
+    GraduationCap,
+    Clock,
+    MoreVertical
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,6 +59,15 @@ import {
 import { MOCK_STUDENTS } from '@/features/admin/data/mockStudentData';
 import { useAcademicYear } from '@/context/AcademicYearContext';
 import { MembersPageSkeleton } from '@/features/admin/components/extracurricular';
+import { Progress } from '@/components/ui/progress';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function ExtracurricularMembersPage() {
     const { academicYear: activeYearCtx } = useAcademicYear();
@@ -125,7 +137,6 @@ export default function ExtracurricularMembersPage() {
         const student = MOCK_STUDENTS.find(s => s.id === selectedStudentId);
         if (!student) return;
 
-        // Check if already a member
         if (members.some(m => m.studentId === student.id)) {
             toast.error('Siswa ini sudah terdaftar di ekstrakurikuler ini');
             return;
@@ -144,7 +155,6 @@ export default function ExtracurricularMembersPage() {
             setSelectedStudentId(null);
             fetchMembers(selectedEkskul.id);
             
-            // Update local capacity view
             setSelectedEkskul(prev => prev ? {
                 ...prev,
                 currentCapacity: prev.currentCapacity + 1
@@ -160,7 +170,6 @@ export default function ExtracurricularMembersPage() {
             await extracurricularService.removeMember(selectedEkskul.id, memberId);
             setMembers(prev => prev.filter(m => m.id !== memberId));
             
-            // Update selectedEkskul capacity locally
             setSelectedEkskul(prev => prev ? {
                 ...prev,
                 currentCapacity: prev.currentCapacity - 1
@@ -182,12 +191,16 @@ export default function ExtracurricularMembersPage() {
 
     const filteredStudents = MOCK_STUDENTS.filter(s => 
         (s.name.toLowerCase().includes(studentSearchTerm.toLowerCase()) || s.nis.includes(studentSearchTerm)) &&
-        !members.some(m => m.studentId === s.id) // Hide existing members
+        !members.some(m => m.studentId === s.id)
     );
 
     if (isLoading) {
         return <MembersPageSkeleton />;
     }
+
+    const occupancyRate = selectedEkskul ? (selectedEkskul.currentCapacity / selectedEkskul.maxCapacity) * 100 : 0;
+    const isFull = occupancyRate >= 100;
+    const isNearCapacity = occupancyRate >= 80 && occupancyRate < 100;
 
     return (
         <div className="space-y-6">
@@ -211,6 +224,9 @@ export default function ExtracurricularMembersPage() {
                             Ekskul
                         </span>
                     </h1>
+                    <p className="text-muted-foreground mt-1">
+                        Kelola data anggota dan pendaftaran siswa baru
+                    </p>
                 </div>
                 
                 <div className="flex items-center gap-3">
@@ -229,11 +245,11 @@ export default function ExtracurricularMembersPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Sidebar: List of Ekskul */}
-                <Card className="lg:col-span-1 border-slate-200 transition-shadow hover:shadow-sm">
+                <Card className="lg:col-span-1 border-slate-200 transition-shadow hover:shadow-sm h-fit sticky top-6">
                     <CardHeader className="pb-3 pt-4 px-4 bg-slate-50/50 border-b border-slate-100 mb-2">
                         <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pilih Kegiatan</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-2 space-y-1">
+                    <CardContent className="p-2 space-y-1 max-h-[calc(100vh-250px)] overflow-y-auto">
                         {filteredEkskuls.length === 0 ? (
                             <div className="py-8 text-center px-4 text-slate-900">
                                 <p className="text-xs text-slate-400">Tidak ada ekskul di periode ini</p>
@@ -266,151 +282,185 @@ export default function ExtracurricularMembersPage() {
                 {/* Main Content: Members Table */}
                 <div className="lg:col-span-3 space-y-6">
                     {selectedEkskul ? (
-                        <Card className="border-slate-200 overflow-hidden shadow-sm">
-                            <CardHeader className="pb-4 border-b border-slate-100 bg-slate-50/30">
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                    <div className="flex items-start gap-4">
-                                        <div className="p-3 rounded-xl bg-blue-800 text-white shadow-inner">
-                                            <Award className="h-6 w-6" />
+                        <>
+                            {/* Detail Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Pembina Card */}
+                                <Card className="border-slate-200 shadow-sm">
+                                    <CardContent className="p-4 flex items-center gap-4">
+                                        <div className="h-12 w-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                                            <Users className="h-6 w-6" />
                                         </div>
                                         <div>
-                                            <CardTitle className="text-2xl font-bold text-slate-900 leading-none">{selectedEkskul.name}</CardTitle>
-                                            <CardDescription className="flex items-center gap-2 text-slate-500 mt-2 font-medium">
-                                                <Users className="h-4 w-4 text-blue-800" />
-                                                Pembina: <span className="text-slate-800 underline decoration-blue-200">{selectedEkskul.mentorName}</span>
-                                            </CardDescription>
+                                            <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5">Pembina</p>
+                                            <p className="font-semibold text-slate-900 text-base">
+                                                {selectedEkskul.mentorName}
+                                            </p>
                                         </div>
-                                    </div>
-                                    
-                                    <div className="flex flex-col items-end">
-                                        <div className="flex items-center gap-2 mb-1.5">
-                                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">OKUPANSI</span>
-                                            <span className={cn(
-                                                "text-sm font-bold px-2 py-0.5 rounded-md",
-                                                selectedEkskul.currentCapacity >= selectedEkskul.maxCapacity ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-800"
-                                            )}>
-                                                {selectedEkskul.currentCapacity} / {selectedEkskul.maxCapacity}
-                                            </span>
-                                        </div>
-                                        <div className="h-2 w-32 bg-slate-200 rounded-full overflow-hidden border border-slate-100 shadow-sm">
-                                            <div 
-                                                className={cn(
-                                                    "h-full transition-all duration-700 ease-in-out",
-                                                    (selectedEkskul.currentCapacity / selectedEkskul.maxCapacity) >= 1 ? "bg-red-500" :
-                                                    (selectedEkskul.currentCapacity / selectedEkskul.maxCapacity) >= 0.8 ? "bg-amber-500" : "bg-blue-600"
-                                                )}
-                                                style={{ width: `${Math.min((selectedEkskul.currentCapacity / selectedEkskul.maxCapacity) * 100, 100)}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            
-                            <CardContent className="p-0">
-                                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-slate-100 bg-slate-50/10">
-                                    <div className="relative flex-1">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Cari nama, NIS, atau kelas..."
-                                            className="pl-9 w-full"
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                        />
-                                    </div>
-                                    <Button 
-                                        onClick={() => setIsAddModalOpen(true)}
-                                        className="bg-blue-800 hover:bg-blue-900 shadow-md active:scale-95 transition-all"
-                                        disabled={selectedEkskul.currentCapacity >= selectedEkskul.maxCapacity}
-                                    >
-                                        <UserPlus className="h-4 w-4 mr-2" />
-                                        Tambah Anggota
-                                    </Button>
-                                </div>
+                                    </CardContent>
+                                </Card>
 
-                                <div className="overflow-x-auto">
-                                    <Table>
-                                        <TableHeader className="bg-slate-50 text-slate-700 border-b border-slate-200">
-                                            <TableRow className="hover:bg-transparent border-none">
-                                                <TableHead className="w-[80px] px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">NO</TableHead>
-                                                <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">NAMA SISWA</TableHead>
-                                                <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">NIS / KELAS</TableHead>
-                                                <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">TGL BERGABUNG</TableHead>
-                                                <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right pr-6 text-slate-700">AKSI</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {isMembersLoading ? (
-                                                Array(3).fill(0).map((_, i) => (
-                                                    <TableRow key={i}>
-                                                        <TableCell colSpan={5}><Skeleton className="h-12 w-full" /></TableCell>
-                                                    </TableRow>
-                                                ))
-                                            ) : filteredMembers.length === 0 ? (
-                                                <TableRow>
-                                                    <TableCell colSpan={5} className="h-72 text-center">
-                                                        <div className="flex flex-col items-center justify-center text-slate-400 animate-in fade-in zoom-in duration-300">
-                                                            <div className="bg-slate-100 p-5 rounded-full mb-4">
-                                                                <Users className="h-10 w-10 opacity-40 text-slate-400" />
-                                                            </div>
-                                                            <p className="font-semibold text-slate-500">Belum ada anggota di ekstrakurikuler ini</p>
-                                                            <p className="text-xs text-slate-400 mt-1 max-w-[200px]">Silakan klik tombol di bawah untuk mulai menambah anggota.</p>
-                                                            <Button 
-                                                                variant="link" 
-                                                                className="text-blue-800 font-bold mt-2"
-                                                                onClick={() => setIsAddModalOpen(true)}
-                                                            >
-                                                                <Plus className="h-4 w-4 mr-1" />
-                                                                Tambah Baru
-                                                            </Button>
-                                                        </div>
-                                                    </TableCell>
+                                {/* Kapasitas Card */}
+                                <Card className="border-slate-200 shadow-sm">
+                                    <CardContent className="py-3 px-4 flex items-center gap-4">
+                                        <div className="h-12 w-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                                            <GraduationCap className="h-6 w-6" />
+                                        </div>
+                                        <div className="flex-1 space-y-1.5">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Okupansi</p>
+                                                <span className={cn(
+                                                    "text-xs font-bold",
+                                                    isFull ? "text-red-600" : isNearCapacity ? "text-amber-600" : "text-blue-600"
+                                                )}>
+                                                    {Math.round(occupancyRate)}%
+                                                </span>
+                                            </div>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="font-bold text-slate-900 text-xl">{selectedEkskul.currentCapacity}</span>
+                                                <span className="text-sm text-slate-500 font-medium">/ {selectedEkskul.maxCapacity} Siswa</span>
+                                            </div>
+                                            <Progress value={occupancyRate} className="h-1.5" />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            {/* Main List Card */}
+                            <Card className="border-slate-200 overflow-hidden shadow-sm">
+                                <CardHeader className="pb-4 border-b border-slate-100">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
+                                                <Award className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-lg font-semibold text-gray-900">Daftar Anggota</CardTitle>
+                                                <CardDescription className="text-sm text-slate-500">
+                                                    Total {filteredMembers.length} anggota aktif
+                                                </CardDescription>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                                            <div className="relative flex-1 sm:w-[250px]">
+                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                <Input
+                                                    placeholder="Cari nama, NIS, atau kelas..."
+                                                    className="pl-9 w-full bg-slate-50/50 focus:bg-white transition-colors"
+                                                    value={searchTerm}
+                                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                                />
+                                            </div>
+                                            <Button
+                                                onClick={() => setIsAddModalOpen(true)}
+                                                className="bg-blue-800 hover:bg-blue-900 shadow-sm active:scale-95 transition-all whitespace-nowrap"
+                                                disabled={isFull}
+                                            >
+                                                <UserPlus className="h-4 w-4 mr-2" />
+                                                Tambah
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+
+                                <CardContent className="p-0">
+                                    <div className="overflow-x-auto">
+                                        <Table>
+                                            <TableHeader className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                                                <TableRow className="hover:bg-transparent border-none">
+                                                    <TableHead className="w-[80px] px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">NO</TableHead>
+                                                    <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">NAMA SISWA</TableHead>
+                                                    <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">NIS / KELAS</TableHead>
+                                                    <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-slate-700">TGL BERGABUNG</TableHead>
+                                                    <TableHead className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right pr-6 text-slate-700">AKSI</TableHead>
                                                 </TableRow>
-                                            ) : (
-                                                filteredMembers.map((member, index) => (
-                                                    <TableRow key={member.id} className="hover:bg-slate-50/60 transition-colors group border-b border-slate-50">
-                                                        <TableCell className="font-medium text-slate-400 pl-6 py-4">{(index + 1).toString().padStart(2, '0')}</TableCell>
-                                                        <TableCell className="font-semibold text-slate-900 text-sm uppercase tracking-tight group-hover:text-blue-800 transition-colors py-4">{member.studentName}</TableCell>
-                                                        <TableCell className="py-4">
-                                                            <div className="flex flex-col">
-                                                                <span className="text-xs font-semibold text-slate-500">{member.nis}</span>
-                                                                <Badge variant="secondary" className="w-fit text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-500 border-none font-medium mt-1">
-                                                                    {member.class}
-                                                                </Badge>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {isMembersLoading ? (
+                                                    Array(3).fill(0).map((_, i) => (
+                                                        <TableRow key={i}>
+                                                            <TableCell colSpan={5}><Skeleton className="h-12 w-full" /></TableCell>
+                                                        </TableRow>
+                                                    ))
+                                                ) : filteredMembers.length === 0 ? (
+                                                    <TableRow>
+                                                        <TableCell colSpan={5} className="h-64 text-center">
+                                                            <div className="flex flex-col items-center justify-center text-slate-400 animate-in fade-in zoom-in duration-300">
+                                                                <div className="bg-slate-50 p-4 rounded-full mb-3 border border-dashed border-slate-200">
+                                                                    <Users className="h-8 w-8 text-slate-300" />
+                                                                </div>
+                                                                <p className="font-semibold text-slate-500">Belum ada anggota</p>
+                                                                <p className="text-xs text-slate-400 mt-1 max-w-[200px]">Silakan klik tombol di atas untuk mulai menambah anggota.</p>
                                                             </div>
                                                         </TableCell>
-                                                        <TableCell className="text-slate-500 font-medium text-sm py-4">
-                                                            {new Date(member.joinDate).toLocaleDateString('id-ID', {
-                                                                day: 'numeric',
-                                                                month: 'long',
-                                                                year: 'numeric'
-                                                            })}
-                                                        </TableCell>
-                                                        <TableCell className="text-right pr-6 py-4">
-                                                            <Button 
-                                                                variant="ghost" 
-                                                                size="sm" 
-                                                                className="text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-full h-8 w-8 p-0"
-                                                                onClick={() => handleRemoveMember(member.id)}
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </TableCell>
                                                     </TableRow>
-                                                ))
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="bg-slate-50/50 border-t border-slate-100 py-3 flex justify-between items-center px-6">
-                                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-                                    Total {filteredMembers.length} Personel
-                                </p>
-                                <Badge variant="outline" className="text-[9px] text-slate-400 border-slate-200 bg-white">
-                                    LIVE SYNC
-                                </Badge>
-                            </CardFooter>
-                        </Card>
+                                                ) : (
+                                                    filteredMembers.map((member, index) => (
+                                                        <TableRow key={member.id} className="hover:bg-slate-50/60 transition-colors group border-b border-slate-50">
+                                                            <TableCell className="font-medium text-slate-400 pl-6 py-4">{(index + 1).toString().padStart(2, '0')}</TableCell>
+                                                            <TableCell className="font-semibold text-slate-900 text-sm uppercase tracking-tight py-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="h-8 w-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold border border-blue-100">
+                                                                        {member.studentName.charAt(0)}
+                                                                    </div>
+                                                                    {member.studentName}
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell className="py-4">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-xs font-mono font-medium text-slate-500">{member.nis}</span>
+                                                                    <Badge variant="secondary" className="w-fit text-[10px] px-1.5 py-0 bg-slate-100 text-slate-500 border-none font-medium mt-1">
+                                                                        {member.class}
+                                                                    </Badge>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell className="text-slate-500 font-medium text-sm py-4">
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                                                                    {new Date(member.joinDate).toLocaleDateString('id-ID', {
+                                                                        day: 'numeric',
+                                                                        month: 'long',
+                                                                        year: 'numeric'
+                                                                    })}
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell className="text-right pr-6 py-4">
+                                                                <DropdownMenu>
+                                                                    <DropdownMenuTrigger asChild>
+                                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                                                                            <MoreVertical className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </DropdownMenuTrigger>
+                                                                    <DropdownMenuContent align="end" className="w-[160px]">
+                                                                        <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                                                                        <DropdownMenuSeparator />
+                                                                        <DropdownMenuItem
+                                                                            onClick={() => handleRemoveMember(member.id)}
+                                                                            className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                                                                        >
+                                                                            <Trash2 className="mr-2 h-4 w-4" /> Hapus
+                                                                        </DropdownMenuItem>
+                                                                    </DropdownMenuContent>
+                                                                </DropdownMenu>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="bg-slate-50/50 border-t border-slate-100 py-3 flex justify-between items-center px-6">
+                                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
+                                        Total {filteredMembers.length} Personel
+                                    </p>
+                                    <Badge variant="outline" className="text-[9px] text-slate-400 border-slate-200 bg-white">
+                                        LIVE SYNC
+                                    </Badge>
+                                </CardFooter>
+                            </Card>
+                        </>
                     ) : (
                         <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50 h-[500px] flex flex-col items-center justify-center p-12 text-center animate-pulse">
                             <div className="bg-white p-6 rounded-full shadow-sm mb-6 border border-slate-100">
