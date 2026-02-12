@@ -25,6 +25,7 @@ import {
     CardTitle,
     CardFooter,
 } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { 
     Select, 
     SelectContent, 
@@ -350,11 +351,11 @@ export const PromotionWorkflow: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-3">
-                    <Card className="border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden border-0">
-                        <CardHeader className="bg-white border-b border-slate-100">
+                    <Card className="border-slate-200 shadow-sm">
+                        <CardHeader className="bg-white border-b border-slate-100 pb-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-xl font-bold text-slate-900">
+                                    <CardTitle className="text-lg font-bold text-slate-900">
                                         {currentStep === 1 && "Konfigurasi Tahun Akademik"}
                                         {currentStep === 2 && "Seleksi & Pemetaan Kelas"}
                                         {currentStep === 3 && "Review Data Individu Siswa"}
@@ -364,13 +365,13 @@ export const PromotionWorkflow: React.FC = () => {
                                         Langkah {currentStep} dari 4
                                     </CardDescription>
                                 </div>
-                                <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                <div className="h-10 w-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                                     <Info className="h-5 w-5" />
                                 </div>
                             </div>
                         </CardHeader>
                         
-                        <CardContent className="p-8 min-h-[400px]">
+                        <CardContent className="p-6 min-h-[400px]">
                             {isLoading ? (
                                 <div className="space-y-6">
                                     {currentStep === 2 ? (
@@ -389,48 +390,46 @@ export const PromotionWorkflow: React.FC = () => {
                             ) : (
                                 <>
                                     {currentStep === 1 && (
-                                        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                                <div className="space-y-4 group">
-                                                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2 mb-1">
-                                                        <div className="h-2 w-2 rounded-full bg-blue-600 shadow-sm" />
-                                                        TAHUN AJARAN ASAL (AKTIF)
+                                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-medium text-slate-700">
+                                                        Tahun Ajaran Asal (Aktif)
                                                     </label>
                                                     <Select value={sourceYearId} onValueChange={setSourceYearId}>
-                                                        <SelectTrigger className="h-14 border-slate-200 focus:ring-primary rounded-2xl shadow-sm text-base font-semibold">
+                                                        <SelectTrigger className="w-full">
                                                             <SelectValue placeholder="Pilih Tahun Asal" />
                                                         </SelectTrigger>
-                                                        <SelectContent className="rounded-xl border-slate-200">
+                                                        <SelectContent>
                                                             {academicYears.map(y => (
-                                                                <SelectItem key={y.id} value={y.id} className="focus:bg-blue-50 focus:text-blue-700">
-                                                                    {y.name} {y.isActive && " • Aktif Sistem"}
+                                                                <SelectItem key={y.id} value={y.id}>
+                                                                    {y.name} {y.isActive && " • Aktif"}
                                                                 </SelectItem>
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
-                                                <div className="space-y-4 group">
-                                                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2 mb-1">
-                                                        <div className="h-2 w-2 rounded-full bg-green-600 shadow-sm" />
-                                                        TAHUN AJARAN TUJUAN
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-medium text-slate-700">
+                                                        Tahun Ajaran Tujuan
                                                     </label>
                                                     <Select value={targetYearId} onValueChange={setTargetYearId}>
                                                         <SelectTrigger 
                                                             disabled={!sourceYearId}
-                                                            className="h-14 border-green-200 bg-green-50/20 focus:ring-green-500 rounded-2xl shadow-sm text-base font-semibold text-green-700 disabled:opacity-50"
+                                                            className="w-full"
                                                         >
                                                             <SelectValue placeholder={sourceYearId ? "Pilih Tahun Tujuan" : "Pilih Tahun Asal Dulu"} />
                                                         </SelectTrigger>
-                                                        <SelectContent className="rounded-xl border-green-100">
+                                                        <SelectContent>
                                                             {filteredTargetYears.length > 0 ? (
                                                                 filteredTargetYears.map(y => (
-                                                                    <SelectItem key={y.id} value={y.id} className="focus:bg-green-50 focus:text-green-700">
+                                                                    <SelectItem key={y.id} value={y.id}>
                                                                         {y.name}
                                                                     </SelectItem>
                                                                 ))
                                                             ) : (
-                                                                <div className="p-4 text-center text-xs font-bold text-slate-400">
-                                                                    Tidak ada tahun ajaran masa depan
+                                                                <div className="p-2 text-center text-xs text-muted-foreground">
+                                                                    Tidak ada data
                                                                 </div>
                                                             )}
                                                         </SelectContent>
@@ -438,175 +437,173 @@ export const PromotionWorkflow: React.FC = () => {
                                                 </div>
                                             </div>
                                             
-                                            <div className="p-6 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl border border-blue-100/50 flex gap-4">
-                                                <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center text-blue-600 shadow-sm shrink-0">
-                                                    <AlertCircle className="h-6 w-6" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-blue-900 mb-1">Peringatan Keamanan Data</h4>
-                                                    <p className="text-sm text-blue-800/80 leading-relaxed font-medium">
-                                                        Proses kenaikan kelas bersifat massal dan mempengaruhi basis data inti. Pastikan target tahun ajaran sudah memiliki struktur kelas yang sesuai.
-                                                    </p>
-                                                </div>
-                                            </div>
+                                            <Alert className="bg-blue-50 border-blue-100">
+                                                <AlertCircle className="h-4 w-4 text-blue-600" />
+                                                <AlertTitle className="text-blue-800 font-semibold">Peringatan Keamanan Data</AlertTitle>
+                                                <AlertDescription className="text-blue-700">
+                                                    Proses kenaikan kelas bersifat massal dan mempengaruhi basis data inti. Pastikan target tahun ajaran sudah memiliki struktur kelas yang sesuai.
+                                                </AlertDescription>
+                                            </Alert>
                                         </div>
                                     )}
 
                                     {currentStep === 2 && (
-                                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-                                                {sourceClasses.map(c => (
-                                                    <div 
-                                                        key={c.id}
-                                                        className={cn(
-                                                            "relative p-5 rounded-3xl border-2 transition-all duration-300 flex flex-col gap-4",
-                                                            selectedClassIds.includes(c.id) 
-                                                                ? "border-primary bg-primary/5 shadow-lg shadow-primary/10 ring-1 ring-primary/20" 
-                                                                : "border-slate-100 hover:border-slate-300 hover:bg-slate-50 shadow-sm"
-                                                        )}
-                                                    >
-                                                        <div className="flex items-center justify-between">
-                                                            <div className={cn(
-                                                                "h-12 w-12 rounded-2xl flex items-center justify-center shadow-inner transition-all",
-                                                                selectedClassIds.includes(c.id) ? "bg-primary text-white scale-110" : "bg-slate-100 text-slate-400"
-                                                            )}>
-                                                                <School className="h-6 w-6" />
-                                                            </div>
-                                                            <Checkbox 
-                                                                checked={selectedClassIds.includes(c.id)} 
-                                                                onCheckedChange={() => handleClassSelect(c.id)}
-                                                                className="h-6 w-6 rounded-lg data-[state=checked]:bg-primary"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-extrabold text-slate-900 text-lg uppercase">{c.name}</div>
-                                                            <div className="text-xs font-bold text-slate-500 mt-0.5 flex items-center gap-1.5 grayscale opacity-70">
-                                                                <Users className="h-3.5 w-3.5" />
-                                                                {c.totalStudents} Siswa Terdeteksi
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Target Mapping UI */}
-                                                        {selectedClassIds.includes(c.id) && (
-                                                            <div className="mt-2 pt-4 border-t border-primary/10 space-y-2 animate-in zoom-in-95 duration-200">
-                                                                <label className="text-[10px] font-bold text-primary uppercase tracking-widest">Target Kelas Tujuan</label>
-                                                                {c.grade === 12 ? (
-                                                                    <Badge className="w-full justify-center py-1.5 bg-blue-600 text-white rounded-lg border-0 font-bold">
-                                                                        <GraduationCap className="h-3.5 w-3.5 mr-1.5" />
-                                                                        OTOMATIS LULUS
-                                                                    </Badge>
-                                                                ) : (
-                                                                    <Select 
-                                                                        key={`select-${c.id}-${targetYearId}`}
-                                                                        value={classMapping[c.id]} 
-                                                                        onValueChange={(val) => setClassMapping(prev => ({ ...prev, [c.id]: val }))}
-                                                                    >
-                                                                        <SelectTrigger className="h-10 bg-white border-primary/20 text-xs font-bold rounded-xl focus:ring-primary shadow-sm">
-                                                                            <SelectValue placeholder="Pilih Tujuan..." />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent className="rounded-xl border-slate-200">
-                                                                            {targetClasses.length > 0 ? (
-                                                                                [10, 11, 12].map(grade => {
-                                                                                    const classesInGrade = targetClasses.filter(tc => tc.grade === grade);
-                                                                                    if (classesInGrade.length === 0) return null;
-                                                                                    return (
-                                                                                        <SelectGroup key={grade}>
-                                                                                            <SelectLabel className="px-2 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                                                                                                Tingkat {grade}
-                                                                                            </SelectLabel>
-                                                                                            {classesInGrade
-                                                                                                .sort((a, b) => a.name.localeCompare(b.name))
-                                                                                                .map(tc => (
-                                                                                                    <SelectItem key={tc.id} value={tc.id} className="text-xs font-bold">
-                                                                                                        {tc.name} {tc.grade === c.grade + 1 && "⭐"}
-                                                                                                    </SelectItem>
-                                                                                                ))
-                                                                                            }
-                                                                                        </SelectGroup>
-                                                                                    );
-                                                                                })
+                                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                            <div className="border rounded-md overflow-hidden">
+                                                <table className="w-full text-sm text-left">
+                                                    <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                                                        <tr>
+                                                            <th className="w-[50px] p-4 font-semibold text-xs uppercase tracking-wider text-center">
+                                                                #
+                                                            </th>
+                                                            <th className="p-4 font-semibold text-xs uppercase tracking-wider">Kelas Asal</th>
+                                                            <th className="p-4 font-semibold text-xs uppercase tracking-wider">Jumlah Siswa</th>
+                                                            <th className="p-4 font-semibold text-xs uppercase tracking-wider">Target Kelas Tujuan</th>
+                                                            <th className="p-4 font-semibold text-xs uppercase tracking-wider text-center">Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-slate-100">
+                                                        {sourceClasses.length === 0 ? (
+                                                            <tr>
+                                                                <td colSpan={5} className="p-8 text-center text-slate-500">
+                                                                    Tidak ada data kelas ditemukan.
+                                                                </td>
+                                                            </tr>
+                                                        ) : (
+                                                            sourceClasses.map(c => (
+                                                                <tr key={c.id} className={cn(
+                                                                    "hover:bg-slate-50 transition-colors",
+                                                                    selectedClassIds.includes(c.id) && "bg-blue-50/30"
+                                                                )}>
+                                                                    <td className="p-4 text-center">
+                                                                        <Checkbox
+                                                                            checked={selectedClassIds.includes(c.id)}
+                                                                            onCheckedChange={() => handleClassSelect(c.id)}
+                                                                        />
+                                                                    </td>
+                                                                    <td className="p-4 font-medium text-slate-900">
+                                                                        {c.name}
+                                                                    </td>
+                                                                    <td className="p-4 text-slate-600">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <Users className="h-4 w-4 text-slate-400" />
+                                                                            {c.totalStudents}
+                                                                        </div>
+                                                                    </td>
+                                                                    <td className="p-4">
+                                                                        {selectedClassIds.includes(c.id) ? (
+                                                                            c.grade === 12 ? (
+                                                                                <Badge variant="secondary" className="bg-slate-100 text-slate-600">
+                                                                                    <GraduationCap className="h-3 w-3 mr-1" />
+                                                                                    Otomatis Lulus
+                                                                                </Badge>
                                                                             ) : (
-                                                                                <div className="p-4 text-center text-[10px] font-bold text-slate-400">
-                                                                                    Belum ada data kelas di tahun tujuan
-                                                                                </div>
-                                                                            )}
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                )}
-
-                                                                {/* Status Indicator Badge */}
-                                                                {classMapping[c.id] && (
-                                                                    <div className="mt-2 flex items-center justify-between">
-                                                                        {(() => {
-                                                                            const targetClass = targetClasses.find(tc => tc.id === classMapping[c.id]);
-                                                                            if (!targetClass) return null;
-                                                                            if (targetClass.grade === c.grade) {
-                                                                                return <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-100 text-[9px] font-bold px-1.5 py-0 h-4">TINGGAL KELAS</Badge>;
-                                                                            }
-                                                                            if (targetClass.grade > c.grade + 1) {
-                                                                                return <Badge variant="outline" className="bg-purple-50 text-purple-600 border-purple-100 text-[9px] font-bold px-1.5 py-0 h-4">LOMPAT KELAS</Badge>;
-                                                                            }
-                                                                            return <Badge variant="outline" className="bg-green-50 text-green-600 border-green-100 text-[9px] font-bold px-1.5 py-0 h-4">PROMOSI NORMAL</Badge>;
-                                                                        })()}
-                                                                    </div>
-                                                                )}
-                                                            </div>
+                                                                                <Select
+                                                                                    value={classMapping[c.id]}
+                                                                                    onValueChange={(val) => setClassMapping(prev => ({ ...prev, [c.id]: val }))}
+                                                                                >
+                                                                                    <SelectTrigger className="h-9 w-full min-w-[180px]">
+                                                                                        <SelectValue placeholder="Pilih Tujuan..." />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
+                                                                                        {targetClasses.length > 0 ? (
+                                                                                            [10, 11, 12].map(grade => {
+                                                                                                const classesInGrade = targetClasses.filter(tc => tc.grade === grade);
+                                                                                                if (classesInGrade.length === 0) return null;
+                                                                                                return (
+                                                                                                    <SelectGroup key={grade}>
+                                                                                                        <SelectLabel className="text-xs font-bold text-slate-400">
+                                                                                                            Tingkat {grade}
+                                                                                                        </SelectLabel>
+                                                                                                        {classesInGrade
+                                                                                                            .sort((a, b) => a.name.localeCompare(b.name))
+                                                                                                            .map(tc => (
+                                                                                                                <SelectItem key={tc.id} value={tc.id}>
+                                                                                                                    {tc.name}
+                                                                                                                </SelectItem>
+                                                                                                            ))
+                                                                                                        }
+                                                                                                    </SelectGroup>
+                                                                                                );
+                                                                                            })
+                                                                                        ) : (
+                                                                                            <div className="p-2 text-center text-xs text-muted-foreground">
+                                                                                                Kosong
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                            )
+                                                                        ) : (
+                                                                            <span className="text-slate-400 text-xs italic">Pilih kelas dulu</span>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="p-4 text-center">
+                                                                        {selectedClassIds.includes(c.id) && classMapping[c.id] && (
+                                                                            (() => {
+                                                                                const targetClass = targetClasses.find(tc => tc.id === classMapping[c.id]);
+                                                                                if (!targetClass) return null;
+                                                                                if (targetClass.grade === c.grade) {
+                                                                                    return <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">Tinggal Kelas</Badge>;
+                                                                                }
+                                                                                if (targetClass.grade > c.grade + 1) {
+                                                                                    return <Badge variant="outline" className="bg-purple-50 text-purple-600 border-purple-200">Lompat</Badge>;
+                                                                                }
+                                                                                return <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">Promosi</Badge>;
+                                                                            })()
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            ))
                                                         )}
-                                                    </div>
-                                                ))}
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                            {sourceClasses.length === 0 && (
-                                                <div className="text-center py-20 bg-slate-50/50 rounded-3xl border border-dashed border-slate-300">
-                                                    <School className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                                                    <p className="text-slate-500 font-bold text-lg">Tidak Ada Kelas Ditemukan</p>
-                                                    <p className="text-slate-400 text-sm">Ganti tahun ajaran asal untuk mencari data lain.</p>
-                                                </div>
-                                            )}
                                         </div>
                                     )}
 
                                     {currentStep === 3 && (
                                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                            <div className="border border-slate-100 rounded-3xl overflow-hidden shadow-sm bg-white">
+                                            <div className="border rounded-md overflow-hidden">
                                                 <table className="w-full text-sm text-left">
-                                                    <thead className="bg-slate-50/80 text-slate-400 border-b border-slate-100">
+                                                    <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                                                         <tr>
-                                                            <th className="px-6 py-4 font-bold text-[10px] uppercase tracking-widest">Informasi Siswa</th>
-                                                            <th className="px-6 py-4 font-bold text-[10px] uppercase tracking-widest text-right">Opsi Status</th>
+                                                            <th className="p-4 font-semibold text-xs uppercase tracking-wider">Informasi Siswa</th>
+                                                            <th className="p-4 font-semibold text-xs uppercase tracking-wider text-right">Opsi Status</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody className="divide-y divide-slate-50">
+                                                    <tbody className="divide-y divide-slate-100">
                                                         {promotionRecords.map((record) => (
-                                                            <tr key={record.studentId} className="hover:bg-blue-50/30 transition-colors group">
-                                                                <td className="px-6 py-5">
-                                                                    <div className="font-extrabold text-slate-900 text-base">{record.studentName}</div>
+                                                            <tr key={record.studentId} className="hover:bg-slate-50 transition-colors">
+                                                                <td className="p-4">
+                                                                    <div className="font-medium text-slate-900">{record.studentName}</div>
                                                                     <div className="flex items-center gap-2 mt-1">
-                                                                        <Badge variant="outline" className="text-[10px] font-bold px-1.5 py-0 rounded bg-slate-50 border-slate-200 text-slate-400">
+                                                                        <Badge variant="outline" className="text-xs font-normal text-slate-500 border-slate-200">
                                                                             {record.nisn}
                                                                         </Badge>
-                                                                        <ArrowRight className="h-3 w-3 text-slate-300" />
-                                                                        <span className="text-[10px] font-bold text-primary/60 uppercase">
+                                                                        <ArrowRight className="h-3 w-3 text-slate-400" />
+                                                                        <span className="text-xs text-slate-500">
                                                                             {sourceClasses.find(c => c.id === record.currentClassId)?.name}
                                                                         </span>
                                                                     </div>
                                                                 </td>
-                                                                <td className="px-6 py-5 text-right">
-                                                                    <div className="flex justify-end gap-1.5">
+                                                                <td className="p-4 text-right">
+                                                                    <div className="flex justify-end gap-2">
                                                                         {(['PROMOTE', 'STAY', 'GRADUATE'] as const).map(act => (
-                                                                            <button
+                                                                            <Button
                                                                                 key={act}
+                                                                                size="sm"
+                                                                                variant={record.action === act ? "default" : "outline"}
                                                                                 onClick={() => updatePromotionAction(record.studentId, act)}
                                                                                 className={cn(
-                                                                                    "h-9 px-4 rounded-xl text-[10px] font-extrabold uppercase transition-all border-2",
-                                                                                    record.action === act 
-                                                                                        ? act === 'PROMOTE' ? "bg-green-600 text-white border-green-600 shadow-lg shadow-green-200" :
-                                                                                          act === 'STAY' ? "bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-200" :
-                                                                                          "bg-blue-800 text-white border-blue-800 shadow-lg shadow-blue-200"
-                                                                                        : "bg-white text-slate-400 border-slate-100 hover:border-slate-200 hover:text-slate-600"
+                                                                                    "h-8 text-xs font-semibold",
+                                                                                    record.action === act && act === 'PROMOTE' && "bg-green-600 hover:bg-green-700",
+                                                                                    record.action === act && act === 'STAY' && "bg-amber-600 hover:bg-amber-700",
+                                                                                    record.action === act && act === 'GRADUATE' && "bg-blue-600 hover:bg-blue-700",
                                                                                 )}
                                                                             >
                                                                                 {act === 'PROMOTE' ? 'Naik' : act === 'STAY' ? 'Tinggal' : 'Lulus'}
-                                                                            </button>
+                                                                            </Button>
                                                                         ))}
                                                                     </div>
                                                                 </td>
@@ -620,55 +617,51 @@ export const PromotionWorkflow: React.FC = () => {
 
                                     {currentStep === 4 && (
                                         <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-3xl">
-                                                    <div className="text-[11px] text-slate-400 uppercase font-black tracking-widest mb-3 flex items-center gap-2">
-                                                        <div className="h-3 w-3 rounded-full bg-slate-400" />
-                                                        Periode Asal
-                                                    </div>
-                                                    <div className="text-2xl font-black text-slate-900 tracking-tight">
-                                                        {academicYears.find(y => y.id === sourceYearId)?.name}
-                                                    </div>
-                                                </div>
-                                                <div className="p-6 bg-green-50/50 border border-green-100 rounded-3xl">
-                                                    <div className="text-[11px] text-green-600 uppercase font-black tracking-widest mb-3 flex items-center gap-2">
-                                                        <div className="h-3 w-3 rounded-full bg-green-500" />
-                                                        Periode Tujuan
-                                                    </div>
-                                                    <div className="text-2xl font-black text-green-900 tracking-tight">
-                                                        {academicYears.find(y => y.id === targetYearId)?.name}
-                                                    </div>
-                                                </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <Card className="bg-slate-50 border-slate-200 shadow-none">
+                                                    <CardContent className="p-4">
+                                                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Periode Asal</div>
+                                                        <div className="text-lg font-bold text-slate-900">
+                                                            {academicYears.find(y => y.id === sourceYearId)?.name}
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                                <Card className="bg-green-50 border-green-100 shadow-none">
+                                                    <CardContent className="p-4">
+                                                        <div className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Periode Tujuan</div>
+                                                        <div className="text-lg font-bold text-green-900">
+                                                            {academicYears.find(y => y.id === targetYearId)?.name}
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
                                             </div>
 
                                             <div className="space-y-4">
-                                                <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest px-1">Statistik Perubahan</h4>
+                                                <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Statistik Perubahan</h4>
                                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                                     {[
-                                                        { label: 'Total Siswa', val: stats.total, color: 'text-slate-900', bg: 'bg-white' },
-                                                        { label: 'Naik Kelas', val: stats.promoted, color: 'text-green-600', bg: 'bg-green-50' },
-                                                        { label: 'Tinggal', val: stats.stayed, color: 'text-amber-500', bg: 'bg-amber-50' },
-                                                        { label: 'Lulus', val: stats.graduated, color: 'text-blue-600', bg: 'bg-blue-50' },
+                                                        { label: 'Total Siswa', val: stats.total, color: 'text-slate-900', bg: 'bg-white border-slate-200' },
+                                                        { label: 'Naik Kelas', val: stats.promoted, color: 'text-green-600', bg: 'bg-green-50 border-green-200' },
+                                                        { label: 'Tinggal', val: stats.stayed, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
+                                                        { label: 'Lulus', val: stats.graduated, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
                                                     ].map(s => (
-                                                        <div key={s.label} className={cn("p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-1", s.bg)}>
-                                                            <div className={cn("text-3xl font-black tracking-tighter", s.color)}>{s.val}</div>
-                                                            <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{s.label}</div>
-                                                        </div>
+                                                        <Card key={s.label} className={cn("border shadow-sm", s.bg)}>
+                                                            <CardContent className="p-4 flex flex-col items-center justify-center gap-1">
+                                                                <div className={cn("text-2xl font-bold", s.color)}>{s.val}</div>
+                                                                <div className="text-xs text-slate-500 font-medium uppercase">{s.label}</div>
+                                                            </CardContent>
+                                                        </Card>
                                                     ))}
                                                 </div>
                                             </div>
 
-                                            <div className="p-8 bg-blue-900 rounded-[2.5rem] text-white flex flex-col items-center text-center gap-6 shadow-2xl shadow-blue-900/40 relative overflow-hidden group">
-                                                {/* Decorative background elements */}
-                                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-500" />
-                                                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 transition-transform group-hover:scale-125 duration-700" />
-                                                
-                                                <div className="h-16 w-16 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md mb-2">
-                                                    <CheckCircle2 className="h-8 w-8 text-white" />
+                                            <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 flex flex-col items-center text-center gap-4">
+                                                <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                                    <CheckCircle2 className="h-6 w-6" />
                                                 </div>
-                                                <div className="relative z-10 max-w-md">
-                                                    <h4 className="text-2xl font-black tracking-tight mb-2">Konfirmasi Tahap Akhir</h4>
-                                                    <p className="text-blue-100/80 text-sm font-medium leading-relaxed">
+                                                <div className="max-w-md space-y-2">
+                                                    <h4 className="text-lg font-bold text-blue-900">Konfirmasi Tahap Akhir</h4>
+                                                    <p className="text-blue-700 text-sm">
                                                         Dengan menekan tombol eksekusi, sistem akan memproses data siswa ke tahun ajaran yang baru secara permanen. Tindakan ini tidak dapat dibatalkan melalui UI.
                                                     </p>
                                                 </div>
@@ -679,40 +672,40 @@ export const PromotionWorkflow: React.FC = () => {
                             )}
                         </CardContent>
 
-                        <CardFooter className="bg-slate-50/80 border-t border-slate-100 flex justify-between p-8">
+                        <CardFooter className="bg-slate-50/50 border-t border-slate-100 flex justify-between p-6">
                             <Button 
-                                variant="ghost" 
+                                variant="outline"
                                 onClick={handleBack}
                                 disabled={currentStep === 1 || isLoading || isSubmitting}
-                                className="h-14 px-8 rounded-2xl font-bold text-slate-500 hover:bg-white hover:text-slate-900"
+                                className="h-10"
                             >
-                                <ChevronLeft className="h-5 w-5 mr-3" />
+                                <ChevronLeft className="h-4 w-4 mr-2" />
                                 Kembali
                             </Button>
                             {currentStep < 4 ? (
                                 <Button 
                                     onClick={handleNext} 
                                     disabled={isLoading}
-                                    className="h-14 px-10 bg-primary hover:bg-blue-800 text-white rounded-2xl font-bold shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5"
+                                    className="h-10 bg-blue-800 hover:bg-blue-900"
                                 >
                                     Lanjut
-                                    <ChevronRight className="h-5 w-5 ml-3" />
+                                    <ChevronRight className="h-4 w-4 ml-2" />
                                 </Button>
                             ) : (
                                 <Button 
                                     onClick={handleSubmit}
                                     disabled={isSubmitting}
-                                    className="h-14 px-12 bg-green-600 hover:bg-green-700 text-white font-black rounded-2xl shadow-xl shadow-green-600/30 transition-all hover:scale-105 active:scale-95"
+                                    className="h-10 bg-green-600 hover:bg-green-700"
                                 >
                                     {isSubmitting ? (
                                         <>
-                                            <Loader2 className="h-5 w-5 mr-3 animate-spin stroke-[3]" />
-                                            MEMPROSES DATA...
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            Memproses...
                                         </>
                                     ) : (
                                         <>
-                                            EKSEKUSI SEKARANG
-                                            <ArrowUpCircle className="h-5 w-5 ml-3" />
+                                            Eksekusi Sekarang
+                                            <ArrowUpCircle className="h-4 w-4 ml-2" />
                                         </>
                                     )}
                                 </Button>
@@ -723,11 +716,11 @@ export const PromotionWorkflow: React.FC = () => {
 
                 <div className="space-y-6">
                     {/* Status Highlights Card */}
-                    <Card className="border-0 shadow-lg shadow-slate-200/50 rounded-3xl overflow-hidden bg-white">
-                        <CardHeader className="bg-slate-50/50 pb-4">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-500">Ringkasan Konfigurasi</CardTitle>
+                    <Card className="border-slate-200 shadow-sm">
+                        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-3 pt-3">
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500">Ringkasan Konfigurasi</CardTitle>
                         </CardHeader>
-                        <CardContent className="pt-6 space-y-6">
+                        <CardContent className="pt-4 space-y-4">
                             {[
                                 { label: 'Tahun Asal', val: academicYears.find(y => y.id === sourceYearId)?.name, active: !!sourceYearId },
                                 { label: 'Tahun Tujuan', val: academicYears.find(y => y.id === targetYearId)?.name, active: !!targetYearId },
@@ -735,28 +728,26 @@ export const PromotionWorkflow: React.FC = () => {
                                 { label: 'Estimasi Siswa', val: `${promotionRecords.length} Siswa`, active: promotionRecords.length > 0 },
                             ].map((item, idx) => (
                                 <div key={idx} className="flex justify-between items-start">
-                                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{item.label}</div>
+                                    <div className="text-xs font-medium text-slate-500">{item.label}</div>
                                     <div className={cn(
-                                        "text-xs font-black transition-all",
-                                        item.active ? "text-primary bg-primary/5 px-2 py-1 rounded-lg" : "text-slate-300"
+                                        "text-xs font-bold transition-all",
+                                        item.active ? "text-blue-600" : "text-slate-300"
                                     )}>
-                                        {item.val || 'Pending'}
+                                        {item.val || '-'}
                                     </div>
                                 </div>
                             ))}
                         </CardContent>
                     </Card>
 
-                    <Card className="border-0 bg-blue-600 rounded-3xl shadow-xl shadow-blue-600/20 text-white">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-base font-black flex items-center gap-3">
-                                <div className="p-2 bg-white/20 rounded-xl">
-                                    <HelpCircle className="h-5 w-5 text-white" />
-                                </div>
+                    <Card className="bg-blue-600 border-blue-600 text-white shadow-md">
+                        <CardHeader className="pb-2 pt-4">
+                            <CardTitle className="text-sm font-bold flex items-center gap-2">
+                                <HelpCircle className="h-4 w-4 text-blue-200" />
                                 BANTUAN CEPAT
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="text-xs font-semibold text-blue-100 leading-relaxed py-4 pt-0">
+                        <CardContent className="text-xs text-blue-100 leading-relaxed pb-4">
                             Sistem secara otomatis menyarankan <b>Target Kelas</b> (misal: X-A ke XI-A). Anda dapat mengubah saran ini di Langkah Pemetaan Kelas.
                         </CardContent>
                     </Card>
