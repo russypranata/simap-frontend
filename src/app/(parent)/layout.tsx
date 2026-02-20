@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRole } from '@/app/context/RoleContext';
 import { ParentLayout } from '@/features/parent/components/ParentLayout';
+import { AcademicYearProvider } from '@/context/AcademicYearContext';
 
 export default function ParentRouteLayout({
   children,
@@ -14,7 +15,11 @@ export default function ParentRouteLayout({
   const router = useRouter();
 
   // Role-based auth guard
+  // Role-based auth guard
   useEffect(() => {
+    // Wait for loading to complete before checking auth
+    if (isLoading) return;
+
     if (!isAuthenticated) {
       router.push('/');
     } else if (role !== 'orang_tua') {
@@ -33,12 +38,16 @@ export default function ParentRouteLayout({
           router.push('/');
       }
     }
-  }, [isAuthenticated, role, router]);
+  }, [isAuthenticated, role, router, isLoading]);
 
   // Show nothing while initializing or redirecting
   if (isLoading || !isAuthenticated || role !== 'orang_tua') {
     return null;
   }
 
-  return <ParentLayout>{children}</ParentLayout>;
+  return (
+    <AcademicYearProvider>
+      <ParentLayout>{children}</ParentLayout>
+    </AcademicYearProvider>
+  );
 }

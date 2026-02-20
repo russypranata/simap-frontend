@@ -18,7 +18,6 @@ import {
     BookOpen,
     Trophy,
     Activity,
-    Wallet,
     Pencil,
     CircleDot,
     ArrowLeft,
@@ -28,7 +27,6 @@ import {
     UserCheck,
     FileText,
     Printer,
-    Award
 } from 'lucide-react';
 import {
     Breadcrumb,
@@ -52,73 +50,97 @@ const routeConfig: Record<string, RouteItem> = {
     // Dashboard
     dashboard: { label: 'Dasbor', icon: LayoutDashboard },
 
-    // Categories (Non-clickable parents)
+    // ── Non-clickable category groups ─────────────────────────────────────────
     'curriculum-data': { label: 'Data Kurikulum', icon: BookOpen, isClickable: false },
     'schedule-kbm': { label: 'Jadwal & KBM', icon: Calendar, isClickable: false },
     'users-management': { label: 'Manajemen Pengguna', icon: Users, isClickable: false },
     'class-mgmt': { label: 'Manajemen Kelas', icon: School, isClickable: false },
-
-    // Profile
-    profile: { label: 'Profil', icon: User },
-    edit: { label: 'Edit', icon: Pencil },
-
-    // Student routes
-    'kartu-pelajar': { label: 'Kartu Pelajar', icon: CreditCard },
-    'data-diri': { label: 'Data Diri', icon: User },
-    grades: { label: 'Nilai Akademik', icon: GraduationCap },
-    attendance: { label: 'Presensi', icon: ClipboardList, parent: 'schedule-kbm' },
-    schedule: { label: 'Jadwal', icon: Calendar, parent: 'schedule-kbm' },
-    announcements: { label: 'Pengumuman', icon: Bell },
-    achievements: { label: 'Prestasi', icon: Trophy },
-    behavior: { label: 'Perilaku', icon: Activity },
-    extracurricular: { label: 'Ekstrakurikuler', icon: Users },
-
-    // Teacher routes
-    'daftar-siswa': { label: 'Daftar Siswa', icon: Users },
-    'input-nilai': { label: 'Input Nilai', icon: GraduationCap },
-    'rekap-absensi': { label: 'Rekap Absensi', icon: ClipboardList },
-    'jadwal-mengajar': { label: 'Jadwal Mengajar', icon: Calendar },
-
-    // Parent routes
-    'anak-saya': { label: 'Anak Saya', icon: Users },
-    'perkembangan': { label: 'Perkembangan', icon: Activity },
-    'pembayaran': { label: 'Pembayaran', icon: Wallet },
-
-    // Extracurricular routes
-    'ekstrakurikuler': { label: 'Ekstrakurikuler', icon: Users },
-    'members': { label: 'Anggota', icon: Users },
-    'anggota': { label: 'Anggota', icon: Users },
-    'presensi': { label: 'Presensi', icon: ClipboardList },
-    'tutor-recap': { label: 'Rekap Tutor', icon: ClipboardList },
-    'tutors': { label: 'Tutor', icon: Users },
-
-    // Mutamayizin routes
-    'mutamayizin': { label: 'Mutamayizin', icon: BookOpen },
-
-    // Admin routes
-    'academic-year': { label: 'Tahun Ajaran', icon: Calendar, parent: 'curriculum-data' },
-    'class': { label: 'Daftar Kelas', icon: School, parent: 'class-management' },
     'class-management': { label: 'Manajemen Kelas', icon: School, isClickable: false },
-    'promotion': { label: 'Kenaikan Kelas', icon: ArrowUpCircle, parent: 'class-management' },
-    'placement': { label: 'Penempatan Kelas', icon: Users, parent: 'class-management' },
-    'homeroom': { label: 'Wali Kelas', icon: UserCheck, parent: 'class-management' },
-    'subject': { label: 'Mata Pelajaran', icon: BookOpen, parent: 'curriculum-data' },
-    'new': { label: 'Tambah Baru', icon: Pencil },
-    'users': { label: 'Manajemen Pengguna', icon: Users, isClickable: false },
-    'teachers': { label: 'Guru & Staff', icon: Users, parent: 'users' },
-    'students': { label: 'Data Siswa', icon: GraduationCap, parent: 'users' },
-    'parents': { label: 'Wali Murid', icon: Users, parent: 'users' },
-    'kelola-pengguna': { label: 'Kelola Pengguna', icon: Users, parent: 'users' },
-    'calendar': { label: 'Kalender Akademik', icon: Calendar, parent: 'schedule-kbm' },
-    'schedule-management': { label: 'Jadwal Pelajaran', icon: Calendar },
-    'time-slots': { label: 'Pengaturan Jam', icon: Clock, parent: 'curriculum-data' },
-    'assessment': { label: 'Input Nilai', icon: FileText },
-    'report-card': { label: 'Cetak Rapor', icon: Printer },
-    'pengaturan': { label: 'Pengaturan', icon: Settings },
 
-    // General
-    settings: { label: 'Pengaturan', icon: Settings },
+    // ── ROLE PARENT ───────────────────────────────────────────────────────────
+    // Parent category groups (non-clickable)
+    'parent:academic': { label: 'Akademik Anak', icon: GraduationCap, isClickable: false },
+    'parent:attendance': { label: 'Kehadiran Anak', icon: ClipboardList, isClickable: false },
+    'parent:settings': { label: 'Pengaturan', icon: Settings, isClickable: false },
+
+    // Parent pages
+    'parent:dashboard': { label: 'Dasbor', icon: LayoutDashboard },
+    'parent:grades': { label: 'Nilai & Rapor', icon: GraduationCap },
+    'parent:schedule': { label: 'Jadwal Pelajaran', icon: Calendar },
+    'parent:achievements': { label: 'Prestasi', icon: Trophy },
+    'parent:behavior': { label: 'Catatan Perilaku', icon: ClipboardList },
+    'parent:announcements': { label: 'Pengumuman', icon: Bell },
+    'parent:profile': { label: 'Profil Saya', icon: User },
+    'parent:edit-profile': { label: 'Edit Profil', icon: Pencil },
+    'parent:change-password': { label: 'Ubah Kata Sandi', icon: Settings },
+
+    // Parent attendance sub-pages
+    'parent:morning': { label: 'Kehadiran Pagi', icon: Clock },
+    'parent:daily': { label: 'Presensi Harian', icon: ClipboardList },
+    'parent:subject': { label: 'Presensi Per Mapel', icon: BookOpen },
+    'parent:prayer': { label: 'Presensi Sholat', icon: Activity },
+    'parent:extracurricular': { label: 'Ekstrakurikuler', icon: Trophy },
+
+    // ── ROLE STUDENT ──────────────────────────────────────────────────────────
+    'student:kartu-pelajar': { label: 'Kartu Pelajar', icon: CreditCard },
+    'student:data-diri': { label: 'Data Diri', icon: User },
+    'student:grades': { label: 'Nilai Akademik', icon: GraduationCap },
+    'student:attendance': { label: 'Presensi', icon: ClipboardList },
+    'student:schedule': { label: 'Jadwal', icon: Calendar },
+    'student:announcements': { label: 'Pengumuman', icon: Bell },
+    'student:achievements': { label: 'Prestasi', icon: Trophy },
+    'student:behavior': { label: 'Perilaku', icon: Activity },
+    'student:extracurricular': { label: 'Ekstrakurikuler', icon: Users },
+    'student:profile': { label: 'Profil', icon: User },
+
+    // ── ROLE TEACHER ──────────────────────────────────────────────────────────
+    'teacher:daftar-siswa': { label: 'Daftar Siswa', icon: Users },
+    'teacher:input-nilai': { label: 'Input Nilai', icon: GraduationCap },
+    'teacher:rekap-absensi': { label: 'Rekap Absensi', icon: ClipboardList },
+    'teacher:jadwal-mengajar': { label: 'Jadwal Mengajar', icon: Calendar },
+    'teacher:schedule': { label: 'Jadwal Mengajar', icon: Calendar },
+    'teacher:grades': { label: 'Input Nilai', icon: GraduationCap },
+    'teacher:profile': { label: 'Profil', icon: User },
+
+    // ── ROLE ADMIN ────────────────────────────────────────────────────────────
+    'admin:academic-year': { label: 'Tahun Ajaran', icon: Calendar, parent: 'curriculum-data' },
+    'admin:class': { label: 'Daftar Kelas', icon: School, parent: 'class-management' },
+    'admin:promotion': { label: 'Kenaikan Kelas', icon: ArrowUpCircle, parent: 'class-management' },
+    'admin:placement': { label: 'Penempatan Kelas', icon: Users, parent: 'class-management' },
+    'admin:homeroom': { label: 'Wali Kelas', icon: UserCheck, parent: 'class-management' },
+    'admin:subject': { label: 'Mata Pelajaran', icon: BookOpen, parent: 'curriculum-data' },
+    'admin:users': { label: 'Manajemen Pengguna', icon: Users, isClickable: false },
+    'admin:teachers': { label: 'Guru & Staff', icon: Users, parent: 'users' },
+    'admin:students': { label: 'Data Siswa', icon: GraduationCap, parent: 'users' },
+    'admin:parents': { label: 'Wali Murid', icon: Users, parent: 'users' },
+    'admin:kelola-pengguna': { label: 'Kelola Pengguna', icon: Users, parent: 'users' },
+    'admin:calendar': { label: 'Kalender Akademik', icon: Calendar, parent: 'schedule-kbm' },
+    'admin:schedule-management': { label: 'Jadwal Pelajaran', icon: Calendar },
+    'admin:time-slots': { label: 'Pengaturan Jam', icon: Clock, parent: 'curriculum-data' },
+    'admin:assessment': { label: 'Input Nilai', icon: FileText },
+    'admin:report-card': { label: 'Cetak Rapor', icon: Printer },
+    'admin:profile': { label: 'Profil', icon: User },
+    'admin:settings': { label: 'Pengaturan', icon: Settings },
+    'admin:announcements': { label: 'Pengumuman', icon: Bell },
+    'admin:dashboard': { label: 'Dasbor', icon: LayoutDashboard },
+
+    // ── EXTRACURRICULAR ADVISOR ───────────────────────────────────────────────
+    'extracurricular-advisor:members': { label: 'Anggota', icon: Users },
+    'extracurricular-advisor:presensi': { label: 'Presensi', icon: ClipboardList },
+    'extracurricular-advisor:tutor-recap': { label: 'Rekap Tutor', icon: ClipboardList },
+    'extracurricular-advisor:tutors': { label: 'Tutor', icon: Users },
+    'extracurricular-advisor:dashboard': { label: 'Dasbor', icon: LayoutDashboard },
+
+    // ── MUTAMAYIZIN ───────────────────────────────────────────────────────────
+    'mutamayizin-coordinator:dashboard': { label: 'Dasbor', icon: LayoutDashboard },
+
+    // ── Generic fallbacks (used when no role match) ───────────────────────────
+    'new': { label: 'Tambah Baru', icon: Pencil },
+    edit: { label: 'Edit', icon: Pencil },
     notifications: { label: 'Notifikasi', icon: Bell },
+    'pengaturan': { label: 'Pengaturan', icon: Settings },
+    'anggota': { label: 'Anggota', icon: Users },
+    'mutamayizin': { label: 'Mutamayizin', icon: BookOpen },
 };
 
 // Role-based segments to skip in breadcrumb display
@@ -130,6 +152,7 @@ const roleSegments = [
     'mutamayizin-coordinator',
     'admin'
 ];
+
 
 interface BreadcrumbData {
     label: string;
@@ -150,119 +173,6 @@ export interface NavbarBreadcrumbProps {
 export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => {
     const pathname = usePathname();
 
-    // Generate breadcrumb items from pathname
-    const generateBreadcrumbs = (): BreadcrumbData[] => {
-        if (items) {
-             return items.map((item, index) => ({
-                label: item.label,
-                href: item.href,
-                isLast: index === items.length - 1,
-                icon: item.icon || CircleDot,
-                isClickable: true,
-            }));
-        }
-
-        if (!pathname || pathname === '/') {
-            return [];
-        }
-
-        const segments = pathname.split('/').filter(Boolean);
-
-        // Filter out role-based segments
-        const filteredSegments = segments.filter(
-            segment => !roleSegments.includes(segment)
-        );
-
-        if (filteredSegments.length === 0) {
-            return [];
-        }
-
-        const breadcrumbs: BreadcrumbData[] = [];
-        let currentPath = '';
-
-        // Rebuild path with correct href
-        let skippedLabel = '';
-        
-
-        segments.forEach((segment, index) => {
-            currentPath += `/${segment}`;
-
-            // Only add to breadcrumbs if not a role segment
-            if (!roleSegments.includes(segment)) {
-                // Skip if we already auto-injected dashboard and this is the dashboard segment
-                if (segment === 'dashboard' && breadcrumbs.some(b => b.label === 'Dasbor')) {
-                    return;
-                }
-                
-                // Smart Logic: Check if this is an ID followed immediately by 'edit'
-                const isIdSegment = segment.match(/^[0-9a-f-]{36}$/i) || /^\d+$/.test(segment) || segment.startsWith('ay-') || segment.startsWith('c-') || segment.startsWith('subj-');
-                const nextSegment = segments[index + 1];
-                
-                if (isIdSegment && nextSegment === 'edit') {
-                    // Start: Capture semantic label for the Edit page before skipping
-                    if (segment.startsWith('ay-')) {
-                        const parts = segment.split('-');
-                        if (parts.length >= 3) skippedLabel = `T.A. ${parts[1]}/${parts[2]}`;
-                    } else {
-                         skippedLabel = formatSegmentLabel(segment);
-                    }
-                    // End: Skip adding this ID segment to breadcrumb list
-                    return; 
-                }
-
-                const config = routeConfig[segment];
-
-                // Inject Parent Category if defined and not already present
-                if (config?.parent) {
-                    const parentConfig = routeConfig[config.parent];
-                    if (parentConfig && !breadcrumbs.some(b => b.label === parentConfig.label)) {
-                        breadcrumbs.push({
-                            label: parentConfig.label,
-                            href: '#', // Non-clickable
-                            isLast: false,
-                            icon: parentConfig.icon,
-                            isClickable: false,
-                        });
-                    }
-                }
-
-                let label = config?.label || formatSegmentLabel(segment);
-                
-                // If this is the 'edit' segment and we skipped the previous ID, merge the label
-                if (segment === 'edit' && skippedLabel) {
-                    label = `Edit ${skippedLabel.replace('Detail ', '')}`; // Remove "Detail" prefix if exists
-                    skippedLabel = ''; // Reset
-                }
-
-                const icon = config?.icon || CircleDot;
-                
-                // Preserve tab query param for attendance page
-                let href = currentPath;
-                if (segment === 'attendance') {
-                     const tabParam = new URLSearchParams(window.location.search).get('tab');
-                     if (tabParam) {
-                         href += `?tab=${tabParam}`;
-                     }
-                }
-
-                breadcrumbs.push({
-                    label,
-                    href,
-                    isLast: false,
-                    icon,
-                    isClickable: config?.isClickable !== false,
-                });
-            }
-        });
-
-        // Mark the last breadcrumb
-        if (breadcrumbs.length > 0) {
-            breadcrumbs[breadcrumbs.length - 1].isLast = true;
-        }
-
-        return breadcrumbs;
-    };
-
     // Format segment to readable label
     const formatSegmentLabel = (segment: string): string => {
         // Handle UUID-like segments
@@ -277,7 +187,6 @@ export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => 
 
         // Handle Academic Year IDs (ay-...)
         if (segment.startsWith('ay-')) {
-            // Parse ay-2025-2026 to T.A. 2025/2026
             const parts = segment.split('-');
             if (parts.length >= 3) {
                 return `T.A. ${parts[1]}/${parts[2]}`;
@@ -302,9 +211,119 @@ export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => 
             .join(' ');
     };
 
+    // Generate breadcrumb items from pathname
+    const generateBreadcrumbs = (): BreadcrumbData[] => {
+        if (items) {
+             return items.map((item, index) => ({
+                label: item.label,
+                href: item.href,
+                isLast: index === items.length - 1,
+                icon: item.icon || CircleDot,
+                isClickable: true,
+            }));
+        }
+
+        if (!pathname || pathname === '/') {
+            return [];
+        }
+
+        const segments = pathname.split('/').filter(Boolean);
+
+        // Detect the current role from the first segment
+        const currentRole = roleSegments.find(r => segments.includes(r)) || '';
+
+        // Helper: resolve a segment to a config entry, role-aware
+        const resolveConfig = (segment: string): RouteItem | undefined => {
+            const roleKey = `${currentRole}:${segment}`;
+            return routeConfig[roleKey] ?? routeConfig[segment];
+        };
+
+        // Filter out role-based segments
+        const filteredSegments = segments.filter(
+            segment => !roleSegments.includes(segment)
+        );
+
+        if (filteredSegments.length === 0) {
+            return [];
+        }
+
+        const breadcrumbs: BreadcrumbData[] = [];
+        let currentPath = '';
+        let skippedLabel = '';
+
+        segments.forEach((segment, index) => {
+            currentPath += `/${segment}`;
+
+            // Only add to breadcrumbs if not a role segment
+            if (!roleSegments.includes(segment)) {
+                // Skip duplicate 'dashboard' label if already injected
+                if (segment === 'dashboard' && breadcrumbs.some(b => b.label === 'Dasbor')) {
+                    return;
+                }
+
+                // Smart Logic: skip ID segments when followed by 'edit', capture label
+                const isIdSegment = segment.match(/^[0-9a-f-]{36}$/i) || /^\d+$/.test(segment) || segment.startsWith('ay-') || segment.startsWith('c-') || segment.startsWith('subj-');
+                const nextSegment = segments[index + 1];
+
+                if (isIdSegment && nextSegment === 'edit') {
+                    if (segment.startsWith('ay-')) {
+                        const parts = segment.split('-');
+                        if (parts.length >= 3) skippedLabel = `T.A. ${parts[1]}/${parts[2]}`;
+                    } else {
+                        skippedLabel = formatSegmentLabel(segment);
+                    }
+                    return;
+                }
+
+                const config = resolveConfig(segment);
+
+                // Inject non-clickable parent category group if needed
+                if (config?.parent) {
+                    const parentConfig = routeConfig[config.parent];
+                    if (parentConfig && !breadcrumbs.some(b => b.label === parentConfig.label)) {
+                        breadcrumbs.push({
+                            label: parentConfig.label,
+                            href: '#',
+                            isLast: false,
+                            icon: parentConfig.icon,
+                            isClickable: false,
+                        });
+                    }
+                }
+
+                let label = config?.label || formatSegmentLabel(segment);
+
+                // For 'edit' segment following a skipped ID, merge the label
+                if (segment === 'edit' && skippedLabel) {
+                    label = `Edit ${skippedLabel.replace('Detail ', '')}`;
+                    skippedLabel = '';
+                }
+
+                const icon = config?.icon || CircleDot;
+
+                breadcrumbs.push({
+                    label,
+                    href: currentPath,
+                    isLast: false,
+                    icon,
+                    isClickable: config?.isClickable !== false,
+                });
+            }
+        });
+
+        // Mark the last breadcrumb
+        if (breadcrumbs.length > 0) {
+            breadcrumbs[breadcrumbs.length - 1].isLast = true;
+        }
+
+        return breadcrumbs;
+    };
+
+
     const breadcrumbs = generateBreadcrumbs();
 
     // If no breadcrumbs, show nothing
+
     if (breadcrumbs.length === 0) {
         return null;
     }

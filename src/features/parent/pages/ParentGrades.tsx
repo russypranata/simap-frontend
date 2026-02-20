@@ -10,13 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import {
     Calendar,
@@ -30,8 +23,6 @@ import {
     Download,
     Star,
     Target,
-    User,
-    Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,12 +31,12 @@ interface SubjectGrade {
     id: number;
     subject: string;
     teacher: string;
-    dailyScore: number;
-    midTermScore: number;
-    finalScore: number;
-    averageScore: number;
-    grade: string;
-    kkm: number;
+    dailyScore: number;        // Nilai Harian
+    midTermScore: number;      // UTS
+    finalScore: number;        // UAS
+    averageScore: number;      // Rata-rata
+    grade: string;             // Predikat
+    kkm: number;               // KKM
 }
 
 interface SemesterSummary {
@@ -54,16 +45,10 @@ interface SemesterSummary {
     averageScore: number;
     rank: number;
     totalStudents: number;
+    attendance: number;
 }
 
-// Mock data
-const mockChildInfo = {
-    name: "Ahmad Fauzan Ramadhan",
-    nis: "0012345678",
-    class: "XII IPA 1",
-    avatar: "",
-};
-
+// Mock data (Child's grades)
 const mockGrades: SubjectGrade[] = [
     { id: 1, subject: "Matematika", teacher: "Pak Ahmad", dailyScore: 85, midTermScore: 82, finalScore: 88, averageScore: 85, grade: "A-", kkm: 75 },
     { id: 2, subject: "Fisika", teacher: "Bu Sari", dailyScore: 78, midTermScore: 80, finalScore: 82, averageScore: 80, grade: "B+", kkm: 75 },
@@ -75,15 +60,26 @@ const mockGrades: SubjectGrade[] = [
     { id: 8, subject: "Pendidikan Agama", teacher: "Pak Usman", dailyScore: 92, midTermScore: 95, finalScore: 93, averageScore: 93, grade: "A", kkm: 75 },
     { id: 9, subject: "PKn", teacher: "Bu Rina", dailyScore: 82, midTermScore: 80, finalScore: 84, averageScore: 82, grade: "B+", kkm: 75 },
     { id: 10, subject: "Seni Budaya", teacher: "Bu Ratna", dailyScore: 88, midTermScore: 85, finalScore: 90, averageScore: 88, grade: "A-", kkm: 75 },
+    { id: 11, subject: "PJOK", teacher: "Pak Dedi", dailyScore: 85, midTermScore: 88, finalScore: 85, averageScore: 86, grade: "A-", kkm: 75 },
+    { id: 12, subject: "Prakarya", teacher: "Pak Joko", dailyScore: 80, midTermScore: 82, finalScore: 80, averageScore: 81, grade: "B+", kkm: 75 },
+    { id: 13, subject: "TIK", teacher: "Pak Fajar", dailyScore: 90, midTermScore: 92, finalScore: 88, averageScore: 90, grade: "A", kkm: 75 },
 ];
 
 const mockSemesterHistory: SemesterSummary[] = [
-    { semester: "Ganjil", academicYear: "2025/2026", averageScore: 85.2, rank: 5, totalStudents: 32 },
-    { semester: "Genap", academicYear: "2024/2025", averageScore: 84.5, rank: 6, totalStudents: 32 },
-    { semester: "Ganjil", academicYear: "2024/2025", averageScore: 83.8, rank: 8, totalStudents: 32 },
+    { semester: "Ganjil", academicYear: "2025/2026", averageScore: 85.2, rank: 5, totalStudents: 32, attendance: 98 },
+    { semester: "Genap", academicYear: "2024/2025", averageScore: 84.5, rank: 6, totalStudents: 32, attendance: 96 },
+    { semester: "Ganjil", academicYear: "2024/2025", averageScore: 83.8, rank: 8, totalStudents: 32, attendance: 95 },
+    { semester: "Genap", academicYear: "2023/2024", averageScore: 82.1, rank: 10, totalStudents: 32, attendance: 94 },
 ];
 
 // Helper functions
+const getGradeColor = (grade: string): string => {
+    if (grade.startsWith("A")) return "text-emerald-600";
+    if (grade.startsWith("B")) return "text-blue-600";
+    if (grade.startsWith("C")) return "text-amber-600";
+    return "text-red-600";
+};
+
 const getGradeBadgeColor = (grade: string): string => {
     if (grade.startsWith("A")) return "bg-emerald-100 text-emerald-700 border-emerald-200";
     if (grade.startsWith("B")) return "bg-blue-100 text-blue-700 border-blue-200";
@@ -97,9 +93,13 @@ const getScoreColor = (score: number, kkm: number): string => {
     return "text-red-600";
 };
 
-export const ChildGrades: React.FC = () => {
-    const [selectedSemester, setSelectedSemester] = useState("current");
+const TrendIcon = ({ current, previous }: { current: number; previous: number }) => {
+    if (current > previous) return <TrendingUp className="h-4 w-4 text-emerald-600" />;
+    if (current < previous) return <TrendingDown className="h-4 w-4 text-red-600" />;
+    return <Minus className="h-4 w-4 text-muted-foreground" />;
+};
 
+export const ParentGrades: React.FC = () => {
     // Calculate stats
     const stats = useMemo(() => {
         const totalAverage = mockGrades.reduce((sum, g) => sum + g.averageScore, 0) / mockGrades.length;
@@ -121,6 +121,7 @@ export const ChildGrades: React.FC = () => {
     }, []);
 
     const currentSemester = mockSemesterHistory[0];
+    const previousSemester = mockSemesterHistory[1];
 
     return (
         <div className="space-y-6">
@@ -129,53 +130,32 @@ export const ChildGrades: React.FC = () => {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Nilai </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Anak</span>
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Nilai & </span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Rapor Anak</span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
                             <GraduationCap className="h-5 w-5" />
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Pantau perkembangan nilai akademik anak Anda
+                        Monitoring hasil belajar dan pencapaian akademik anak
                     </p>
 
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" className="gap-2">
+                    <Button
+                        variant="outline"
+                        className="gap-2"
+                    >
                         <Download className="h-4 w-4" />
                         Unduh Rapor
                     </Button>
                 </div>
             </div>
 
-            {/* Child Info Card */}
-            <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-white">
-                <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                        <div className="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold text-lg">
-                            {mockChildInfo.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
-                        </div>
-                        <div className="flex-1">
-                            <h3 className="font-semibold text-lg">{mockChildInfo.name}</h3>
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                <span>NIS: {mockChildInfo.nis}</span>
-                                <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                                    {mockChildInfo.class}
-                                </Badge>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-sm text-muted-foreground">Peringkat Kelas</p>
-                            <p className="text-2xl font-bold text-amber-600">#{currentSemester.rank}</p>
-                            <p className="text-xs text-muted-foreground">dari {currentSemester.totalStudents} siswa</p>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Rata-rata Nilai */}
                 <Card>
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between">
@@ -193,9 +173,36 @@ export const ChildGrades: React.FC = () => {
                                 <BarChart3 className="h-5 w-5 text-blue-800" />
                             </div>
                         </div>
+                        <div className="flex items-center gap-1 mt-2 text-xs">
+                            <TrendIcon current={currentSemester.averageScore} previous={previousSemester.averageScore} />
+                            <span className="text-muted-foreground">
+                                vs semester lalu ({previousSemester.averageScore})
+                            </span>
+                        </div>
                     </CardContent>
                 </Card>
 
+                {/* Peringkat */}
+                <Card>
+                    <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Peringkat Kelas</p>
+                                <p className="text-2xl font-bold text-amber-600 mt-1">
+                                    #{currentSemester.rank}
+                                </p>
+                            </div>
+                            <div className="p-3 bg-amber-100 rounded-full">
+                                <Award className="h-5 w-5 text-amber-600" />
+                            </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                            dari {currentSemester.totalStudents} siswa
+                        </p>
+                    </CardContent>
+                </Card>
+
+                {/* Nilai Tertinggi */}
                 <Card>
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between">
@@ -215,25 +222,7 @@ export const ChildGrades: React.FC = () => {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Perlu Perhatian</p>
-                                <p className="text-2xl font-bold text-amber-600 mt-1">
-                                    {stats.lowestSubject.averageScore}
-                                </p>
-                            </div>
-                            <div className="p-3 bg-amber-100 rounded-full">
-                                <Target className="h-5 w-5 text-amber-600" />
-                            </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2">
-                            {stats.lowestSubject.subject}
-                        </p>
-                    </CardContent>
-                </Card>
-
+                {/* Tuntas KKM */}
                 <Card>
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between">
@@ -244,7 +233,7 @@ export const ChildGrades: React.FC = () => {
                                 </p>
                             </div>
                             <div className="p-3 bg-green-100 rounded-full">
-                                <Award className="h-5 w-5 text-green-600" />
+                                <Target className="h-5 w-5 text-green-600" />
                             </div>
                         </div>
                         <Progress
@@ -268,6 +257,9 @@ export const ChildGrades: React.FC = () => {
                                 <CardDescription>Semester Ganjil TA 2025/2026</CardDescription>
                             </div>
                         </div>
+                        <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                            {mockGrades.length} Mata Pelajaran
+                        </Badge>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -282,6 +274,7 @@ export const ChildGrades: React.FC = () => {
                                     <th className="text-center p-4 font-medium text-sm w-24">UAS</th>
                                     <th className="text-center p-4 font-medium text-sm w-24">Rata-rata</th>
                                     <th className="text-center p-4 font-medium text-sm w-24">Predikat</th>
+                                    <th className="text-center p-4 font-medium text-sm w-20">KKM</th>
                                     <th className="text-center p-4 font-medium text-sm w-24">Status</th>
                                 </tr>
                             </thead>
@@ -320,6 +313,9 @@ export const ChildGrades: React.FC = () => {
                                                 {grade.grade}
                                             </Badge>
                                         </td>
+                                        <td className="p-4 text-center text-sm text-muted-foreground">
+                                            {grade.kkm}
+                                        </td>
                                         <td className="p-4 text-center">
                                             {grade.averageScore >= grade.kkm ? (
                                                 <Badge className="bg-green-100 text-green-700 border-green-200">
@@ -327,7 +323,7 @@ export const ChildGrades: React.FC = () => {
                                                 </Badge>
                                             ) : (
                                                 <Badge className="bg-red-100 text-red-700 border-red-200">
-                                                    Belum
+                                                    Belum Tuntas
                                                 </Badge>
                                             )}
                                         </td>
@@ -335,6 +331,29 @@ export const ChildGrades: React.FC = () => {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Summary Footer */}
+                    <div className="p-4 bg-muted/30 border-t">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="flex items-center gap-6">
+                                <div>
+                                    <p className="text-xs text-muted-foreground">Rata-rata Keseluruhan</p>
+                                    <p className={cn("text-xl font-bold", getScoreColor(stats.totalAverage, 75))}>
+                                        {stats.totalAverage}
+                                    </p>
+                                </div>
+                                <div className="h-8 w-px bg-border" />
+                                <div>
+                                    <p className="text-xs text-muted-foreground">Total Mata Pelajaran</p>
+                                    <p className="text-xl font-bold">{stats.totalSubjects}</p>
+                                </div>
+                            </div>
+                            <Button variant="outline" size="sm" className="gap-2">
+                                <Download className="h-4 w-4" />
+                                Export Nilai
+                            </Button>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -353,7 +372,7 @@ export const ChildGrades: React.FC = () => {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {mockSemesterHistory.map((semester, index) => (
                             <div
                                 key={`${semester.academicYear}-${semester.semester}`}
@@ -384,9 +403,45 @@ export const ChildGrades: React.FC = () => {
                                         <span className="text-sm text-muted-foreground">Peringkat</span>
                                         <span className="font-semibold">#{semester.rank}</span>
                                     </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm text-muted-foreground">Kehadiran</span>
+                                        <span className="font-semibold">{semester.attendance}%</span>
+                                    </div>
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Info Card */}
+            <Card className="bg-amber-50 border-amber-200">
+                <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                        <div className="p-2 bg-amber-100 rounded-lg">
+                            <GraduationCap className="h-5 w-5 text-amber-800" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-amber-900">Keterangan Predikat</h3>
+                            <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">A</Badge>
+                                    <span className="text-amber-800">90-100</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Badge className="bg-blue-100 text-blue-700 border-blue-200">B</Badge>
+                                    <span className="text-amber-800">80-89</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Badge className="bg-amber-100 text-amber-700 border-amber-200">C</Badge>
+                                    <span className="text-amber-800">70-79</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Badge className="bg-red-100 text-red-700 border-red-200">D</Badge>
+                                    <span className="text-amber-800">&lt; 70</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </CardContent>
             </Card>

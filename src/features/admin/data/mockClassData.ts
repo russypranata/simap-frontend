@@ -54,21 +54,5 @@ export const MOCK_CLASSES: Class[] = [
     ...generateClassesForYear('ay-2024-2025'),
     ...generateClassesForYear('ay-2025-2026'),
     ...generateClassesForYear('ay-2026-2027'),
-    
-    // Add some Peminatan classes for 2025/2026 to keep diversity
-    {
-        id: 'c-bio-11-ikh',
-        name: 'BIOLOGI XI PEM IKH',
-        grade: 11,
-        type: 'PEMINATAN',
-        academicYearId: 'ay-2025-2026',
-        homeroomTeacherId: 't-1',
-        homeroomTeacherName: 'Ahmad Dahlan',
-        capacity: 40,
-        totalStudents: 15,
-        peminatanCategory: 'IKH',
-        genderCategory: 'PUTRA',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    }
 ];
+
