@@ -1,5 +1,5 @@
-import { ParentDashboard } from '@/features/parent/pages/Dashboard';
+import { ParentDashboard } from "@/features/parent/pages/ParentDashboard";
 
-export default function ParentDashboardPage() {
+export default function Page() {
     return <ParentDashboard />;
 }

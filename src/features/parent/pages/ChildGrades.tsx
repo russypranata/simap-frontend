@@ -139,14 +139,7 @@ export const ChildGrades: React.FC = () => {
                     <p className="text-muted-foreground mt-1">
                         Pantau perkembangan nilai akademik anak Anda
                     </p>
-                    <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                            <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-sm font-medium text-blue-800">Semester Ganjil</span>
-                    </div>
+
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" className="gap-2">

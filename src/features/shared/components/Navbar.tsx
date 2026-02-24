@@ -25,7 +25,7 @@ import {
 import { useRole } from '@/app/context/RoleContext';
 
 import { NotificationBell } from './NotificationBell';
-import { NavbarBreadcrumb } from './NavbarBreadcrumb';
+import { ActiveAcademicYearBadge } from './ActiveAcademicYearBadge';
 import { User, LogOut, Calendar } from 'lucide-react';
 import { formatDate, getDayName } from '@/features/shared/utils/dateFormatter';
 import { getStudentProfile } from '@/features/student/services/studentProfileService';
@@ -105,9 +105,9 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
 
     return (
         <nav className="bg-card border-b">
-            <div className="flex h-16 items-center justify-between px-4">
+            <div className="flex h-16 items-center justify-between pl-2 pr-4">
                 <div className="flex items-center space-x-4">
-                    <NavbarBreadcrumb />
+                    <ActiveAcademicYearBadge />
                 </div>
 
                 <div className="flex items-center space-x-4">

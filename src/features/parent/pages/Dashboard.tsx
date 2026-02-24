@@ -103,12 +103,6 @@ export const ParentDashboard: React.FC = () => {
                     <p className="text-muted-foreground mt-1">
                         {greeting}, <span className="font-medium text-foreground">Bapak/Ibu {parentName}</span>
                     </p>
-                    <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                            <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 

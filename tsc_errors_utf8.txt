@@ -1,0 +1,1 @@
+﻿src/features/admin/pages/ClassDetail.tsx(81,48): error TS2304: Cannot find name 'academicYearService'.

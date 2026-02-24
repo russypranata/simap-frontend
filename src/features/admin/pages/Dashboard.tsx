@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { Shield, Calendar } from 'lucide-react';
+import { Shield, Calendar, Construction } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { getAdminProfile } from '@/features/admin/services/adminProfileService';
 
@@ -10,12 +10,11 @@ export const AdminDashboard: React.FC = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
 
     useEffect(() => {
-        // Fetch real name from profile service
         const fetchUserName = async () => {
             try {
                 const profile = await getAdminProfile();
                 if (profile && profile.name) {
-                    setUserName(profile.name); // Use full name
+                    setUserName(profile.name);
                 }
             } catch (error) {
                 console.error('Failed to fetch user name for dashboard:', error);
@@ -23,13 +22,10 @@ export const AdminDashboard: React.FC = () => {
         };
 
         fetchUserName();
-
-        // Update time every minute
         const timer = setInterval(() => setCurrentTime(new Date()), 60000);
         return () => clearInterval(timer);
     }, []);
 
-    // Get greeting based on time
     const greeting = useMemo(() => {
         const hour = currentTime.getHours();
         if (hour < 11) return 'Selamat pagi';
@@ -39,9 +35,9 @@ export const AdminDashboard: React.FC = () => {
     }, [currentTime]);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pb-2">
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
@@ -58,10 +54,10 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <p className="text-muted-foreground mt-1">
                         {greeting},{' '}
-                        <span className="font-medium text-foreground">
+                        <span className="font-semibold text-foreground">
                             {userName}
                         </span>
-                        !
+                        ! Selamat datang kembali di panel kontrol sistem.
                     </p>
                     <div className="flex items-center gap-3 mt-4">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
@@ -78,22 +74,21 @@ export const AdminDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Coming Soon Card */}
-            <Card>
-                <CardContent className="p-12 text-center">
-                    <div className="max-w-md mx-auto space-y-4">
-                        <div className="inline-flex p-4 bg-primary/10 rounded-full">
-                            <Shield className="h-12 w-12 text-primary" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-foreground">
-                            Fitur Segera Hadir
-                        </h2>
-                        <p className="text-muted-foreground">
-                            Fitur lengkap untuk manajemen Administrator sedang dalam tahap pengembangan. Sementara waktu, Anda dapat mengelola profil melalui menu Profil.
-                        </p>
+            {/* Coming Soon Placeholder */}
+            <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
+                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="p-4 bg-amber-100 rounded-full mb-4">
+                        <Construction className="h-10 w-10 text-amber-600" />
                     </div>
+                    <h2 className="text-xl font-bold text-slate-800 mb-2">
+                        Fitur Segera Hadir
+                    </h2>
+                    <p className="text-muted-foreground max-w-md">
+                        Dashboard Admin sedang dalam pengembangan. Statistik, ringkasan data, dan fitur monitoring akan segera tersedia.
+                    </p>
                 </CardContent>
             </Card>
         </div>
     );
 };
+

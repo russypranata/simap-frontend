@@ -1,5 +1,5 @@
-import { ParentAnnouncements } from '@/features/parent/pages/Announcements';
+import { ParentAnnouncements } from "@/features/parent/pages/ParentAnnouncements";
 
-export default function ParentAnnouncementsPage() {
+export default function Page() {
     return <ParentAnnouncements />;
 }

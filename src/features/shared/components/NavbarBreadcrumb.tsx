@@ -18,10 +18,16 @@ import {
     BookOpen,
     Trophy,
     Activity,
-    Wallet,
     Pencil,
     CircleDot,
-    ArrowLeft
+    ArrowLeft,
+    School,
+    Clock,
+    ArrowUpCircle,
+    UserCheck,
+    FileText,
+    Printer,
+    Briefcase,
 } from 'lucide-react';
 import {
     Breadcrumb,
@@ -34,54 +40,140 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 // Route configuration with labels and icons
-const routeConfig: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
-    // Dashboard
+interface RouteItem {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    isClickable?: boolean;
+    parent?: string;
+}
+
+const routeConfig: Record<string, RouteItem> = {
+    // Dashboard (generic fallback)
     dashboard: { label: 'Dashboard', icon: LayoutDashboard },
 
-    // Profile
-    profile: { label: 'Profil', icon: User },
+    // ── Non-clickable category groups ─────────────────────────────────────────
+    'curriculum-data': { label: 'Data Kurikulum', icon: BookOpen, isClickable: false },
+    'schedule-kbm': { label: 'Jadwal & KBM', icon: Calendar, isClickable: false },
+    'users-management': { label: 'Manajemen Pengguna', icon: Users, isClickable: false },
+    'class-mgmt': { label: 'Manajemen Kelas', icon: School, isClickable: false },
+    'class-management': { label: 'Manajemen Kelas', icon: School, isClickable: false },
+    'extracurricular-management': { label: 'Manajemen Ekskul', icon: Trophy, isClickable: false },
+    'users-student': { label: 'Data Siswa', icon: Users, isClickable: false },
+    'users-staff': { label: 'Data Pegawai', icon: Briefcase, isClickable: false },
+    'access-control': { label: 'Hak Akses', icon: Settings, isClickable: false },
+    'assessments': { label: 'Penilaian', icon: ClipboardList, isClickable: false },
+
+    // ── ROLE PARENT ───────────────────────────────────────────────────────────
+    // Parent category groups (non-clickable)
+    'parent:academic': { label: 'Akademik Anak', icon: GraduationCap, isClickable: false },
+    'parent:attendance': { label: 'Kehadiran Anak', icon: ClipboardList, isClickable: false },
+    'parent:settings': { label: 'Pengaturan', icon: Settings, isClickable: false },
+
+    // Parent pages
+    'parent:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
+    'parent:grades': { label: 'Nilai & Rapor', icon: GraduationCap },
+    'parent:schedule': { label: 'Jadwal Pelajaran', icon: Calendar },
+    'parent:achievements': { label: 'Prestasi', icon: Trophy },
+    'parent:behavior': { label: 'Catatan Perilaku', icon: ClipboardList },
+    'parent:announcements': { label: 'Pengumuman', icon: Bell },
+    'parent:profile': { label: 'Profil Saya', icon: User },
+    'parent:edit-profile': { label: 'Edit Profil', icon: Pencil },
+    'parent:change-password': { label: 'Ubah Kata Sandi', icon: Settings },
+
+    // Parent attendance sub-pages
+    'parent:morning': { label: 'Kehadiran Pagi', icon: Clock },
+    'parent:daily': { label: 'Presensi Harian', icon: ClipboardList },
+    'parent:subject': { label: 'Presensi Mapel', icon: BookOpen },
+    'parent:prayer': { label: 'Presensi Sholat', icon: Activity },
+    'parent:extracurricular': { label: 'Presensi Ekskul', icon: Trophy },
+
+    // ── ROLE STUDENT ──────────────────────────────────────────────────────────
+    'student:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
+    'student:kartu-pelajar': { label: 'Kartu Pelajar', icon: CreditCard },
+    'student:data-diri': { label: 'Data Diri', icon: User },
+    'student:grades': { label: 'Nilai & Rapor', icon: GraduationCap },
+    'student:attendance': { label: 'Kehadiran', icon: ClipboardList },
+    'student:schedule': { label: 'Jadwal Pelajaran', icon: Calendar },
+    'student:announcements': { label: 'Pengumuman', icon: Bell },
+    'student:achievements': { label: 'Prestasi', icon: Trophy },
+    'student:behavior': { label: 'Catatan Perilaku', icon: Activity },
+    'student:extracurricular': { label: 'Ekstrakurikuler', icon: Users },
+    'student:profile': { label: 'Profil Saya', icon: User },
+
+    // ── ROLE TEACHER ──────────────────────────────────────────────────────────
+    'teacher:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
+    'teacher:daftar-siswa': { label: 'Daftar Siswa', icon: Users },
+    'teacher:input-nilai': { label: 'Input Nilai', icon: GraduationCap },
+    'teacher:rekap-absensi': { label: 'Rekap Absensi', icon: ClipboardList },
+    'teacher:jadwal-mengajar': { label: 'Jadwal Mengajar', icon: Calendar },
+    'teacher:schedule': { label: 'Jadwal Mengajar', icon: Calendar },
+    'teacher:grades': { label: 'Nilai Siswa', icon: GraduationCap },
+    'teacher:journal': { label: 'Jurnal Mengajar', icon: BookOpen },
+    'teacher:student-behavior': { label: 'Catatan Perilaku', icon: ClipboardList },
+    'teacher:homeroom': { label: 'Wali Kelas', icon: School },
+    'teacher:picket': { label: 'Guru Piket', icon: Users },
+    'teacher:documents': { label: 'Administrasi', icon: FileText },
+    'teacher:announcements': { label: 'Pengumuman', icon: Bell },
+    'teacher:profile': { label: 'Profil', icon: User },
+
+    // ── ROLE ADMIN ────────────────────────────────────────────────────────────
+    'admin:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
+    'admin:academic-year': { label: 'Tahun Ajaran', icon: Calendar, parent: 'curriculum-data' },
+    'admin:class': { label: 'Daftar Kelas', icon: School, parent: 'class-management' },
+    'admin:promotion': { label: 'Kenaikan Kelas', icon: ArrowUpCircle, parent: 'class-management' },
+    'admin:placement': { label: 'Penempatan Kelas', icon: Users, parent: 'class-management' },
+    'admin:homeroom': { label: 'Wali Kelas', icon: UserCheck, parent: 'class-management' },
+    'admin:subject': { label: 'Mata Pelajaran', icon: BookOpen, parent: 'curriculum-data' },
+    'admin:schedule': { label: 'Jadwal Pelajaran', icon: Calendar, parent: 'schedule-kbm' },
+    'admin:calendar': { label: 'Kalender Akademik', icon: Calendar, parent: 'schedule-kbm' },
+    'admin:attendance': { label: 'Presensi', icon: ClipboardList, parent: 'schedule-kbm' },
+    'admin:time-slots': { label: 'Pengaturan Jam', icon: Clock, parent: 'curriculum-data' },
+    'admin:assessment': { label: 'Input Nilai', icon: FileText, parent: 'assessments' },
+    'admin:report-card': { label: 'Cetak Rapor', icon: Printer, parent: 'assessments' },
+    'admin:schedule-management': { label: 'Jadwal Pelajaran', icon: Calendar },
+    'admin:extracurricular': { label: 'Daftar Ekskul', icon: Trophy, parent: 'extracurricular-management' },
+    'admin:members': { label: 'Keanggotaan', icon: Users, parent: 'extracurricular-management' },
+    'admin:users': { label: 'Manajemen Pengguna', icon: Users, isClickable: false },
+    'admin:teachers': { label: 'Guru / Pendidik', icon: Users, parent: 'users-staff' },
+    'admin:staff': { label: 'Tendik / Staf', icon: Users, parent: 'users-staff' },
+    'admin:students': { label: 'Siswa Aktif', icon: GraduationCap, parent: 'users-student' },
+    'admin:parents': { label: 'Wali Murid', icon: Users, parent: 'users-student' },
+    'admin:ppdb': { label: 'PPDB / Calon', icon: Users, parent: 'users-student' },
+    'admin:mutation': { label: 'Mutasi', icon: Users, parent: 'users-student' },
+    'admin:alumni': { label: 'Alumni', icon: Trophy, parent: 'users-student' },
+    'admin:management': { label: 'Manajemen Pengguna', icon: Settings, parent: 'access-control' },
+    'admin:kelola-pengguna': { label: 'Kelola Pengguna', icon: Users, parent: 'users' },
+    'admin:profile': { label: 'Profil', icon: User },
+    'admin:settings': { label: 'Pengaturan', icon: Settings },
+    'admin:announcements': { label: 'Pengumuman', icon: Bell },
+
+    // ── EXTRACURRICULAR ADVISOR ───────────────────────────────────────────────
+    'extracurricular-advisor:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
+    'extracurricular-advisor:members': { label: 'Daftar Anggota', icon: Users },
+    'extracurricular-advisor:presensi': { label: 'Presensi Kegiatan', icon: ClipboardList },
+    'extracurricular-advisor:attendance': { label: 'Presensi Kegiatan', icon: ClipboardList },
+    'extracurricular-advisor:tutor-recap': { label: 'Rekap Tutor', icon: ClipboardList },
+    'extracurricular-advisor:tutors': { label: 'Tutor', icon: Users },
+    'extracurricular-advisor:profile': { label: 'Profil', icon: User },
+
+    // ── MUTAMAYIZIN ───────────────────────────────────────────────────────────
+    'mutamayizin-ekstrakurikuler': { label: 'Ekstrakurikuler', icon: Activity, isClickable: false },
+    'mutamayizin-coordinator:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
+    'mutamayizin-coordinator:achievements': { label: 'Prestasi', icon: Trophy },
+    'mutamayizin-coordinator:add': { label: 'Tambah', icon: Pencil },
+    'mutamayizin-coordinator:attendance': { label: 'Presensi Siswa', icon: ClipboardList, parent: 'mutamayizin-ekstrakurikuler' },
+    'mutamayizin-coordinator:tutor-recap': { label: 'Presensi Tutor', icon: ClipboardList, parent: 'mutamayizin-ekstrakurikuler' },
+    'mutamayizin-coordinator:members': { label: 'Anggota', icon: Users, parent: 'mutamayizin-ekstrakurikuler' },
+    'mutamayizin-coordinator:tutors': { label: 'Data Tutor', icon: Users, parent: 'mutamayizin-ekstrakurikuler' },
+    'mutamayizin-coordinator:profile': { label: 'Profil', icon: User },
+
+    // ── Generic fallbacks (used when no role match) ───────────────────────────
+    'new': { label: 'Tambah Baru', icon: Pencil },
     edit: { label: 'Edit', icon: Pencil },
-
-    // Student routes
-    'kartu-pelajar': { label: 'Kartu Pelajar', icon: CreditCard },
-    'data-diri': { label: 'Data Diri', icon: User },
-    grades: { label: 'Nilai Akademik', icon: GraduationCap },
-    attendance: { label: 'Presensi', icon: ClipboardList },
-    schedule: { label: 'Jadwal', icon: Calendar },
-    announcements: { label: 'Pengumuman', icon: Bell },
-    achievements: { label: 'Prestasi', icon: Trophy },
-    behavior: { label: 'Perilaku', icon: Activity },
-    extracurricular: { label: 'Ekstrakurikuler', icon: Users },
-
-    // Teacher routes
-    'daftar-siswa': { label: 'Daftar Siswa', icon: Users },
-    'input-nilai': { label: 'Input Nilai', icon: GraduationCap },
-    'rekap-absensi': { label: 'Rekap Absensi', icon: ClipboardList },
-    'jadwal-mengajar': { label: 'Jadwal Mengajar', icon: Calendar },
-
-    // Parent routes
-    'anak-saya': { label: 'Anak Saya', icon: Users },
-    'perkembangan': { label: 'Perkembangan', icon: Activity },
-    'pembayaran': { label: 'Pembayaran', icon: Wallet },
-
-    // Extracurricular routes
-    'ekstrakurikuler': { label: 'Ekstrakurikuler', icon: Users },
-    'members': { label: 'Anggota', icon: Users },
-    'anggota': { label: 'Anggota', icon: Users },
-    'presensi': { label: 'Presensi', icon: ClipboardList },
-    'tutor-recap': { label: 'Rekap Tutor', icon: ClipboardList },
-    'tutors': { label: 'Tutor', icon: Users },
-
-    // Mutamayizin routes
-    'mutamayizin': { label: 'Mutamayizin', icon: BookOpen },
-
-    // Admin routes
-    'kelola-pengguna': { label: 'Kelola Pengguna', icon: Users },
-    'pengaturan': { label: 'Pengaturan', icon: Settings },
-
-    // General
-    settings: { label: 'Pengaturan', icon: Settings },
     notifications: { label: 'Notifikasi', icon: Bell },
+    'pengaturan': { label: 'Pengaturan', icon: Settings },
+    'anggota': { label: 'Anggota', icon: Users },
+    'mutamayizin': { label: 'Mutamayizin', icon: BookOpen },
 };
 
 // Role-based segments to skip in breadcrumb display
@@ -94,71 +186,25 @@ const roleSegments = [
     'admin'
 ];
 
+
 interface BreadcrumbData {
     label: string;
     href: string;
     isLast: boolean;
     icon: React.ComponentType<{ className?: string }>;
+    isClickable: boolean;
 }
 
-export const NavbarBreadcrumb: React.FC = () => {
+export interface NavbarBreadcrumbProps {
+    items?: {
+        label: string;
+        href: string;
+        icon?: React.ComponentType<{ className?: string }>;
+    }[];
+}
+
+export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => {
     const pathname = usePathname();
-
-    // Generate breadcrumb items from pathname
-    const generateBreadcrumbs = (): BreadcrumbData[] => {
-        if (!pathname || pathname === '/') {
-            return [];
-        }
-
-        const segments = pathname.split('/').filter(Boolean);
-
-        // Filter out role-based segments
-        const filteredSegments = segments.filter(
-            segment => !roleSegments.includes(segment)
-        );
-
-        if (filteredSegments.length === 0) {
-            return [];
-        }
-
-        const breadcrumbs: BreadcrumbData[] = [];
-        let currentPath = '';
-
-        // Rebuild path with correct href
-        segments.forEach((segment) => {
-            currentPath += `/${segment}`;
-
-            // Only add to breadcrumbs if not a role segment
-            if (!roleSegments.includes(segment)) {
-                const config = routeConfig[segment];
-                const label = config?.label || formatSegmentLabel(segment);
-                const icon = config?.icon || CircleDot;
-                
-                // Preserve tab query param for attendance page
-                let href = currentPath;
-                if (segment === 'attendance') {
-                     const tabParam = new URLSearchParams(window.location.search).get('tab');
-                     if (tabParam) {
-                         href += `?tab=${tabParam}`;
-                     }
-                }
-
-                breadcrumbs.push({
-                    label,
-                    href,
-                    isLast: false,
-                    icon,
-                });
-            }
-        });
-
-        // Mark the last breadcrumb
-        if (breadcrumbs.length > 0) {
-            breadcrumbs[breadcrumbs.length - 1].isLast = true;
-        }
-
-        return breadcrumbs;
-    };
 
     // Format segment to readable label
     const formatSegmentLabel = (segment: string): string => {
@@ -172,6 +218,25 @@ export const NavbarBreadcrumb: React.FC = () => {
             return 'Detail';
         }
 
+        // Handle Academic Year IDs (ay-...)
+        if (segment.startsWith('ay-')) {
+            const parts = segment.split('-');
+            if (parts.length >= 3) {
+                return `T.A. ${parts[1]}/${parts[2]}`;
+            }
+            return 'Detail Tahun Ajaran';
+        }
+
+        // Handle Class IDs (c-...)
+        if (segment.startsWith('c-')) {
+            return 'Detail Kelas';
+        }
+
+        // Handle Subject IDs (subj-...)
+        if (segment.startsWith('subj-')) {
+            return 'Detail Mata Pelajaran';
+        }
+
         // Convert kebab-case to Title Case
         return segment
             .split('-')
@@ -179,9 +244,119 @@ export const NavbarBreadcrumb: React.FC = () => {
             .join(' ');
     };
 
+    // Generate breadcrumb items from pathname
+    const generateBreadcrumbs = (): BreadcrumbData[] => {
+        if (items) {
+             return items.map((item, index) => ({
+                label: item.label,
+                href: item.href,
+                isLast: index === items.length - 1,
+                icon: item.icon || CircleDot,
+                isClickable: true,
+            }));
+        }
+
+        if (!pathname || pathname === '/') {
+            return [];
+        }
+
+        const segments = pathname.split('/').filter(Boolean);
+
+        // Detect the current role from the first segment
+        const currentRole = roleSegments.find(r => segments.includes(r)) || '';
+
+        // Helper: resolve a segment to a config entry, role-aware
+        const resolveConfig = (segment: string): RouteItem | undefined => {
+            const roleKey = `${currentRole}:${segment}`;
+            return routeConfig[roleKey] ?? routeConfig[segment];
+        };
+
+        // Filter out role-based segments
+        const filteredSegments = segments.filter(
+            segment => !roleSegments.includes(segment)
+        );
+
+        if (filteredSegments.length === 0) {
+            return [];
+        }
+
+        const breadcrumbs: BreadcrumbData[] = [];
+        let currentPath = '';
+        let skippedLabel = '';
+
+        segments.forEach((segment, index) => {
+            currentPath += `/${segment}`;
+
+            // Only add to breadcrumbs if not a role segment
+            if (!roleSegments.includes(segment)) {
+                // Skip duplicate 'dashboard' label if already injected
+                if (segment === 'dashboard' && breadcrumbs.some(b => b.label === 'Dasbor')) {
+                    return;
+                }
+
+                // Smart Logic: skip ID segments when followed by 'edit', capture label
+                const isIdSegment = segment.match(/^[0-9a-f-]{36}$/i) || /^\d+$/.test(segment) || segment.startsWith('ay-') || segment.startsWith('c-') || segment.startsWith('subj-');
+                const nextSegment = segments[index + 1];
+
+                if (isIdSegment && nextSegment === 'edit') {
+                    if (segment.startsWith('ay-')) {
+                        const parts = segment.split('-');
+                        if (parts.length >= 3) skippedLabel = `T.A. ${parts[1]}/${parts[2]}`;
+                    } else {
+                        skippedLabel = formatSegmentLabel(segment);
+                    }
+                    return;
+                }
+
+                const config = resolveConfig(segment);
+
+                // Inject non-clickable parent category group if needed
+                if (config?.parent) {
+                    const parentConfig = routeConfig[config.parent];
+                    if (parentConfig && !breadcrumbs.some(b => b.label === parentConfig.label)) {
+                        breadcrumbs.push({
+                            label: parentConfig.label,
+                            href: '#',
+                            isLast: false,
+                            icon: parentConfig.icon,
+                            isClickable: false,
+                        });
+                    }
+                }
+
+                let label = config?.label || formatSegmentLabel(segment);
+
+                // For 'edit' segment following a skipped ID, merge the label
+                if (segment === 'edit' && skippedLabel) {
+                    label = `Edit ${skippedLabel.replace('Detail ', '')}`;
+                    skippedLabel = '';
+                }
+
+                const icon = config?.icon || CircleDot;
+
+                breadcrumbs.push({
+                    label,
+                    href: currentPath,
+                    isLast: false,
+                    icon,
+                    isClickable: config?.isClickable !== false,
+                });
+            }
+        });
+
+        // Mark the last breadcrumb
+        if (breadcrumbs.length > 0) {
+            breadcrumbs[breadcrumbs.length - 1].isLast = true;
+        }
+
+        return breadcrumbs;
+    };
+
+
     const breadcrumbs = generateBreadcrumbs();
 
     // If no breadcrumbs, show nothing
+
     if (breadcrumbs.length === 0) {
         return null;
     }
@@ -192,7 +367,7 @@ export const NavbarBreadcrumb: React.FC = () => {
         const Icon = crumb.icon;
 
         return (
-            <div className="flex items-center -ml-2">
+            <div className="flex items-center">
                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 rounded-md">
                     <Icon className="h-4 w-4 text-primary" />
                     <span className="text-sm font-medium text-primary">
@@ -205,21 +380,36 @@ export const NavbarBreadcrumb: React.FC = () => {
 
     // Mobile: Show back button style for small screens
     const MobileView = () => {
-        const previousBreadcrumb = breadcrumbs[breadcrumbs.length - 2];
+        // Find the nearest clickable ancestor
+        const clickableAncestors = breadcrumbs.slice(0, -1).reverse().filter(b => b.isClickable);
+        const backTarget = clickableAncestors[0];
+        const isBackEnabled = !!backTarget;
+        
         const currentBreadcrumb = breadcrumbs[breadcrumbs.length - 1];
         const CurrentIcon = currentBreadcrumb.icon;
 
         return (
             <div className="flex items-center gap-1.5">
-                <Link href={previousBreadcrumb.href}>
+                {isBackEnabled ? (
+                    <Link href={backTarget.href}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                    </Link>
+                ) : (
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
+                        disabled
+                        className="h-7 w-7 p-0 text-blue-800/50 cursor-not-allowed"
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
-                </Link>
+                )}
                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 rounded-md">
                     <CurrentIcon className="h-4 w-4 text-primary" />
                     <span className="text-sm font-medium text-primary">
@@ -232,23 +422,37 @@ export const NavbarBreadcrumb: React.FC = () => {
 
     // Desktop: Show full breadcrumb with enhanced styling
     const DesktopView = () => {
+        // Find nearest clickable ancestor for back button
+        const clickableAncestors = breadcrumbs.slice(0, -1).reverse().filter(b => b.isClickable);
+        const backTarget = clickableAncestors[0];
+        const isBackEnabled = !!backTarget;
         const hasHistory = breadcrumbs.length > 1;
-        const previousBreadcrumb = hasHistory ? breadcrumbs[breadcrumbs.length - 2] : null;
 
         return (
-            <div className="flex items-center gap-2 -ml-2">
-                {hasHistory && previousBreadcrumb && (
+            <div className="flex items-center gap-2">
+                {hasHistory && (
                     <>
-                        <Button
-                            variant="default"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg bg-blue-800 hover:bg-blue-900 text-white shadow-sm border-none transition-colors"
-                            asChild
-                        >
-                            <Link href={previousBreadcrumb.href}>
+                        {isBackEnabled ? (
+                            <Button
+                                variant="default"
+                                size="icon"
+                                className="h-8 w-8 rounded-lg bg-blue-800 hover:bg-blue-900 text-white shadow-sm border-none transition-colors"
+                                asChild
+                            >
+                                <Link href={backTarget.href}>
+                                    <ArrowLeft className="h-4 w-4" />
+                                </Link>
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="default"
+                                size="icon"
+                                disabled
+                                className="h-8 w-8 rounded-lg bg-blue-800/60 text-white/40 shadow-none border-none cursor-not-allowed"
+                            >
                                 <ArrowLeft className="h-4 w-4" />
-                            </Link>
-                        </Button>
+                            </Button>
+                        )}
                         <div className="h-5 w-[1px] bg-border/60 mx-1" />
                     </>
                 )}
@@ -272,6 +476,14 @@ export const NavbarBreadcrumb: React.FC = () => {
                                             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 rounded-md">
                                                 <Icon className="h-4 w-4 text-primary" />
                                                 <span className="text-sm font-medium text-primary">
+                                                    {crumb.label}
+                                                </span>
+                                            </div>
+                                        ) : !crumb.isClickable ? (
+                                            // Non-clickable label (Category)
+                                            <div className="flex items-center gap-1.5 px-2.5 py-1 text-muted-foreground/60 cursor-default">
+                                                <Icon className="h-4 w-4 opacity-40" />
+                                                <span className="text-sm font-medium">
                                                     {crumb.label}
                                                 </span>
                                             </div>

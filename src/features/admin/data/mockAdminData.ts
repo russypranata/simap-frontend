@@ -160,7 +160,7 @@ export const mockRecentActivities: RecentActivity[] = [
         id: 1,
         type: 'user_created',
         title: 'Pengguna Baru Ditambahkan',
-        description: 'Siswa baru: Ahmad Fadillah (XII IPA 2)',
+        description: 'Siswa baru: Ahmad Fadillah (XII-B)',
         timestamp: '2026-01-17T14:30:00Z',
         icon: 'user-plus',
     },

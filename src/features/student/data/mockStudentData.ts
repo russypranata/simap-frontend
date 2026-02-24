@@ -129,7 +129,7 @@ export const mockStudentProfile: StudentProfileData = {
     username: 'ahmad.fauzan',
     nis: '0012345678',
     nisn: '0107959840',
-    class: 'XII IPA 1',
+    class: 'XII-A',
     email: 'ahmad.fauzan@student.sman1.sch.id',
     phone: '08123456789',
     address: 'Jl. Merdeka No. 10, RT 05/RW 02, Kel. Sukamaju, Kec. Cikupa',

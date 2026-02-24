@@ -30,7 +30,9 @@ export const MutamayizinProfile: React.FC = () => {
         totalStudents: 0,
         activeStudents: 0,
         totalAchievements: 0,
-        avgStudentPerformance: 0,
+        totalEkskul: 0,
+        totalTutors: 0,
+        activeTutors: 0,
     });
     const [loading, setLoading] = useState(true);
 
@@ -91,18 +93,7 @@ export const MutamayizinProfile: React.FC = () => {
                     <p className="text-muted-foreground mt-1">
                         Kelola informasi profil dan pengaturan akun Anda
                     </p>
-                    <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                            <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">
-                                Tahun Ajaran 2025/2026
-                            </span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-sm font-medium text-blue-800">
-                            Semester Ganjil
-                        </span>
-                    </div>
+
                 </div>
             </div>
 
@@ -290,9 +281,9 @@ export const MutamayizinProfile: React.FC = () => {
                                 <Star className="h-5 w-5 text-purple-600" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">Rata-rata Nilai</p>
+                                <p className="text-xs text-muted-foreground">Ekstrakurikuler</p>
                                 <p className="text-lg font-semibold">
-                                    {stats.avgStudentPerformance}
+                                    {stats.totalEkskul}
                                 </p>
                             </div>
                         </div>

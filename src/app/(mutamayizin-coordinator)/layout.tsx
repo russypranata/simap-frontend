@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { MutamayizinLayout } from '@/features/mutamayizin/components/MutamayizinLayout';
 import { useRole } from '@/app/context/RoleContext';
+import { AcademicYearProvider } from '@/context/AcademicYearContext';
 
 export default function MutamayizinCoordinatorRouteLayout({
     children,
@@ -49,5 +50,9 @@ export default function MutamayizinCoordinatorRouteLayout({
         return null;
     }
 
-    return <MutamayizinLayout>{children}</MutamayizinLayout>;
+    return (
+        <AcademicYearProvider>
+            <MutamayizinLayout>{children}</MutamayizinLayout>
+        </AcademicYearProvider>
+    );
 }
