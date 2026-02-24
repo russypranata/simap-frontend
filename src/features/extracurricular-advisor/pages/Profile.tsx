@@ -84,10 +84,10 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
+                            <span className="bg-linear-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
                                 Profil{' '}
                             </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
+                            <span className="bg-linear-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
                                 Saya
                             </span>
                         </h1>
@@ -118,7 +118,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                 <User className="h-5 w-5" />
                             </div>
                             <div>
@@ -331,7 +331,7 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
             <Card className="gap-0">
                 <CardHeader className="pb-4">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                             <BarChart3 className="h-5 w-5" />
                         </div>
                         <div>
