@@ -17,7 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useAcademicYear } from "@/context/AcademicYearContext";
+
 import {
     mutamayizinService,
     type MutamayizinDashboardStats,
@@ -43,7 +43,7 @@ const DashboardSkeleton: React.FC = () => (
 
 export const MutamayizinDashboard: React.FC = () => {
     const router = useRouter();
-    const { academicYear } = useAcademicYear();
+
 
     const [isLoading, setIsLoading] = useState(true);
     const [userName, setUserName] = useState("Koordinator Program Mutamayizin");
@@ -116,14 +116,7 @@ export const MutamayizinDashboard: React.FC = () => {
                     <p className="text-muted-foreground mt-1">
                         Selamat datang, <span className="font-medium text-foreground">{userName}</span>
                     </p>
-                    <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                            <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Tahun Ajaran {academicYear.academicYear}</span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-sm font-medium text-blue-800">Semester {academicYear.label}</span>
-                    </div>
+
                 </div>
 
                 <div className="flex items-center gap-2">

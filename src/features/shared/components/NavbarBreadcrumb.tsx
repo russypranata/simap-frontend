@@ -27,6 +27,7 @@ import {
     UserCheck,
     FileText,
     Printer,
+    Briefcase,
 } from 'lucide-react';
 import {
     Breadcrumb,
@@ -47,8 +48,8 @@ interface RouteItem {
 }
 
 const routeConfig: Record<string, RouteItem> = {
-    // Dashboard
-    dashboard: { label: 'Dasbor', icon: LayoutDashboard },
+    // Dashboard (generic fallback)
+    dashboard: { label: 'Dashboard', icon: LayoutDashboard },
 
     // ── Non-clickable category groups ─────────────────────────────────────────
     'curriculum-data': { label: 'Data Kurikulum', icon: BookOpen, isClickable: false },
@@ -56,6 +57,11 @@ const routeConfig: Record<string, RouteItem> = {
     'users-management': { label: 'Manajemen Pengguna', icon: Users, isClickable: false },
     'class-mgmt': { label: 'Manajemen Kelas', icon: School, isClickable: false },
     'class-management': { label: 'Manajemen Kelas', icon: School, isClickable: false },
+    'extracurricular-management': { label: 'Manajemen Ekskul', icon: Trophy, isClickable: false },
+    'users-student': { label: 'Data Siswa', icon: Users, isClickable: false },
+    'users-staff': { label: 'Data Pegawai', icon: Briefcase, isClickable: false },
+    'access-control': { label: 'Hak Akses', icon: Settings, isClickable: false },
+    'assessments': { label: 'Penilaian', icon: ClipboardList, isClickable: false },
 
     // ── ROLE PARENT ───────────────────────────────────────────────────────────
     // Parent category groups (non-clickable)
@@ -64,7 +70,7 @@ const routeConfig: Record<string, RouteItem> = {
     'parent:settings': { label: 'Pengaturan', icon: Settings, isClickable: false },
 
     // Parent pages
-    'parent:dashboard': { label: 'Dasbor', icon: LayoutDashboard },
+    'parent:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
     'parent:grades': { label: 'Nilai & Rapor', icon: GraduationCap },
     'parent:schedule': { label: 'Jadwal Pelajaran', icon: Calendar },
     'parent:achievements': { label: 'Prestasi', icon: Trophy },
@@ -77,67 +83,86 @@ const routeConfig: Record<string, RouteItem> = {
     // Parent attendance sub-pages
     'parent:morning': { label: 'Kehadiran Pagi', icon: Clock },
     'parent:daily': { label: 'Presensi Harian', icon: ClipboardList },
-    'parent:subject': { label: 'Presensi Per Mapel', icon: BookOpen },
+    'parent:subject': { label: 'Presensi Mapel', icon: BookOpen },
     'parent:prayer': { label: 'Presensi Sholat', icon: Activity },
     'parent:extracurricular': { label: 'Presensi Ekskul', icon: Trophy },
 
     // ── ROLE STUDENT ──────────────────────────────────────────────────────────
+    'student:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
     'student:kartu-pelajar': { label: 'Kartu Pelajar', icon: CreditCard },
     'student:data-diri': { label: 'Data Diri', icon: User },
-    'student:grades': { label: 'Nilai Akademik', icon: GraduationCap },
-    'student:attendance': { label: 'Presensi', icon: ClipboardList },
-    'student:schedule': { label: 'Jadwal', icon: Calendar },
+    'student:grades': { label: 'Nilai & Rapor', icon: GraduationCap },
+    'student:attendance': { label: 'Kehadiran', icon: ClipboardList },
+    'student:schedule': { label: 'Jadwal Pelajaran', icon: Calendar },
     'student:announcements': { label: 'Pengumuman', icon: Bell },
     'student:achievements': { label: 'Prestasi', icon: Trophy },
-    'student:behavior': { label: 'Perilaku', icon: Activity },
+    'student:behavior': { label: 'Catatan Perilaku', icon: Activity },
     'student:extracurricular': { label: 'Ekstrakurikuler', icon: Users },
-    'student:profile': { label: 'Profil', icon: User },
+    'student:profile': { label: 'Profil Saya', icon: User },
 
     // ── ROLE TEACHER ──────────────────────────────────────────────────────────
+    'teacher:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
     'teacher:daftar-siswa': { label: 'Daftar Siswa', icon: Users },
     'teacher:input-nilai': { label: 'Input Nilai', icon: GraduationCap },
     'teacher:rekap-absensi': { label: 'Rekap Absensi', icon: ClipboardList },
     'teacher:jadwal-mengajar': { label: 'Jadwal Mengajar', icon: Calendar },
     'teacher:schedule': { label: 'Jadwal Mengajar', icon: Calendar },
-    'teacher:grades': { label: 'Input Nilai', icon: GraduationCap },
+    'teacher:grades': { label: 'Nilai Siswa', icon: GraduationCap },
+    'teacher:journal': { label: 'Jurnal Mengajar', icon: BookOpen },
+    'teacher:student-behavior': { label: 'Catatan Perilaku', icon: ClipboardList },
+    'teacher:homeroom': { label: 'Wali Kelas', icon: School },
+    'teacher:picket': { label: 'Guru Piket', icon: Users },
+    'teacher:documents': { label: 'Administrasi', icon: FileText },
+    'teacher:announcements': { label: 'Pengumuman', icon: Bell },
     'teacher:profile': { label: 'Profil', icon: User },
 
     // ── ROLE ADMIN ────────────────────────────────────────────────────────────
+    'admin:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
     'admin:academic-year': { label: 'Tahun Ajaran', icon: Calendar, parent: 'curriculum-data' },
     'admin:class': { label: 'Daftar Kelas', icon: School, parent: 'class-management' },
     'admin:promotion': { label: 'Kenaikan Kelas', icon: ArrowUpCircle, parent: 'class-management' },
     'admin:placement': { label: 'Penempatan Kelas', icon: Users, parent: 'class-management' },
     'admin:homeroom': { label: 'Wali Kelas', icon: UserCheck, parent: 'class-management' },
     'admin:subject': { label: 'Mata Pelajaran', icon: BookOpen, parent: 'curriculum-data' },
-    'admin:users': { label: 'Manajemen Pengguna', icon: Users, isClickable: false },
-    'admin:teachers': { label: 'Guru & Staff', icon: Users, parent: 'users' },
-    'admin:students': { label: 'Data Siswa', icon: GraduationCap, parent: 'users' },
-    'admin:parents': { label: 'Wali Murid', icon: Users, parent: 'users' },
-    'admin:kelola-pengguna': { label: 'Kelola Pengguna', icon: Users, parent: 'users' },
+    'admin:schedule': { label: 'Jadwal Pelajaran', icon: Calendar, parent: 'schedule-kbm' },
     'admin:calendar': { label: 'Kalender Akademik', icon: Calendar, parent: 'schedule-kbm' },
-    'admin:schedule-management': { label: 'Jadwal Pelajaran', icon: Calendar },
+    'admin:attendance': { label: 'Presensi', icon: ClipboardList, parent: 'schedule-kbm' },
     'admin:time-slots': { label: 'Pengaturan Jam', icon: Clock, parent: 'curriculum-data' },
-    'admin:assessment': { label: 'Input Nilai', icon: FileText },
-    'admin:report-card': { label: 'Cetak Rapor', icon: Printer },
+    'admin:assessment': { label: 'Input Nilai', icon: FileText, parent: 'assessments' },
+    'admin:report-card': { label: 'Cetak Rapor', icon: Printer, parent: 'assessments' },
+    'admin:schedule-management': { label: 'Jadwal Pelajaran', icon: Calendar },
+    'admin:extracurricular': { label: 'Daftar Ekskul', icon: Trophy, parent: 'extracurricular-management' },
+    'admin:members': { label: 'Keanggotaan', icon: Users, parent: 'extracurricular-management' },
+    'admin:users': { label: 'Manajemen Pengguna', icon: Users, isClickable: false },
+    'admin:teachers': { label: 'Guru / Pendidik', icon: Users, parent: 'users-staff' },
+    'admin:staff': { label: 'Tendik / Staf', icon: Users, parent: 'users-staff' },
+    'admin:students': { label: 'Siswa Aktif', icon: GraduationCap, parent: 'users-student' },
+    'admin:parents': { label: 'Wali Murid', icon: Users, parent: 'users-student' },
+    'admin:ppdb': { label: 'PPDB / Calon', icon: Users, parent: 'users-student' },
+    'admin:mutation': { label: 'Mutasi', icon: Users, parent: 'users-student' },
+    'admin:alumni': { label: 'Alumni', icon: Trophy, parent: 'users-student' },
+    'admin:management': { label: 'Manajemen Pengguna', icon: Settings, parent: 'access-control' },
+    'admin:kelola-pengguna': { label: 'Kelola Pengguna', icon: Users, parent: 'users' },
     'admin:profile': { label: 'Profil', icon: User },
     'admin:settings': { label: 'Pengaturan', icon: Settings },
     'admin:announcements': { label: 'Pengumuman', icon: Bell },
-    'admin:dashboard': { label: 'Dasbor', icon: LayoutDashboard },
 
     // ── EXTRACURRICULAR ADVISOR ───────────────────────────────────────────────
-    'extracurricular-advisor:members': { label: 'Anggota', icon: Users },
-    'extracurricular-advisor:presensi': { label: 'Presensi', icon: ClipboardList },
+    'extracurricular-advisor:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
+    'extracurricular-advisor:members': { label: 'Daftar Anggota', icon: Users },
+    'extracurricular-advisor:presensi': { label: 'Presensi Kegiatan', icon: ClipboardList },
+    'extracurricular-advisor:attendance': { label: 'Presensi Kegiatan', icon: ClipboardList },
     'extracurricular-advisor:tutor-recap': { label: 'Rekap Tutor', icon: ClipboardList },
     'extracurricular-advisor:tutors': { label: 'Tutor', icon: Users },
-    'extracurricular-advisor:dashboard': { label: 'Dasbor', icon: LayoutDashboard },
+    'extracurricular-advisor:profile': { label: 'Profil', icon: User },
 
     // ── MUTAMAYIZIN ───────────────────────────────────────────────────────────
     'mutamayizin-ekstrakurikuler': { label: 'Ekstrakurikuler', icon: Activity, isClickable: false },
-    'mutamayizin-coordinator:dashboard': { label: 'Dasbor', icon: LayoutDashboard },
+    'mutamayizin-coordinator:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
     'mutamayizin-coordinator:achievements': { label: 'Prestasi', icon: Trophy },
     'mutamayizin-coordinator:add': { label: 'Tambah', icon: Pencil },
     'mutamayizin-coordinator:attendance': { label: 'Presensi Siswa', icon: ClipboardList, parent: 'mutamayizin-ekstrakurikuler' },
-    'mutamayizin-coordinator:tutor-recap': { label: 'Rekap Tutor', icon: ClipboardList, parent: 'mutamayizin-ekstrakurikuler' },
+    'mutamayizin-coordinator:tutor-recap': { label: 'Presensi Tutor', icon: ClipboardList, parent: 'mutamayizin-ekstrakurikuler' },
     'mutamayizin-coordinator:members': { label: 'Anggota', icon: Users, parent: 'mutamayizin-ekstrakurikuler' },
     'mutamayizin-coordinator:tutors': { label: 'Data Tutor', icon: Users, parent: 'mutamayizin-ekstrakurikuler' },
     'mutamayizin-coordinator:profile': { label: 'Profil', icon: User },

@@ -55,9 +55,9 @@ export const mutamayizinService = {
     // Dashboard related endpoints
     getDashboardStats: async (): Promise<MutamayizinDashboardStats> => {
         return {
-            totalStudents: 28,
-            activeStudents: 27,
-            totalAchievements: 21,
+            totalStudents: 12,
+            activeStudents: 10,
+            totalAchievements: 22,
             totalEkskul: 8,
             totalTutors: 8,
             activeTutors: 6,
