@@ -34,7 +34,7 @@ export const MutamayizinSidebar: React.FC = () => {
             icon: Star,
             subItems: [
                 {
-                    title: "Presensi",
+                    title: "Presensi Siswa",
                     href: "/mutamayizin-coordinator/attendance",
                     icon: CalendarCheck,
                 },

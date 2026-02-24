@@ -79,7 +79,7 @@ const routeConfig: Record<string, RouteItem> = {
     'parent:daily': { label: 'Presensi Harian', icon: ClipboardList },
     'parent:subject': { label: 'Presensi Per Mapel', icon: BookOpen },
     'parent:prayer': { label: 'Presensi Sholat', icon: Activity },
-    'parent:extracurricular': { label: 'Ekstrakurikuler', icon: Trophy },
+    'parent:extracurricular': { label: 'Presensi Ekskul', icon: Trophy },
 
     // ── ROLE STUDENT ──────────────────────────────────────────────────────────
     'student:kartu-pelajar': { label: 'Kartu Pelajar', icon: CreditCard },
@@ -132,7 +132,15 @@ const routeConfig: Record<string, RouteItem> = {
     'extracurricular-advisor:dashboard': { label: 'Dasbor', icon: LayoutDashboard },
 
     // ── MUTAMAYIZIN ───────────────────────────────────────────────────────────
+    'mutamayizin-ekstrakurikuler': { label: 'Ekstrakurikuler', icon: Activity, isClickable: false },
     'mutamayizin-coordinator:dashboard': { label: 'Dasbor', icon: LayoutDashboard },
+    'mutamayizin-coordinator:achievements': { label: 'Prestasi', icon: Trophy },
+    'mutamayizin-coordinator:add': { label: 'Tambah', icon: Pencil },
+    'mutamayizin-coordinator:attendance': { label: 'Presensi Siswa', icon: ClipboardList, parent: 'mutamayizin-ekstrakurikuler' },
+    'mutamayizin-coordinator:tutor-recap': { label: 'Rekap Tutor', icon: ClipboardList, parent: 'mutamayizin-ekstrakurikuler' },
+    'mutamayizin-coordinator:members': { label: 'Anggota', icon: Users, parent: 'mutamayizin-ekstrakurikuler' },
+    'mutamayizin-coordinator:tutors': { label: 'Data Tutor', icon: Users, parent: 'mutamayizin-ekstrakurikuler' },
+    'mutamayizin-coordinator:profile': { label: 'Profil', icon: User },
 
     // ── Generic fallbacks (used when no role match) ───────────────────────────
     'new': { label: 'Tambah Baru', icon: Pencil },

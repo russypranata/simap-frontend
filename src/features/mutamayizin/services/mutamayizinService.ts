@@ -8,7 +8,25 @@ export interface MutamayizinDashboardStats {
     totalStudents: number;
     activeStudents: number;
     totalAchievements: number;
-    avgStudentPerformance: number;
+    totalEkskul: number;
+    totalTutors: number;
+    activeTutors: number;
+}
+
+export interface RecentAchievement {
+    id: number;
+    studentName: string;
+    competitionName: string;
+    rank: string;
+    level: string;
+    date: string;
+}
+
+export interface EkskulSummary {
+    name: string;
+    memberCount: number;
+    tutorName: string;
+    lastActivity: string;
 }
 
 export interface MutamayizinStudent {
@@ -36,26 +54,40 @@ export interface MutamayizinProfileData {
 export const mutamayizinService = {
     // Dashboard related endpoints
     getDashboardStats: async (): Promise<MutamayizinDashboardStats> => {
-        // Placeholder implementation
-        // const response = await fetch(`${API_BASE_URL}/mutamayizin/dashboard/stats`);
-        // if (!response.ok) throw new Error("Failed to fetch dashboard stats");
-        // return response.json();
-
-        // Return mock data for now
         return {
             totalStudents: 28,
             activeStudents: 27,
-            totalAchievements: 15,
-            avgStudentPerformance: 87
+            totalAchievements: 21,
+            totalEkskul: 8,
+            totalTutors: 8,
+            activeTutors: 6,
         };
     },
 
-    getProfileData: async (): Promise<MutamayizinProfileData> => {
-        // const response = await fetch(`${API_BASE_URL}/mutamayizin/profile`);
-        // if (!response.ok) throw new Error("Failed to fetch profile data");
-        // return response.json();
+    getRecentAchievements: async (): Promise<RecentAchievement[]> => {
+        return [
+            { id: 1, studentName: "Ahmad Rizki", competitionName: "Olimpiade Matematika", rank: "Juara 1", level: "Provinsi", date: "2024-11-15" },
+            { id: 2, studentName: "Siti Nabila", competitionName: "Lomba Pidato Bahasa Inggris", rank: "Juara 2", level: "Kabupaten", date: "2024-10-20" },
+            { id: 3, studentName: "Muhammad Fajar", competitionName: "Kompetisi Robotika", rank: "Juara 1", level: "Nasional", date: "2024-09-10" },
+            { id: 4, studentName: "Rina Amelia", competitionName: "Lomba Karya Tulis Ilmiah", rank: "Juara 3", level: "Nasional", date: "2024-08-25" },
+            { id: 5, studentName: "Budi Santoso", competitionName: "Lomba Futsal", rank: "Juara 1", level: "Provinsi", date: "2024-07-18" },
+        ];
+    },
 
-        // Return mock data for now
+    getEkskulSummary: async (): Promise<EkskulSummary[]> => {
+        return [
+            { name: "Pramuka", memberCount: 8, tutorName: "Ahmad Fauzi, S.Pd", lastActivity: "2024-11-22" },
+            { name: "Futsal", memberCount: 6, tutorName: "Budi Santoso, S.Kom", lastActivity: "2024-11-20" },
+            { name: "PMR", memberCount: 5, tutorName: "Eka Pertiwi, S.Pd", lastActivity: "2024-11-19" },
+            { name: "Seni Tari", memberCount: 4, tutorName: "Citra Dewi, S.Sn", lastActivity: "2024-11-18" },
+            { name: "Robotik", memberCount: 3, tutorName: "Fajar Nugraha, S.Kom", lastActivity: "2024-11-15" },
+            { name: "English Club", memberCount: 4, tutorName: "Gita Savitri, S.Pd", lastActivity: "2024-11-14" },
+            { name: "Basket", memberCount: 5, tutorName: "Budi Santoso, S.Kom", lastActivity: "2024-11-13" },
+            { name: "Paskibra", memberCount: 3, tutorName: "Dedi Kurniawan, S.Pd", lastActivity: "2024-11-10" },
+        ];
+    },
+
+    getProfileData: async (): Promise<MutamayizinProfileData> => {
         return {
             name: "Dr. Fatimah Zahra, M.Pd.I",
             email: "fatimah.zahra@alfityan.sch.id",
@@ -76,31 +108,19 @@ export const mutamayizinService = {
     },
 
     addStudent: async (studentData: any) => {
-        // const response = await fetch(`${API_BASE_URL}/mutamayizin/students`, {
-        //     method: "POST",
-        //     body: JSON.stringify(studentData)
-        // });
         return { success: true };
     },
 
     deleteStudent: async (studentId: number) => {
-        // const response = await fetch(`${API_BASE_URL}/mutamayizin/students/${studentId}`, {
-        //     method: "DELETE"
-        // });
         return { success: true };
     },
 
     // Achievement endpoints
     getAchievements: async (filter: any) => {
-        // const response = await fetch(`${API_BASE_URL}/mutamayizin/achievements`);
         return [];
     },
 
     addAchievement: async (data: any) => {
-        // const response = await fetch(`${API_BASE_URL}/mutamayizin/achievements`, {
-        //     method: "POST",
-        //     body: JSON.stringify(data)
-        // });
         return { success: true };
     }
 };

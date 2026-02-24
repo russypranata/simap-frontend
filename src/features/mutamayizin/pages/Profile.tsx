@@ -30,7 +30,9 @@ export const MutamayizinProfile: React.FC = () => {
         totalStudents: 0,
         activeStudents: 0,
         totalAchievements: 0,
-        avgStudentPerformance: 0,
+        totalEkskul: 0,
+        totalTutors: 0,
+        activeTutors: 0,
     });
     const [loading, setLoading] = useState(true);
 
@@ -290,9 +292,9 @@ export const MutamayizinProfile: React.FC = () => {
                                 <Star className="h-5 w-5 text-purple-600" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">Rata-rata Nilai</p>
+                                <p className="text-xs text-muted-foreground">Ekstrakurikuler</p>
                                 <p className="text-lg font-semibold">
-                                    {stats.avgStudentPerformance}
+                                    {stats.totalEkskul}
                                 </p>
                             </div>
                         </div>

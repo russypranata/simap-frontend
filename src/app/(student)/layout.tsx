@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { StudentLayout } from '@/features/student/components/StudentLayout';
 import { useRole } from '@/app/context/RoleContext';
+import { AcademicYearProvider } from '@/context/AcademicYearContext';
 
 export default function StudentRouteLayout({
   children,
@@ -49,5 +50,9 @@ export default function StudentRouteLayout({
     return null;
   }
 
-  return <StudentLayout>{children}</StudentLayout>;
+  return (
+    <AcademicYearProvider>
+      <StudentLayout>{children}</StudentLayout>
+    </AcademicYearProvider>
+  );
 }

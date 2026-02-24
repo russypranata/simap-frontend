@@ -64,27 +64,36 @@ export const ParentSidebar: React.FC = () => {
                 {
                     title: "Kehadiran Pagi",
                     href: "/parent/attendance/morning",
-                    icon: Sun, // Changed icon for Morning Attendance
+                    icon: Sun,
                 },
                 {
                     title: "Presensi Harian",
                     href: "/parent/attendance/daily",
-                    icon: CalendarCheck, // New Icon for Daily Attendance
+                    icon: CalendarCheck,
                 },
                 {
                     title: "Presensi Mapel",
                     href: "/parent/attendance/subject",
-                    icon: CheckCircle, // Kept CheckCircle for Subject Attendance
+                    icon: CheckCircle,
                 },
                 {
                     title: "Presensi Sholat",
                     href: "/parent/attendance/prayer",
                     icon: Moon,
                 },
+            ],
+        },
+        // Ekstrakurikuler Group
+        {
+            title: "Ekstrakurikuler",
+            href: "/parent/attendance/extracurricular",
+            icon: Trophy,
+            isGroup: true,
+            subItems: [
                 {
-                    title: "Ekstrakurikuler",
+                    title: "Presensi Ekskul",
                     href: "/parent/attendance/extracurricular",
-                    icon: Trophy,
+                    icon: CheckCircle,
                 },
             ],
         },

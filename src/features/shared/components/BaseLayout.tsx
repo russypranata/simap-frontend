@@ -95,7 +95,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
                     {/* Page content - only this area can scroll */}
                     <main className="flex-1 overflow-y-auto overflow-x-auto pt-16">
                         <div className="min-h-full p-6">
-                            <div className="mb-6">
+                            <div className="mb-4">
                                 <NavbarBreadcrumb />
                             </div>
                             {children}
