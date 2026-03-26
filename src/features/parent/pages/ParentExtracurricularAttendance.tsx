@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
     Card,
     CardContent,
@@ -9,8 +10,25 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     Calendar,
     Trophy,
@@ -20,100 +38,212 @@ import {
     CheckCircle,
     Star,
     Award,
-    ChevronRight,
     User,
+    Activity,
+    ChevronRight,
+    ChevronLeft,
+    Filter,
+    SlidersHorizontal,
+    Loader2,
+    RefreshCw,
+    AlertTriangle,
+    RotateCcw,
+    Check,
+    X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// Types
-interface Extracurricular {
-    id: number;
-    name: string;
-    category: string;
-    schedule: string;
-    time: string;
-    location: string;
-    advisor: string;
-    members: number;
-    status: "active" | "inactive";
-    attendanceRate: number;
-    joinDate: string;
-    achievements?: string[];
-}
-
-interface ExtracurricularAttendance {
-    id: number;
-    date: string;
-    activity: string;
-    status: "hadir" | "izin" | "alpa";
-}
-
-// Mock data
-const mockExtracurriculars: Extracurricular[] = [
-    {
-        id: 1,
-        name: "Pramuka",
-        category: "Kepramukaan",
-        schedule: "Jumat",
-        time: "14:00 - 16:00",
-        location: "Lapangan Sekolah",
-        advisor: "Pak Ahmad Fauzi",
-        members: 45,
-        status: "active",
-        attendanceRate: 92,
-        joinDate: "2023-07-15",
-        achievements: ["Juara 2 Jambore Tingkat Kota 2024", "Best Team Camping 2025"],
-    },
-    {
-        id: 2,
-        name: "Basket",
-        category: "Olahraga",
-        schedule: "Selasa & Kamis",
-        time: "15:00 - 17:00",
-        location: "Lapangan Basket",
-        advisor: "Pak Dedi Kurniawan",
-        members: 20,
-        status: "active",
-        attendanceRate: 88,
-        joinDate: "2024-08-01",
-        achievements: ["Juara 1 Turnamen Antar SMA 2025"],
-    },
-];
-
-const mockRecentAttendance: ExtracurricularAttendance[] = [
-    { id: 1, date: "2026-01-10", activity: "Pramuka - Latihan Rutin", status: "hadir" },
-    { id: 2, date: "2026-01-09", activity: "Basket - Latihan", status: "hadir" },
-    { id: 3, date: "2026-01-07", activity: "Basket - Latihan", status: "hadir" },
-    { id: 4, date: "2026-01-03", activity: "Pramuka - Latihan Rutin", status: "izin" },
-    { id: 5, date: "2025-12-26", activity: "Basket - Latihan", status: "hadir" },
-];
+import { useParentExtracurricularAttendance } from "../hooks/useParentExtracurricularAttendance";
+import type { ExtracurricularStatus } from "../services/parentExtracurricularAttendanceService";
 
 // Helper functions
-const getStatusConfig = (status: ExtracurricularAttendance["status"]) => {
+const getStatusConfig = (status: ExtracurricularStatus) => {
     const configs = {
-        hadir: { label: "Hadir", color: "bg-green-100 text-green-700 border-green-200" },
-        izin: { label: "Izin", color: "bg-blue-100 text-blue-700 border-blue-200" },
-        alpa: { label: "Alpa", color: "bg-red-100 text-red-700 border-red-200" },
+        hadir: { label: "Hadir", color: "bg-green-50 text-green-700 border-green-200" },
+        izin: { label: "Izin", color: "bg-blue-50 text-blue-700 border-blue-200" },
+        alpa: { label: "Alpa", color: "bg-red-50 text-red-700 border-red-200" },
     };
     return configs[status];
 };
 
-const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-        "Kepramukaan": "bg-amber-100 text-amber-800 border-amber-200",
-        "Olahraga": "bg-blue-100 text-blue-800 border-blue-200",
-        "Seni": "bg-pink-100 text-pink-800 border-pink-200",
-        "Akademik": "bg-purple-100 text-purple-800 border-purple-200",
-        "Teknologi": "bg-cyan-100 text-cyan-800 border-cyan-200",
-    };
-    return colors[category] || "bg-gray-100 text-gray-800 border-gray-200";
+// Skeleton Loading Component
+const ParentExtracurricularSkeleton: React.FC = () => {
+    return (
+        <div className="space-y-6 animate-in fade-in duration-500">
+            {/* Header Skeleton */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-72" />
+                        <Skeleton className="h-8 w-8 rounded-full" />
+                    </div>
+                    <Skeleton className="h-4 w-56" />
+                </div>
+            </div>
+
+            {/* Summary Stats Skeleton */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="group relative overflow-hidden rounded-xl bg-white shadow-sm">
+                        <div className="px-5 py-4 pl-6 flex items-center gap-4">
+                            <div className="relative flex-shrink-0">
+                                <Skeleton className="w-11 h-11 rounded-xl" />
+                            </div>
+                            <div className="min-w-0 flex-1 space-y-2">
+                                <Skeleton className="h-3 w-24" />
+                                <div className="flex items-baseline gap-2">
+                                    <Skeleton className="h-7 w-12" />
+                                    <Skeleton className="h-4 w-16" />
+                                </div>
+                                <Skeleton className="h-3 w-28" />
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Extracurricular Cards Skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {Array.from({ length: 2 }).map((_, i) => (
+                    <Card key={i} className="overflow-hidden">
+                        <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Skeleton className="h-10 w-10 rounded-lg" />
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-5 w-28" />
+                                        <Skeleton className="h-4 w-20" />
+                                    </div>
+                                </div>
+                                <Skeleton className="h-6 w-16 rounded-full" />
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                                {Array.from({ length: 4 }).map((_, j) => (
+                                    <Skeleton key={j} className="h-5 w-full" />
+                                ))}
+                            </div>
+                            <div className="mb-4 space-y-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-2 w-full rounded-full" />
+                            </div>
+                            <div className="pt-3 border-t space-y-2">
+                                <Skeleton className="h-4 w-20" />
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-3/4" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            {/* Attendance History Skeleton */}
+            <Card className="border-blue-200 shadow-sm">
+                <CardHeader className="pb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <Skeleton className="h-10 w-10 rounded-lg" />
+                            <div className="space-y-2">
+                                <Skeleton className="h-5 w-36" />
+                                <Skeleton className="h-4 w-52" />
+                            </div>
+                        </div>
+                        <Skeleton className="h-9 w-[200px]" />
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-3">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-slate-100">
+                                <div className="flex items-center gap-4">
+                                    <Skeleton className="w-10 h-10 rounded-full" />
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-4 w-48" />
+                                        <Skeleton className="h-3 w-36" />
+                                    </div>
+                                </div>
+                                <Skeleton className="h-6 w-16 rounded-full" />
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    );
 };
 
+// Error State Component
+const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
+    <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div className="flex items-center gap-3">
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Kegiatan </span>
+                        <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Ekstrakurikuler</span>
+                    </h1>
+                    <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <Trophy className="h-5 w-5" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <Card className="border-red-200 shadow-sm mt-6">
+            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="p-4 bg-red-100 rounded-full mb-4">
+                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
+                <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
+                <Button onClick={onRetry} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50">
+                    <RefreshCw className="h-4 w-4" />
+                    Coba Lagi
+                </Button>
+            </CardContent>
+        </Card>
+    </div>
+);
+
 export const ParentExtracurricularAttendance: React.FC = () => {
-    const totalEkskul = mockExtracurriculars.length;
-    const avgAttendance = Math.round(
-        mockExtracurriculars.reduce((sum, e) => sum + e.attendanceRate, 0) / totalEkskul
-    );
+    const {
+        children,
+        selectedChildId,
+        setSelectedChildId,
+        extracurriculars,
+        paginatedAttendance,
+        stats,
+        academicYears,
+        selectedAcademicYear,
+        handleAcademicYearChange,
+        uniqueActivitiesList,
+        filterActivity,
+        handleFilterChange,
+        currentPage,
+        totalPages,
+        itemsPerPage,
+        setItemsPerPage,
+        filteredTotal,
+        startIndexDisplay,
+        endIndexDisplay,
+        goToPage,
+        goToPrevPage,
+        triggerFetchingOverlay,
+        isLoading,
+        isFetching,
+        error,
+        refetch,
+    } = useParentExtracurricularAttendance();
+
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [tempAcademicYear, setTempAcademicYear] = useState<string>("all");
+
+    if (error) {
+        return <ErrorState error={error} onRetry={refetch} />;
+    }
+
+    if (isLoading) {
+        return <ParentExtracurricularSkeleton />;
+    }
 
     return (
         <div className="space-y-6">
@@ -132,96 +262,239 @@ export const ParentExtracurricularAttendance: React.FC = () => {
                     <p className="text-muted-foreground mt-1">
                         Lihat kegiatan ekstrakurikuler yang diikuti anak dan riwayat keaktifannya
                     </p>
+                </div>
+                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 no-print w-full lg:w-auto mt-4 lg:mt-0 flex-wrap lg:flex-nowrap justify-end">
+                    {/* Filter Modal */}
+                    <Dialog open={isFilterOpen} onOpenChange={(open) => {
+                        if (open) {
+                            setTempAcademicYear(selectedAcademicYear);
+                        }
+                        setIsFilterOpen(open);
+                    }}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" className="h-9 gap-2 bg-white text-slate-700 border-slate-200 shadow-sm font-medium">
+                                <Filter className="h-4 w-4 text-slate-500" />
+                                <span className="hidden sm:inline">Filter</span>
+                                {selectedAcademicYear !== "all" && (
+                                    <Badge className="ml-0.5 h-5 w-5 min-w-[20px] px-0 bg-blue-800 text-white text-[10px] flex items-center justify-center border-0 rounded-full">
+                                        1
+                                    </Badge>
+                                )}
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px] rounded-2xl">
+                            <DialogHeader className="flex-row items-center gap-4">
+                                <div className="p-2.5 bg-blue-100 rounded-xl">
+                                    <Filter className="h-5 w-5 text-blue-700" />
+                                </div>
+                                <div>
+                                    <DialogTitle className="text-lg font-semibold text-slate-900">Filter Kegiatan</DialogTitle>
+                                    <DialogDescription className="text-slate-500">
+                                        Sesuaikan tahun ajaran kegiatan
+                                    </DialogDescription>
+                                </div>
+                            </DialogHeader>
+                            
+                            <div className="grid gap-4 py-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                        <Calendar className="h-4 w-4 text-slate-400" />
+                                        Tahun Ajaran
+                                    </label>
+                                    <Select value={tempAcademicYear} onValueChange={setTempAcademicYear}>
+                                        <SelectTrigger className="w-full bg-slate-50/50 border-slate-200">
+                                            <SelectValue placeholder="Pilih Tahun" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">Semua Tahun</SelectItem>
+                                            {academicYears.map(year => (
+                                                <SelectItem key={year} value={year}>TA. {year}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
 
+                            <DialogFooter className="sm:justify-between gap-2 border-t pt-4">
+                                <Button 
+                                    variant="ghost" 
+                                    onClick={() => setTempAcademicYear("all")}
+                                    className="text-slate-500 hover:text-red-500 hover:bg-red-50 gap-2"
+                                >
+                                    <RotateCcw className="h-4 w-4" />
+                                    Reset Pilihan
+                                </Button>
+                                <Button 
+                                    className="bg-blue-800 hover:bg-blue-900 text-white px-8 gap-2"
+                                    onClick={() => {
+                                        handleAcademicYearChange(tempAcademicYear);
+                                        setIsFilterOpen(false);
+                                    }}
+                                >
+                                    <CheckCircle className="h-4 w-4" />
+                                    Terapkan
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Child Selector */}
+                    {children.length > 1 && (
+                        <Select value={selectedChildId} onValueChange={setSelectedChildId}>
+                            <SelectTrigger className="w-full sm:w-[220px] h-9 bg-white shadow-sm border-slate-200">
+                                <Users className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
+                                <div className="flex-1 text-left truncate">
+                                    <SelectValue placeholder="Pilih Anak" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {children.map(child => (
+                                    <SelectItem key={child.id} value={child.id}>
+                                        {child.name} — {child.class}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
                 </div>
             </div>
 
+            {/* Active Global Filters */}
+            {selectedAcademicYear !== "all" && (
+                <div className="flex flex-wrap items-center gap-2 px-1 no-print">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+                        <SlidersHorizontal className="h-3 w-3" />
+                        <span>Filter Aktif:</span>
+                    </div>
+                    
+                    <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
+                        <Calendar className="h-3.5 w-3.5" />
+                        TA. {selectedAcademicYear}
+                        <button
+                            onClick={() => handleAcademicYearChange("all")}
+                            className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
+                        >
+                            <X className="h-3.5 w-3.5" />
+                        </button>
+                    </Badge>
+
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
+                        onClick={() => handleAcademicYearChange("all")}
+                    >
+                        <RotateCcw className="h-3 w-3" />
+                        Hapus Semua
+                    </Button>
+                </div>
+            )}
+
             {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Ekskul Diikuti</p>
-                                <p className="text-2xl font-bold text-blue-800 mt-1">{totalEkskul}</p>
-                            </div>
-                            <div className="p-3 bg-blue-100 rounded-full">
-                                <Trophy className="h-5 w-5 text-blue-800" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Ekskul Diikuti */}
+                <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5">
+                    <div className="px-5 py-4 pl-6 flex items-center gap-4">
+                        <div className="relative flex-shrink-0">
+                            <div className="w-11 h-11 rounded-xl bg-blue-100/80 flex items-center justify-center ring-2 ring-blue-200/50 transition-transform duration-300 group-hover:scale-105">
+                                <Trophy className="h-5 w-5 text-blue-600" />
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Rata-rata Kehadiran</p>
-                                <p className={cn(
-                                    "text-2xl font-bold mt-1",
-                                    avgAttendance >= 90 ? "text-green-600" :
-                                        avgAttendance >= 75 ? "text-amber-600" : "text-red-600"
-                                )}>
-                                    {avgAttendance}%
-                                </p>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Ekskul Diikuti</p>
+                            <div className="flex items-baseline gap-2 mt-0.5">
+                                <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">{stats.totalEkskul}</p>
+                                <p className="text-xs text-muted-foreground font-medium">kegiatan</p>
                             </div>
-                            <div className="p-3 bg-green-100 rounded-full">
-                                <CheckCircle className="h-5 w-5 text-green-600" />
+                            <p className="text-[11px] text-muted-foreground mt-1">Total ekskul aktif</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Rata-rata Kehadiran */}
+                <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5">
+                    <div className="px-5 py-4 pl-6 flex items-center gap-4">
+                        <div className="relative flex-shrink-0">
+                            <div className={cn(
+                                "w-11 h-11 rounded-xl flex items-center justify-center ring-2 transition-transform duration-300 group-hover:scale-105",
+                                stats.avgAttendance >= 90 ? "bg-green-100/80 ring-green-200/50" :
+                                    stats.avgAttendance >= 75 ? "bg-amber-100/80 ring-amber-200/50" : "bg-red-100/80 ring-red-200/50"
+                            )}>
+                                <CheckCircle className={cn(
+                                    "h-5 w-5",
+                                    stats.avgAttendance >= 90 ? "text-green-600" :
+                                        stats.avgAttendance >= 75 ? "text-amber-600" : "text-red-600"
+                                )} />
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Total Prestasi</p>
-                                <p className="text-2xl font-bold text-amber-600 mt-1">
-                                    {mockExtracurriculars.reduce((sum, e) => sum + (e.achievements?.length || 0), 0)}
-                                </p>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Rata-rata Kehadiran</p>
+                            <div className="flex items-baseline gap-2 mt-0.5">
+                                <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">{stats.avgAttendance}%</p>
                             </div>
-                            <div className="p-3 bg-amber-100 rounded-full">
+                            <p className="text-[11px] text-muted-foreground mt-1">Tingkat partisipasi</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Total Prestasi */}
+                <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5">
+                    <div className="px-5 py-4 pl-6 flex items-center gap-4">
+                        <div className="relative flex-shrink-0">
+                            <div className="w-11 h-11 rounded-xl bg-amber-100/80 flex items-center justify-center ring-2 ring-amber-200/50 transition-transform duration-300 group-hover:scale-105">
                                 <Award className="h-5 w-5 text-amber-600" />
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total Prestasi</p>
+                            <div className="flex items-baseline gap-2 mt-0.5">
+                                <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">
+                                    {stats.totalAchievements}
+                                </p>
+                                <p className="text-xs text-muted-foreground font-medium">penghargaan</p>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground mt-1">Dari semua ekskul</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Extracurricular Cards */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {mockExtracurriculars.map((ekskul) => (
-                    <Card key={ekskul.id} className="overflow-hidden">
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-blue-800 to-blue-600 p-4 relative overflow-hidden">
-                            <div className="absolute inset-0 opacity-10">
-                                <div className="absolute top-0 right-0 w-32 h-32 border-[16px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
-                            </div>
-                            <div className="flex items-center justify-between relative z-10">
+                {extracurriculars.map((ekskul) => (
+                    <Card key={ekskul.id} className="group overflow-hidden transition-all duration-300 hover:-translate-y-0.5 flex flex-col">
+                        <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
-                                        <Trophy className="h-5 w-5 text-white" />
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                        <Trophy className="h-5 w-5 text-blue-800" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-white">{ekskul.name}</h3>
-                                        <Badge className="bg-white/20 text-white border-white/30 text-xs mt-1">
+                                        <CardTitle className="text-lg">
+                                            {ekskul.name}
+                                        </CardTitle>
+                                        <CardDescription>
                                             {ekskul.category}
-                                        </Badge>
+                                            {selectedAcademicYear === "all" && (
+                                                <span className="ml-1.5 inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+                                                    TA. {ekskul.academicYearId}
+                                                </span>
+                                            )}
+                                        </CardDescription>
                                     </div>
                                 </div>
-                                <Badge className={cn(
-                                    "text-xs",
+                                <Badge variant="outline" className={cn(
+                                    "text-[11px] px-2.5 py-0.5 font-medium tracking-wide shadow-sm",
                                     ekskul.status === "active"
-                                        ? "bg-green-100 text-green-700"
-                                        : "bg-gray-100 text-gray-700"
+                                        ? "bg-green-50 text-green-700 border-green-200"
+                                        : "bg-slate-50 text-slate-700 border-slate-200"
                                 )}>
                                     {ekskul.status === "active" ? "Aktif" : "Tidak Aktif"}
                                 </Badge>
                             </div>
-                        </div>
+                        </CardHeader>
 
-                        <CardContent className="p-4">
+                        <CardContent className="flex flex-col flex-1">
                             {/* Schedule Info */}
                             <div className="grid grid-cols-2 gap-3 mb-4">
                                 <div className="flex items-center gap-2 text-sm">
@@ -247,7 +520,7 @@ export const ParentExtracurricularAttendance: React.FC = () => {
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm text-muted-foreground">Tingkat Kehadiran</span>
                                     <span className={cn(
-                                        "font-bold",
+                                        "font-bold tabular-nums",
                                         ekskul.attendanceRate >= 90 ? "text-green-600" :
                                             ekskul.attendanceRate >= 75 ? "text-amber-600" : "text-red-600"
                                     )}>
@@ -266,86 +539,270 @@ export const ParentExtracurricularAttendance: React.FC = () => {
                             </div>
 
                             {/* Achievements */}
-                            {ekskul.achievements && ekskul.achievements.length > 0 && (
-                                <div className="pt-3 border-t">
-                                    <p className="text-sm font-medium mb-2 flex items-center gap-1">
-                                        <Award className="h-4 w-4 text-amber-600" />
-                                        Prestasi
-                                    </p>
-                                    <div className="space-y-1">
-                                        {ekskul.achievements.map((achievement, index) => (
-                                            <div key={index} className="flex items-center gap-2 text-sm">
-                                                <Star className="h-3 w-3 text-amber-500" />
-                                                <span className="text-muted-foreground">{achievement}</span>
-                                            </div>
-                                        ))}
+                            <div className="flex-1">
+                                {ekskul.achievements && ekskul.achievements.length > 0 && (
+                                    <div className="pt-3 border-t">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <p className="text-sm font-medium flex items-center gap-1">
+                                                <Award className="h-4 w-4 text-amber-600" />
+                                                Prestasi
+                                            </p>
+                                            {ekskul.achievements.length > 2 && (
+                                                <Link href={`/parent/academic/achievements`} className="text-[11px] text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                                                    Lihat Semua
+                                                    <ChevronRight className="h-3 w-3 ml-0.5" />
+                                                </Link>
+                                            )}
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            {ekskul.achievements.slice(0, 2).map((achievement, index) => (
+                                                <div key={index} className="flex items-start gap-2 text-sm">
+                                                    <Star className="h-3.5 w-3.5 mt-0.5 text-amber-500 flex-shrink-0" />
+                                                    <span className="text-muted-foreground leading-snug line-clamp-2">{achievement}</span>
+                                                </div>
+                                            ))}
+                                            {ekskul.achievements.length > 2 && (
+                                                <div className="text-[11px] text-muted-foreground pl-5 mt-1 italic">
+                                                    + {ekskul.achievements.length - 2} prestasi lainnya
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
 
                             {/* Footer */}
-                            <div className="flex items-center justify-between mt-4 pt-3 border-t">
-                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                    <Users className="h-4 w-4" />
-                                    <span>{ekskul.members} anggota</span>
+                            <div className="flex items-center justify-between mt-5 -mx-6 -mb-6 px-6 py-3 bg-slate-50/80 border-t border-slate-100">
+                                <div className="flex items-center gap-1.5 text-sm text-slate-600">
+                                    <Users className="h-4 w-4 text-slate-400" />
+                                    <span><span className="tabular-nums font-semibold text-slate-800">{ekskul.members}</span> anggota</span>
                                 </div>
-                                <span className="text-xs text-muted-foreground">
-                                    Bergabung: {new Date(ekskul.joinDate).toLocaleDateString("id-ID", {
-                                        month: "long",
-                                        year: "numeric"
-                                    })}
-                                </span>
+                                <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-100 shadow-sm">
+                                    <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                                    <span>
+                                        Sejak {new Date(ekskul.joinDate).toLocaleDateString("id-ID", {
+                                            month: "short",
+                                            year: "numeric"
+                                        })}
+                                    </span>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
                 ))}
             </div>
 
-            {/* Recent Attendance */}
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                            <CheckCircle className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                            <CardTitle className="text-lg">Riwayat Kehadiran Terbaru</CardTitle>
-                            <CardDescription>5 kegiatan terakhir yang diikuti anak</CardDescription>
+            <Card className="relative overflow-hidden shadow-sm border-blue-200">
+                {/* Fetching overlay */}
+                {isFetching && (
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-30 flex items-center justify-center rounded-xl">
+                        <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-lg rounded-xl px-5 py-3">
+                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                            <span className="text-sm font-medium text-slate-600">Memuat data...</span>
                         </div>
                     </div>
+                )}
+                <CardHeader className="pb-1">
+                    {/* Row 1: Title & Stats */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-blue-100 rounded-xl">
+                                <Activity className="h-5 w-5 text-blue-800" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-semibold text-slate-800">Riwayat Kehadiran</CardTitle>
+                                <CardDescription className="text-sm text-slate-600">Kehadiran seluruh kegiatan ekstrakurikuler</CardDescription>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5 sm:mt-0">
+                            <Badge className="bg-blue-100 text-blue-800 border-blue-200 font-semibold h-7 px-3 rounded-full text-[11px]">
+                                {filteredTotal} Kehadiran
+                            </Badge>
+
+                            {/* Extracurricular Direct Select Filter */}
+                            <Select value={filterActivity} onValueChange={handleFilterChange}>
+                                <SelectTrigger className="w-full sm:w-[220px] h-9 bg-white hover:bg-slate-50 text-slate-700 shadow-sm border-slate-200 transition-colors">
+                                    <Trophy className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
+                                    <div className="flex-1 text-left truncate">
+                                        <SelectValue placeholder="Semua Ekstrakurikuler" />
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Semua Ekstrakurikuler</SelectItem>
+                                    {uniqueActivitiesList.map(name => (
+                                        <SelectItem key={name} value={name.toLowerCase()}>{name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-3">
-                        {mockRecentAttendance.map((record) => {
-                            const statusConfig = getStatusConfig(record.status);
-                            return (
-                                <div
-                                    key={record.id}
-                                    className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-blue-100 rounded-lg">
-                                            <Trophy className="h-4 w-4 text-blue-800" />
+                    {paginatedAttendance.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center text-center py-20 px-4">
+                            <div className="w-16 h-16 rounded-full bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center mb-4 transition-transform hover:scale-110">
+                                <Trophy className="h-8 w-8 text-slate-400" />
+                            </div>
+                            <div className="space-y-1">
+                                <h3 className="text-lg font-semibold text-slate-800">Tidak Ada Riwayat</h3>
+                                <p className="text-sm text-slate-500 max-w-md">
+                                    Belum ada data riwayat kehadiran ekstrakurikuler untuk filter yang dipilih.
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {paginatedAttendance.map((record) => {
+                                const statusConfig = getStatusConfig(record.status);
+                                return (
+                                    <div
+                                        key={record.id}
+                                        className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-slate-100 bg-white hover:border-blue-100 hover:shadow-sm transition-all duration-200"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className={cn(
+                                                "flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full border transition-colors",
+                                                record.status === 'hadir' ? "bg-green-50/50 border-green-100 text-green-600" :
+                                                    record.status === 'izin' ? "bg-blue-50/50 border-blue-100 text-blue-600" :
+                                                        "bg-red-50/50 border-red-100 text-red-600"
+                                            )}>
+                                                {record.status === 'hadir' ? <CheckCircle className="h-4 w-4" /> :
+                                                    record.status === 'izin' ? <Clock className="h-4 w-4" /> :
+                                                        <Activity className="h-4 w-4" />}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-[15px] text-slate-800 leading-tight mb-1 group-hover:text-blue-700 transition-colors">{record.activity}</p>
+                                                <div className="flex items-center gap-1.5 text-[13px] text-slate-500 font-medium">
+                                                    <Calendar className="w-3.5 h-3.5 opacity-70" />
+                                                    {new Date(record.date).toLocaleDateString("id-ID", {
+                                                        weekday: "long",
+                                                        day: "numeric",
+                                                        month: "long",
+                                                        year: "numeric"
+                                                    })}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="font-medium text-sm">{record.activity}</p>
-                                            <p className="text-xs text-muted-foreground">
-                                                {new Date(record.date).toLocaleDateString("id-ID", {
-                                                    weekday: "long",
-                                                    day: "numeric",
-                                                    month: "long",
-                                                    year: "numeric"
-                                                })}
-                                            </p>
-                                        </div>
+                                        <Badge variant="outline" className={cn(
+                                            "px-2.5 py-0.5 font-medium tracking-wide w-fit sm:w-auto",
+                                            statusConfig.color
+                                        )}>
+                                            {statusConfig.label}
+                                        </Badge>
                                     </div>
-                                    <Badge variant="outline" className={statusConfig.color}>
-                                        {statusConfig.label}
-                                    </Badge>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* Footer with Pagination */}
+                    {filteredTotal > 0 && (
+                        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 mt-6 pt-4 border-t border-slate-100">
+                            {/* Left: Pagination Info */}
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground w-full lg:w-auto justify-center lg:justify-start">
+                                <span>Menampilkan</span>
+                                <span className="font-medium text-foreground">
+                                    {startIndexDisplay}
+                                </span>
+                                <span>-</span>
+                                <span className="font-medium text-foreground">
+                                    {endIndexDisplay}
+                                </span>
+                                <span>dari</span>
+                                <span className="font-medium text-foreground">{filteredTotal}</span>
+                                <span>entri</span>
+                            </div>
+
+                            {/* Right: Pagination Controls */}
+                            <div className="flex items-center gap-3 w-full lg:w-auto justify-center lg:justify-end">
+                                {/* Items per page */}
+                                <Select value={itemsPerPage.toString()} onValueChange={(val) => {
+                                    setItemsPerPage(Number(val));
+                                    goToPage(1);
+                                }}>
+                                    <SelectTrigger className="w-[100px] h-8">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="5">5 / hal</SelectItem>
+                                        <SelectItem value="10">10 / hal</SelectItem>
+                                        <SelectItem value="25">25 / hal</SelectItem>
+                                    </SelectContent>
+                                </Select>
+
+                                {/* Page info */}
+                                <span className="text-sm text-muted-foreground">
+                                    Hal {currentPage}/{totalPages}
+                                </span>
+
+                                {/* Previous button */}
+                                <button
+                                    onClick={() => {
+                                        goToPrevPage();
+                                        triggerFetchingOverlay();
+                                    }}
+                                    disabled={currentPage === 1}
+                                    className="h-8 w-8 p-0 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </button>
+
+                                {/* Page number buttons */}
+                                <div className="flex items-center gap-1">
+                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                        const pageNumber = i + 1;
+                                        return (
+                                            <button
+                                                key={pageNumber}
+                                                onClick={() => {
+                                                    goToPage(pageNumber);
+                                                    triggerFetchingOverlay();
+                                                }}
+                                                className={cn(
+                                                    "w-8 h-8 p-0 rounded-lg font-medium text-sm transition-colors flex items-center justify-center",
+                                                    currentPage === pageNumber
+                                                        ? "bg-blue-800 text-white"
+                                                        : "border border-slate-300 bg-white text-slate-600 hover:bg-slate-100"
+                                                )}
+                                            >
+                                                {pageNumber}
+                                            </button>
+                                        );
+                                    })}
+                                    {totalPages > 5 && (
+                                        <>
+                                            <span className="text-sm text-muted-foreground px-1">...</span>
+                                            <button
+                                                onClick={() => {
+                                                    goToPage(totalPages);
+                                                    triggerFetchingOverlay();
+                                                }}
+                                                className={cn(
+                                                    "w-8 h-8 p-0 rounded-lg font-medium text-sm transition-colors flex items-center justify-center border border-slate-300 bg-white text-slate-600 hover:bg-slate-100",
+                                                    currentPage === totalPages && "bg-blue-800 text-white"
+                                                )}
+                                            >
+                                                {totalPages}
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
-                            );
-                        })}
-                    </div>
+
+                                {/* Next button */}
+                                <button
+                                    onClick={() => {
+                                        goToPage(Math.min(totalPages, currentPage + 1));
+                                        triggerFetchingOverlay();
+                                    }}
+                                    disabled={currentPage === totalPages}
+                                    className="h-8 w-8 p-0 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>

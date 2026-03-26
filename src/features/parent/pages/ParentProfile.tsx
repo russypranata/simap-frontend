@@ -1,14 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-    Dialog,
-    DialogContent,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,17 +19,53 @@ import {
     Briefcase,
 } from 'lucide-react';
 
-import { mockParentProfile } from '../data/mockParentData';
+import { ParentProfileData } from '../data/mockParentData';
+import { getParentProfile } from '../services/parentProfileService';
+import { ProfileSkeleton } from '../components/profile/ProfileSkeleton';
+import { toast } from 'sonner';
 
 export const ParentProfile: React.FC = () => {
     const router = useRouter();
-    const [isPhotoOpen, setIsPhotoOpen] = useState(false);
-    
-    // In a real app, fetch data from API
-    const profileData = mockParentProfile;
-    
+    const [profileData, setProfileData] = useState<ParentProfileData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const data = await getParentProfile();
+                setProfileData(data);
+            } catch (error) {
+                console.error('Failed to fetch profile:', error);
+                toast.error('Gagal memuat data profil');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
+    if (isLoading) {
+        return <ProfileSkeleton />;
+    }
+
     if (!profileData) {
-        return <div>Loading...</div>; // TODO: Skeleton
+        return (
+            <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
+                <div className="p-4 bg-red-50 text-red-600 rounded-full">
+                    <User className="h-8 w-8" />
+                </div>
+                <div className="space-y-2">
+                    <h2 className="text-xl font-semibold text-foreground">Gagal Memuat Profil</h2>
+                    <p className="text-muted-foreground text-sm max-w-sm">
+                        Terjadi kesalahan saat mengambil data profil Anda. Silakan muat ulang halaman atau coba lagi nanti.
+                    </p>
+                </div>
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                    Muat Ulang
+                </Button>
+            </div>
+        );
     }
 
     const initials = profileData.name
@@ -110,51 +141,13 @@ export const ParentProfile: React.FC = () => {
                     <div className="space-y-6">
                         {/* Profile Picture and Basic Info */}
                         <div className="flex flex-col md:flex-row items-center md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                            <div
-                                onClick={() => {
-                                    if (profileData.profilePicture) {
-                                        setIsPhotoOpen(true);
-                                    }
-                                }}
-                                className={`relative group ${profileData.profilePicture ? 'cursor-pointer' : 'cursor-default'}`}
-                            >
-                                <Avatar className="w-32 h-32 rounded-full border-4 border-primary/10 transition-transform duration-300 group-hover:scale-105">
-                                    <AvatarImage
-                                        src={profileData.profilePicture}
-                                        alt={profileData.name}
-                                        className="object-cover"
-                                    />
+                            <div className="relative">
+                                <Avatar className="w-32 h-32 rounded-full border-4 border-primary/10">
                                     <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-full">
                                         {initials}
                                     </AvatarFallback>
                                 </Avatar>
-                                {profileData.profilePicture && (
-                                    <div className="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                        <div className="bg-white/90 p-2 rounded-full shadow-sm backdrop-blur-sm">
-                                            <Edit className="h-5 w-5 text-gray-800" />
-                                        </div>
-                                    </div>
-                                )}
                             </div>
-
-                            <Dialog
-                                open={isPhotoOpen}
-                                onOpenChange={setIsPhotoOpen}
-                            >
-                                <DialogContent className="max-w-md md:max-w-lg p-1 bg-transparent border-none shadow-none text-transparent">
-                                    <DialogTitle className="sr-only">Foto Profil {profileData.name}</DialogTitle>
-                                    <div className="relative rounded-lg overflow-hidden bg-white shadow-2xl">
-                                        {profileData.profilePicture && (
-                                            /* eslint-disable-next-line @next/next/no-img-element */
-                                            <img
-                                                src={profileData.profilePicture}
-                                                alt={`Foto Profil ${profileData.name}`}
-                                                className="w-full h-auto object-contain max-h-[80vh] rounded-lg"
-                                            />
-                                        )}
-                                    </div>
-                                </DialogContent>
-                            </Dialog>
 
                             <div className="flex-1 text-center md:text-left space-y-2">
                                 <h2 className="text-2xl font-bold text-foreground">
@@ -247,7 +240,7 @@ export const ParentProfile: React.FC = () => {
                                         <p className="text-xs text-muted-foreground">
                                             Telepon
                                         </p>
-                                        <p className="text-sm font-medium">
+                                        <p className="text-sm font-medium font-mono">
                                             {profileData.phone}
                                         </p>
                                     </div>
@@ -282,12 +275,12 @@ export const ParentProfile: React.FC = () => {
                                             <User className="h-5 w-5" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-sm font-semibold text-blue-900">{child.name}</p>
+                                            <p className="text-sm font-semibold text-slate-900">{child.name}</p>
                                             <div className="flex items-center gap-2 mt-1">
-                                                <Badge variant="outline" className="text-xs bg-white text-blue-700 border-blue-200">
+                                                <Badge className="text-xs bg-white text-blue-800 hover:bg-white border-transparent">
                                                     {child.class}
                                                 </Badge>
-                                                <span className="text-xs text-muted-foreground">NIS: {child.nis}</span>
+                                                <span className="text-xs text-muted-foreground">NIS: <span className="font-mono">{child.nis}</span></span>
                                             </div>
                                         </div>
                                      </div>

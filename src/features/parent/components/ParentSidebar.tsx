@@ -10,15 +10,11 @@ import {
     Award,
     CheckCircle,
     Moon, // Using Moon for Prayer, alternative: Clock
-    Sun, // Added Sun icon
+    Timer, // Using Timer for Keterlambatan Pagi
     CalendarCheck, // Added CalendarCheck icon
     Trophy,
     ClipboardList,
-    Megaphone,
     User,
-    Pencil,
-    Lock,
-    Settings,
 } from "lucide-react";
 
 export const ParentSidebar: React.FC = () => {
@@ -62,9 +58,9 @@ export const ParentSidebar: React.FC = () => {
             isGroup: true,
             subItems: [
                 {
-                    title: "Kehadiran Pagi",
+                    title: "Keterlambatan Pagi",
                     href: "/parent/attendance/morning",
-                    icon: Sun,
+                    icon: Timer,
                 },
                 {
                     title: "Presensi Harian",
@@ -83,71 +79,23 @@ export const ParentSidebar: React.FC = () => {
                 },
             ],
         },
-        // Ekstrakurikuler Group
+        // Ekstrakurikuler
         {
             title: "Ekstrakurikuler",
-            href: "/parent/attendance/extracurricular",
+            href: "/parent/extracurricular",
             icon: Trophy,
-            isGroup: true,
-            subItems: [
-                {
-                    title: "Presensi Ekskul",
-                    href: "/parent/attendance/extracurricular",
-                    icon: CheckCircle,
-                },
-            ],
         },
-        // Catatan Group
+        // Catatan
         {
-            title: "Catatan",
+            title: "Catatan Perilaku",
             href: "/parent/behavior",
             icon: ClipboardList,
-            isGroup: true,
-            subItems: [
-                {
-                    title: "Catatan Perilaku",
-                    href: "/parent/behavior",
-                    icon: ClipboardList,
-                },
-            ],
         },
-        // Informasi Group
+        // Pengaturan
         {
-            title: "Informasi",
-            href: "/parent/announcements",
-            icon: Megaphone,
-            isGroup: true,
-            subItems: [
-                {
-                    title: "Pengumuman",
-                    href: "/parent/announcements",
-                    icon: Megaphone,
-                },
-            ],
-        },
-        // Pengaturan Group
-        {
-            title: "Pengaturan",
-            href: "/parent/settings",
-            icon: Settings,
-            isGroup: true,
-            subItems: [
-                {
-                    title: "Profil Saya",
-                    href: "/parent/settings/profile",
-                    icon: User,
-                },
-                {
-                    title: "Edit Profil",
-                    href: "/parent/settings/edit-profile",
-                    icon: Pencil,
-                },
-                {
-                    title: "Ubah Kata Sandi",
-                    href: "/parent/settings/change-password",
-                    icon: Lock,
-                },
-            ],
+            title: "Profil Saya",
+            href: "/parent/settings/profile",
+            icon: User,
         },
     ];
 

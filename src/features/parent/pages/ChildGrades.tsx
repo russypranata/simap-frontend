@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
     Card,
     CardContent,
@@ -10,28 +10,16 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import {
-    Calendar,
     GraduationCap,
     TrendingUp,
-    TrendingDown,
-    Minus,
     BookOpen,
     Award,
     BarChart3,
     Download,
     Star,
     Target,
-    User,
-    Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -98,8 +86,6 @@ const getScoreColor = (score: number, kkm: number): string => {
 };
 
 export const ChildGrades: React.FC = () => {
-    const [selectedSemester, setSelectedSemester] = useState("current");
-
     // Calculate stats
     const stats = useMemo(() => {
         const totalAverage = mockGrades.reduce((sum, g) => sum + g.averageScore, 0) / mockGrades.length;

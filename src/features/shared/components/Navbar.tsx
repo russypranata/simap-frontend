@@ -31,6 +31,8 @@ import { formatDate, getDayName } from '@/features/shared/utils/dateFormatter';
 import { getStudentProfile } from '@/features/student/services/studentProfileService';
 import { StudentProfileData } from '@/features/student/data/mockStudentData';
 import { mockAdvisorData } from '@/features/extracurricular-advisor/data/mockAdvisorData';
+import { getParentProfile } from '@/features/parent/services/parentProfileService';
+import { ParentProfileData } from '@/features/parent/data/mockParentData';
 
 interface NavbarProps {
     showNotifications?: boolean;
@@ -42,6 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
     const [studentProfile, setStudentProfile] =
         React.useState<StudentProfileData | null>(null);
     const [advisorProfile, setAdvisorProfile] = React.useState<typeof mockAdvisorData | null>(null);
+    const [parentProfile, setParentProfile] = React.useState<ParentProfileData | null>(null);
 
     React.useEffect(() => {
         if (isAuthenticated) {
@@ -57,6 +60,16 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                 fetchProfile();
             } else if (role === 'tutor_ekskul') {
                 setAdvisorProfile(mockAdvisorData);
+            } else if (role === 'orang_tua') {
+                const fetchParent = async () => {
+                    try {
+                        const data = await getParentProfile();
+                        setParentProfile(data);
+                    } catch (error) {
+                        console.error('Failed to fetch parent profile', error);
+                    }
+                };
+                fetchParent();
             }
         }
     }, [isAuthenticated, role]);
@@ -98,9 +111,33 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
         switch (role) {
             case 'siswa':
                 return '/student/profile';
+            case 'orang_tua':
+                return '/parent/settings/profile';
+            case 'guru':
+                return '/teacher/profile';
+            case 'admin':
+                return '/admin/profile';
+            case 'tutor_ekskul':
+                return '/extracurricular-advisor/profile';
+            case 'pj_mutamayizin':
+                return '/mutamayizin-coordinator/profile';
             default:
                 return '/profile';
         }
+    };
+
+    const getProfileName = () => {
+        if (role === 'tutor_ekskul') return advisorProfile?.name;
+        if (role === 'siswa') return studentProfile?.name;
+        if (role === 'orang_tua') return parentProfile?.name;
+        return undefined;
+    };
+
+    const getProfilePicture = () => {
+        if (role === 'tutor_ekskul') return advisorProfile?.profilePicture;
+        if (role === 'siswa') return studentProfile?.profilePicture;
+        // return undefined for orang_tua to force fallback initials
+        return undefined;
     };
 
     return (
@@ -143,24 +180,14 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                     >
                                         <Avatar className="h-9 w-9">
                                             <AvatarImage
-                                                src={
-                                                    (role === 'tutor_ekskul' ? advisorProfile?.profilePicture : studentProfile?.profilePicture) ||
-                                                    undefined
-                                                }
-                                                alt={
-                                                    (role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name) ||
-                                                    'User'
-                                                }
+                                                src={getProfilePicture() || undefined}
+                                                alt={getProfileName() || 'User'}
                                                 className="object-cover"
                                             />
                                             <AvatarFallback className="bg-blue-800 text-white">
-                                                {(role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name)
-                                                    ? getInitials(
-                                                          role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name,
-                                                      )
-                                                    : getRoleDisplayName(
-                                                          role,
-                                                      )?.charAt(0) || 'U'}
+                                                {getProfileName()
+                                                    ? getInitials(getProfileName())
+                                                    : getRoleDisplayName(role)?.charAt(0) || 'U'}
                                             </AvatarFallback>
                                         </Avatar>
                                     </Button>
@@ -175,28 +202,20 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                                             <div className="relative">
                                                 <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                                                     <AvatarImage
-                                                        src={
-                                                            (role === 'tutor_ekskul' ? advisorProfile?.profilePicture : studentProfile?.profilePicture) ||
-                                                            undefined
-                                                        }
+                                                        src={getProfilePicture() || undefined}
                                                         alt="Avatar"
                                                     />
                                                     <AvatarFallback className="bg-blue-800 text-white font-bold">
-                                                        {(role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name)
-                                                            ? getInitials(
-                                                                  role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name,
-                                                              )
-                                                            : getRoleDisplayName(
-                                                                  role,
-                                                              )?.charAt(0) || 'U'}
+                                                        {getProfileName()
+                                                            ? getInitials(getProfileName())
+                                                            : getRoleDisplayName(role)?.charAt(0) || 'U'}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-background"></span>
                                             </div>
                                             <div className="flex flex-col space-y-0.5">
                                                 <p className="text-sm font-bold text-foreground">
-                                                    {(role === 'tutor_ekskul' ? advisorProfile?.name : studentProfile?.name) ||
-                                                        'Pengguna'}
+                                                    {getProfileName() || 'Pengguna'}
                                                 </p>
                                                 <div className="flex items-center">
                                                     <span className="text-xs font-medium text-muted-foreground bg-background/50 px-1.5 py-0.5 rounded-md border border-border/50">
@@ -211,7 +230,7 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
 
                                     <div className="p-2 space-y-1">
                                         <Link
-                                            href="/profile"
+                                            href={getProfileLink(role)}
                                             className="block outline-none"
                                         >
                                             <DropdownMenuItem className="p-3 my-0.5 cursor-pointer rounded-lg focus:bg-accent group">

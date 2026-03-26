@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
     Card,
     CardContent,
@@ -13,8 +13,6 @@ import { Button } from "@/components/ui/button";
 import {
     Calendar,
     Clock,
-    MapPin,
-    BookOpen,
     User,
     GraduationCap,
     Printer,

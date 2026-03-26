@@ -81,11 +81,11 @@ const routeConfig: Record<string, RouteItem> = {
     'parent:change-password': { label: 'Ubah Kata Sandi', icon: Settings },
 
     // Parent attendance sub-pages
-    'parent:morning': { label: 'Kehadiran Pagi', icon: Clock },
+    'parent:morning': { label: 'Keterlambatan Pagi', icon: Clock },
     'parent:daily': { label: 'Presensi Harian', icon: ClipboardList },
     'parent:subject': { label: 'Presensi Mapel', icon: BookOpen },
     'parent:prayer': { label: 'Presensi Sholat', icon: Activity },
-    'parent:extracurricular': { label: 'Presensi Ekskul', icon: Trophy },
+    'parent:extracurricular': { label: 'Ekstrakurikuler', icon: Trophy },
 
     // ── ROLE STUDENT ──────────────────────────────────────────────────────────
     'student:dashboard': { label: 'Dashboard', icon: LayoutDashboard },

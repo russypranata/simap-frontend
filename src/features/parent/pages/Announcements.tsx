@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -193,7 +187,7 @@ export const ParentAnnouncements: React.FC = () => {
                         <Card
                             key={announcement.id}
                             className={cn(
-                                "cursor-pointer hover:shadow-md transition-all",
+                                "cursor-pointer transition-all",
                                 announcement.isPinned && "ring-2 ring-red-200 bg-red-50/30",
                                 !announcement.isRead && "bg-blue-50/50"
                             )}

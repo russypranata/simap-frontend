@@ -6,6 +6,32 @@
 D:\src\simap-frontend\next.config.ts
   5:3  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
 
+D:\src\simap-frontend\src\app\(admin)\admin\extracurricular\attendance\[id]\page.tsx
+    5:5    warning  'ChevronLeft' is defined but never used                                                                       @typescript-eslint/no-unused-vars
+    8:5    warning  'UserCircle' is defined but never used                                                                        @typescript-eslint/no-unused-vars
+   69:8    warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  219:115  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                               react/no-unescaped-entities
+  219:131  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                               react/no-unescaped-entities
+
+D:\src\simap-frontend\src\app\(admin)\admin\extracurricular\attendance\page.tsx
+  58:8  warning  React Hook useEffect has a missing dependency: 'fetchRecaps'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\src\simap-frontend\src\app\(admin)\admin\extracurricular\members\page.tsx
+    9:5   warning  'Plus' is defined but never used                           @typescript-eslint/no-unused-vars
+   17:5   warning  'Clock' is defined but never used                          @typescript-eslint/no-unused-vars
+   90:12  warning  'availableStudents' is assigned a value but never used     @typescript-eslint/no-unused-vars
+   90:31  warning  'setAvailableStudents' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  105:22  warning  'error' is defined but never used                          @typescript-eslint/no-unused-vars
+  127:18  warning  'error' is defined but never used                          @typescript-eslint/no-unused-vars
+  162:18  warning  'error' is defined but never used                          @typescript-eslint/no-unused-vars
+  179:18  warning  'error' is defined but never used                          @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\app\(extracurricular-advisor)\extracurricular-advisor\attendance\[id]\page.tsx
+  54:26  warning  'setItemsPerPage' is assigned a value but never used                                                                                                                                              @typescript-eslint/no-unused-vars
+  76:11  warning  The 'students' logical expression could make the dependencies of useMemo Hook (at line 77) change on every render. To fix this, wrap the initialization of 'students' in its own useMemo() Hook   react-hooks/exhaustive-deps
+  76:11  warning  The 'students' logical expression could make the dependencies of useMemo Hook (at line 101) change on every render. To fix this, wrap the initialization of 'students' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  76:11  warning  The 'students' logical expression could make the dependencies of useMemo Hook (at line 146) change on every render. To fix this, wrap the initialization of 'students' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
 D:\src\simap-frontend\src\app\(mutamayizin-coordinator)\mutamayizin-coordinator\attendance\[ekstrakurikuler]\[id]\page.tsx
    83:13  warning  'ekstrakurikuler' is assigned a value but never used                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
    83:30  warning  'id' is assigned a value but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
@@ -60,8 +86,9 @@ D:\src\simap-frontend\src\app\(mutamayizin-coordinator)\mutamayizin-coordinator\
 
 D:\src\simap-frontend\src\app\(mutamayizin-coordinator)\mutamayizin-coordinator\members\page.tsx
    33:5   warning  'Phone' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
-  436:61  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
-  577:41  error    'pageNumber' is never reassigned. Use 'const' instead                                                                                                                                                                                                                                    prefer-const
+   36:5   warning  'Calendar' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  427:61  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  568:41  error    'pageNumber' is never reassigned. Use 'const' instead                                                                                                                                                                                                                                    prefer-const
 
 D:\src\simap-frontend\src\app\(teacher)\teacher\homeroom\student\[id]\page.tsx
   11:5   warning  'User' is defined but never used         @typescript-eslint/no-unused-vars
@@ -122,6 +149,11 @@ D:\src\simap-frontend\src\components\ui\chart.tsx
   137:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   275:15  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
+D:\src\simap-frontend\src\components\ui\image-cropper.tsx
+  28:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  39:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  39:86  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
 D:\src\simap-frontend\src\components\ui\sidebar.tsx
   611:26  error  Error: Cannot call impure function during render
 
@@ -136,7 +168,284 @@ D:\src\simap-frontend\src\components\ui\sidebar.tsx:611:26
   613 |
   614 |   return (  react-hooks/purity
 
+D:\src\simap-frontend\src\features\admin\components\academic-year\EditSemesterDialog.tsx
+  62:5  warning  'academicYearId' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\components\academic-year\SemesterBadge.tsx
+  15:5  warning  'isActive' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\components\forms\CalendarEventForm.tsx
+  86:18  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+D:\src\simap-frontend\src\features\admin\components\forms\CalendarEventForm.tsx:86:18
+  84 |
+  85 |     // Auto-set isHoliday based on type
+> 86 |     const type = form.watch('type');
+     |                  ^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  87 |     useEffect(() => {
+  88 |         form.setValue('isHoliday', type === 'holiday');
+  89 |     }, [type, form]);  react-hooks/incompatible-library
+
+D:\src\simap-frontend\src\features\admin\components\forms\ExtracurricularForm.tsx
+   36:10  warning  'toast' is defined but never used  @typescript-eslint/no-unused-vars
+  121:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\components\forms\MutationForm.tsx
+   3:17  warning  'useEffect' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  58:18  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+D:\src\simap-frontend\src\features\admin\components\forms\MutationForm.tsx:58:18
+  56 |     });
+  57 |
+> 58 |     const type = form.watch('type');
+     |                  ^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  59 |
+  60 |     return (
+  61 |         <Dialog open={open} onOpenChange={onOpenChange}>  react-hooks/incompatible-library
+
+D:\src\simap-frontend\src\features\admin\components\forms\ScheduleForm.tsx
+   90:27  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+D:\src\simap-frontend\src\features\admin\components\forms\ScheduleForm.tsx:90:27
+  88 |     // Real-time Conflict Detection
+  89 |     const [conflict, setConflict] = useState<ConflictResult>({ hasConflict: false });
+> 90 |     const watchedValues = form.watch();
+     |                           ^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  91 |
+  92 |     useEffect(() => {
+  93 |         const { day, startTime, endTime, teacherId, classId } = watchedValues;  react-hooks/incompatible-library
+  103:61  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  108:8   warning  React Hook useEffect has a missing dependency: 'watchedValues'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+  130:26  warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+  181:59  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+
+D:\src\simap-frontend\src\features\admin\components\forms\StaffForm.tsx
+  86:18  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+D:\src\simap-frontend\src\features\admin\components\forms\StaffForm.tsx:86:18
+  84 |     }, [initialData, form, open]);
+  85 |
+> 86 |     const role = form.watch('role');
+     |                  ^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  87 |
+  88 |     return (
+  89 |         <Dialog open={open} onOpenChange={onOpenChange}>  react-hooks/incompatible-library
+
+D:\src\simap-frontend\src\features\admin\components\profile\ChangePasswordDialog.tsx
+  85:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\src\simap-frontend\src\features\admin\components\settings\TimeSlotList.tsx
+   13:18  warning  'Plus' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   32:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\src\simap-frontend\src\features\admin\components\settings\TimeSlotList.tsx:32:9
+  30 |     // Reset when day changes
+  31 |     useEffect(() => {
+> 32 |         setSlots(initialSlots);
+     |         ^^^^^^^^ Avoid calling setState() directly within an effect
+  33 |         setIsDirty(false);
+  34 |     }, [initialSlots, day]);
+  35 |  react-hooks/set-state-in-effect
+   36:69  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-explicit-any
+  158:46  warning  'index' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\hooks\useAcademicCalendar.ts
+   3:25  warning  'EventType' is defined but never used                                                           @typescript-eslint/no-unused-vars
+   6:5   warning  'getDaysInMonth' is defined but never used                                                      @typescript-eslint/no-unused-vars
+   7:5   warning  'getFirstDayOfMonth' is defined but never used                                                  @typescript-eslint/no-unused-vars
+  58:5   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+D:\src\simap-frontend\src\features\admin\pages\AcademicCalendar.tsx
+   63:7  warning  'typeDotColors' is assigned a value but never used                                                             @typescript-eslint/no-unused-vars
+  161:8  warning  React Hook useMemo has a missing dependency: 'selectedDate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  173:8  warning  React Hook useMemo has a missing dependency: 'selectedDate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\src\simap-frontend\src\features\admin\pages\AcademicYearDetail.tsx
+  61:8  warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\src\simap-frontend\src\features\admin\pages\AcademicYearForm.tsx
+  36:10  warning  'AcademicYear' is defined but never used                                                                              @typescript-eslint/no-unused-vars
+  90:8   warning  React Hook useEffect has a missing dependency: 'fetchAcademicYear'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\src\simap-frontend\src\features\admin\pages\ClassForm.tsx
+   58:19  warning  'Student' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+  111:8   warning  React Hook useEffect has a missing dependency: 'loadInitialData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\src\simap-frontend\src\features\admin\pages\ClassList.tsx
+  14:5   warning  'Calendar' is defined but never used                 @typescript-eslint/no-unused-vars
+  15:5   warning  'FileX' is defined but never used                    @typescript-eslint/no-unused-vars
+  76:12  warning  'activeYear' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  77:12  warning  'activeSemester' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\pages\EditProfile.tsx
+   6:16  warning  'Shield' is defined but never used        @typescript-eslint/no-unused-vars
+   6:24  warning  'Calendar' is defined but never used      @typescript-eslint/no-unused-vars
+  59:25  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\src\simap-frontend\src\features\admin\pages\ExtracurricularList.tsx
+   17:5   warning  'MoreVertical' is defined but never used  @typescript-eslint/no-unused-vars
+   27:5   warning  'CardFooter' is defined but never used    @typescript-eslint/no-unused-vars
+   56:10  warning  'Skeleton' is defined but never used      @typescript-eslint/no-unused-vars
+  106:18  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  155:18  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\pages\PPDBList.tsx
+   8:5  warning  'CheckCircle' is defined but never used  @typescript-eslint/no-unused-vars
+   9:5  warning  'XCircle' is defined but never used      @typescript-eslint/no-unused-vars
+  10:5  warning  'Clock' is defined but never used        @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\pages\ParentList.tsx
+  13:5  warning  'Eye' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\pages\PlacementWorkflow.tsx
+   13:10   warning  'Label' is defined but never used                                                                                    @typescript-eslint/no-unused-vars
+   31:128  warning  'CheckCircle2' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+   32:5    warning  'Clock' is defined but never used                                                                                    @typescript-eslint/no-unused-vars
+   36:10   warning  'Progress' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+  208:8    warning  React Hook useMemo has an unnecessary dependency: 'placementMode'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+  739:106  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                      react/no-unescaped-entities
+  739:118  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                      react/no-unescaped-entities
+
+D:\src\simap-frontend\src\features\admin\pages\Profile.tsx
+  66:11  warning  'handleFileChange' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  74:25  error    Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
+
+D:\src\simap-frontend\src\features\admin\pages\PromotionWorkflow.tsx
+   14:5   warning  'ArrowLeftRight' is defined but never used  @typescript-eslint/no-unused-vars
+  111:18  warning  'error' is defined but never used           @typescript-eslint/no-unused-vars
+  123:18  warning  'error' is defined but never used           @typescript-eslint/no-unused-vars
+  135:18  warning  'error' is defined but never used           @typescript-eslint/no-unused-vars
+  271:37  warning  '_' is assigned a value but never used      @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\pages\ScheduleList.tsx
+   10:5    warning  'MapPin' is defined but never used                               @typescript-eslint/no-unused-vars
+   11:5    warning  'MoreHorizontal' is defined but never used                       @typescript-eslint/no-unused-vars
+   13:5    warning  'CalendarDays' is defined but never used                         @typescript-eslint/no-unused-vars
+   16:5    warning  'Settings' is defined but never used                             @typescript-eslint/no-unused-vars
+   52:5    warning  'DropdownMenu' is defined but never used                         @typescript-eslint/no-unused-vars
+   53:5    warning  'DropdownMenuContent' is defined but never used                  @typescript-eslint/no-unused-vars
+   54:5    warning  'DropdownMenuItem' is defined but never used                     @typescript-eslint/no-unused-vars
+   55:5    warning  'DropdownMenuTrigger' is defined but never used                  @typescript-eslint/no-unused-vars
+   58:10   warning  'Checkbox' is defined but never used                             @typescript-eslint/no-unused-vars
+   90:41   warning  'MOCK_TIME_SLOTS' is defined but never used                      @typescript-eslint/no-unused-vars
+   90:58   warning  'TimeSlot' is defined but never used                             @typescript-eslint/no-unused-vars
+   91:10   warning  'getScheduleGrid' is defined but never used                      @typescript-eslint/no-unused-vars
+  101:12   warning  'classes' is assigned a value but never used                     @typescript-eslint/no-unused-vars
+  104:12   warning  'activeYear' is assigned a value but never used                  @typescript-eslint/no-unused-vars
+  105:12   warning  'activeSemester' is assigned a value but never used              @typescript-eslint/no-unused-vars
+  159:69   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  186:11   warning  'toggleSelectAll' is assigned a value but never used             @typescript-eslint/no-unused-vars
+  194:11   warning  'toggleSelectItem' is assigned a value but never used            @typescript-eslint/no-unused-vars
+  210:83   error    Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  213:18   warning  'error' is defined but never used                                @typescript-eslint/no-unused-vars
+  225:18   warning  'error' is defined but never used                                @typescript-eslint/no-unused-vars
+  267:18   warning  'error' is defined but never used                                @typescript-eslint/no-unused-vars
+  458:105  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  458:117  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  485:78   warning  'slotIdx' is defined but never used                              @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\pages\StudentForm.tsx
+    8:10  warning  'ArrowLeft' is defined but never used        @typescript-eslint/no-unused-vars
+   30:29  warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
+   32:10  warning  'Separator' is defined but never used        @typescript-eslint/no-unused-vars
+  103:48  error    Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+
+D:\src\simap-frontend\src\features\admin\pages\SubjectDetail.tsx
+   88:5   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  113:11  warning  'colors' is assigned a value but never used                                                     @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\pages\SubjectForm.tsx
+    6:19  warning  'useWatch' is defined but never used                                                                                @typescript-eslint/no-unused-vars
+    9:5   warning  'ArrowLeft' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+   17:5   warning  'Users' is defined but never used                                                                                   @typescript-eslint/no-unused-vars
+   58:10  warning  'Checkbox' is defined but never used                                                                                @typescript-eslint/no-unused-vars
+   65:10  warning  'Subject' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+  136:8   warning  React Hook useEffect has a missing dependency: 'loadInitialData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  176:23  error    Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+  224:23  error    Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+
+D:\src\simap-frontend\src\features\admin\pages\SubjectList.tsx
+   16:5   warning  'Calendar' is defined but never used                 @typescript-eslint/no-unused-vars
+   93:12  warning  'activeYear' is assigned a value but never used      @typescript-eslint/no-unused-vars
+   94:12  warning  'activeSemester' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  119:69  error    Unexpected any. Specify a different type             @typescript-eslint/no-explicit-any
+  347:47  warning  'colors' is assigned a value but never used          @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\pages\TeacherDetail.tsx
+  26:5  warning  'Fingerprint' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\pages\TeacherForm.tsx
+   8:10  warning  'ArrowLeft' is defined but never used        @typescript-eslint/no-unused-vars
+   8:47  warning  'CalendarIcon' is defined but never used     @typescript-eslint/no-unused-vars
+  10:10  warning  'format' is defined but never used           @typescript-eslint/no-unused-vars
+  11:16  warning  'indonesia' is defined but never used        @typescript-eslint/no-unused-vars
+  35:10  warning  'Calendar' is defined but never used         @typescript-eslint/no-unused-vars
+  36:10  warning  'Popover' is defined but never used          @typescript-eslint/no-unused-vars
+  36:19  warning  'PopoverContent' is defined but never used   @typescript-eslint/no-unused-vars
+  36:35  warning  'PopoverTrigger' is defined but never used   @typescript-eslint/no-unused-vars
+  37:10  warning  'cn' is defined but never used               @typescript-eslint/no-unused-vars
+  39:10  warning  'Teacher' is defined but never used          @typescript-eslint/no-unused-vars
+  39:19  warning  'TeacherPosition' is defined but never used  @typescript-eslint/no-unused-vars
+  39:36  warning  'TeacherStatus' is defined but never used    @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\pages\TeacherList.tsx
+  12:5  warning  'User' is defined but never used        @typescript-eslint/no-unused-vars
+  17:5  warning  'Briefcase' is defined but never used   @typescript-eslint/no-unused-vars
+  18:5  warning  'BadgeCheck' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\services\academicYearService.ts
+  47:9  error  'semester1End' is never reassigned. Use 'const' instead    prefer-const
+  63:9  error  'semester2Start' is never reassigned. Use 'const' instead  prefer-const
+
+D:\src\simap-frontend\src\features\admin\types\teacher.ts
+  126:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+D:\src\simap-frontend\src\features\admin\utils\scheduleHelpers.ts
+  3:10  warning  'MOCK_TIME_SLOTS' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\admin\utils\scheduleUtils.ts
+   2:10  warning  'MOCK_TIME_SLOTS' is defined but never used  @typescript-eslint/no-unused-vars
+  36:54  warning  'category' is defined but never used         @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\extracurricular-advisor\components\profile\AdvisorPhotoRequirementsModal.tsx
+  16:5  warning  'XCircle' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\extracurricular-advisor\pages\Attendance.tsx
+    45:5   warning  'ChevronsLeft' is defined but never used                     @typescript-eslint/no-unused-vars
+    46:5   warning  'ChevronsRight' is defined but never used                    @typescript-eslint/no-unused-vars
+    96:26  warning  'setItemsPerPage' is assigned a value but never used         @typescript-eslint/no-unused-vars
+    97:26  warning  'setIsRefreshing' is assigned a value but never used         @typescript-eslint/no-unused-vars
+   117:33  warning  'setHistoryItemsPerPage' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  1257:47  warning  'duration' is assigned a value but never used                @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\extracurricular-advisor\pages\Members.tsx
+  32:5  warning  'Calendar' is defined but never used         @typescript-eslint/no-unused-vars
+  39:5  warning  'BarChart3' is defined but never used        @typescript-eslint/no-unused-vars
+  40:5  warning  'HelpCircle' is defined but never used       @typescript-eslint/no-unused-vars
+  44:5  warning  'Tooltip' is defined but never used          @typescript-eslint/no-unused-vars
+  45:5  warning  'TooltipContent' is defined but never used   @typescript-eslint/no-unused-vars
+  46:5  warning  'TooltipProvider' is defined but never used  @typescript-eslint/no-unused-vars
+  47:5  warning  'TooltipTrigger' is defined but never used   @typescript-eslint/no-unused-vars
+
+D:\src\simap-frontend\src\features\extracurricular-advisor\services\advisorService.ts
+  635:22  warning  'absentCount' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
 D:\src\simap-frontend\src\features\mutamayizin\pages\Achievements.tsx
+   23:5   warning  'Calendar' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
    48:5   warning  'AlertDialog' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
    49:5   warning  'AlertDialogAction' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
    50:5   warning  'AlertDialogCancel' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
@@ -161,14 +470,19 @@ D:\src\simap-frontend\src\features\mutamayizin\pages\Achievements.tsx:371:9
   372:8   warning  React Hook useMemo has unnecessary dependencies: 'levelFilter' and 'searchQuery'. Either exclude them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
   396:11  warning  'handleDeleteConfirm' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
 
+D:\src\simap-frontend\src\features\mutamayizin\pages\Dashboard.tsx
+   6:5  warning  'Calendar' is defined but never used   @typescript-eslint/no-unused-vars
+  11:5  warning  'Briefcase' is defined but never used  @typescript-eslint/no-unused-vars
+
 D:\src\simap-frontend\src\features\mutamayizin\pages\EditProfile.tsx
    6:10  warning  'Button' is defined but never used  @typescript-eslint/no-unused-vars
   32:31  warning  'data' is defined but never used    @typescript-eslint/no-unused-vars
 
 D:\src\simap-frontend\src\features\mutamayizin\pages\Tutors.tsx
+   33:5   warning  'Calendar' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
    40:5   warning  'XCircle' is defined but never used                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
    83:11  warning  'router' is assigned a value but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
-  335:57  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  326:57  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
 D:\src\simap-frontend\src\features\mutamayizin\pages\ViewAchievement.tsx
   169:5   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free                                                                                                                                                                      @typescript-eslint/ban-ts-comment
@@ -180,143 +494,81 @@ D:\src\simap-frontend\src\features\mutamayizin\pages\ViewAchievement.tsx
   539:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
 D:\src\simap-frontend\src\features\mutamayizin\services\mutamayizinService.ts
-   5:7   warning  'API_BASE_URL' is assigned a value but never used  @typescript-eslint/no-unused-vars
-  73:25  warning  'academicYear' is defined but never used           @typescript-eslint/no-unused-vars
-  78:24  warning  'studentData' is defined but never used            @typescript-eslint/no-unused-vars
-  78:37  error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
-  86:27  warning  'studentId' is defined but never used              @typescript-eslint/no-unused-vars
-  94:29  warning  'filter' is defined but never used                 @typescript-eslint/no-unused-vars
-  94:37  error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
-  99:28  warning  'data' is defined but never used                   @typescript-eslint/no-unused-vars
-  99:34  error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+    5:7   warning  'API_BASE_URL' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  105:25  warning  'academicYear' is defined but never used           @typescript-eslint/no-unused-vars
+  110:24  warning  'studentData' is defined but never used            @typescript-eslint/no-unused-vars
+  110:37  error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  114:27  warning  'studentId' is defined but never used              @typescript-eslint/no-unused-vars
+  119:29  warning  'filter' is defined but never used                 @typescript-eslint/no-unused-vars
+  119:37  error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  123:28  warning  'data' is defined but never used                   @typescript-eslint/no-unused-vars
+  123:34  error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
 
-D:\src\simap-frontend\src\features\parent\components\ParentSidebar.tsx
-  12:5  warning  'CreditCard' is defined but never used  @typescript-eslint/no-unused-vars
-
-D:\src\simap-frontend\src\features\parent\pages\Announcements.tsx
-  7:5  warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
-  8:5  warning  'CardHeader' is defined but never used       @typescript-eslint/no-unused-vars
-  9:5  warning  'CardTitle' is defined but never used        @typescript-eslint/no-unused-vars
-
-D:\src\simap-frontend\src\features\parent\pages\ChildAttendance.tsx
-   7:5  warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
-  28:5  warning  'User' is defined but never used             @typescript-eslint/no-unused-vars
-
-D:\src\simap-frontend\src\features\parent\pages\ChildGrades.tsx
-   14:5   warning  'Select' is defined but never used                        @typescript-eslint/no-unused-vars
-   15:5   warning  'SelectContent' is defined but never used                 @typescript-eslint/no-unused-vars
-   16:5   warning  'SelectItem' is defined but never used                    @typescript-eslint/no-unused-vars
-   17:5   warning  'SelectTrigger' is defined but never used                 @typescript-eslint/no-unused-vars
-   18:5   warning  'SelectValue' is defined but never used                   @typescript-eslint/no-unused-vars
-   25:5   warning  'TrendingDown' is defined but never used                  @typescript-eslint/no-unused-vars
-   26:5   warning  'Minus' is defined but never used                         @typescript-eslint/no-unused-vars
-   33:5   warning  'User' is defined but never used                          @typescript-eslint/no-unused-vars
-   34:5   warning  'Users' is defined but never used                         @typescript-eslint/no-unused-vars
-  101:12  warning  'selectedSemester' is assigned a value but never used     @typescript-eslint/no-unused-vars
-  101:30  warning  'setSelectedSemester' is assigned a value but never used  @typescript-eslint/no-unused-vars
-
-D:\src\simap-frontend\src\features\parent\pages\ChildProfile.tsx
-   7:5   warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
-  14:5   warning  'Calendar' is defined but never used         @typescript-eslint/no-unused-vars
-  17:5   warning  'Mail' is defined but never used             @typescript-eslint/no-unused-vars
-  18:5   warning  'Phone' is defined but never used            @typescript-eslint/no-unused-vars
-  19:5   warning  'MapPin' is defined but never used           @typescript-eslint/no-unused-vars
-  22:5   warning  'BookOpen' is defined but never used         @typescript-eslint/no-unused-vars
-  23:5   warning  'Award' is defined but never used            @typescript-eslint/no-unused-vars
-  25:10  warning  'cn' is defined but never used               @typescript-eslint/no-unused-vars
-
-D:\src\simap-frontend\src\features\parent\pages\ChildSchedule.tsx
-   3:17  warning  'useState' is defined but never used  @typescript-eslint/no-unused-vars
-  16:5   warning  'MapPin' is defined but never used    @typescript-eslint/no-unused-vars
-  17:5   warning  'BookOpen' is defined but never used  @typescript-eslint/no-unused-vars
-
-D:\src\simap-frontend\src\features\parent\pages\Dashboard.tsx
-  13:5   warning  'BookOpen' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
-  16:5   warning  'Clock' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
-  17:5   warning  'User' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
-  18:5   warning  'MapPin' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
-  23:10  warning  'Progress' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
-  67:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-D:\src\simap-frontend\src\features\parent\pages\Dashboard.tsx:67:9
-  65 |
-  66 |     useEffect(() => {
-> 67 |         setParentName("Budi Santoso");
-     |         ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  68 |         const timer = setInterval(() => setCurrentTime(new Date()), 60000);
-  69 |         return () => clearInterval(timer);
-  70 |     }, []);  react-hooks/set-state-in-effect
-
-D:\src\simap-frontend\src\features\shared\components\Navbar.tsx
-  97:11  warning  'getProfileLink' is assigned a value but never used  @typescript-eslint/no-unused-vars
+D:\src\simap-frontend\src\features\shared\components\ActiveAcademicYearBadge.tsx
+  5:10  warning  'Badge' is defined but never used  @typescript-eslint/no-unused-vars
+  8:10  warning  'cn' is defined but never used     @typescript-eslint/no-unused-vars
 
 D:\src\simap-frontend\src\features\shared\components\NavbarBreadcrumb.tsx
-  302:18  error  Error: Cannot create components during render
+  523:18  error  Error: Cannot create components during render
 
 Components created during render will reset their state each time they are created. Declare components outside of render.
 
-D:\src\simap-frontend\src\features\shared\components\NavbarBreadcrumb.tsx:302:18
-  300 |             {/* Mobile view */}
-  301 |             <div className="md:hidden">
-> 302 |                 <MobileView />
+D:\src\simap-frontend\src\features\shared\components\NavbarBreadcrumb.tsx:523:18
+  521 |             {/* Mobile view */}
+  522 |             <div className="md:hidden">
+> 523 |                 <MobileView />
       |                  ^^^^^^^^^^ This component is created during render
-  303 |             </div>
-  304 |
-  305 |             {/* Desktop view */}
+  524 |             </div>
+  525 |
+  526 |             {/* Desktop view */}
 
-D:\src\simap-frontend\src\features\shared\components\NavbarBreadcrumb.tsx:198:24
-  196 |
-  197 |     // Mobile: Show back button style for small screens
-> 198 |     const MobileView = () => {
+D:\src\simap-frontend\src\features\shared\components\NavbarBreadcrumb.tsx:382:24
+  380 |
+  381 |     // Mobile: Show back button style for small screens
+> 382 |     const MobileView = () => {
       |                        ^^^^^^^
-> 199 |         const previousBreadcrumb = breadcrumbs[breadcrumbs.length - 2];
-      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 200 |         const currentBreadcrumb = breadcrumbs[breadcrumbs.length - 1];
+> 383 |         // Find the nearest clickable ancestor
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 384 |         const clickableAncestors = breadcrumbs.slice(0, -1).reverse().filter(b => b.isClickable);
       ΓÇª
-      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 221 |         );
-      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 222 |     };
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 420 |         );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 421 |     };
       | ^^^^^^ The component is created during render here
-  223 |
-  224 |     // Desktop: Show full breadcrumb with enhanced styling
-  225 |     const DesktopView = () => {  react-hooks/static-components
-  307:18  error  Error: Cannot create components during render
+  422 |
+  423 |     // Desktop: Show full breadcrumb with enhanced styling
+  424 |     const DesktopView = () => {  react-hooks/static-components
+  528:18  error  Error: Cannot create components during render
 
 Components created during render will reset their state each time they are created. Declare components outside of render.
 
-D:\src\simap-frontend\src\features\shared\components\NavbarBreadcrumb.tsx:307:18
-  305 |             {/* Desktop view */}
-  306 |             <div className="hidden md:block">
-> 307 |                 <DesktopView />
+D:\src\simap-frontend\src\features\shared\components\NavbarBreadcrumb.tsx:528:18
+  526 |             {/* Desktop view */}
+  527 |             <div className="hidden md:block">
+> 528 |                 <DesktopView />
       |                  ^^^^^^^^^^^ This component is created during render
-  308 |             </div>
-  309 |         </>
-  310 |     );
+  529 |             </div>
+  530 |         </>
+  531 |     );
 
-D:\src\simap-frontend\src\features\shared\components\NavbarBreadcrumb.tsx:225:25
-  223 |
-  224 |     // Desktop: Show full breadcrumb with enhanced styling
-> 225 |     const DesktopView = () => {
+D:\src\simap-frontend\src\features\shared\components\NavbarBreadcrumb.tsx:424:25
+  422 |
+  423 |     // Desktop: Show full breadcrumb with enhanced styling
+> 424 |     const DesktopView = () => {
       |                         ^^^^^^^
-> 226 |         const hasHistory = breadcrumbs.length > 1;
-      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 227 |         const previousBreadcrumb = hasHistory ? breadcrumbs[breadcrumbs.length - 2] : null;
+> 425 |         // Find nearest clickable ancestor for back button
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 426 |         const clickableAncestors = breadcrumbs.slice(0, -1).reverse().filter(b => b.isClickable);
       ΓÇª
-      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 295 |         );
-      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 296 |     };
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 516 |         );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 517 |     };
       | ^^^^^^ The component is created during render here
-  297 |
-  298 |     return (
-  299 |         <>                                                                                                                                    react-hooks/static-components
+  518 |
+  519 |     return (
+  520 |         <>                     react-hooks/static-components
 
 D:\src\simap-frontend\src\features\student\components\StudentSidebar.tsx
    8:5  warning  'BookOpen' is defined but never used  @typescript-eslint/no-unused-vars
@@ -1344,6 +1596,12 @@ D:\src\simap-frontend\src\features\teacher\services\teacherApi.ts
 D:\src\simap-frontend\src\features\teacher\utils\attendanceUtils.ts
   8:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
-Γ£û 646 problems (171 errors, 475 warnings)
-  3 errors and 0 warnings potentially fixable with the `--fix` option.
+D:\src\simap-frontend\src\lib\api-client.ts
+  60:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  75:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  80:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  92:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 784 problems (199 errors, 585 warnings)
+  5 errors and 2 warnings potentially fixable with the `--fix` option.
 

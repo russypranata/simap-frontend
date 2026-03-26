@@ -25,8 +25,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2, KeyRound, AlertCircle, ChevronDown, ChevronUp, ShieldCheck, Check, X } from "lucide-react";
 
-// In a real app, this would call an API service
-const mockUpdatePassword = async (data: any) => {
+const mockUpdatePassword = async () => {
     return new Promise((resolve) => setTimeout(resolve, 1000));
 };
 
@@ -94,16 +93,12 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
         hasNumber: /[0-9]/.test(newPassword),
     };
 
-    const onSubmit = async (data: ChangePasswordFormValues) => {
+    const onSubmit = async () => {
         setIsLoading(true);
         setApiError(null);
 
         try {
-            await mockUpdatePassword({
-                currentPassword: data.currentPassword,
-                newPassword: data.newPassword,
-                confirmPassword: data.confirmPassword,
-            });
+            await mockUpdatePassword();
 
             toast.success(
                 <div className="flex flex-col">
@@ -116,7 +111,7 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
 
             form.reset();
             onOpenChange(false);
-        } catch (error) {
+        } catch {
             setApiError("Gagal mengubah kata sandi. Silakan coba lagi.");
             toast.error("Gagal mengubah kata sandi");
         } finally {
@@ -217,6 +212,7 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
                                                 type={showCurrentPassword ? "text" : "password"}
                                                 placeholder="Masukkan kata sandi lama"
                                                 autoComplete="current-password"
+                                                className="font-mono"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -252,6 +248,7 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
                                                 type={showNewPassword ? "text" : "password"}
                                                 placeholder="Masukkan kata sandi baru"
                                                 autoComplete="new-password"
+                                                className="font-mono"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -287,6 +284,7 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
                                                 type={showConfirmPassword ? "text" : "password"}
                                                 placeholder="Ulangi kata sandi baru"
                                                 autoComplete="new-password"
+                                                className="font-mono"
                                                 {...field}
                                             />
                                         </FormControl>

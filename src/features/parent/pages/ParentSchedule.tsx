@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
     Card,
     CardContent,
@@ -24,7 +24,6 @@ import {
     BookOpen,
     User,
     GraduationCap,
-    Printer,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -132,32 +131,25 @@ export const ParentSchedule: React.FC = () => {
     const currentDay = dayNames[today.getDay()];
 
     // Filter schedule based on selected day
-    const filteredSchedule = useMemo(() => {
-        if (selectedDay === "all") return mockSchedule;
-        return mockSchedule.filter((item) => item.day === selectedDay);
-    }, [selectedDay]);
+    const filteredSchedule = selectedDay === "all" ? mockSchedule : mockSchedule.filter((item) => item.day === selectedDay);
 
     // Get today's schedule
-    const todaySchedule = useMemo(() => {
-        return mockSchedule.filter((item) => item.day === currentDay);
-    }, [currentDay]);
+    const todaySchedule = mockSchedule.filter((item) => item.day === currentDay);
 
     // Group schedule by day
-    const scheduleByDay = useMemo(() => {
+    const scheduleByDay = (() => {
         const grouped: Record<string, ScheduleItem[]> = {};
         DAYS.forEach((day) => {
             grouped[day] = mockSchedule.filter((item) => item.day === day);
         });
         return grouped;
-    }, []);
+    })();
 
     // Stats
     const totalLessons = mockSchedule.length;
     const uniqueSubjects = new Set(mockSchedule.map((s) => s.subject)).size;
 
-    const handlePrint = () => {
-        window.print();
-    };
+
 
     return (
         <div className="space-y-6">
@@ -176,17 +168,6 @@ export const ParentSchedule: React.FC = () => {
                     <p className="text-muted-foreground mt-1">
                         Jadwal pelajaran mingguan kelas XII IPA 1 (Ananda Budi Santoso)
                     </p>
-
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        onClick={handlePrint}
-                        className="gap-2"
-                    >
-                        <Printer className="h-4 w-4" />
-                        Cetak Jadwal
-                    </Button>
                 </div>
             </div>
 
@@ -196,7 +177,7 @@ export const ParentSchedule: React.FC = () => {
                     <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-100 rounded-lg">
+                                <div className="p-2.5 bg-blue-100 rounded-xl">
                                     <Calendar className="h-5 w-5 text-blue-800" />
                                 </div>
                                 <div>
@@ -242,18 +223,22 @@ export const ParentSchedule: React.FC = () => {
                         variant={viewMode === "weekly" ? "default" : "outline"}
                         onClick={() => setViewMode("weekly")}
                         className={cn(
+                            "gap-2",
                             viewMode === "weekly" && "bg-blue-800 hover:bg-blue-900 text-white"
                         )}
                     >
+                        <Calendar className="h-4 w-4" />
                         Mingguan
                     </Button>
                     <Button
                         variant={viewMode === "daily" ? "default" : "outline"}
                         onClick={() => setViewMode("daily")}
                         className={cn(
+                            "gap-2",
                             viewMode === "daily" && "bg-blue-800 hover:bg-blue-900 text-white"
                         )}
                     >
+                        <BookOpen className="h-4 w-4" />
                         Harian
                     </Button>
                 </div>
@@ -277,57 +262,100 @@ export const ParentSchedule: React.FC = () => {
             {viewMode === "weekly" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {DAYS.map((day) => (
-                        <Card key={day} className={cn(
-                            "overflow-hidden",
-                            day === currentDay && "ring-2 ring-blue-500"
-                        )}>
-                            <CardHeader className="py-3 bg-muted/50">
+                        <Card
+                            key={day}
+                            className={cn(
+                                "overflow-hidden transition-shadow hover:shadow-lg",
+                                day === currentDay && "ring-2 ring-blue-500 border-blue-300"
+                            )}
+                        >
+                            <CardHeader
+                                className={cn(
+                                    "py-3 border-b",
+                                    day === currentDay
+                                        ? "bg-blue-50 border-blue-200"
+                                        : "bg-slate-50 border-slate-200"
+                                )}
+                            >
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-base font-semibold">{day}</CardTitle>
+                                    <div className="flex items-center gap-2">
+                                        <div
+                                            className={cn(
+                                                "w-2.5 h-2.5 rounded-full flex-shrink-0",
+                                                scheduleByDay[day].length === 0
+                                                    ? "bg-gray-300"
+                                                    : day === currentDay
+                                                        ? "bg-blue-600"
+                                                        : "bg-blue-400"
+                                            )}
+                                        />
+                                        <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+                                            {day}
+                                        </CardTitle>
+                                    </div>
                                     {day === currentDay && (
-                                        <Badge className="bg-blue-800 text-white text-xs">Hari Ini</Badge>
+                                        <Badge className="bg-blue-600 text-white text-xs font-medium px-2 py-0">
+                                            Hari Ini
+                                        </Badge>
                                     )}
                                 </div>
                             </CardHeader>
-                            <CardContent className="p-0">
-                                <div className="divide-y">
+                            <CardContent className="p-2">
+                                <div className="space-y-1">
                                     {scheduleByDay[day].length === 0 ? (
-                                        <div className="p-4 text-center text-muted-foreground text-sm">
-                                            Tidak ada jadwal
+                                        <div className="py-8 text-center">
+                                            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 mb-2">
+                                                <BookOpen className="h-4 w-4 text-slate-400" />
+                                            </div>
+                                            <p className="text-sm text-muted-foreground">
+                                                Tidak ada jadwal
+                                            </p>
                                         </div>
                                     ) : (
                                         scheduleByDay[day].map((item) => (
                                             <div
                                                 key={item.id}
-                                                className="p-3 hover:bg-muted/30 transition-colors"
+                                                className="group p-2.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all"
                                             >
-                                                <div className="flex items-start gap-3">
-                                                    <div className="text-xs text-muted-foreground font-medium min-w-[70px]">
-                                                        {item.startTime}
-                                                        <br />
-                                                        <span className="text-muted-foreground/60">{item.endTime}</span>
+                                                <div className="flex items-start gap-2.5">
+                                                    {/* Time column */}
+                                                    <div className="flex flex-col items-center gap-1 min-w-[70px] pt-0.5">
+                                                        <Badge
+                                                            variant="secondary"
+                                                            className="text-xs font-bold bg-slate-200 text-slate-700 px-2 py-0 h-5"
+                                                        >
+                                                            {item.lessonNumber}
+                                                        </Badge>
+                                                        <div className="text-xs text-slate-600 font-medium whitespace-nowrap">
+                                                            {item.startTime} - {item.endTime}
+                                                        </div>
                                                     </div>
+                                                    {/* Divider line */}
+                                                    <div className="w-px self-stretch bg-slate-200 group-hover:bg-blue-200 transition-colors" />
+                                                    {/* Content column */}
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2">
+                                                        {/* Subject */}
+                                                        <div className="mb-1.5">
                                                             <Badge
                                                                 variant="outline"
                                                                 className={cn(
-                                                                    "text-xs font-medium px-2 py-0.5",
+                                                                    "text-xs font-semibold px-2.5 py-1",
                                                                     getSubjectColor(item.subject)
                                                                 )}
                                                             >
                                                                 {item.subject}
                                                             </Badge>
                                                         </div>
-                                                        <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-                                                            <span className="flex items-center gap-1">
-                                                                <User className="h-3 w-3" />
-                                                                {item.teacher}
-                                                            </span>
-                                                            <span className="flex items-center gap-1">
-                                                                <MapPin className="h-3 w-3" />
-                                                                {item.room}
-                                                            </span>
+                                                        {/* Teacher and room */}
+                                                        <div className="space-y-1">
+                                                            <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                                                                <User className="h-3 w-3 text-slate-400 flex-shrink-0" />
+                                                                <span className="truncate">{item.teacher}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                                                                <MapPin className="h-3 w-3 text-slate-400 flex-shrink-0" />
+                                                                <span className="truncate">{item.room}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -343,75 +371,98 @@ export const ParentSchedule: React.FC = () => {
 
             {/* Daily View */}
             {viewMode === "daily" && (
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <BookOpen className="h-5 w-5 text-primary" />
+                <Card className="border-blue-200 shadow-sm overflow-hidden">
+                    <CardHeader className="pb-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-start gap-3">
+                                <div className="p-2.5 bg-blue-100 rounded-xl">
+                                    <BookOpen className="h-5 w-5 text-blue-700" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg font-semibold text-slate-800">
+                                        {selectedDay === "all" ? "Semua Jadwal" : `Jadwal Hari ${selectedDay}`}
+                                    </CardTitle>
+                                    <CardDescription className="text-sm text-slate-600">
+                                        {filteredSchedule.length} jam pelajaran terdaftar
+                                    </CardDescription>
+                                </div>
                             </div>
-                            <div>
-                                <CardTitle className="text-lg">
-                                    {selectedDay === "all" ? "Semua Jadwal" : `Jadwal Hari ${selectedDay}`}
-                                </CardTitle>
-                                <CardDescription>
-                                    {filteredSchedule.length} jam pelajaran
-                                </CardDescription>
+                            <div className="flex items-center gap-2">
+                                <Badge className="bg-blue-100 text-blue-800 border-blue-200 font-semibold h-7 px-3 rounded-full text-[11px]">
+                                    {filteredSchedule.length} Jam Pelajaran
+                                </Badge>
                             </div>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">
                         <div className="overflow-x-auto">
                             <table className="w-full">
-                                <thead className="bg-muted/50">
-                                    <tr>
-                                        <th className="text-left p-4 font-medium text-sm w-24">Jam Ke</th>
-                                        <th className="text-left p-4 font-medium text-sm w-32">Waktu</th>
+                                <thead>
+                                    <tr className="bg-slate-50 border-b border-slate-200">
+                                        <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-20">Jam</th>
+                                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-44">Waktu</th>
                                         {selectedDay === "all" && (
-                                            <th className="text-left p-4 font-medium text-sm w-28">Hari</th>
+                                            <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-32">Hari</th>
                                         )}
-                                        <th className="text-left p-4 font-medium text-sm">Mata Pelajaran</th>
-                                        <th className="text-left p-4 font-medium text-sm">Guru</th>
-                                        <th className="text-left p-4 font-medium text-sm w-32">Ruangan</th>
+                                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle">Mata Pelajaran</th>
+                                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle">Guru Pengampu</th>
+                                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-40">Lokasi / Ruangan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredSchedule.map((item) => (
-                                        <tr key={item.id} className="border-b hover:bg-muted/30 transition-colors">
-                                            <td className="p-4">
-                                                <Badge variant="outline" className="bg-muted">
+                                        <tr
+                                            key={item.id}
+                                            className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50/50 transition-colors"
+                                        >
+                                            <td className="p-4 text-center align-middle">
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="font-bold bg-slate-100 text-slate-600 border-slate-200 px-2.5 py-1 text-xs"
+                                                >
                                                     {item.lessonNumber}
                                                 </Badge>
                                             </td>
-                                            <td className="p-4 text-sm">
-                                                <div className="flex items-center gap-1.5">
-                                                    <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                                                    {item.startTime} - {item.endTime}
+                                            <td className="p-4 align-middle">
+                                                <div className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md bg-orange-50 text-orange-700 text-xs font-medium border border-orange-100">
+                                                    <Clock className="h-3.5 w-3.5" />
+                                                    <span className="font-mono">{item.startTime} - {item.endTime}</span>
                                                 </div>
                                             </td>
                                             {selectedDay === "all" && (
-                                                <td className="p-4 text-sm font-medium">{item.day}</td>
+                                                <td className="p-4 align-middle">
+                                                    <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100 font-semibold">
+                                                        {item.day}
+                                                    </Badge>
+                                                </td>
                                             )}
-                                            <td className="p-4">
-                                                <Badge
-                                                    variant="outline"
-                                                    className={cn(
-                                                        "font-medium",
-                                                        getSubjectColor(item.subject)
-                                                    )}
-                                                >
-                                                    {item.subject}
-                                                </Badge>
-                                            </td>
-                                            <td className="p-4 text-sm">
-                                                <div className="flex items-center gap-1.5">
-                                                    <User className="h-3.5 w-3.5 text-muted-foreground" />
-                                                    {item.teacher}
+                                            <td className="p-4 align-middle">
+                                                <div className="flex items-center gap-2">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className={cn(
+                                                            "font-semibold px-2.5 py-1 border shadow-sm transition-transform hover:scale-105 cursor-default",
+                                                            getSubjectColor(item.subject).replace("border-300", "border-200")
+                                                        )}
+                                                    >
+                                                        {item.subject}
+                                                    </Badge>
                                                 </div>
                                             </td>
-                                            <td className="p-4 text-sm">
-                                                <div className="flex items-center gap-1.5">
-                                                    <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                                                    {item.room}
+                                            <td className="p-4 align-middle">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-slate-500 shrink-0">
+                                                        <User className="h-4 w-4" />
+                                                    </div>
+                                                    <span className="text-sm font-medium text-slate-700">{item.teacher}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 align-middle">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-slate-500 shrink-0">
+                                                        <MapPin className="h-4 w-4" />
+                                                    </div>
+                                                    <span className="text-sm font-medium text-slate-700">{item.room}</span>
                                                 </div>
                                             </td>
                                         </tr>
@@ -427,7 +478,7 @@ export const ParentSchedule: React.FC = () => {
             <Card className="bg-blue-50 border-blue-200">
                 <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
+                        <div className="p-2.5 bg-blue-100 rounded-xl">
                             <GraduationCap className="h-5 w-5 text-blue-800" />
                         </div>
                         <div>

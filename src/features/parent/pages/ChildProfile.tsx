@@ -4,25 +4,17 @@ import React from "react";
 import {
     Card,
     CardContent,
-    CardDescription,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-    Calendar,
     GraduationCap,
     User,
-    Mail,
-    Phone,
-    MapPin,
     Users,
     Trophy,
-    BookOpen,
-    Award,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 // Mock data
 const mockChildProfile = {
@@ -110,23 +102,23 @@ export const ChildProfile: React.FC = () => {
                                 </Badge>
                             </div>
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-3 text-sm text-muted-foreground">
-                                <span>NIS: {mockChildProfile.nis}</span>
-                                <span>NISN: {mockChildProfile.nisn}</span>
+                                <span>NIS: <span className="tabular-nums font-medium">{mockChildProfile.nis}</span></span>
+                                <span>NISN: <span className="tabular-nums font-medium">{mockChildProfile.nisn}</span></span>
                             </div>
                         </div>
 
                         {/* Quick Stats */}
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div className="p-3 bg-blue-50 rounded-lg">
-                                <p className="text-xl font-bold text-blue-800">{mockStats.averageScore}</p>
+                                <p className="text-xl font-bold text-blue-800 tabular-nums">{mockStats.averageScore}</p>
                                 <p className="text-xs text-muted-foreground">Rata-rata</p>
                             </div>
                             <div className="p-3 bg-amber-50 rounded-lg">
-                                <p className="text-xl font-bold text-amber-600">#{mockStats.rank}</p>
+                                <p className="text-xl font-bold text-amber-600 tabular-nums">#{mockStats.rank}</p>
                                 <p className="text-xs text-muted-foreground">Peringkat</p>
                             </div>
                             <div className="p-3 bg-green-50 rounded-lg">
-                                <p className="text-xl font-bold text-green-600">{mockStats.attendanceRate}%</p>
+                                <p className="text-xl font-bold text-green-600 tabular-nums">{mockStats.attendanceRate}%</p>
                                 <p className="text-xs text-muted-foreground">Kehadiran</p>
                             </div>
                         </div>
@@ -172,7 +164,7 @@ export const ChildProfile: React.FC = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <p className="text-sm text-muted-foreground">Telepon</p>
-                                    <p className="font-medium">{mockChildProfile.phone}</p>
+                                    <p className="tabular-nums font-medium">{mockChildProfile.phone}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground">Email</p>
@@ -256,7 +248,7 @@ export const ChildProfile: React.FC = () => {
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Telepon</span>
-                                        <span className="font-medium">{mockParentInfo.fatherPhone}</span>
+                                        <span className="tabular-nums font-medium">{mockParentInfo.fatherPhone}</span>
                                     </div>
                                 </div>
                             </div>
@@ -275,7 +267,7 @@ export const ChildProfile: React.FC = () => {
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Telepon</span>
-                                        <span className="font-medium">{mockParentInfo.motherPhone}</span>
+                                        <span className="tabular-nums font-medium">{mockParentInfo.motherPhone}</span>
                                     </div>
                                 </div>
                             </div>

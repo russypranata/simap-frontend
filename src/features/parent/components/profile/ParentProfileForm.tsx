@@ -17,6 +17,7 @@ import {
     Camera,
     AtSign,
     Briefcase,
+    Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 // Reuse components from student features as they are generic
@@ -54,10 +55,32 @@ export const ParentProfileForm: React.FC<ParentProfileFormProps> = ({
     };
 
     const handleSave = () => {
+        // Basic presence check
         if (!formData.name || !formData.email || !formData.username || !formData.phone) {
-            toast.error('Nama, Username, Email, dan Nomor Telepon wajib diisi');
+            toast.error('Silakan cek kembali input Anda', {
+                description: 'Nama, Username, Email, dan Telepon wajib diisi.',
+            });
             return;
         }
+
+        // Email format check
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            toast.error('Format email tidak valid', {
+                description: 'Mohon masukkan alamat email yang benar.',
+            });
+            return;
+        }
+
+        // Phone numeric check
+        const phoneRegex = /^[0-9+]+$/;
+        if (!phoneRegex.test(formData.phone)) {
+            toast.error('Format telepon tidak valid', {
+                description: 'Nomor telepon hanya boleh berisi angka.',
+            });
+            return;
+        }
+
         onSave(formData, selectedFile);
     };
 
@@ -167,11 +190,13 @@ export const ParentProfileForm: React.FC<ParentProfileFormProps> = ({
                     <div className="flex flex-col items-center space-y-4 pb-6 border-b">
                         <div className="relative group">
                             <Avatar className="w-32 h-32 rounded-full border-4 border-primary/10">
-                                <AvatarImage
-                                    src={formData.profilePicture}
-                                    alt={formData.name}
-                                    className="object-cover"
-                                />
+                                {selectedFile ? (
+                                    <AvatarImage
+                                        src={formData.profilePicture}
+                                        alt={formData.name}
+                                        className="object-cover"
+                                    />
+                                ) : null}
                                 <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-full">
                                     {getInitials(formData.name)}
                                 </AvatarFallback>
@@ -293,6 +318,7 @@ export const ParentProfileForm: React.FC<ParentProfileFormProps> = ({
                                     value={formData.phone}
                                     onChange={handleInputChange}
                                     placeholder="08xxxxxxxxxx"
+                                    className="font-mono"
                                 />
                             </div>
                         </div>
@@ -331,10 +357,17 @@ export const ParentProfileForm: React.FC<ParentProfileFormProps> = ({
                                 disabled={isLoading}
                                 className="flex-1 sm:flex-none bg-blue-800 hover:bg-blue-900 text-white"
                             >
-                                <Save className="h-4 w-4 mr-2" />
-                                {isLoading
-                                    ? 'Menyimpan...'
-                                    : 'Simpan Perubahan'}
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        Menyimpan...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="h-4 w-4 mr-2" />
+                                        Simpan Perubahan
+                                    </>
+                                )}
                             </Button>
                         </div>
                     </div>

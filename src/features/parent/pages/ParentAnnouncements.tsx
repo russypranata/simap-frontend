@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,11 +27,9 @@ import {
     Clock,
     User,
     FileText,
-    AlertCircle,
     Bell,
     ChevronRight,
     ChevronLeft,
-    Eye,
     Paperclip,
     Trophy,
 } from "lucide-react";

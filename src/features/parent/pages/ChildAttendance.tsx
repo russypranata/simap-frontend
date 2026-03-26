@@ -25,7 +25,6 @@ import {
     AlertCircle,
     TrendingUp,
     Filter,
-    User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -239,13 +238,16 @@ export const ChildAttendance: React.FC = () => {
 
             {/* Attendance History */}
             <Card>
-                <CardHeader>
+                <CardHeader className="bg-slate-50">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <Calendar className="h-5 w-5 text-primary" />
+                            <div className="p-2.5 bg-blue-100 rounded-xl">
+                                <Calendar className="h-5 w-5 text-blue-700" />
                             </div>
-                            <CardTitle className="text-lg">Riwayat Kehadiran</CardTitle>
+                            <div>
+                                <CardTitle className="text-lg font-semibold text-slate-800">Riwayat Kehadiran</CardTitle>
+                                <CardDescription className="text-sm text-slate-600">Daftar kehadiran per mata pelajaran</CardDescription>
+                            </div>
                         </div>
                         <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                             <SelectTrigger className="w-[140px]">
@@ -265,11 +267,11 @@ export const ChildAttendance: React.FC = () => {
                 <CardContent className="p-0">
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-muted/50">
-                                <tr>
-                                    <th className="text-left p-4 font-medium text-sm">Tanggal</th>
-                                    <th className="text-left p-4 font-medium text-sm">Mata Pelajaran</th>
-                                    <th className="text-center p-4 font-medium text-sm">Status</th>
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200">
+                                    <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tanggal</th>
+                                    <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Mata Pelajaran</th>
+                                    <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -277,7 +279,7 @@ export const ChildAttendance: React.FC = () => {
                                     const statusConfig = getStatusConfig(record.status);
                                     const StatusIcon = statusConfig.icon;
                                     return (
-                                        <tr key={record.id} className="border-b hover:bg-muted/30">
+                                        <tr key={record.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                             <td className="p-4">
                                                 <p className="font-medium text-sm">{record.day}</p>
                                                 <p className="text-xs text-muted-foreground">

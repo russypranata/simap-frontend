@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Pencil, Lock, Key, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { ParentProfileForm } from '@/features/parent/components/profile/ParentProfileForm';
+import { EditProfileSkeleton } from '@/features/parent/components/profile/EditProfileSkeleton';
 import { ChangePasswordDialog } from '@/features/parent/components/profile/ChangePasswordDialog';
 import { ParentProfileData } from '@/features/parent/data/mockParentData';
 import {
@@ -46,14 +47,21 @@ export const ParentEditProfile: React.FC = () => {
             await updateParentProfile(data);
 
             if (file) {
-                await uploadParentAvatar(file);
+                try {
+                    await uploadParentAvatar(file);
+                } catch (avatarError) {
+                    console.error('Avatar upload failed:', avatarError);
+                    toast.error('Profil diperbarui, tetapi gagal mengunggah foto.');
+                    setIsLoading(false);
+                    return; // Don't redirect or show success toast if avatar failed
+                }
             }
 
             // In real app, re-fetch to update context/state
             toast.success('Profil berhasil diperbarui!');
-            router.push('/parent/profile');
+            router.push('/parent/settings/profile');
         } catch (error) {
-            toast.error('Gagal menyimpan perubahan');
+            toast.error('Gagal menyimpan perubahan profil');
             console.error(error);
         } finally {
             setIsLoading(false);
@@ -61,11 +69,22 @@ export const ParentEditProfile: React.FC = () => {
     };
 
     const handleCancel = () => {
-        router.push('/parent/profile');
+        router.push('/parent/settings/profile');
     };
 
-    if (isFetching || !profileData) {
-        return <div>Loading...</div>; // TODO: Skeleton
+    if (isFetching) {
+        return <EditProfileSkeleton />;
+    }
+
+    if (!profileData) {
+        return (
+            <div className="flex flex-col items-center justify-center p-8 text-center bg-red-50 rounded-xl border border-red-100">
+                <p className="text-red-600 font-medium">Gagal memuat data formulir.</p>
+                <Button variant="link" onClick={() => window.location.reload()} className="text-red-700 mt-2">
+                    Coba Lagi
+                </Button>
+            </div>
+        );
     }
 
     return (
