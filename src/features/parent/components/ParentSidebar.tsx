@@ -91,10 +91,10 @@ export const ParentSidebar: React.FC = () => {
             href: "/parent/behavior",
             icon: ClipboardList,
         },
-        // Pengaturan
+        // Profil Saya
         {
             title: "Profil Saya",
-            href: "/parent/settings/profile",
+            href: "/parent/profile",
             icon: User,
         },
     ];

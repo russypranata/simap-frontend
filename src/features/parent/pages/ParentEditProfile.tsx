@@ -59,7 +59,7 @@ export const ParentEditProfile: React.FC = () => {
 
             // In real app, re-fetch to update context/state
             toast.success('Profil berhasil diperbarui!');
-            router.push('/parent/settings/profile');
+            router.push('/parent/profile');
         } catch (error) {
             toast.error('Gagal menyimpan perubahan profil');
             console.error(error);
@@ -69,7 +69,7 @@ export const ParentEditProfile: React.FC = () => {
     };
 
     const handleCancel = () => {
-        router.push('/parent/settings/profile');
+        router.push('/parent/profile');
     };
 
     if (isFetching) {

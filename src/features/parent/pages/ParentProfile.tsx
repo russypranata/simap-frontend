@@ -126,7 +126,7 @@ export const ParentProfile: React.FC = () => {
                             </Badge>
                             <Button
                                 onClick={() =>
-                                    router.push('/parent/settings/edit-profile')
+                                    router.push('/parent/profile/edit')
                                 }
                                 size="sm"
                                 className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white"

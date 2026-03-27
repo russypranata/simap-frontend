@@ -112,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
             case 'siswa':
                 return '/student/profile';
             case 'orang_tua':
-                return '/parent/settings/profile';
+                return '/parent/profile';
             case 'guru':
                 return '/teacher/profile';
             case 'admin':
