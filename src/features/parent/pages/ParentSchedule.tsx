@@ -1,498 +1,281 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import React, { useMemo } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Users } from "lucide-react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import {
-    Calendar,
-    Clock,
-    MapPin,
-    BookOpen,
-    User,
-    GraduationCap,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+    ScheduleHeader,
+    ScheduleFilterDialog,
+    ActiveFilterBadges,
+    CurrentlyActiveLessonCard,
+    WeeklyCalendarGrid,
+} from "../components/schedule";
+import { useParentSchedule } from "../hooks/useParentSchedule";
+import type { ScheduleItem } from "../services/parentScheduleService";
 
-// Types
-interface ScheduleItem {
-    id: number;
-    day: string;
-    startTime: string;
-    endTime: string;
-    subject: string;
-    teacher: string;
-    room: string;
-    lessonNumber: number;
-}
+// Inline simple components to avoid extra files
+const ParentScheduleSkeleton = () => (
+    <div className="space-y-6 animate-in fade-in duration-500">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-2">
+                <div className="h-10 w-72 bg-slate-200 rounded animate-pulse" />
+                <div className="h-4 w-56 bg-slate-200 rounded animate-pulse" />
+            </div>
+            <div className="flex gap-2">
+                <div className="h-9 w-20 bg-slate-200 rounded animate-pulse" />
+                <div className="h-9 w-52 bg-slate-200 rounded animate-pulse" />
+            </div>
+        </div>
 
-// Mock schedule data for student (Child)
-const mockSchedule: ScheduleItem[] = [
-    // Senin
-    { id: 1, day: "Senin", startTime: "07:00", endTime: "07:45", subject: "Upacara", teacher: "-", room: "Lapangan", lessonNumber: 1 },
-    { id: 2, day: "Senin", startTime: "07:45", endTime: "08:30", subject: "Matematika", teacher: "Pak Ahmad", room: "XII IPA 1", lessonNumber: 2 },
-    { id: 3, day: "Senin", startTime: "08:30", endTime: "09:15", subject: "Matematika", teacher: "Pak Ahmad", room: "XII IPA 1", lessonNumber: 3 },
-    { id: 4, day: "Senin", startTime: "09:30", endTime: "10:15", subject: "Fisika", teacher: "Bu Sari", room: "Lab Fisika", lessonNumber: 4 },
-    { id: 5, day: "Senin", startTime: "10:15", endTime: "11:00", subject: "Fisika", teacher: "Bu Sari", room: "Lab Fisika", lessonNumber: 5 },
-    { id: 6, day: "Senin", startTime: "11:00", endTime: "11:45", subject: "Bahasa Indonesia", teacher: "Bu Dewi", room: "XII IPA 1", lessonNumber: 6 },
-    { id: 7, day: "Senin", startTime: "12:30", endTime: "13:15", subject: "Bahasa Indonesia", teacher: "Bu Dewi", room: "XII IPA 1", lessonNumber: 7 },
-    { id: 8, day: "Senin", startTime: "13:15", endTime: "14:00", subject: "Bahasa Inggris", teacher: "Pak Budi", room: "XII IPA 1", lessonNumber: 8 },
+        {/* Filter Card */}
+        <div className="border border-slate-200 rounded-lg p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="h-10 bg-slate-200 rounded animate-pulse" />
+                <div className="h-10 bg-slate-200 rounded animate-pulse" />
+                <div className="h-10 bg-slate-200 rounded animate-pulse" />
+            </div>
+        </div>
 
-    // Selasa
-    { id: 9, day: "Selasa", startTime: "07:00", endTime: "07:45", subject: "Kimia", teacher: "Pak Rudi", room: "Lab Kimia", lessonNumber: 1 },
-    { id: 10, day: "Selasa", startTime: "07:45", endTime: "08:30", subject: "Kimia", teacher: "Pak Rudi", room: "Lab Kimia", lessonNumber: 2 },
-    { id: 11, day: "Selasa", startTime: "08:30", endTime: "09:15", subject: "Biologi", teacher: "Bu Ani", room: "Lab Biologi", lessonNumber: 3 },
-    { id: 12, day: "Selasa", startTime: "09:30", endTime: "10:15", subject: "Biologi", teacher: "Bu Ani", room: "Lab Biologi", lessonNumber: 4 },
-    { id: 13, day: "Selasa", startTime: "10:15", endTime: "11:00", subject: "Sejarah", teacher: "Pak Hendra", room: "XII IPA 1", lessonNumber: 5 },
-    { id: 14, day: "Selasa", startTime: "11:00", endTime: "11:45", subject: "Sejarah", teacher: "Pak Hendra", room: "XII IPA 1", lessonNumber: 6 },
-    { id: 15, day: "Selasa", startTime: "12:30", endTime: "13:15", subject: "Pendidikan Agama", teacher: "Pak Usman", room: "XII IPA 1", lessonNumber: 7 },
-    { id: 16, day: "Selasa", startTime: "13:15", endTime: "14:00", subject: "Pendidikan Agama", teacher: "Pak Usman", room: "XII IPA 1", lessonNumber: 8 },
+        {/* Weekly Calendar Grid Skeleton */}
+        <Card className="overflow-hidden">
+            <CardHeader className="bg-slate-50">
+                <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 bg-slate-200 rounded-xl animate-pulse" />
+                    <div className="space-y-2 flex-1">
+                        <div className="h-5 w-48 bg-slate-200 rounded animate-pulse" />
+                        <div className="h-4 w-64 bg-slate-200 rounded animate-pulse" />
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="overflow-hidden">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="bg-slate-50 border-b border-slate-200">
+                                <th className="w-[120px] p-4">
+                                    <div className="h-4 w-16 bg-slate-200 rounded animate-pulse" />
+                                </th>
+                                {Array.from({ length: 6 }).map((_, i) => (
+                                    <th key={i} className="p-4">
+                                        <div className="h-4 w-12 bg-slate-200 rounded animate-pulse mx-auto" />
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white">
+                            {Array.from({ length: 8 }).map((_, rowIndex) => (
+                                <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-slate-50/50" : "bg-white"}>
+                                    <td className="p-3 border-t border-slate-200">
+                                        <div className="h-4 w-12 bg-slate-200 rounded animate-pulse" />
+                                    </td>
+                                    {Array.from({ length: 6 }).map((_, colIndex) => (
+                                        <td key={colIndex} className="p-2 border-t border-l border-slate-200">
+                                            <div className="h-[80px] bg-slate-200/50 rounded-lg animate-pulse" />
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </CardContent>
+        </Card>
 
-    // Rabu
-    { id: 17, day: "Rabu", startTime: "07:00", endTime: "07:45", subject: "Matematika", teacher: "Pak Ahmad", room: "XII IPA 1", lessonNumber: 1 },
-    { id: 18, day: "Rabu", startTime: "07:45", endTime: "08:30", subject: "Matematika", teacher: "Pak Ahmad", room: "XII IPA 1", lessonNumber: 2 },
-    { id: 19, day: "Rabu", startTime: "08:30", endTime: "09:15", subject: "Bahasa Inggris", teacher: "Pak Budi", room: "XII IPA 1", lessonNumber: 3 },
-    { id: 20, day: "Rabu", startTime: "09:30", endTime: "10:15", subject: "Bahasa Inggris", teacher: "Pak Budi", room: "XII IPA 1", lessonNumber: 4 },
-    { id: 21, day: "Rabu", startTime: "10:15", endTime: "11:00", subject: "Seni Budaya", teacher: "Bu Ratna", room: "R. Seni", lessonNumber: 5 },
-    { id: 22, day: "Rabu", startTime: "11:00", endTime: "11:45", subject: "Seni Budaya", teacher: "Bu Ratna", room: "R. Seni", lessonNumber: 6 },
-    { id: 23, day: "Rabu", startTime: "12:30", endTime: "13:15", subject: "PJOK", teacher: "Pak Dedi", room: "Lapangan", lessonNumber: 7 },
-    { id: 24, day: "Rabu", startTime: "13:15", endTime: "14:00", subject: "PJOK", teacher: "Pak Dedi", room: "Lapangan", lessonNumber: 8 },
+        {/* Info Card */}
+        <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
+            <div className="flex items-start gap-3">
+                <div className="h-10 w-10 bg-slate-200 rounded-xl animate-pulse" />
+                <div className="space-y-2 flex-1">
+                    <div className="h-5 w-32 bg-slate-200 rounded animate-pulse" />
+                    <div className="space-y-1">
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="h-4 w-64 bg-slate-200 rounded animate-pulse" />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+);
 
-    // Kamis
-    { id: 25, day: "Kamis", startTime: "07:00", endTime: "07:45", subject: "Fisika", teacher: "Bu Sari", room: "Lab Fisika", lessonNumber: 1 },
-    { id: 26, day: "Kamis", startTime: "07:45", endTime: "08:30", subject: "Fisika", teacher: "Bu Sari", room: "Lab Fisika", lessonNumber: 2 },
-    { id: 27, day: "Kamis", startTime: "08:30", endTime: "09:15", subject: "Kimia", teacher: "Pak Rudi", room: "Lab Kimia", lessonNumber: 3 },
-    { id: 28, day: "Kamis", startTime: "09:30", endTime: "10:15", subject: "Kimia", teacher: "Pak Rudi", room: "Lab Kimia", lessonNumber: 4 },
-    { id: 29, day: "Kamis", startTime: "10:15", endTime: "11:00", subject: "PKn", teacher: "Bu Rina", room: "XII IPA 1", lessonNumber: 5 },
-    { id: 30, day: "Kamis", startTime: "11:00", endTime: "11:45", subject: "PKn", teacher: "Bu Rina", room: "XII IPA 1", lessonNumber: 6 },
-    { id: 31, day: "Kamis", startTime: "12:30", endTime: "13:15", subject: "Prakarya", teacher: "Pak Joko", room: "R. Prakarya", lessonNumber: 7 },
-    { id: 32, day: "Kamis", startTime: "13:15", endTime: "14:00", subject: "Prakarya", teacher: "Pak Joko", room: "R. Prakarya", lessonNumber: 8 },
+const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
+    <div className="space-y-6">
+        <ScheduleHeader childName="" childClass="" />
+        <div className="border-red-200 shadow-sm rounded-lg border bg-white p-8 text-center">
+            <div className="p-4 bg-red-100 rounded-full mb-4 inline-block">
+                <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
+            <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
+            <Button onClick={onRetry} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Coba Lagi
+            </Button>
+        </div>
+    </div>
+);
 
-    // Jumat
-    { id: 33, day: "Jumat", startTime: "07:00", endTime: "07:45", subject: "Biologi", teacher: "Bu Ani", room: "Lab Biologi", lessonNumber: 1 },
-    { id: 34, day: "Jumat", startTime: "07:45", endTime: "08:30", subject: "Biologi", teacher: "Bu Ani", room: "Lab Biologi", lessonNumber: 2 },
-    { id: 35, day: "Jumat", startTime: "08:30", endTime: "09:15", subject: "Matematika", teacher: "Pak Ahmad", room: "XII IPA 1", lessonNumber: 3 },
-    { id: 36, day: "Jumat", startTime: "09:30", endTime: "10:15", subject: "Bahasa Indonesia", teacher: "Bu Dewi", room: "XII IPA 1", lessonNumber: 4 },
-    { id: 37, day: "Jumat", startTime: "10:15", endTime: "11:00", subject: "BK", teacher: "Bu Linda", room: "R. BK", lessonNumber: 5 },
+const EmptyState = ({ onRetry }: { onRetry: () => void }) => (
+    <div className="border-slate-200 shadow-sm border-dashed bg-slate-50/30 rounded-lg border p-8 text-center">
+        <div className="w-16 h-16 rounded-full bg-white border border-dashed border-slate-200 flex items-center justify-center mb-4 transition-transform hover:scale-110 shadow-sm mx-auto">
+            <svg className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+        </div>
+        <h3 className="text-lg font-semibold text-slate-800">Tidak Ada Data Jadwal</h3>
+        <p className="text-sm text-slate-500 max-w-md mb-6">
+            Belum ada data jadwal pelajaran yang terdaftar. Silakan muat ulang atau hubungi administrator.
+        </p>
+        <Button onClick={onRetry} variant="outline" className="gap-2 bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm rounded-xl px-6 h-10 transition-all active:scale-95">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Muat Ulang Data
+        </Button>
+    </div>
+);
 
-    // Sabtu
-    { id: 38, day: "Sabtu", startTime: "07:00", endTime: "07:45", subject: "Bahasa Inggris", teacher: "Pak Budi", room: "XII IPA 1", lessonNumber: 1 },
-    { id: 39, day: "Sabtu", startTime: "07:45", endTime: "08:30", subject: "Bahasa Inggris", teacher: "Pak Budi", room: "XII IPA 1", lessonNumber: 2 },
-    { id: 40, day: "Sabtu", startTime: "08:30", endTime: "09:15", subject: "TIK", teacher: "Pak Fajar", room: "Lab Komputer", lessonNumber: 3 },
-    { id: 41, day: "Sabtu", startTime: "09:30", endTime: "10:15", subject: "TIK", teacher: "Pak Fajar", room: "Lab Komputer", lessonNumber: 4 },
-    { id: 42, day: "Sabtu", startTime: "10:15", endTime: "11:00", subject: "Muatan Lokal", teacher: "Bu Yuli", room: "XII IPA 1", lessonNumber: 5 },
-];
-
-const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-
-// Subject colors for visual variety
-const getSubjectColor = (subject: string): string => {
-    const colors: Record<string, string> = {
-        "Matematika": "bg-blue-100 border-blue-300 text-blue-800",
-        "Fisika": "bg-purple-100 border-purple-300 text-purple-800",
-        "Kimia": "bg-green-100 border-green-300 text-green-800",
-        "Biologi": "bg-emerald-100 border-emerald-300 text-emerald-800",
-        "Bahasa Indonesia": "bg-amber-100 border-amber-300 text-amber-800",
-        "Bahasa Inggris": "bg-rose-100 border-rose-300 text-rose-800",
-        "Sejarah": "bg-orange-100 border-orange-300 text-orange-800",
-        "Pendidikan Agama": "bg-cyan-100 border-cyan-300 text-cyan-800",
-        "Seni Budaya": "bg-pink-100 border-pink-300 text-pink-800",
-        "PJOK": "bg-lime-100 border-lime-300 text-lime-800",
-        "PKn": "bg-indigo-100 border-indigo-300 text-indigo-800",
-        "Prakarya": "bg-teal-100 border-teal-300 text-teal-800",
-        "BK": "bg-sky-100 border-sky-300 text-sky-800",
-        "TIK": "bg-violet-100 border-violet-300 text-violet-800",
-        "Muatan Lokal": "bg-fuchsia-100 border-fuchsia-300 text-fuchsia-800",
-        "Upacara": "bg-red-100 border-red-300 text-red-800",
-    };
-    return colors[subject] || "bg-gray-100 border-gray-300 text-gray-800";
-};
+const ScheduleInfoCard = ({ stats, currentDay }: { stats: { totalLessons: number; uniqueSubjects: number; todayLessons: number }; currentDay: string }) => (
+    <div className="bg-blue-50 border-blue-200 rounded-lg border p-4">
+        <div className="flex items-start gap-3">
+            <div className="p-2.5 bg-blue-100 rounded-xl">
+                <svg className="h-5 w-5 text-blue-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                </svg>
+            </div>
+            <div>
+                <h3 className="font-semibold text-blue-900">Informasi Jadwal</h3>
+                <ul className="mt-2 space-y-1 text-sm text-blue-800">
+                    <li>• Total {stats.totalLessons} jam pelajaran per minggu</li>
+                    <li>• {stats.uniqueSubjects} mata pelajaran berbeda</li>
+                    {currentDay !== "Minggu" && (
+                        <li>• Hari ini: {stats.todayLessons} jam pelajaran</li>
+                    )}
+                    <li>• Istirahat: 09:15-09:30 dan 11:45-12:30</li>
+                    <li>• Jadwal dapat berubah sewaktu-waktu, silakan periksa pengumuman terbaru</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+);
 
 export const ParentSchedule: React.FC = () => {
-    const [selectedDay, setSelectedDay] = useState<string>("all");
-    const [viewMode, setViewMode] = useState<"daily" | "weekly">("weekly");
+    const {
+        schedule,
+        stats,
+        children,
+        academicYears,
+        selectedChildId,
+        selectedYearId,
+        childName,
+        childClass,
+        isLoading,
+        isError,
+        errorMessage,
+        currentDay,
+        todaySchedule,
+        days,
+        getSubjectColor,
+        setSelectedChildId,
+        setSelectedYearId,
+        refetch,
+        isLessonHappeningNow,
+    } = useParentSchedule();
 
-    // Get current day
-    const today = new Date();
-    const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-    const currentDay = dayNames[today.getDay()];
+    const currentLesson = todaySchedule.find(isLessonHappeningNow) || null;
 
-    // Filter schedule based on selected day
-    const filteredSchedule = selectedDay === "all" ? mockSchedule : mockSchedule.filter((item) => item.day === selectedDay);
-
-    // Get today's schedule
-    const todaySchedule = mockSchedule.filter((item) => item.day === currentDay);
-
-    // Group schedule by day
-    const scheduleByDay = (() => {
+    const scheduleByDay = useMemo(() => {
         const grouped: Record<string, ScheduleItem[]> = {};
-        DAYS.forEach((day) => {
-            grouped[day] = mockSchedule.filter((item) => item.day === day);
+        days.forEach((day) => {
+            grouped[day] = schedule.filter((item) => item.day === day);
         });
         return grouped;
-    })();
+    }, [schedule, days]);
 
-    // Stats
-    const totalLessons = mockSchedule.length;
-    const uniqueSubjects = new Set(mockSchedule.map((s) => s.subject)).size;
+    const activeYear = academicYears.find((y) => y.id === selectedYearId);
 
+    const handleApplyFilter = (yearId: string) => {
+        setSelectedYearId(yearId);
+    };
 
+    if (isLoading) return <ParentScheduleSkeleton />;
+    if (isError) return <ErrorState error={errorMessage || "Terjadi kesalahan"} onRetry={refetch} />;
+    if (schedule.length === 0) {
+        return (
+            <div className="space-y-6">
+                <ScheduleHeader childName={childName} childClass={childClass} />
+                <EmptyState onRetry={refetch} />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
-            {/* Header */}
+            {/* Header with Filter and Child Selector */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Jadwal </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Pelajaran Anak</span>
-                        </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <Calendar className="h-5 w-5" />
-                        </div>
-                    </div>
-                    <p className="text-muted-foreground mt-1">
-                        Jadwal pelajaran mingguan kelas XII IPA 1 (Ananda Budi Santoso)
-                    </p>
+                <ScheduleHeader childName={childName} childClass={childClass} />
+
+                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 no-print w-full lg:w-auto mt-4 lg:mt-0 flex-wrap lg:flex-nowrap justify-end">
+                    <ScheduleFilterDialog
+                        academicYears={academicYears}
+                        activeYear={activeYear}
+                        selectedYearId={selectedYearId}
+                        onApply={handleApplyFilter}
+                    />
+
+                    {children.length > 1 && (
+                        <Select value={selectedChildId} onValueChange={setSelectedChildId}>
+                            <SelectTrigger className="w-full sm:w-[220px] h-9 bg-white shadow-sm border-slate-200">
+                                <Users className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
+                                <div className="flex-1 text-left truncate">
+                                    <SelectValue placeholder="Pilih Anak" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {children.map(child => (
+                                    <SelectItem key={child.childId} value={child.childId}>
+                                        {child.childName} — {child.childClass}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
                 </div>
             </div>
 
-            {/* Today's Schedule Highlight */}
-            {currentDay !== "Minggu" && todaySchedule.length > 0 && (
-                <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-white">
-                    <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2.5 bg-blue-100 rounded-xl">
-                                    <Calendar className="h-5 w-5 text-blue-800" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg">Jadwal Anak Hari Ini - {currentDay}</CardTitle>
-                                    <CardDescription>{todaySchedule.length} jam pelajaran</CardDescription>
-                                </div>
-                            </div>
-                            <Badge className="bg-blue-800 text-white">
-                                {today.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
-                            </Badge>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex gap-2 overflow-x-auto pb-2">
-                            {todaySchedule.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className={cn(
-                                        "flex-shrink-0 p-3 rounded-lg border-2",
-                                        getSubjectColor(item.subject)
-                                    )}
-                                >
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Clock className="h-3.5 w-3.5" />
-                                        <span className="text-xs font-medium">{item.startTime} - {item.endTime}</span>
-                                    </div>
-                                    <p className="font-semibold text-sm">{item.subject}</p>
-                                    <div className="flex items-center gap-1 mt-1">
-                                        <User className="h-3 w-3 opacity-70" />
-                                        <span className="text-xs opacity-80">{item.teacher}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+            {/* Active Filter Badges */}
+            <ActiveFilterBadges
+                selectedYearId={selectedYearId}
+                academicYears={academicYears}
+                activeYear={activeYear}
+                onClearYear={() => setSelectedYearId(academicYears[0]?.id)}
+            />
+
+            {/* Currently Active Lesson */}
+            {currentDay !== "Minggu" && currentLesson && (
+                <CurrentlyActiveLessonCard currentLesson={currentLesson} currentDay={currentDay} />
             )}
 
-            {/* View Toggle & Filter */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-between">
-                <div className="flex gap-2">
-                    <Button
-                        variant={viewMode === "weekly" ? "default" : "outline"}
-                        onClick={() => setViewMode("weekly")}
-                        className={cn(
-                            "gap-2",
-                            viewMode === "weekly" && "bg-blue-800 hover:bg-blue-900 text-white"
-                        )}
-                    >
-                        <Calendar className="h-4 w-4" />
-                        Mingguan
-                    </Button>
-                    <Button
-                        variant={viewMode === "daily" ? "default" : "outline"}
-                        onClick={() => setViewMode("daily")}
-                        className={cn(
-                            "gap-2",
-                            viewMode === "daily" && "bg-blue-800 hover:bg-blue-900 text-white"
-                        )}
-                    >
-                        <BookOpen className="h-4 w-4" />
-                        Harian
-                    </Button>
-                </div>
+            {/* Weekly Calendar Grid - Simplified View */}
+            <WeeklyCalendarGrid
+                scheduleByDay={scheduleByDay}
+                currentDay={currentDay}
+                isLessonHappeningNow={isLessonHappeningNow}
+                getSubjectColor={getSubjectColor}
+                childClass={childClass}
+            />
 
-                {viewMode === "daily" && (
-                    <Select value={selectedDay} onValueChange={setSelectedDay}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Pilih Hari" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Semua Hari</SelectItem>
-                            {DAYS.map((day) => (
-                                <SelectItem key={day} value={day}>{day}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                )}
-            </div>
-
-            {/* Weekly View */}
-            {viewMode === "weekly" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {DAYS.map((day) => (
-                        <Card
-                            key={day}
-                            className={cn(
-                                "overflow-hidden transition-shadow hover:shadow-lg",
-                                day === currentDay && "ring-2 ring-blue-500 border-blue-300"
-                            )}
-                        >
-                            <CardHeader
-                                className={cn(
-                                    "py-3 border-b",
-                                    day === currentDay
-                                        ? "bg-blue-50 border-blue-200"
-                                        : "bg-slate-50 border-slate-200"
-                                )}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div
-                                            className={cn(
-                                                "w-2.5 h-2.5 rounded-full flex-shrink-0",
-                                                scheduleByDay[day].length === 0
-                                                    ? "bg-gray-300"
-                                                    : day === currentDay
-                                                        ? "bg-blue-600"
-                                                        : "bg-blue-400"
-                                            )}
-                                        />
-                                        <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wide">
-                                            {day}
-                                        </CardTitle>
-                                    </div>
-                                    {day === currentDay && (
-                                        <Badge className="bg-blue-600 text-white text-xs font-medium px-2 py-0">
-                                            Hari Ini
-                                        </Badge>
-                                    )}
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-2">
-                                <div className="space-y-1">
-                                    {scheduleByDay[day].length === 0 ? (
-                                        <div className="py-8 text-center">
-                                            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 mb-2">
-                                                <BookOpen className="h-4 w-4 text-slate-400" />
-                                            </div>
-                                            <p className="text-sm text-muted-foreground">
-                                                Tidak ada jadwal
-                                            </p>
-                                        </div>
-                                    ) : (
-                                        scheduleByDay[day].map((item) => (
-                                            <div
-                                                key={item.id}
-                                                className="group p-2.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all"
-                                            >
-                                                <div className="flex items-start gap-2.5">
-                                                    {/* Time column */}
-                                                    <div className="flex flex-col items-center gap-1 min-w-[70px] pt-0.5">
-                                                        <Badge
-                                                            variant="secondary"
-                                                            className="text-xs font-bold bg-slate-200 text-slate-700 px-2 py-0 h-5"
-                                                        >
-                                                            {item.lessonNumber}
-                                                        </Badge>
-                                                        <div className="text-xs text-slate-600 font-medium whitespace-nowrap">
-                                                            {item.startTime} - {item.endTime}
-                                                        </div>
-                                                    </div>
-                                                    {/* Divider line */}
-                                                    <div className="w-px self-stretch bg-slate-200 group-hover:bg-blue-200 transition-colors" />
-                                                    {/* Content column */}
-                                                    <div className="flex-1 min-w-0">
-                                                        {/* Subject */}
-                                                        <div className="mb-1.5">
-                                                            <Badge
-                                                                variant="outline"
-                                                                className={cn(
-                                                                    "text-xs font-semibold px-2.5 py-1",
-                                                                    getSubjectColor(item.subject)
-                                                                )}
-                                                            >
-                                                                {item.subject}
-                                                            </Badge>
-                                                        </div>
-                                                        {/* Teacher and room */}
-                                                        <div className="space-y-1">
-                                                            <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                                                                <User className="h-3 w-3 text-slate-400 flex-shrink-0" />
-                                                                <span className="truncate">{item.teacher}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                                                                <MapPin className="h-3 w-3 text-slate-400 flex-shrink-0" />
-                                                                <span className="truncate">{item.room}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            )}
-
-            {/* Daily View */}
-            {viewMode === "daily" && (
-                <Card className="border-blue-200 shadow-sm overflow-hidden">
-                    <CardHeader className="pb-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div className="flex items-start gap-3">
-                                <div className="p-2.5 bg-blue-100 rounded-xl">
-                                    <BookOpen className="h-5 w-5 text-blue-700" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg font-semibold text-slate-800">
-                                        {selectedDay === "all" ? "Semua Jadwal" : `Jadwal Hari ${selectedDay}`}
-                                    </CardTitle>
-                                    <CardDescription className="text-sm text-slate-600">
-                                        {filteredSchedule.length} jam pelajaran terdaftar
-                                    </CardDescription>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Badge className="bg-blue-100 text-blue-800 border-blue-200 font-semibold h-7 px-3 rounded-full text-[11px]">
-                                    {filteredSchedule.length} Jam Pelajaran
-                                </Badge>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="bg-slate-50 border-b border-slate-200">
-                                        <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-20">Jam</th>
-                                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-44">Waktu</th>
-                                        {selectedDay === "all" && (
-                                            <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-32">Hari</th>
-                                        )}
-                                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle">Mata Pelajaran</th>
-                                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle">Guru Pengampu</th>
-                                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-40">Lokasi / Ruangan</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredSchedule.map((item) => (
-                                        <tr
-                                            key={item.id}
-                                            className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50/50 transition-colors"
-                                        >
-                                            <td className="p-4 text-center align-middle">
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="font-bold bg-slate-100 text-slate-600 border-slate-200 px-2.5 py-1 text-xs"
-                                                >
-                                                    {item.lessonNumber}
-                                                </Badge>
-                                            </td>
-                                            <td className="p-4 align-middle">
-                                                <div className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md bg-orange-50 text-orange-700 text-xs font-medium border border-orange-100">
-                                                    <Clock className="h-3.5 w-3.5" />
-                                                    <span className="font-mono">{item.startTime} - {item.endTime}</span>
-                                                </div>
-                                            </td>
-                                            {selectedDay === "all" && (
-                                                <td className="p-4 align-middle">
-                                                    <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100 font-semibold">
-                                                        {item.day}
-                                                    </Badge>
-                                                </td>
-                                            )}
-                                            <td className="p-4 align-middle">
-                                                <div className="flex items-center gap-2">
-                                                    <Badge
-                                                        variant="outline"
-                                                        className={cn(
-                                                            "font-semibold px-2.5 py-1 border shadow-sm transition-transform hover:scale-105 cursor-default",
-                                                            getSubjectColor(item.subject).replace("border-300", "border-200")
-                                                        )}
-                                                    >
-                                                        {item.subject}
-                                                    </Badge>
-                                                </div>
-                                            </td>
-                                            <td className="p-4 align-middle">
-                                                <div className="flex items-center gap-2.5">
-                                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-slate-500 shrink-0">
-                                                        <User className="h-4 w-4" />
-                                                    </div>
-                                                    <span className="text-sm font-medium text-slate-700">{item.teacher}</span>
-                                                </div>
-                                            </td>
-                                            <td className="p-4 align-middle">
-                                                <div className="flex items-center gap-2.5">
-                                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-slate-500 shrink-0">
-                                                        <MapPin className="h-4 w-4" />
-                                                    </div>
-                                                    <span className="text-sm font-medium text-slate-700">{item.room}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
-
-            {/* Quick Info */}
-            <Card className="bg-blue-50 border-blue-200">
-                <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                        <div className="p-2.5 bg-blue-100 rounded-xl">
-                            <GraduationCap className="h-5 w-5 text-blue-800" />
-                        </div>
-                        <div>
-                            <h3 className="font-semibold text-blue-900">Informasi Jadwal</h3>
-                            <ul className="mt-2 space-y-1 text-sm text-blue-800">
-                                <li>• Total {totalLessons} jam pelajaran per minggu</li>
-                                <li>• {uniqueSubjects} mata pelajaran berbeda</li>
-                                <li>• Istirahat: 09:15-09:30 dan 11:45-12:30</li>
-                                <li>• Jadwal dapat berubah sewaktu-waktu, silakan periksa pengumuman terbaru</li>
-                            </ul>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+            {/* Info Card */}
+            <ScheduleInfoCard stats={stats} currentDay={currentDay} />
         </div>
     );
 };

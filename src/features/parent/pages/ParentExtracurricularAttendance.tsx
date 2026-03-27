@@ -377,16 +377,6 @@ export const ParentExtracurricularAttendance: React.FC = () => {
                             <X className="h-3.5 w-3.5" />
                         </button>
                     </Badge>
-
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
-                        onClick={() => handleAcademicYearChange("all")}
-                    >
-                        <RotateCcw className="h-3 w-3" />
-                        Hapus Semua
-                    </Button>
                 </div>
             )}
 

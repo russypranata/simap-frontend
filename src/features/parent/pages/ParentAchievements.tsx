@@ -367,16 +367,6 @@ export const ParentAchievements: React.FC = () => {
                             <X className="h-3.5 w-3.5" />
                         </button>
                     </Badge>
-
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
-                        onClick={() => setSelectedAcademicYear("all")}
-                    >
-                        <RotateCcw className="h-3 w-3" />
-                        Hapus Semua
-                    </Button>
                 </div>
             )}
 
@@ -516,16 +506,6 @@ export const ParentAchievements: React.FC = () => {
                                         <X className="h-3.5 w-3.5" />
                                     </button>
                                 </Badge>
-
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
-                                    onClick={() => setLevelFilter("all")}
-                                >
-                                    <RotateCcw className="h-3 w-3" />
-                                    Hapus Semua
-                                </Button>
                             </div>
                         )}
                     </div>

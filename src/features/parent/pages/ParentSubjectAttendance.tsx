@@ -522,20 +522,23 @@ export const ParentSubjectAttendance: React.FC = () => {
                         </Badge>
                     )}
 
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
-                        onClick={() => {
-                            setSelectedAcademicYear("all");
-                            setSelectedSemester("all");
-                            setSelectedSubject("all");
-                            triggerFetchingOverlay();
-                        }}
-                    >
-                        <RotateCcw className="h-3 w-3" />
-                        Hapus Semua
-                    </Button>
+                    {/* Show "Hapus Semua" only if more than 1 filter is active */}
+                    {(selectedAcademicYear !== "all" ? 1 : 0) + (selectedSemester !== "all" ? 1 : 0) + (selectedSubject !== "all" ? 1 : 0) > 1 && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
+                            onClick={() => {
+                                setSelectedAcademicYear("all");
+                                setSelectedSemester("all");
+                                setSelectedSubject("all");
+                                triggerFetchingOverlay();
+                            }}
+                        >
+                            <RotateCcw className="h-3 w-3" />
+                            Hapus Semua
+                        </Button>
+                    )}
                 </div>
             )}
 

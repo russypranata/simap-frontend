@@ -443,18 +443,21 @@ export const ParentDailyAttendance: React.FC = () => {
                             </Badge>
                         )}
 
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
-                            onClick={() => {
-                                setSelectedYearId(academicYears[0]?.id);
-                                setSelectedSemesterId(academicYears[0]?.semesters[0]?.id);
-                            }}
-                        >
-                            <RotateCcw className="h-3 w-3" />
-                            Hapus Semua
-                        </Button>
+                        {/* Show "Hapus Semua" only if more than 1 filter is active */}
+                        {(selectedYearId !== academicYears[0]?.id ? 1 : 0) + (selectedSemesterId !== academicYears[0]?.semesters[0]?.id ? 1 : 0) > 1 && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
+                                onClick={() => {
+                                    setSelectedYearId(academicYears[0]?.id);
+                                    setSelectedSemesterId(academicYears[0]?.semesters[0]?.id);
+                                }}
+                            >
+                                <RotateCcw className="h-3 w-3" />
+                                Hapus Semua
+                            </Button>
+                        )}
                     </div>
                 )}
 

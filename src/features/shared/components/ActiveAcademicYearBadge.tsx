@@ -3,7 +3,7 @@
 import React from 'react';
 import { useAcademicYear } from '@/context/AcademicYearContext';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Layers } from 'lucide-react';
+import { Calendar, BookOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
@@ -26,7 +26,7 @@ export const ActiveAcademicYearBadge: React.FC = () => {
             </div>
             <div className="h-4 w-[1px] bg-border" />
             <div className="flex items-center gap-2 text-blue-800">
-                <Layers className="h-4 w-4 text-blue-800/70" />
+                <BookOpen className="h-4 w-4 text-blue-800/70" />
                 <span className="text-sm font-medium">
                     Semester {semesterLabel}
                 </span>
