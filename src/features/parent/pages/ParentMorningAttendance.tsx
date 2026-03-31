@@ -36,7 +36,8 @@ import {
     X,
     MapPin,
     UserCheck,
-    SlidersHorizontal
+    SlidersHorizontal,
+    BookOpen,
 } from "lucide-react";
 import {
     Dialog,
@@ -343,8 +344,8 @@ export const ParentMorningAttendance: React.FC = () => {
 
                     {selectedSemesterId !== "all" && (
                         <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                            <Filter className="h-3.5 w-3.5" />
-                            {
+                            <BookOpen className="h-3.5 w-3.5" />
+                            Semester {
                                 selectedYearId !== "all"
                                     ? academicYears.find(y => y.id === selectedYearId)?.semesters.find(s => s.id === selectedSemesterId)?.name
                                     : selectedSemesterId === "1" ? "Ganjil" : "Genap"

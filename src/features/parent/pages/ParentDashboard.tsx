@@ -1,28 +1,24 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
     Calendar,
-    Award,
     GraduationCap,
     Clock,
     CheckCircle,
     Trophy,
-    Megaphone,
     User,
     ChevronRight,
     TrendingUp,
-    TrendingDown,
-    MapPin,
     AlertTriangle,
     ClipboardList,
-    BookOpen,
+    MapPin,
+    RefreshCw,
+    Users,
+    Timer,
+    Moon,
     Activity,
-    XCircle,
-    AlertCircle,
-    Star,
-    Minus,
 } from 'lucide-react';
 import {
     Card,
@@ -33,215 +29,153 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { getParentProfile } from '@/features/parent/services/parentProfileService';
-import { mockParentProfile } from '@/features/parent/data/mockParentData';
+import { useParentDashboard } from '../hooks/useParentDashboard';
 
-// Types
-interface TodayScheduleItem {
-    id: number;
-    time: string;
-    subject: string;
-    teacher: string;
-    room: string;
-}
+// ==================== SKELETON ====================
 
-interface RecentAnnouncement {
-    id: number;
+const DashboardSkeleton: React.FC = () => (
+    <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-2">
+                <Skeleton className="h-10 w-64" />
+                <Skeleton className="h-4 w-48" />
+            </div>
+            <Skeleton className="h-9 w-[220px]" />
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="rounded-xl bg-white border border-slate-100 shadow-sm p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                        <Skeleton className="h-9 w-9 rounded-xl" />
+                        <Skeleton className="h-3 w-12" />
+                    </div>
+                    <Skeleton className="h-7 w-16" />
+                    <Skeleton className="h-3 w-24" />
+                </div>
+            ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {Array.from({ length: 2 }).map((_, i) => (
+                <Card key={i}>
+                    <CardHeader className="pb-3">
+                        <div className="flex items-center gap-3">
+                            <Skeleton className="h-9 w-9 rounded-lg" />
+                            <div className="space-y-1">
+                                <Skeleton className="h-5 w-32" />
+                                <Skeleton className="h-3 w-48" />
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        {Array.from({ length: 3 }).map((_, j) => (
+                            <Skeleton key={j} className="h-16 w-full rounded-xl" />
+                        ))}
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    </div>
+);
+
+// ==================== ERROR STATE ====================
+
+const ErrorState: React.FC<{ error: string; onRetry: () => void }> = ({ error, onRetry }) => (
+    <div className="space-y-6">
+        <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight">
+                <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Dashboard </span>
+                <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Orang Tua</span>
+            </h1>
+        </div>
+        <Card className="border-red-200 shadow-sm">
+            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="p-4 bg-red-100 rounded-full mb-4">
+                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
+                <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
+                <Button onClick={onRetry} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50">
+                    <RefreshCw className="h-4 w-4" />
+                    Coba Lagi
+                </Button>
+            </CardContent>
+        </Card>
+    </div>
+);
+
+// ==================== STAT CARD ====================
+
+const StatCard: React.FC<{
     title: string;
-    category: string;
-    date: string;
-    isNew: boolean;
-}
+    value: string | number;
+    subtitle: string;
+    icon: React.ElementType;
+    color: string;
+    href: string;
+    alert?: boolean;
+}> = ({ title, value, subtitle, icon: Icon, color, href, alert }) => (
+    <Link href={href}>
+        <div className={cn(
+            "group relative overflow-hidden rounded-xl bg-white border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 h-full",
+            `hover:border-${color}-200`
+        )}>
+            <div className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                    <div className={cn("p-2.5 rounded-xl group-hover:scale-110 transition-transform duration-300", `bg-${color}-50`)}>
+                        <Icon className={cn("h-5 w-5", `text-${color}-600`)} />
+                    </div>
+                    {alert ? (
+                        <span className="flex items-center gap-1">
+                            <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", `bg-${color}-500`)} />
+                            <span className={cn("text-[10px] font-semibold", `text-${color}-600`)}>Cek</span>
+                        </span>
+                    ) : (
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{title}</span>
+                    )}
+                </div>
+                <p className={cn("text-2xl font-bold tabular-nums", alert ? `text-${color}-600` : "text-slate-800")}>{value}</p>
+                <p className="text-[11px] text-muted-foreground mt-1 font-medium">{subtitle}</p>
+            </div>
+        </div>
+    </Link>
+);
 
-interface SubjectScore {
-    subject: string;
-    score: number;
-    grade: string;
-}
-
-interface MonthlyAttendance {
-    hadir: number;
-    sakit: number;
-    izin: number;
-    alpa: number;
-    totalSchoolDays: number;
-}
-
-interface EkskulSummary {
-    id: number;
-    name: string;
-    category: string;
-    schedule: string;
-    attendanceRate: number;
-    achievements: number;
-}
-
-// Mock data
-const mockTodaySchedule: TodayScheduleItem[] = [
-    {
-        id: 1,
-        time: '07:00',
-        subject: 'Biologi',
-        teacher: 'Bu Ani',
-        room: 'Lab Biologi',
-    },
-    {
-        id: 2,
-        time: '08:30',
-        subject: 'Matematika',
-        teacher: 'Pak Ahmad',
-        room: 'XII IPA 1',
-    },
-    {
-        id: 3,
-        time: '09:30',
-        subject: 'Bahasa Indonesia',
-        teacher: 'Bu Dewi',
-        room: 'XII IPA 1',
-    },
-    { id: 4, time: '10:15', subject: 'BK', teacher: 'Bu Linda', room: 'R. BK' },
-];
-
-const mockAnnouncements: RecentAnnouncement[] = [
-    {
-        id: 1,
-        title: 'Jadwal Ujian Akhir Semester Ganjil 2025/2026',
-        category: 'Penting',
-        date: '10 Jan',
-        isNew: true,
-    },
-    {
-        id: 2,
-        title: 'Undangan Rapat Orang Tua Wali Murid',
-        category: 'Umum',
-        date: '9 Jan',
-        isNew: true,
-    },
-    {
-        id: 3,
-        title: 'Laporan Perkembangan Akademik Tengah Semester',
-        category: 'Akademik',
-        date: '8 Jan',
-        isNew: false,
-    },
-];
-
-const mockSubjectScores: SubjectScore[] = [
-    { subject: 'Pendidikan Agama', score: 93, grade: 'A' },
-    { subject: 'Biologi', score: 90, grade: 'A' },
-    { subject: 'TIK', score: 90, grade: 'A' },
-    { subject: 'Seni Budaya', score: 88, grade: 'A-' },
-    { subject: 'Bahasa Inggris', score: 86, grade: 'A-' },
-    { subject: 'PJOK', score: 86, grade: 'A-' },
-    { subject: 'Matematika', score: 85, grade: 'A-' },
-    { subject: 'Kimia', score: 84, grade: 'A-' },
-    { subject: 'PKn', score: 82, grade: 'B+' },
-    { subject: 'Prakarya', score: 81, grade: 'B+' },
-    { subject: 'Fisika', score: 80, grade: 'B+' },
-    { subject: 'Bahasa Indonesia', score: 80, grade: 'B+' },
-    { subject: 'Sejarah', score: 78, grade: 'B' },
-];
-
-const mockMonthlyAttendance: MonthlyAttendance = {
-    hadir: 19,
-    sakit: 1,
-    izin: 1,
-    alpa: 0,
-    totalSchoolDays: 21,
-};
-
-const mockEkskulSummary: EkskulSummary[] = [
-    {
-        id: 1,
-        name: 'Pramuka',
-        category: 'Kepramukaan',
-        schedule: 'Jumat, 14:00-16:00',
-        attendanceRate: 92,
-        achievements: 3,
-    },
-    {
-        id: 2,
-        name: 'Basket',
-        category: 'Olahraga',
-        schedule: 'Selasa & Kamis, 15:00-17:00',
-        attendanceRate: 88,
-        achievements: 1,
-    },
-];
-
-// Helper
-const getScoreBarColor = (score: number): string => {
-    if (score >= 90) return 'bg-emerald-500';
-    if (score >= 80) return 'bg-blue-500';
-    if (score >= 75) return 'bg-amber-500';
-    return 'bg-red-500';
-};
-
-const getAttendanceRateColor = (rate: number): string => {
-    if (rate >= 90) return 'text-emerald-600';
-    if (rate >= 75) return 'text-amber-600';
-    return 'text-red-600';
-};
+// ==================== MAIN COMPONENT ====================
 
 export const ParentDashboard: React.FC = () => {
-    const [userName, setUserName] = useState<string>('Orang Tua');
-    const [currentTime, setCurrentTime] = useState(new Date());
-
-    useEffect(() => {
-        const fetchUserName = async () => {
-            try {
-                const profile = await getParentProfile();
-                if (profile && profile.name) {
-                    setUserName(profile.name);
-                }
-            } catch (error) {
-                console.error(
-                    'Failed to fetch user name for dashboard:',
-                    error,
-                );
-            }
-        };
-        fetchUserName();
-
-        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
-        return () => clearInterval(timer);
-    }, []);
+    const {
+        data,
+        children,
+        selectedChildId,
+        setSelectedChildId,
+        isLoading,
+        isFetching,
+        error,
+        refetch,
+    } = useParentDashboard();
 
     const greeting = useMemo(() => {
-        const hour = currentTime.getHours();
+        const hour = new Date().getHours();
         if (hour < 11) return 'Selamat pagi';
         if (hour < 15) return 'Selamat siang';
         if (hour < 18) return 'Selamat sore';
         return 'Selamat malam';
-    }, [currentTime]);
+    }, []);
 
-    // Mock stats
-    const stats = {
-        childName: mockParentProfile.children[0].name,
-        childClass: mockParentProfile.children[0].class,
-        averageScore: 85.2,
-        rank: 5,
-        attendanceRate: 96,
-        ekstrakurikuler: 2,
-        unreadAnnouncements: 2,
-        violationCount: 0,
-        lateCount: 0,
-        achievementsCount: 3,
-        prayerRate: 90,
-    };
+    if (isLoading) return <DashboardSkeleton />;
+    if (error) return <ErrorState error={error} onRetry={refetch} />;
+    if (!data) return null;
 
-    // Computed values
-    const attendancePercentage = Math.round(
-        (mockMonthlyAttendance.hadir / mockMonthlyAttendance.totalSchoolDays) * 100,
-    );
-
-    const topSubjects = mockSubjectScores.slice(0, 3);
-    const bottomSubjects = [...mockSubjectScores].slice(-3).reverse();
-
-    const previousAverage = 84.5;
-    const averageTrend = stats.averageScore - previousAverage;
+    const { stats, todaySchedule, topSubjects, bottomSubjects, monthlyAttendance, ekskulSummary, hasWarning } = data;
 
     return (
         <div className="space-y-6">
@@ -250,108 +184,62 @@ export const ParentDashboard: React.FC = () => {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
-                                Dashboard{' '}
-                            </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
-                                Orang Tua
-                            </span>
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Dashboard </span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Orang Tua</span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
                             <User className="h-5 w-5" />
                         </div>
                     </div>
-                    <p className="text-muted-foreground mt-1">
-                        {greeting},{' '}
-                        <span className="font-medium text-foreground">
-                            {userName}
-                        </span>
-                        !
+                    <p className="text-muted-foreground mt-2">
+                        {greeting}, <span className="font-semibold text-foreground">{data.parentName}</span>
+                        {data.child && (
+                            <span className="text-slate-500"> · Memantau perkembangan <span className="font-medium text-foreground">{data.child.name}</span> ({data.child.class})</span>
+                        )}
                     </p>
                 </div>
-                {/* Child Info Badge */}
-                <div className="flex items-center gap-2 p-3 bg-white rounded-lg border shadow-sm">
-                    <div className="p-2 bg-blue-100 rounded-full text-blue-700">
-                         <User className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <p className="text-xs text-muted-foreground">Memantau</p>
-                        <p className="text-sm font-bold text-slate-900">{stats.childName}</p>
-                    </div>
-                    <Badge className="ml-2 bg-white text-blue-800 hover:bg-white border-transparent gap-1">
-                        <GraduationCap className="h-3.5 w-3.5" />
-                        {stats.childClass}
-                    </Badge>
-                </div>
+
+                {/* Child Selector */}
+                {children.length > 1 && (
+                    <Select value={selectedChildId} onValueChange={setSelectedChildId}>
+                        <SelectTrigger className="w-full sm:w-[220px] h-9 bg-white shadow-sm border-slate-200">
+                            <Users className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
+                            <div className="flex-1 text-left truncate">
+                                <SelectValue placeholder="Pilih Anak" />
+                            </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {children.map(child => (
+                                <SelectItem key={child.id} value={child.id}>
+                                    {child.name} — {child.class}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
             </div>
 
             {/* Warning Banner */}
-            {(stats.violationCount >= 3 || stats.averageScore < 75) && (
-                <Card
-                    className={cn(
-                        'border-2',
-                        stats.violationCount >= 5 || stats.averageScore < 70
-                            ? 'bg-red-50 border-red-300'
-                            : 'bg-amber-50 border-amber-300',
-                    )}
-                >
+            {hasWarning && (
+                <Card className={cn('border-2', stats.violationCount >= 5 || stats.averageScore < 70 ? 'bg-red-50 border-red-300' : 'bg-amber-50 border-amber-300')}>
                     <CardContent className="p-4">
                         <div className="flex items-start gap-3">
-                            <div
-                                className={cn(
-                                    'p-2 rounded-lg',
-                                    stats.violationCount >= 5 ||
-                                        stats.averageScore < 70
-                                        ? 'bg-red-100'
-                                        : 'bg-amber-100',
-                                )}
-                            >
-                                <AlertTriangle
-                                    className={cn(
-                                        'h-5 w-5',
-                                        stats.violationCount >= 5 ||
-                                            stats.averageScore < 70
-                                            ? 'text-red-600'
-                                            : 'text-amber-600',
-                                    )}
-                                />
+                            <div className={cn('p-2 rounded-lg', stats.violationCount >= 5 || stats.averageScore < 70 ? 'bg-red-100' : 'bg-amber-100')}>
+                                <AlertTriangle className={cn('h-5 w-5', stats.violationCount >= 5 || stats.averageScore < 70 ? 'text-red-600' : 'text-amber-600')} />
                             </div>
                             <div className="flex-1">
-                                <h3
-                                    className={cn(
-                                        'font-semibold',
-                                        stats.violationCount >= 5 ||
-                                            stats.averageScore < 70
-                                            ? 'text-red-900'
-                                            : 'text-amber-900',
-                                    )}
-                                >
-                                    Perhatian Diperlukan untuk {stats.childName}!
+                                <h3 className={cn('font-semibold', stats.violationCount >= 5 || stats.averageScore < 70 ? 'text-red-900' : 'text-amber-900')}>
+                                    Perhatian Diperlukan untuk {data.child.name}!
                                 </h3>
-                                <p
-                                    className={cn(
-                                        'text-sm mt-1',
-                                        stats.violationCount >= 5 ||
-                                            stats.averageScore < 70
-                                            ? 'text-red-800'
-                                            : 'text-amber-800',
-                                    )}
-                                >
-                                    {stats.violationCount >= 3 &&
-                                        `Anak Anda memiliki ${stats.violationCount} catatan pelanggaran. `}
-                                    {stats.averageScore < 75 &&
-                                        `Nilai rata-rata di bawah KKM. `}
+                                <p className={cn('text-sm mt-1', stats.violationCount >= 5 || stats.averageScore < 70 ? 'text-red-800' : 'text-amber-800')}>
+                                    {stats.violationCount >= 3 && `Anak Anda memiliki ${stats.violationCount} catatan pelanggaran. `}
+                                    {stats.averageScore < 75 && `Nilai rata-rata di bawah KKM. `}
                                     Mohon pantau perkembangan dan hubungi Wali Kelas jika diperlukan.
                                 </p>
                             </div>
                             <Link href="/parent/behavior">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="gap-1 text-amber-800 border-amber-300 hover:bg-amber-100"
-                                >
-                                    Lihat Detail
-                                    <ChevronRight className="h-4 w-4" />
+                                <Button variant="outline" size="sm" className="gap-1 text-amber-800 border-amber-300 hover:bg-amber-100">
+                                    Lihat Detail <ChevronRight className="h-4 w-4" />
                                 </Button>
                             </Link>
                         </div>
@@ -361,592 +249,228 @@ export const ParentDashboard: React.FC = () => {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-                {/* Akademik */}
-                <Link href="/parent/academic/grades">
-                    <div className="group relative overflow-hidden rounded-xl bg-white border border-slate-100 shadow-sm transition-all duration-300 hover:border-blue-200 hover:shadow-md hover:-translate-y-0.5 h-full">
-                        <div className="p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="p-2.5 bg-blue-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <GraduationCap className="h-5 w-5 text-blue-600" />
-                                </div>
-                                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Nilai</span>
-                            </div>
-                            <p className="text-2xl font-bold text-slate-800 tabular-nums">
-                                {stats.averageScore}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground mt-1 font-medium">
-                                Rata-rata Akademik
-                            </p>
-                        </div>
-                    </div>
-                </Link>
-
-                {/* Kehadiran Harian */}
-                <Link href="/parent/attendance/daily">
-                    <div className="group relative overflow-hidden rounded-xl bg-white border border-slate-100 shadow-sm transition-all duration-300 hover:border-green-200 hover:shadow-md hover:-translate-y-0.5 h-full">
-                        <div className="p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="p-2.5 bg-green-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <CheckCircle className="h-5 w-5 text-green-600" />
-                                </div>
-                                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Kehadiran</span>
-                            </div>
-                            <p className="text-2xl font-bold text-slate-800 tabular-nums">
-                                {stats.attendanceRate}%
-                            </p>
-                            <p className="text-[11px] text-muted-foreground mt-1 font-medium">
-                                Hadir di Sekolah
-                            </p>
-                        </div>
-                    </div>
-                </Link>
-
-                {/* Keterlambatan Pagi */}
-                <Link href="/parent/attendance/morning">
-                    <div className="group relative overflow-hidden rounded-xl bg-white border border-slate-100 shadow-sm transition-all duration-300 hover:border-amber-200 hover:shadow-md hover:-translate-y-0.5 h-full">
-                        <div className="p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="p-2.5 bg-amber-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <Clock className="h-5 w-5 text-amber-600" />
-                                </div>
-                                {stats.lateCount > 0 ? (
-                                    <span className="flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-                                        <span className="text-[10px] text-amber-600 font-semibold">Cek</span>
-                                    </span>
-                                ) : (
-                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Pagi</span>
-                                )}
-                            </div>
-                            <p className={cn("text-2xl font-bold tabular-nums", stats.lateCount > 0 ? "text-amber-600" : "text-slate-800")}>
-                                {stats.lateCount}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground mt-1 font-medium">
-                                Kali Terlambat
-                            </p>
-                        </div>
-                    </div>
-                </Link>
-
-                {/* Presensi Sholat */}
-                <Link href="/parent/attendance/prayer">
-                    <div className="group relative overflow-hidden rounded-xl bg-white border border-slate-100 shadow-sm transition-all duration-300 hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5 h-full">
-                        <div className="p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="p-2.5 bg-indigo-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <Calendar className="h-5 w-5 text-indigo-600" />
-                                </div>
-                                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Ibadah</span>
-                            </div>
-                            <p className="text-2xl font-bold text-slate-800 tabular-nums">
-                                {stats.prayerRate}%
-                            </p>
-                            <p className="text-[11px] text-muted-foreground mt-1 font-medium">
-                                Keaktifan Sholat
-                            </p>
-                        </div>
-                    </div>
-                </Link>
-
-                {/* Prestasi */}
-                <Link href="/parent/academic/achievements">
-                    <div className="group relative overflow-hidden rounded-xl bg-white border border-slate-100 shadow-sm transition-all duration-300 hover:border-purple-200 hover:shadow-md hover:-translate-y-0.5 h-full">
-                        <div className="p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="p-2.5 bg-purple-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <Trophy className="h-5 w-5 text-purple-600" />
-                                </div>
-                                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Prestasi</span>
-                            </div>
-                            <p className="text-2xl font-bold text-slate-800 tabular-nums">
-                                {stats.achievementsCount}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground mt-1 font-medium">
-                                Penghargaan Siswa
-                            </p>
-                        </div>
-                    </div>
-                </Link>
-
-                {/* Catatan Perilaku */}
-                <Link href="/parent/behavior">
-                    <div className="group relative overflow-hidden rounded-xl bg-white border border-slate-100 shadow-sm transition-all duration-300 hover:border-rose-200 hover:shadow-md hover:-translate-y-0.5 h-full">
-                        <div className="p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="p-2.5 bg-rose-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                    <ClipboardList className="h-5 w-5 text-rose-600" />
-                                </div>
-                                {stats.violationCount > 0 ? (
-                                    <span className="flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse" />
-                                        <span className="text-[10px] text-rose-600 font-semibold">Cek</span>
-                                    </span>
-                                ) : (
-                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-green-500">Aman</span>
-                                )}
-                            </div>
-                            <p className={cn("text-2xl font-bold tabular-nums", stats.violationCount > 0 ? "text-rose-600" : "text-slate-800")}>
-                                {stats.violationCount}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground mt-1 font-medium">
-                                Pelanggaran Aktif
-                            </p>
-                        </div>
-                    </div>
-                </Link>
+                <StatCard title="Nilai" value={stats.averageScore} subtitle="Rata-rata Akademik" icon={GraduationCap} color="blue" href="/parent/academic/grades" />
+                <StatCard title="Kehadiran" value={`${stats.attendanceRate}%`} subtitle="Hadir di Sekolah" icon={CheckCircle} color="green" href="/parent/attendance/daily" />
+                <StatCard title="Pagi" value={stats.lateCount} subtitle="Kali Terlambat" icon={Timer} color="amber" href="/parent/attendance/morning" alert={stats.lateCount > 0} />
+                <StatCard title="Ibadah" value={`${stats.prayerRate}%`} subtitle="Keaktifan Sholat" icon={Moon} color="indigo" href="/parent/attendance/prayer" />
+                <StatCard title="Prestasi" value={stats.achievementsCount} subtitle="Penghargaan Siswa" icon={Trophy} color="purple" href="/parent/academic/achievements" />
+                <StatCard title="Perilaku" value={stats.violationCount} subtitle="Pelanggaran Aktif" icon={ClipboardList} color="rose" href="/parent/behavior" alert={stats.violationCount > 0} />
             </div>
 
-            {/* Row 1: Schedule + Announcements */}
+            {/* Row: Schedule + Attendance */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Today's Schedule */}
                 <Card className="border-slate-100 shadow-sm overflow-hidden">
-                    <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                    <CardHeader className="p-4 border-b border-slate-50 bg-slate-50/50">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-blue-100 rounded-lg">
                                     <Calendar className="h-5 w-5 text-blue-700" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg text-slate-800">
-                                        Jadwal Hari Ini
-                                    </CardTitle>
+                                    <CardTitle className="text-lg text-slate-800">Jadwal Hari Ini</CardTitle>
                                     <CardDescription>
-                                        {currentTime.toLocaleDateString(
-                                            'id-ID',
-                                            {
-                                                weekday: 'long',
-                                                day: 'numeric',
-                                                month: 'long',
-                                            },
-                                        )}
+                                        {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
                                     </CardDescription>
                                 </div>
                             </div>
                             <Link href="/parent/academic/schedule">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="gap-1 text-blue-700 hover:text-blue-800 hover:bg-blue-50"
-                                >
-                                    Selengkapnya
-                                    <ChevronRight className="h-4 w-4" />
+                                <Button variant="ghost" size="sm" className="gap-1 text-blue-700 hover:text-blue-800 hover:bg-blue-50">
+                                    Selengkapnya <ChevronRight className="h-4 w-4" />
                                 </Button>
                             </Link>
                         </div>
                     </CardHeader>
                     <CardContent className="p-4">
-                        <div className="space-y-3">
-                            {mockTodaySchedule.map((item, index) => (
-                                <div
-                                    key={item.id}
-                                    className={cn(
-                                        'group flex items-center gap-4 p-3 rounded-xl border transition-all duration-200',
-                                        index === 0
-                                            ? 'bg-blue-50/50 border-blue-200'
-                                            : 'bg-white border-slate-100 hover:border-blue-100 hover:shadow-sm',
-                                    )}
-                                >
-                                    <div className="text-center min-w-[50px] shrink-0">
-                                        <p
-                                            className={cn(
-                                                'text-sm font-bold',
-                                                index === 0
-                                                    ? 'text-blue-700'
-                                                    : 'text-slate-600',
-                                            )}
-                                        >
-                                            {item.time}
-                                        </p>
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className={cn("font-semibold text-sm truncate", index === 0 ? "text-blue-900" : "text-slate-800")}>
-                                            {item.subject}
-                                        </p>
-                                        <div className="flex flex-wrap items-center gap-3 mt-1 text-[11px] font-medium text-slate-500">
-                                            <span className="flex items-center gap-1.5">
-                                                <User className="h-3 w-3 opacity-70" />
-                                                <span className="truncate">{item.teacher}</span>
-                                            </span>
-                                            <span className="flex items-center gap-1.5">
-                                                <MapPin className="h-3 w-3 opacity-70" />
-                                                <span className="truncate">{item.room}</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    {index === 0 && (
-                                        <Badge className="bg-blue-100 text-blue-700 border-0 hover:bg-blue-100 px-2 py-0.5 text-[10px]">
-                                            Berlangsung
-                                        </Badge>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Recent Announcements */}
-                <Card className="border-slate-100 shadow-sm overflow-hidden">
-                    <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-amber-100 rounded-lg">
-                                    <Megaphone className="h-5 w-5 text-amber-600" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg text-slate-800">
-                                        Pengumuman
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Informasi terbaru sekolah
-                                    </CardDescription>
-                                </div>
+                        {todaySchedule.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                                <Calendar className="h-8 w-8 text-slate-300 mb-2" />
+                                <p className="text-sm text-slate-500">Tidak ada jadwal hari ini</p>
                             </div>
-                            <Link href="/parent/announcements">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="gap-1 text-slate-600 hover:text-slate-800 hover:bg-slate-100"
-                                >
-                                    Lihat Semua
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </Link>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                        <div className="space-y-3">
-                            {mockAnnouncements.map((item) => (
-                                <Link
-                                    key={item.id}
-                                    href="/parent/announcements"
-                                    className="group flex flex-col gap-2 p-3.5 rounded-xl border border-slate-100 bg-white hover:border-slate-300 hover:shadow-sm transition-all duration-200"
-                                >
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            <Badge
-                                                variant="outline"
-                                                className={cn(
-                                                    'text-[10px] px-2 py-0',
-                                                    item.category === 'Penting'
-                                                        ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                                        : item.category === 'Akademik'
-                                                            ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                                            : 'bg-amber-50 text-amber-700 border-amber-200',
-                                                )}
-                                            >
-                                                {item.category}
-                                            </Badge>
-                                            <span className="text-[11px] font-medium text-slate-400">
-                                                {item.date}
-                                            </span>
+                        ) : (
+                            <div className="space-y-3">
+                                {todaySchedule.map((item, index) => (
+                                    <div key={item.id} className={cn(
+                                        'group flex items-center gap-4 p-3 rounded-xl border transition-all duration-200',
+                                        item.isOngoing ? 'bg-blue-50/50 border-blue-200' : 'bg-white border-slate-100 hover:border-blue-100 hover:shadow-sm'
+                                    )}>
+                                        <div className="text-center min-w-[50px] shrink-0">
+                                            <p className={cn('text-sm font-bold', item.isOngoing ? 'text-blue-700' : 'text-slate-600')}>{item.time}</p>
                                         </div>
-                                        {item.isNew && (
-                                            <span className="flex items-center gap-1 shrink-0">
-                                                <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse" />
-                                                <span className="text-[10px] text-rose-600 font-semibold">Baru</span>
-                                            </span>
+                                        <div className="flex-1 min-w-0">
+                                            <p className={cn('font-semibold text-sm truncate', item.isOngoing ? 'text-blue-900' : 'text-slate-800')}>{item.subject}</p>
+                                            <div className="flex flex-wrap items-center gap-3 mt-1 text-[11px] font-medium text-slate-500">
+                                                <span className="flex items-center gap-1.5"><User className="h-3 w-3 opacity-70" />{item.teacher}</span>
+                                                <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3 opacity-70" />{item.room}</span>
+                                            </div>
+                                        </div>
+                                        {item.isOngoing && (
+                                            <Badge className="bg-blue-100 text-blue-700 border-0 hover:bg-blue-100 px-2 py-0.5 text-[10px]">Berlangsung</Badge>
                                         )}
                                     </div>
-                                    <p className="font-semibold text-sm text-slate-800 leading-snug group-hover:text-amber-700 transition-colors line-clamp-2">
-                                        {item.title}
-                                    </p>
-                                </Link>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
-            </div>
 
-            {/* Row 2: Kehadiran Bulan Ini + Performa Akademik */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Kehadiran Bulan Ini */}
+                {/* Monthly Attendance */}
                 <Card className="border-slate-100 shadow-sm overflow-hidden">
-                    <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                    <CardHeader className="p-4 border-b border-slate-50 bg-slate-50/50">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-green-100 rounded-lg">
                                     <CheckCircle className="h-5 w-5 text-green-700" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg text-slate-800">
-                                        Kehadiran Bulan Ini
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Ringkasan presensi harian {currentTime.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
-                                    </CardDescription>
+                                    <CardTitle className="text-lg text-slate-800">Kehadiran Bulan Ini</CardTitle>
+                                    <CardDescription>Rekap presensi harian</CardDescription>
                                 </div>
                             </div>
                             <Link href="/parent/attendance/daily">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="gap-1 text-green-700 hover:text-green-800 hover:bg-green-50"
-                                >
-                                    Detail
-                                    <ChevronRight className="h-4 w-4" />
+                                <Button variant="ghost" size="sm" className="gap-1 text-green-700 hover:text-green-800 hover:bg-green-50">
+                                    Detail <ChevronRight className="h-4 w-4" />
                                 </Button>
                             </Link>
                         </div>
                     </CardHeader>
                     <CardContent className="p-4">
-                        {/* Attendance percentage highlight */}
-                        <div className="flex items-center gap-4 mb-5 p-3.5 rounded-xl bg-green-50/70 border border-green-100">
-                            <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-white border border-green-200 shadow-sm">
-                                <span className={cn("text-xl font-bold tabular-nums", getAttendanceRateColor(attendancePercentage))}>
-                                    {attendancePercentage}%
-                                </span>
-                            </div>
-                            <div>
-                                <p className="text-sm font-semibold text-green-900">Tingkat Kehadiran</p>
-                                <p className="text-xs text-green-700 mt-0.5">
-                                    {mockMonthlyAttendance.hadir} dari {mockMonthlyAttendance.totalSchoolDays} hari sekolah
-                                </p>
+                        <div className="flex items-center justify-center mb-4">
+                            <div className="text-center">
+                                <p className="text-4xl font-bold text-green-600 tabular-nums">{monthlyAttendance.percentage}%</p>
+                                <p className="text-sm text-slate-500 mt-1">Tingkat Kehadiran</p>
                             </div>
                         </div>
-
-                        {/* Status breakdown */}
-                        <div className="space-y-3">
-                            {[
-                                { label: 'Hadir', count: mockMonthlyAttendance.hadir, icon: CheckCircle, color: 'green' as const },
-                                { label: 'Sakit', count: mockMonthlyAttendance.sakit, icon: AlertCircle, color: 'yellow' as const },
-                                { label: 'Izin', count: mockMonthlyAttendance.izin, icon: Clock, color: 'blue' as const },
-                                { label: 'Alpa', count: mockMonthlyAttendance.alpa, icon: XCircle, color: 'red' as const },
-                            ].map((item) => {
-                                const percentage = (item.count / mockMonthlyAttendance.totalSchoolDays) * 100;
-                                const colorMap = {
-                                    green: { bg: 'bg-green-50', text: 'text-green-700', icon: 'text-green-600', bar: '[&>div]:bg-green-500' },
-                                    yellow: { bg: 'bg-yellow-50', text: 'text-yellow-700', icon: 'text-yellow-600', bar: '[&>div]:bg-yellow-500' },
-                                    blue: { bg: 'bg-blue-50', text: 'text-blue-700', icon: 'text-blue-600', bar: '[&>div]:bg-blue-500' },
-                                    red: { bg: 'bg-red-50', text: 'text-red-700', icon: 'text-red-600', bar: '[&>div]:bg-red-500' },
-                                };
-                                const c = colorMap[item.color];
-                                return (
-                                    <div key={item.label} className="flex items-center gap-3">
-                                        <div className={cn("p-1.5 rounded-lg", c.bg)}>
-                                            <item.icon className={cn("h-3.5 w-3.5", c.icon)} />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="text-xs font-medium text-slate-700">{item.label}</span>
-                                                <span className={cn("text-xs font-bold tabular-nums", c.text)}>
-                                                    {item.count} hari
-                                                </span>
-                                            </div>
-                                            <Progress value={percentage} className={cn("h-1.5", c.bar)} />
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Performa Akademik */}
-                <Card className="border-slate-100 shadow-sm overflow-hidden">
-                    <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-100 rounded-lg">
-                                    <BookOpen className="h-5 w-5 text-blue-700" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg text-slate-800">
-                                        Performa Akademik
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Nilai tertinggi & terendah semester ini
-                                    </CardDescription>
-                                </div>
+                        <div className="grid grid-cols-4 gap-3">
+                            <div className="text-center p-3 rounded-xl bg-green-50 border border-green-200">
+                                <p className="text-xl font-bold text-green-600 tabular-nums">{monthlyAttendance.hadir}</p>
+                                <p className="text-xs text-slate-600 mt-1">Hadir</p>
                             </div>
-                            <Link href="/parent/academic/grades">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="gap-1 text-blue-700 hover:text-blue-800 hover:bg-blue-50"
-                                >
-                                    Detail
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </Link>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                        {/* Average & Rank summary */}
-                        <div className="flex gap-3 mb-5">
-                            <div className="flex-1 p-3.5 rounded-xl bg-blue-50/70 border border-blue-100">
-                                <p className="text-[11px] text-blue-600 font-semibold uppercase tracking-wider mb-1">Rata-rata</p>
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-xl font-bold text-blue-900 tabular-nums">{stats.averageScore}</span>
-                                    {averageTrend !== 0 && (
-                                        <span className={cn("flex items-center gap-0.5 text-xs font-medium", averageTrend > 0 ? "text-emerald-600" : "text-red-600")}>
-                                            {averageTrend > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                                            {averageTrend > 0 ? '+' : ''}{averageTrend.toFixed(1)}
-                                        </span>
-                                    )}
-                                </div>
+                            <div className="text-center p-3 rounded-xl bg-amber-50 border border-amber-200">
+                                <p className="text-xl font-bold text-amber-600 tabular-nums">{monthlyAttendance.sakit}</p>
+                                <p className="text-xs text-slate-600 mt-1">Sakit</p>
                             </div>
-                            <div className="flex-1 p-3.5 rounded-xl bg-amber-50/70 border border-amber-100">
-                                <p className="text-[11px] text-amber-600 font-semibold uppercase tracking-wider mb-1">Peringkat</p>
-                                <div className="flex items-baseline gap-1.5">
-                                    <span className="text-xl font-bold text-amber-900 tabular-nums">#{stats.rank}</span>
-                                    <span className="text-xs text-amber-700 font-medium">dari 32</span>
-                                </div>
+                            <div className="text-center p-3 rounded-xl bg-blue-50 border border-blue-200">
+                                <p className="text-xl font-bold text-blue-600 tabular-nums">{monthlyAttendance.izin}</p>
+                                <p className="text-xs text-slate-600 mt-1">Izin</p>
                             </div>
-                        </div>
-
-                        {/* Top subjects */}
-                        <div className="mb-4">
-                            <div className="flex items-center gap-1.5 mb-2.5">
-                                <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
-                                <span className="text-xs font-semibold text-slate-700">Nilai Tertinggi</span>
-                            </div>
-                            <div className="space-y-2.5">
-                                {topSubjects.map((subj) => (
-                                    <div key={subj.subject} className="flex items-center gap-3">
-                                        <span className="text-xs text-slate-600 font-medium min-w-[110px] truncate">{subj.subject}</span>
-                                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                                            <div
-                                                className={cn("h-full rounded-full transition-all duration-500", getScoreBarColor(subj.score))}
-                                                style={{ width: `${subj.score}%` }}
-                                            />
-                                        </div>
-                                        <div className="flex items-center gap-1.5 min-w-[55px] justify-end">
-                                            <span className="text-xs font-bold text-slate-800 tabular-nums">{subj.score}</span>
-                                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-emerald-50 text-emerald-700 border-emerald-200">
-                                                {subj.grade}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Bottom subjects */}
-                        <div>
-                            <div className="flex items-center gap-1.5 mb-2.5">
-                                <TrendingDown className="h-3.5 w-3.5 text-amber-600" />
-                                <span className="text-xs font-semibold text-slate-700">Perlu Perhatian</span>
-                            </div>
-                            <div className="space-y-2.5">
-                                {bottomSubjects.map((subj) => (
-                                    <div key={subj.subject} className="flex items-center gap-3">
-                                        <span className="text-xs text-slate-600 font-medium min-w-[110px] truncate">{subj.subject}</span>
-                                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                                            <div
-                                                className={cn("h-full rounded-full transition-all duration-500", getScoreBarColor(subj.score))}
-                                                style={{ width: `${subj.score}%` }}
-                                            />
-                                        </div>
-                                        <div className="flex items-center gap-1.5 min-w-[55px] justify-end">
-                                            <span className="text-xs font-bold text-slate-800 tabular-nums">{subj.score}</span>
-                                            <Badge variant="outline" className={cn(
-                                                "text-[9px] px-1.5 py-0 h-4",
-                                                subj.score >= 80
-                                                    ? "bg-blue-50 text-blue-700 border-blue-200"
-                                                    : "bg-amber-50 text-amber-700 border-amber-200"
-                                            )}>
-                                                {subj.grade}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                ))}
+                            <div className="text-center p-3 rounded-xl bg-red-50 border border-red-200">
+                                <p className={cn("text-xl font-bold tabular-nums", monthlyAttendance.alpa > 0 ? "text-red-600" : "text-slate-400")}>{monthlyAttendance.alpa}</p>
+                                <p className="text-xs text-slate-600 mt-1">Alpha</p>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Row 3: Aktivitas Ekskul */}
-            <Card className="border-slate-100 shadow-sm overflow-hidden">
-                <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-purple-100 rounded-lg">
-                                <Trophy className="h-5 w-5 text-purple-700" />
+            {/* Row: Top/Bottom Subjects + Ekskul */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Subject Performance */}
+                <Card className="border-slate-100 shadow-sm overflow-hidden">
+                    <CardHeader className="p-4 border-b border-slate-50 bg-slate-50/50">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-100 rounded-lg">
+                                    <TrendingUp className="h-5 w-5 text-blue-700" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg text-slate-800">Performa Nilai</CardTitle>
+                                    <CardDescription>Tertinggi & terendah semester ini</CardDescription>
+                                </div>
                             </div>
-                            <div>
-                                <CardTitle className="text-lg text-slate-800">
-                                    Aktivitas Ekstrakurikuler
-                                </CardTitle>
-                                <CardDescription>
-                                    Kegiatan ekskul yang diikuti anak
-                                </CardDescription>
+                            <Link href="/parent/academic/grades">
+                                <Button variant="ghost" size="sm" className="gap-1 text-blue-700 hover:text-blue-800 hover:bg-blue-50">
+                                    Semua Nilai <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-4 space-y-4">
+                        <div>
+                            <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-2">Tertinggi</p>
+                            <div className="space-y-2">
+                                {topSubjects.map((s, i) => (
+                                    <div key={i} className="flex items-center justify-between p-2.5 rounded-lg bg-emerald-50/50 border border-emerald-100">
+                                        <span className="text-sm font-medium text-slate-700 truncate">{s.subject}</span>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <span className="text-sm font-bold text-emerald-600">{s.score}</span>
+                                            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px]">{s.grade}</Badge>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-                        <Link href="/parent/extracurricular">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="gap-1 text-purple-700 hover:text-purple-800 hover:bg-purple-50"
-                            >
-                                Selengkapnya
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </Link>
-                    </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {mockEkskulSummary.map((ekskul) => (
-                            <div
-                                key={ekskul.id}
-                                className="group p-4 rounded-xl border border-slate-100 bg-white hover:border-purple-200 hover:shadow-sm transition-all duration-200"
-                            >
-                                <div className="flex items-start justify-between mb-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2.5 bg-purple-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                                            <Trophy className="h-5 w-5 text-purple-600" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-semibold text-sm text-slate-800">{ekskul.name}</h4>
-                                            <p className="text-[11px] text-muted-foreground font-medium">{ekskul.category}</p>
+                        <div>
+                            <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">Perlu Perhatian</p>
+                            <div className="space-y-2">
+                                {bottomSubjects.map((s, i) => (
+                                    <div key={i} className="flex items-center justify-between p-2.5 rounded-lg bg-amber-50/50 border border-amber-100">
+                                        <span className="text-sm font-medium text-slate-700 truncate">{s.subject}</span>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <span className="text-sm font-bold text-amber-600">{s.score}</span>
+                                            <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-[10px]">{s.grade}</Badge>
                                         </div>
                                     </div>
-                                    <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200">
-                                        Aktif
-                                    </Badge>
-                                </div>
+                                ))}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                                {/* Schedule */}
-                                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium mb-3">
-                                    <Calendar className="h-3 w-3 opacity-70" />
-                                    <span>{ekskul.schedule}</span>
+                {/* Ekskul Summary */}
+                <Card className="border-slate-100 shadow-sm overflow-hidden">
+                    <CardHeader className="p-4 border-b border-slate-50 bg-slate-50/50">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-purple-100 rounded-lg">
+                                    <Activity className="h-5 w-5 text-purple-700" />
                                 </div>
-
-                                {/* Attendance & Achievement */}
-                                <div className="flex items-center gap-4">
-                                    <div className="flex-1">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className="text-[11px] text-muted-foreground font-medium">Kehadiran</span>
-                                            <span className={cn(
-                                                "text-xs font-bold tabular-nums",
-                                                getAttendanceRateColor(ekskul.attendanceRate)
-                                            )}>
-                                                {ekskul.attendanceRate}%
-                                            </span>
-                                        </div>
-                                        <Progress
-                                            value={ekskul.attendanceRate}
-                                            className={cn(
-                                                "h-1.5",
-                                                ekskul.attendanceRate >= 90 ? "[&>div]:bg-emerald-500" :
-                                                    ekskul.attendanceRate >= 75 ? "[&>div]:bg-amber-500" :
-                                                        "[&>div]:bg-red-500"
-                                            )}
-                                        />
-                                    </div>
-                                    {ekskul.achievements > 0 && (
-                                        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-100">
-                                            <Award className="h-3.5 w-3.5 text-amber-600" />
-                                            <span className="text-xs font-bold text-amber-800 tabular-nums">{ekskul.achievements}</span>
-                                        </div>
-                                    )}
+                                <div>
+                                    <CardTitle className="text-lg text-slate-800">Ekstrakurikuler</CardTitle>
+                                    <CardDescription>Keaktifan kegiatan ekskul</CardDescription>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
+                            <Link href="/parent/extracurricular">
+                                <Button variant="ghost" size="sm" className="gap-1 text-purple-700 hover:text-purple-800 hover:bg-purple-50">
+                                    Detail <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                        {ekskulSummary.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                                <Activity className="h-8 w-8 text-slate-300 mb-2" />
+                                <p className="text-sm text-slate-500">Belum ada ekskul yang diikuti</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {ekskulSummary.map(ekskul => (
+                                    <div key={ekskul.id} className="p-3 rounded-xl border border-slate-100 hover:border-purple-100 hover:bg-purple-50/30 transition-all">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-sm font-semibold text-slate-800">{ekskul.name}</span>
+                                            <span className={cn("text-sm font-bold tabular-nums",
+                                                ekskul.attendanceRate >= 90 ? "text-emerald-600" :
+                                                ekskul.attendanceRate >= 75 ? "text-amber-600" : "text-red-600"
+                                            )}>{ekskul.attendanceRate}%</span>
+                                        </div>
+                                        <div className="w-full bg-slate-100 rounded-full h-1.5">
+                                            <div
+                                                className={cn("h-1.5 rounded-full transition-all",
+                                                    ekskul.attendanceRate >= 90 ? "bg-emerald-500" :
+                                                    ekskul.attendanceRate >= 75 ? "bg-amber-500" : "bg-red-500"
+                                                )}
+                                                style={{ width: `${ekskul.attendanceRate}%` }}
+                                            />
+                                        </div>
+                                        <p className="text-xs text-slate-500 mt-1">Tingkat kehadiran</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 };

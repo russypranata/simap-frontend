@@ -499,7 +499,7 @@ export const ParentSubjectAttendance: React.FC = () => {
                     {selectedSemester !== "all" && (
                         <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
                             <BookOpen className="h-3.5 w-3.5" />
-                            {selectedSemester === "1" ? "Ganjil" : "Genap"}
+                            Semester {selectedSemester === "1" ? "Ganjil" : "Genap"}
                             <button
                                 onClick={() => { setSelectedSemester("all"); triggerFetchingOverlay(); }}
                                 className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"

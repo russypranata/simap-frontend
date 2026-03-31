@@ -433,7 +433,7 @@ export const ParentDailyAttendance: React.FC = () => {
                         {selectedSemesterId !== academicYears[0]?.semesters[0]?.id && (
                             <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
                                 <BookOpen className="h-3.5 w-3.5" />
-                                {academicYears.find(y => y.id === selectedYearId)?.semesters.find(s => s.id === selectedSemesterId)?.name || "Semester"}
+                                Semester {academicYears.find(y => y.id === selectedYearId)?.semesters.find(s => s.id === selectedSemesterId)?.name || "-"}
                                 <button
                                     onClick={() => setSelectedSemesterId(academicYears[0]?.semesters[0]?.id)}
                                     className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"

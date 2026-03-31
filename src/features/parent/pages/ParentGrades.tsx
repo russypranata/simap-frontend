@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
+import Link from "next/link";
+import { mockParentProfile } from "@/features/parent/data/mockParentData";
 import {
     Card,
     CardContent,
@@ -10,7 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     Select,
@@ -28,7 +29,6 @@ import {
     DialogTrigger,
     DialogFooter,
 } from "@/components/ui/dialog";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
     GraduationCap,
@@ -45,12 +45,29 @@ import {
     RotateCcw,
     SlidersHorizontal,
     BookText,
-    AlertCircle,
-    Clock,
-    Info,
+    UserCheck,
+    Users,
+    Medal,
+    ClipboardList,
+    CalendarIcon,
     X,
+    Trophy,
+    Info,
+    ChevronRight,
+    Thermometer,
+    AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip as RechartsTooltip,
+    ResponsiveContainer,
+    ReferenceLine,
+} from "recharts";
 
 // ==================== TYPES ====================
 
@@ -58,16 +75,53 @@ interface SubjectGrade {
     id: number;
     subject: string;
     teacher: string;
-    sumatifScore: number;      // Nilai sumatif (harian)
-    astsScore: number;         // ASTS (tengah semester)
-    asasScore: number;         // ASAS (akhir semester)
-    finalAverage: number;      // Rata-rata akhir (calculated)
-    grade: string;
+    ki3Scores: number[];
+    ki3Average: number;
+    ki3Predicate: string;
+    ki3Description: string;
+    ki4Scores: number[];
+    ki4Average: number;
+    ki4Predicate: string;
+    ki4Description: string;
+    finalAverage: number;
+    finalGrade: string;
     kkm: number;
-    academicYear: string;      // Format: "2025/2026"
+    academicYear: string;
     semester: "ganjil" | "genap";
-    description?: string;      // Deskripsi kompetensi
-    lastUpdated?: string;      // ISO date string
+    remedial?: {
+        type: "remedial" | "pengayaan";
+        date?: string;          // tanggal pelaksanaan RTL
+        scoreAfter?: number;    // nilai setelah remedial
+        material?: string;      // materi remedial
+    };
+}
+
+interface AttitudeScore {
+    spiritual: {
+        score: "A" | "B" | "C";
+        predicate: "Sangat Baik" | "Baik" | "Cukup";
+        description: string;
+    };
+    social: {
+        score: "A" | "B" | "C";
+        predicate: "Sangat Baik" | "Baik" | "Cukup";
+        description: string;
+    };
+}
+
+interface Extracurricular {
+    name: string;
+    type: "Wajib" | "Pilihan";
+    score: "A" | "B" | "C";
+    predicate: "Sangat Baik" | "Baik" | "Cukup";
+    description: string;
+    instructor: string;
+}
+
+interface AttendanceSummary {
+    sick: number;
+    permission: number;
+    alpha: number;
 }
 
 interface SemesterSummary {
@@ -84,307 +138,138 @@ interface ReportCardNote {
     icon: string;
 }
 
-interface AcademicPeriod {
-    academicYear: string;
-    semester: "ganjil" | "genap";
-    startDate: string;
-    endDate: string;
-    isGradesReleased: boolean;
-    gradesReleaseDate?: string;
+interface AcademicYear {
+    id: string;
+    year: string;
+    semesters: {
+        id: string;
+        label: string;
+        status: "completed" | "active" | "upcoming";
+    }[];
 }
-
-interface PeriodStatus {
-    isEnded: boolean;
-    isGradesAvailable: boolean;
-    status: "ongoing" | "released" | "pending";
-}
-
-interface GradeStats {
-    totalAverage: number;
-    highestSubject: SubjectGrade | null;
-    lowestSubject: SubjectGrade | null;
-    aboveKKM: number;
-    totalSubjects: number;
-    progressValue: number;
-    needsRemedial: SubjectGrade[];
-}
-
-interface GradeStatus {
-    status: "tuntas" | "remedial";
-    label: string;
-    variant: "success" | "warning";
-    pointsNeeded?: number;
-}
-
-// ==================== CONSTANTS ====================
-
-const GRADE_WEIGHTS = {
-    sumatif: 0.3,  // 30%
-    asts: 0.35,    // 35%
-    asas: 0.35,    // 35%
-};
-
-const ACADEMIC_PERIODS: AcademicPeriod[] = [
-    {
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        startDate: "2025-07-01",
-        endDate: "2025-12-31",
-        isGradesReleased: true,
-        gradesReleaseDate: "2026-01-15",
-    },
-    {
-        academicYear: "2025/2026",
-        semester: "genap",
-        startDate: "2026-01-01",
-        endDate: "2026-06-30",
-        isGradesReleased: false,
-    },
-    {
-        academicYear: "2024/2025",
-        semester: "genap",
-        startDate: "2025-01-01",
-        endDate: "2025-06-30",
-        isGradesReleased: true,
-        gradesReleaseDate: "2025-07-15",
-    },
-    {
-        academicYear: "2024/2025",
-        semester: "ganjil",
-        startDate: "2024-07-01",
-        endDate: "2024-12-31",
-        isGradesReleased: true,
-        gradesReleaseDate: "2025-01-15",
-    },
-];
 
 // ==================== MOCK DATA ====================
 
-const mockChildInfo = {
-    name: "Ahmad Fauzan Ramadhan",
-    nis: "0012345678",
-    class: "XII IPA 1",
-};
-
-const mockGrades: SubjectGrade[] = [
-    { 
-        id: 1, 
-        subject: "Matematika", 
-        teacher: "Ahmad Hidayat, S.Pd", 
-        sumatifScore: 85, 
-        astsScore: 82, 
-        asasScore: 88, 
-        finalAverage: 0, // Will be calculated
-        grade: "A-", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        description: "Menunjukkan pemahaman yang baik dalam aljabar dan geometri",
-        lastUpdated: "2026-01-10T10:30:00Z",
+const academicYears: AcademicYear[] = [
+    {
+        id: "2025-2026", year: "2025/2026",
+        semesters: [
+            { id: "ganjil", label: "Ganjil", status: "active" },
+            { id: "genap", label: "Genap", status: "upcoming" },
+        ],
     },
-    { 
-        id: 2, 
-        subject: "Fisika", 
-        teacher: "Sari Wahyuni, S.Pd", 
-        sumatifScore: 78, 
-        astsScore: 80, 
-        asasScore: 82, 
-        finalAverage: 0,
-        grade: "B+", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        description: "Perlu peningkatan dalam pemahaman konsep fisika modern",
-        lastUpdated: "2026-01-10T11:00:00Z",
-    },
-    { 
-        id: 3, 
-        subject: "Kimia", 
-        teacher: "Rudi Hartono, S.Pd", 
-        sumatifScore: 82, 
-        astsScore: 85, 
-        asasScore: 84, 
-        finalAverage: 0,
-        grade: "A-", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        lastUpdated: "2026-01-10T09:45:00Z",
-    },
-    { 
-        id: 4, 
-        subject: "Biologi", 
-        teacher: "Ani Suryani, S.Pd", 
-        sumatifScore: 88, 
-        astsScore: 90, 
-        asasScore: 92, 
-        finalAverage: 0,
-        grade: "A", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        description: "Prestasi luar biasa dalam biologi molekuler",
-        lastUpdated: "2026-01-10T14:20:00Z",
-    },
-    { 
-        id: 5, 
-        subject: "Bahasa Indonesia", 
-        teacher: "Dewi Lestari, S.Pd", 
-        sumatifScore: 80, 
-        astsScore: 78, 
-        asasScore: 82, 
-        finalAverage: 0,
-        grade: "B+", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        lastUpdated: "2026-01-10T08:30:00Z",
-    },
-    { 
-        id: 6, 
-        subject: "Bahasa Inggris", 
-        teacher: "Budi Santoso, S.Pd", 
-        sumatifScore: 85, 
-        astsScore: 88, 
-        asasScore: 86, 
-        finalAverage: 0,
-        grade: "A-", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        lastUpdated: "2026-01-10T13:15:00Z",
-    },
-    { 
-        id: 7, 
-        subject: "Sejarah", 
-        teacher: "Hendra Gunawan, S.Pd", 
-        sumatifScore: 78, 
-        astsScore: 75, 
-        asasScore: 80, 
-        finalAverage: 0,
-        grade: "B", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        lastUpdated: "2026-01-10T10:00:00Z",
-    },
-    { 
-        id: 8, 
-        subject: "Pendidikan Agama Islam", 
-        teacher: "Usman Abdullah, S.Pd.I", 
-        sumatifScore: 92, 
-        astsScore: 95, 
-        asasScore: 93, 
-        finalAverage: 0,
-        grade: "A", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        description: "Sangat baik dalam pemahaman fiqih dan akhlak",
-        lastUpdated: "2026-01-10T07:45:00Z",
-    },
-    { 
-        id: 9, 
-        subject: "PKn", 
-        teacher: "Rina Marlina, S.Pd", 
-        sumatifScore: 82, 
-        astsScore: 80, 
-        asasScore: 84, 
-        finalAverage: 0,
-        grade: "B+", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        lastUpdated: "2026-01-10T11:30:00Z",
-    },
-    { 
-        id: 10, 
-        subject: "Seni Budaya", 
-        teacher: "Ratna Sari, S.Sn", 
-        sumatifScore: 88, 
-        astsScore: 85, 
-        asasScore: 90, 
-        finalAverage: 0,
-        grade: "A-", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        lastUpdated: "2026-01-10T15:00:00Z",
-    },
-    { 
-        id: 11, 
-        subject: "PJOK", 
-        teacher: "Agus Prasetyo, S.Pd", 
-        sumatifScore: 85, 
-        astsScore: 87, 
-        asasScore: 86, 
-        finalAverage: 0,
-        grade: "A-", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        lastUpdated: "2026-01-10T16:00:00Z",
-    },
-    { 
-        id: 12, 
-        subject: "Prakarya", 
-        teacher: "Fitri Handayani, S.Pd", 
-        sumatifScore: 83, 
-        astsScore: 85, 
-        asasScore: 84, 
-        finalAverage: 0,
-        grade: "A-", 
-        kkm: 75,
-        academicYear: "2025/2026",
-        semester: "ganjil",
-        lastUpdated: "2026-01-10T14:45:00Z",
+    {
+        id: "2024-2025", year: "2024/2025",
+        semesters: [
+            { id: "genap", label: "Genap", status: "completed" },
+            { id: "ganjil", label: "Ganjil", status: "completed" },
+        ],
     },
 ];
 
+const mockGrades: SubjectGrade[] = [
+    {
+        id: 1, subject: "Matematika", teacher: "Ahmad Hidayat, S.Pd",
+        ki3Scores: [85, 88, 82, 86], ki3Average: 85, ki3Predicate: "A",
+        ki3Description: "Menunjukkan pemahaman yang sangat baik dalam aljabar, geometri, dan kalkulus dasar.",
+        ki4Scores: [88, 85, 90], ki4Average: 88, ki4Predicate: "A",
+        ki4Description: "Terampil dalam menyelesaikan masalah matematika dan menyajikan solusi secara sistematis.",
+        finalAverage: 86, finalGrade: "A", kkm: 75, academicYear: "2025/2026", semester: "ganjil",
+    },
+    {
+        id: 2, subject: "Fisika", teacher: "Sari Wahyuni, S.Pd",
+        ki3Scores: [78, 80, 82, 79], ki3Average: 80, ki3Predicate: "B",
+        ki3Description: "Memahami konsep fisika dasar dengan baik. Perlu peningkatan dalam pemahaman fisika modern.",
+        ki4Scores: [82, 85, 80], ki4Average: 82, ki4Predicate: "A",
+        ki4Description: "Terampil dalam melakukan eksperimen dan analisis data.",
+        finalAverage: 81, finalGrade: "B+", kkm: 75, academicYear: "2025/2026", semester: "ganjil",
+        remedial: { type: "remedial", date: "2024-12-10", scoreAfter: 82, material: "Fisika Modern & Gelombang" },
+    },
+    {
+        id: 3, subject: "Kimia", teacher: "Rudi Hartono, S.Pd",
+        ki3Scores: [82, 85, 84, 86], ki3Average: 84, ki3Predicate: "A",
+        ki3Description: "Penguasaan konsep kimia organik dan anorganik sangat baik.",
+        ki4Scores: [85, 88, 86], ki4Average: 86, ki4Predicate: "A",
+        ki4Description: "Terampil dalam praktikum laboratorium.",
+        finalAverage: 85, finalGrade: "A", kkm: 75, academicYear: "2025/2026", semester: "ganjil",
+    },
+    {
+        id: 4, subject: "Biologi", teacher: "Ani Suryani, S.Pd",
+        ki3Scores: [88, 90, 92, 89], ki3Average: 90, ki3Predicate: "A",
+        ki3Description: "Prestasi luar biasa dalam biologi molekuler dan genetika.",
+        ki4Scores: [92, 90, 94], ki4Average: 92, ki4Predicate: "A",
+        ki4Description: "Keterampilan observasi dan analisis data biologi sangat baik.",
+        finalAverage: 91, finalGrade: "A", kkm: 75, academicYear: "2025/2026", semester: "ganjil",
+        remedial: { type: "pengayaan" },
+    },
+    {
+        id: 5, subject: "Bahasa Indonesia", teacher: "Dewi Lestari, S.Pd",
+        ki3Scores: [80, 78, 82, 81], ki3Average: 80, ki3Predicate: "B",
+        ki3Description: "Memahami kaidah bahasa Indonesia dengan baik.",
+        ki4Scores: [82, 85, 83], ki4Average: 83, ki4Predicate: "A",
+        ki4Description: "Terampil menulis berbagai jenis teks.",
+        finalAverage: 81, finalGrade: "B+", kkm: 75, academicYear: "2025/2026", semester: "ganjil",
+    },
+    {
+        id: 6, subject: "Bahasa Inggris", teacher: "Budi Santoso, S.Pd",
+        ki3Scores: [85, 88, 86, 87], ki3Average: 86, ki3Predicate: "A",
+        ki3Description: "Excellent understanding of English grammar and vocabulary.",
+        ki4Scores: [88, 85, 90], ki4Average: 88, ki4Predicate: "A",
+        ki4Description: "Fluent in speaking and writing.",
+        finalAverage: 87, finalGrade: "A", kkm: 75, academicYear: "2025/2026", semester: "ganjil",
+    },
+];
+
+const mockAttitude: AttitudeScore = {
+    spiritual: {
+        score: "A", predicate: "Sangat Baik",
+        description: "Menunjukkan sikap spiritual yang sangat baik. Rajin beribadah, jujur, dan berakhlak mulia.",
+    },
+    social: {
+        score: "A", predicate: "Sangat Baik",
+        description: "Menunjukkan sikap sosial yang sangat baik. Peduli terhadap sesama dan aktif dalam kegiatan sosial.",
+    },
+};
+
+const mockExtracurriculars: Extracurricular[] = [
+    {
+        name: "Pramuka", type: "Wajib", score: "A", predicate: "Sangat Baik",
+        description: "Aktif dalam semua kegiatan pramuka. Menunjukkan keterampilan kepramukaan yang sangat baik.",
+        instructor: "Kak Ahmad Fauzi, S.Pd",
+    },
+    {
+        name: "Basket", type: "Pilihan", score: "A", predicate: "Sangat Baik",
+        description: "Terampil dalam teknik dasar basket. Aktif dalam tim basket sekolah.",
+        instructor: "Kak Rudi Hermawan, S.Pd",
+    },
+    {
+        name: "KIR", type: "Pilihan", score: "B", predicate: "Baik",
+        description: "Aktif dalam penelitian ilmiah. Karya ilmiah menunjukkan metodologi yang baik.",
+        instructor: "Ibu Dr. Siti Aminah, M.Si",
+    },
+];
+
+const mockAttendance: AttendanceSummary = { sick: 2, permission: 1, alpha: 0 };
+
 const mockSemesterHistory: SemesterSummary[] = [
-    { semester: "Ganjil", academicYear: "2025/2026", averageScore: 85.2, rank: 5, totalStudents: 32 },
     { semester: "Genap", academicYear: "2024/2025", averageScore: 84.5, rank: 6, totalStudents: 32 },
     { semester: "Ganjil", academicYear: "2024/2025", averageScore: 83.8, rank: 8, totalStudents: 32 },
 ];
 
 const mockReportCardNotes: ReportCardNote[] = [
-    {
-        category: "Prestasi Akademik",
-        note: "Ananda menunjukkan peningkatan yang signifikan dalam mata pelajaran IPA, khususnya Biologi. Pertahankan semangat belajar dan tingkatkan pemahaman dalam Matematika.",
-        icon: "🏆"
-    },
-    {
-        category: "Sikap dan Perilaku",
-        note: "Ananda aktif dalam kegiatan kelas dan menunjukkan sikap yang baik terhadap guru dan teman. Teruslah menjadi contoh yang baik dalam kedisiplinan.",
-        icon: "⭐"
-    },
-    {
-        category: "Ekstrakurikuler",
-        note: "Ananda aktif mengikuti kegiatan Pramuka dan menunjukkan kepemimpinan yang baik. Pertahankan partisipasi dalam kegiatan ekstrakurikuler.",
-        icon: "🎯"
-    },
-    {
-        category: "Catatan Wali Kelas",
-        note: "Secara keseluruhan, Ananda adalah siswa yang berprestasi dan menjadi kebanggaan kelas. Teruslah berusaha dan jangan mudah menyerah menghadapi tantangan.",
-        icon: "📝"
-    },
+    { category: "Prestasi Akademik", note: "Ananda menunjukkan peningkatan yang signifikan dalam mata pelajaran IPA, khususnya Biologi dan Kimia.", icon: "🏆" },
+    { category: "Sikap dan Perilaku", note: "Ananda aktif dalam kegiatan kelas dan menunjukkan sikap yang baik terhadap guru dan teman.", icon: "⭐" },
+    { category: "Ekstrakurikuler", note: "Ananda aktif mengikuti kegiatan Pramuka dan Basket. Menunjukkan kepemimpinan yang baik.", icon: "🎯" },
+    { category: "Catatan Wali Kelas", note: "Secara keseluruhan, Ananda adalah siswa yang berprestasi dan menjadi kebanggaan kelas.", icon: "📝" },
 ];
 
 // ==================== HELPER FUNCTIONS ====================
 
-const calculateFinalAverage = (sumatif: number, asts: number, asas: number): number => {
-    const weighted = 
-        sumatif * GRADE_WEIGHTS.sumatif +
-        asts * GRADE_WEIGHTS.asts +
-        asas * GRADE_WEIGHTS.asas;
-    return Math.round(weighted * 10) / 10;
-};
-
-const getGradeBadgeColor = (grade: string): string => {
-    if (grade.startsWith("A")) return "bg-emerald-50 text-emerald-700 border-emerald-200";
-    if (grade.startsWith("B")) return "bg-blue-50 text-blue-700 border-blue-200";
-    if (grade.startsWith("C")) return "bg-amber-50 text-amber-700 border-amber-200";
-    return "bg-red-50 text-red-700 border-red-200";
+const getGradeColor = (grade: string): string => {
+    if (grade === "A") return "bg-emerald-100 text-emerald-700 border-emerald-200";
+    if (grade === "B") return "bg-blue-100 text-blue-700 border-blue-200";
+    if (grade === "C") return "bg-amber-100 text-amber-700 border-amber-200";
+    return "bg-red-100 text-red-700 border-red-200";
 };
 
 const getScoreColor = (score: number, kkm: number): string => {
@@ -393,353 +278,688 @@ const getScoreColor = (score: number, kkm: number): string => {
     return "text-red-600";
 };
 
-const getGradeStatus = (grade: SubjectGrade): GradeStatus => {
-    if (grade.finalAverage >= grade.kkm) {
-        return { status: "tuntas", label: "Tuntas", variant: "success" };
-    }
-    const remedialNeeded = grade.kkm - grade.finalAverage;
-    return { 
-        status: "remedial", 
-        label: "Remedial", 
-        variant: "warning",
-        pointsNeeded: Math.ceil(remedialNeeded),
-    };
-};
+// ==================== SKELETON ====================
 
-const checkPeriodStatus = (academicYear: string, semester: "ganjil" | "genap"): PeriodStatus => {
-    const period = ACADEMIC_PERIODS.find(
-        p => p.academicYear === academicYear && p.semester === semester
-    );
-    
-    if (!period) {
-        return { isEnded: false, isGradesAvailable: false, status: "pending" };
-    }
-    
-    const now = new Date();
-    const endDate = new Date(period.endDate);
-    const isEnded = now > endDate;
-    const isGradesAvailable = isEnded && period.isGradesReleased;
-    
-    let status: PeriodStatus["status"] = "pending";
-    if (!isEnded) status = "ongoing";
-    else if (isGradesAvailable) status = "released";
-    
-    return { isEnded, isGradesAvailable, status };
-};
+const ParentGradesSkeleton: React.FC = () => (
+    <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-56" />
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                </div>
+                <Skeleton className="h-4 w-48" />
+            </div>
+            <div className="flex items-center gap-3">
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-28" />
+            </div>
+        </div>
 
-const formatDate = (dateString: string | undefined): string => {
-    if (!dateString) return "-";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    });
-};
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 items-stretch">
+            {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="rounded-xl bg-white border border-slate-100 shadow-sm p-4">
+                    <div className="flex items-center gap-3">
+                        <Skeleton className="w-12 h-12 rounded-xl" />
+                        <div className="space-y-2 flex-1">
+                            <Skeleton className="h-3 w-20" />
+                            <Skeleton className="h-6 w-14" />
+                            <Skeleton className="h-3 w-24" />
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
 
-// ==================== COMPONENTS ====================
+        <Card>
+            <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-xl" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-5 w-32" />
+                        <Skeleton className="h-4 w-48" />
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="p-4 space-y-3">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="flex items-center gap-4 p-3 rounded-xl border border-slate-100">
+                            <Skeleton className="h-4 w-6" />
+                            <div className="flex-1 space-y-1">
+                                <Skeleton className="h-4 w-36" />
+                                <Skeleton className="h-3 w-28" />
+                            </div>
+                            <Skeleton className="h-8 w-16" />
+                            <Skeleton className="h-8 w-16" />
+                            <Skeleton className="h-8 w-12" />
+                            <Skeleton className="h-6 w-10 rounded-full" />
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+);
 
-interface StatCardProps {
+// ==================== STAT CARD ====================
+
+const StatCard: React.FC<{
     title: string;
     value: string | number;
     subtitle?: string;
     icon: React.ElementType;
-    color: "blue" | "green" | "amber" | "emerald";
-    progressValue?: number;
-}
-
-const StatCard: React.FC<StatCardProps> = ({ title, value, subtitle, icon: Icon, color, progressValue }) => {
+    color: "blue" | "green" | "amber" | "emerald" | "purple";
+}> = ({ title, value, subtitle, icon: Icon, color }) => {
     const colorConfig = {
-        blue: {
-            bg: "bg-blue-100/80",
-            ring: "ring-blue-200/50",
-            text: "text-blue-600",
-            valueColor: "text-blue-600",
-        },
-        green: {
-            bg: "bg-green-100/80",
-            ring: "ring-green-200/50",
-            text: "text-green-600",
-            valueColor: "text-green-600",
-        },
-        amber: {
-            bg: "bg-amber-100/80",
-            ring: "ring-amber-200/50",
-            text: "text-amber-600",
-            valueColor: "text-amber-600",
-        },
-        emerald: {
-            bg: "bg-emerald-100/80",
-            ring: "ring-emerald-200/50",
-            text: "text-emerald-600",
-            valueColor: "text-emerald-600",
-        },
+        blue: { bg: "bg-blue-100", text: "text-blue-600", ring: "ring-blue-200/50" },
+        green: { bg: "bg-green-100", text: "text-green-600", ring: "ring-green-200/50" },
+        amber: { bg: "bg-amber-100", text: "text-amber-600", ring: "ring-amber-200/50" },
+        emerald: { bg: "bg-emerald-100", text: "text-emerald-600", ring: "ring-emerald-200/50" },
+        purple: { bg: "bg-purple-100", text: "text-purple-600", ring: "ring-purple-200/50" },
     };
-
     const config = colorConfig[color];
-
     return (
-        <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 border border-slate-200">
-            <div className="px-5 py-4 flex items-center gap-4">
-                <div className="relative flex-shrink-0">
+        <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 h-full">
+            <div className="p-4 flex flex-col justify-between h-full min-h-[88px]">
+                <div className="flex items-start gap-3">
                     <div className={cn(
-                        "w-12 h-12 rounded-xl flex items-center justify-center ring-2 transition-transform duration-300 group-hover:scale-105",
-                        config.bg,
-                        config.ring
+                        "w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ring-2 transition-transform duration-300 group-hover:scale-105",
+                        config.bg, config.ring
                     )}>
-                        <Icon className={cn("h-6 w-6", config.text)} />
+                        <Icon className={cn("h-5 w-5", config.text)} />
                     </div>
-                </div>
-                <div className="min-w-0 flex-1">
-                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{title}</p>
-                    <div className="flex items-baseline gap-2 mt-1">
-                        <p className={cn("text-2xl font-bold leading-none tabular-nums", config.valueColor)}>{value}</p>
-                        {subtitle && <p className="text-xs text-muted-foreground font-medium truncate">{subtitle}</p>}
+                    <div className="min-w-0 flex-1">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold leading-tight truncate">{title}</p>
+                        <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums mt-1">{value}</p>
+                        <p className="text-[11px] text-muted-foreground mt-1 truncate">{subtitle ?? "\u00A0"}</p>
                     </div>
-                    {progressValue !== undefined && (
-                        <Progress value={progressValue} className="mt-2 h-1.5 rounded-full" />
-                    )}
                 </div>
             </div>
         </div>
     );
 };
 
-interface EmptyStateProps {
-    hasActiveFilters: boolean;
-    onResetFilters: () => void;
-}
+// ==================== FILTER DIALOG ====================
 
-const EmptyState: React.FC<EmptyStateProps> = ({ hasActiveFilters, onResetFilters }) => (
-    <Card className="border-dashed border-2">
-        <CardContent className="flex flex-col items-center justify-center py-16">
-            <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                <FileText className="h-10 w-10 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-800">Tidak Ada Data Nilai</h3>
-            <p className="text-sm text-muted-foreground text-center max-w-md mt-2">
-                {hasActiveFilters 
-                    ? "Tidak ada data nilai untuk filter yang dipilih. Coba ubah filter atau reset pilihan."
-                    : "Belum ada data nilai yang tersedia untuk anak Anda."}
-            </p>
-            {hasActiveFilters && (
-                <Button 
-                    variant="outline" 
-                    className="mt-4 gap-2"
-                    onClick={onResetFilters}
-                >
-                    <RotateCcw className="h-4 w-4" />
-                    Reset Filter
+const GradesFilterDialog: React.FC<{
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    selectedYearId: string;
+    selectedSemester: string;
+    academicYears: AcademicYear[];
+    onApply: (yearId: string, semester: string) => void;
+}> = ({ open, onOpenChange, selectedYearId, selectedSemester, academicYears, onApply }) => {
+    const [tempYearId, setTempYearId] = useState(selectedYearId);
+    const [tempSemester, setTempSemester] = useState(selectedSemester);
+
+    React.useEffect(() => {
+        if (open) {
+            setTempYearId(selectedYearId);
+            setTempSemester(selectedSemester);
+        }
+    }, [open, selectedYearId, selectedSemester]);
+
+    // handleYearChange: auto-select first available (non-upcoming) semester when year changes
+    const handleYearChange = (yearId: string) => {
+        setTempYearId(yearId);
+        const year = academicYears.find(y => y.id === yearId);
+        const firstAvailable = year?.semesters.find(s => s.status !== "upcoming");
+        if (firstAvailable) setTempSemester(firstAvailable.id);
+    };
+
+    const handleApply = () => {
+        onApply(tempYearId, tempSemester);
+        onOpenChange(false);
+    };
+
+    const handleReset = () => {
+        // Reset to first year with a completed semester
+        for (const year of academicYears) {
+            const completed = year.semesters.find(s => s.status === "completed");
+            if (completed) {
+                setTempYearId(year.id);
+                setTempSemester(completed.id);
+                return;
+            }
+        }
+        setTempYearId(academicYears[0]?.id);
+        setTempSemester(academicYears[0]?.semesters[0]?.id ?? "ganjil");
+    };
+
+    // Default = first year with completed semester + that semester
+    const defaultYearId = (() => {
+        for (const year of academicYears) {
+            if (year.semesters.some(s => s.status === "completed")) return year.id;
+        }
+        return academicYears[0]?.id;
+    })();
+    const defaultSemesterId = academicYears.find(y => y.id === defaultYearId)?.semesters.find(s => s.status === "completed")?.id ?? "";
+
+    const activeFilterCount = 2; // TA dan Semester selalu aktif sebagai filter
+    const tempYearSemesters = academicYears.find(y => y.id === tempYearId)?.semesters ?? [];
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogTrigger asChild>
+                <Button variant="outline" className="h-9 gap-2 bg-white text-slate-700 border-slate-200 shadow-sm font-medium">
+                    <Filter className="h-4 w-4 text-slate-500" />
+                    <span className="hidden sm:inline">Filter</span>
+                    {activeFilterCount > 0 && (
+                        <Badge className="ml-0.5 h-5 w-5 min-w-[20px] px-0 bg-blue-800 text-white text-[10px] flex items-center justify-center border-0 rounded-full">
+                            {activeFilterCount}
+                        </Badge>
+                    )}
                 </Button>
-            )}
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] rounded-2xl">
+                <DialogHeader className="flex-row items-center gap-4">
+                    <div className="p-2.5 bg-blue-100 rounded-xl">
+                        <Filter className="h-5 w-5 text-blue-700" />
+                    </div>
+                    <div>
+                        <DialogTitle className="text-lg font-semibold text-slate-900">Filter Nilai</DialogTitle>
+                        <DialogDescription className="text-slate-500">Sesuaikan tahun ajaran dan semester</DialogDescription>
+                    </div>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <CalendarIcon className="h-4 w-4 text-slate-400" />
+                            Tahun Ajaran
+                        </label>
+                        <Select value={tempYearId} onValueChange={handleYearChange}>
+                            <SelectTrigger className="w-full bg-slate-50/50 border-slate-200">
+                                <SelectValue placeholder="Tahun" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {academicYears.map(year => (
+                                    <SelectItem key={year.id} value={year.id}>TA {year.year}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-slate-400" />
+                            Semester
+                        </label>
+                        <Select value={tempSemester} onValueChange={setTempSemester}>
+                            <SelectTrigger className="w-full bg-slate-50/50 border-slate-200">
+                                <SelectValue placeholder="Semester" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {tempYearSemesters.map(sem => (
+                                    <SelectItem key={sem.id} value={sem.id} disabled={sem.status === "upcoming"}>
+                                        <div className="flex items-center gap-2">
+                                            <span>Semester {sem.label}</span>
+                                            {sem.status === "active" && (
+                                                <Badge className="text-[9px] px-1.5 py-0 bg-blue-100 text-blue-700 border-blue-200 font-semibold">Berlangsung</Badge>
+                                            )}
+                                            {sem.status === "upcoming" && (
+                                                <Badge className="text-[9px] px-1.5 py-0 bg-slate-100 text-slate-400 border-slate-200 font-semibold">Belum Dimulai</Badge>
+                                            )}
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <DialogFooter className="sm:justify-between gap-2 border-t pt-4">
+                    <Button variant="ghost" onClick={handleReset} className="text-slate-500 hover:text-red-500 hover:bg-red-50 gap-2">
+                        <RotateCcw className="h-4 w-4" />
+                        Reset Pilihan
+                    </Button>
+                    <Button className="bg-blue-800 hover:bg-blue-900 text-white px-8 gap-2" onClick={handleApply}>
+                        <Check className="h-4 w-4" />
+                        Terapkan
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+// ==================== FILTER BADGES ====================
+
+const GradesFilterBadges: React.FC<{
+    selectedYearId: string;
+    selectedSemester: string;
+    academicYears: AcademicYear[];
+    onClearYear: () => void;
+    onClearSemester: () => void;
+}> = ({ selectedYearId, selectedSemester, academicYears, onClearYear, onClearSemester }) => {
+    const selectedYear = academicYears.find(y => y.id === selectedYearId);
+    if (!selectedYear) return null;
+
+    return (
+        <div className="flex flex-wrap items-center gap-2 px-1 no-print">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+                <SlidersHorizontal className="h-3 w-3" />
+                <span>Filter Aktif:</span>
+            </div>
+            <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                TA {selectedYear.year}
+                {academicYears.length > 1 && (
+                    <button onClick={onClearYear} className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1" aria-label="Hapus filter tahun ajaran">
+                        <X className="h-3.5 w-3.5" />
+                    </button>
+                )}
+            </Badge>
+            <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
+                <BookOpen className="h-3.5 w-3.5" />
+                Semester {selectedSemester === "ganjil" ? "Ganjil" : "Genap"}
+                <button onClick={onClearSemester} className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1" aria-label="Hapus filter semester">
+                    <X className="h-3.5 w-3.5" />
+                </button>
+            </Badge>
+        </div>
+    );
+};
+
+// ==================== ATTITUDE SECTION ====================
+
+const AttitudeSection: React.FC<{ attitude: AttitudeScore }> = ({ attitude }) => (
+    <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-blue-100 rounded-xl">
+                    <UserCheck className="h-5 w-5 text-blue-700" />
+                </div>
+                <div>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Nilai Sikap</CardTitle>
+                    <CardDescription className="text-sm text-slate-600">Penilaian sikap spiritual dan sosial</CardDescription>
+                </div>
+            </div>
+        </CardHeader>
+        <CardContent>
+            <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white">
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <Star className="h-4 w-4 text-amber-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold text-slate-800">Sikap Spiritual</p>
+                            <Badge className="bg-amber-100 text-amber-800 border-amber-200">{attitude.spiritual.score}</Badge>
+                        </div>
+                    </div>
+                    <p className="text-sm font-medium text-slate-700 mb-2">{attitude.spiritual.predicate}</p>
+                    <p className="text-xs text-slate-600 leading-relaxed">{attitude.spiritual.description}</p>
+                </div>
+                <div className="p-4 rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <Users className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold text-slate-800">Sikap Sosial</p>
+                            <Badge className="bg-blue-100 text-blue-800 border-blue-200">{attitude.social.score}</Badge>
+                        </div>
+                    </div>
+                    <p className="text-sm font-medium text-slate-700 mb-2">{attitude.social.predicate}</p>
+                    <p className="text-xs text-slate-600 leading-relaxed">{attitude.social.description}</p>
+                </div>
+            </div>
         </CardContent>
     </Card>
 );
 
-interface LoadingStateProps {
-    showStats?: boolean;
-}
+// ==================== ATTENDANCE SECTION ====================
 
-const LoadingState: React.FC<LoadingStateProps> = ({ showStats = true }) => (
-    <div className="space-y-6">
-        <Skeleton className="h-32 w-full rounded-xl" />
-        {showStats && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-28 w-full rounded-xl" />
-                ))}
+const AttendanceSection: React.FC<{ attendance: AttendanceSummary }> = ({ attendance }) => (
+    <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-red-100 rounded-xl">
+                        <ClipboardList className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                        <CardTitle className="text-lg font-semibold text-slate-800">Ketidakhadiran</CardTitle>
+                        <CardDescription className="text-sm text-slate-600">Rekap presensi harian semester ini</CardDescription>
+                    </div>
+                </div>
+                <Link href="/parent/attendance/daily">
+                    <Button variant="ghost" size="sm" className="gap-1 text-blue-700 hover:text-blue-800 hover:bg-blue-50 text-xs">
+                        Lihat Detail
+                        <ChevronRight className="h-3.5 w-3.5" />
+                    </Button>
+                </Link>
             </div>
-        )}
-        <Skeleton className="h-96 w-full rounded-xl" />
-    </div>
+        </CardHeader>
+        <CardContent>
+            <div className="grid grid-cols-3 gap-3">
+                {/* Sakit */}
+                <div className="relative overflow-hidden p-4 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <Thermometer className="h-4 w-4 text-amber-600" />
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Hari</span>
+                    </div>
+                    <p className="text-3xl font-bold text-amber-600 tabular-nums leading-none">{attendance.sick}</p>
+                    <p className="text-xs font-semibold text-amber-700 mt-1.5">Sakit</p>
+                </div>
+
+                {/* Izin */}
+                <div className="relative overflow-hidden p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <FileText className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">Hari</span>
+                    </div>
+                    <p className="text-3xl font-bold text-blue-600 tabular-nums leading-none">{attendance.permission}</p>
+                    <p className="text-xs font-semibold text-blue-700 mt-1.5">Izin</p>
+                </div>
+
+                {/* Alpha */}
+                <div className="relative overflow-hidden p-4 rounded-xl bg-gradient-to-br from-red-50 to-rose-50 border border-red-200">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                            <AlertCircle className="h-4 w-4 text-red-600" />
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-red-400">Hari</span>
+                    </div>
+                    <p className="text-3xl font-bold text-red-600 tabular-nums leading-none">{attendance.alpha}</p>
+                    <p className="text-xs font-semibold text-red-700 mt-1.5">Alpha</p>
+                    {attendance.alpha > 0 && (
+                        <div className="absolute top-2 right-2">
+                            <span className="flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </CardContent>
+    </Card>
 );
 
-interface PeriodAlertProps {
-    periodStatus: PeriodStatus;
-    academicYear: string;
-    semester: string;
-}
+// ==================== EXTRACURRICULAR SECTION ====================
 
-const PeriodAlert: React.FC<PeriodAlertProps> = ({ periodStatus, academicYear, semester }) => {
-    if (periodStatus.status === "ongoing") {
-        return (
-            <Alert className="border-blue-200 bg-blue-50">
-                <Clock className="h-5 w-5 text-blue-600" />
-                <AlertTitle className="text-blue-800">Periode Masih Berlangsung</AlertTitle>
-                <AlertDescription className="text-blue-700">
-                    Semester {semester} Tahun Ajaran {academicYear} masih berjalan. Nilai yang ditampilkan 
-                    adalah nilai sementara dan dapat berubah hingga periode berakhir.
-                </AlertDescription>
-            </Alert>
-        );
-    }
-    
-    if (periodStatus.status === "pending") {
-        return (
-            <Alert className="border-amber-200 bg-amber-50">
-                <Info className="h-5 w-5 text-amber-600" />
-                <AlertTitle className="text-amber-800">Nilai Belum Dirilis</AlertTitle>
-                <AlertDescription className="text-amber-700">
-                    Nilai untuk Semester {semester} Tahun Ajaran {academicYear} sedang diproses 
-                    oleh guru dan akan segera tersedia.
-                </AlertDescription>
-            </Alert>
-        );
-    }
-    
-    return null;
+const ExtracurricularSection: React.FC<{ extracurriculars: Extracurricular[] }> = ({ extracurriculars }) => (
+    <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-purple-100 rounded-xl">
+                    <Medal className="h-5 w-5 text-purple-700" />
+                </div>
+                <div>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Ekstrakurikuler</CardTitle>
+                    <CardDescription className="text-sm text-slate-600">Prestasi dan partisipasi ekstrakurikuler</CardDescription>
+                </div>
+            </div>
+        </CardHeader>
+        <CardContent>
+            <div className="space-y-3">
+                {extracurriculars.map((ekskul, index) => (
+                    <div key={index} className="p-4 rounded-xl border border-slate-200 hover:border-purple-200 hover:bg-purple-50/30 transition-all">
+                        <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                                    <Medal className="h-5 w-5 text-purple-600" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-slate-800">{ekskul.name}</h4>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <Badge variant="outline" className="text-xs bg-slate-50">{ekskul.type}</Badge>
+                                        <Badge className={cn("text-xs", getGradeColor(ekskul.score))}>{ekskul.score} - {ekskul.predicate}</Badge>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p className="text-sm text-slate-600 mb-2">{ekskul.description}</p>
+                        <p className="text-xs text-slate-500">Pembina: {ekskul.instructor}</p>
+                    </div>
+                ))}
+            </div>
+        </CardContent>
+    </Card>
+);
+
+// ==================== GRADE DETAIL DIALOG ====================
+
+const GradeDetailDialog: React.FC<{ grade: SubjectGrade | null; onClose: () => void }> = ({ grade, onClose }) => {
+    if (!grade) return null;
+    return (
+        <Dialog open={!!grade} onOpenChange={(open) => { if (!open) onClose(); }}>
+            <DialogContent className="sm:max-w-[520px] max-h-[85vh] flex flex-col rounded-2xl">
+                <DialogHeader className="flex-row items-center gap-4 flex-shrink-0">
+                    <div className="p-2.5 bg-blue-100 rounded-xl">
+                        <BookText className="h-5 w-5 text-blue-700" />
+                    </div>
+                    <div>
+                        <DialogTitle className="text-lg font-semibold text-slate-900">{grade.subject}</DialogTitle>
+                        <DialogDescription className="text-slate-500">{grade.teacher}</DialogDescription>
+                    </div>
+                </DialogHeader>
+                <div className="space-y-4 py-2 overflow-y-auto flex-1 pr-1">
+                    {/* KKM Info */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
+                        <span className="text-sm font-semibold text-slate-600">KKM (Kriteria Ketuntasan Minimal)</span>
+                        <Badge variant="outline" className="font-bold text-slate-700 border-slate-300">{grade.kkm}</Badge>
+                    </div>
+
+                    {/* KI-3 */}
+                    <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/40 space-y-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
+                                    <BookOpen className="h-3.5 w-3.5 text-blue-600" />
+                                </div>
+                                <span className="text-sm font-semibold text-slate-800">KI-3 (Pengetahuan)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className={cn("text-lg font-bold", getScoreColor(grade.ki3Average, grade.kkm))}>{grade.ki3Average}</span>
+                                <Badge className={cn("text-xs", getGradeColor(grade.ki3Predicate))}>{grade.ki3Predicate}</Badge>
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                            {grade.ki3Scores.map((s, i) => (
+                                <span key={i} className={cn("text-xs font-semibold px-2 py-0.5 rounded-md border", getScoreColor(s, grade.kkm), "bg-white border-slate-200")}>
+                                    {s}
+                                </span>
+                            ))}
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed italic">"{grade.ki3Description}"</p>
+                    </div>
+
+                    {/* KI-4 */}
+                    <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/40 space-y-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                    <Award className="h-3.5 w-3.5 text-emerald-600" />
+                                </div>
+                                <span className="text-sm font-semibold text-slate-800">KI-4 (Keterampilan)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className={cn("text-lg font-bold", getScoreColor(grade.ki4Average, grade.kkm))}>{grade.ki4Average}</span>
+                                <Badge className={cn("text-xs", getGradeColor(grade.ki4Predicate))}>{grade.ki4Predicate}</Badge>
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                            {grade.ki4Scores.map((s, i) => (
+                                <span key={i} className={cn("text-xs font-semibold px-2 py-0.5 rounded-md border", getScoreColor(s, grade.kkm), "bg-white border-slate-200")}>
+                                    {s}
+                                </span>
+                            ))}
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed italic">"{grade.ki4Description}"</p>
+                    </div>
+
+                    {/* Final */}
+                    <div className={cn("flex items-center justify-between p-4 rounded-xl border-2",
+                        grade.finalAverage >= grade.kkm ? "bg-emerald-50 border-emerald-300" : "bg-red-50 border-red-300"
+                    )}>
+                        <div>
+                            <p className="text-sm font-semibold text-slate-700">Nilai Akhir</p>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                                {grade.finalAverage >= grade.kkm ? "✓ Tuntas KKM" : "✗ Belum Tuntas KKM"}
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className={cn("text-3xl font-bold", getScoreColor(grade.finalAverage, grade.kkm))}>{grade.finalAverage}</span>
+                            <Badge variant="outline" className={cn("text-sm font-bold px-3 py-1", getGradeColor(grade.finalGrade))}>{grade.finalGrade}</Badge>
+                        </div>
+                    </div>
+
+                    {/* Remedial / Pengayaan */}
+                    {grade.remedial && (
+                        <div className={cn("p-4 rounded-xl border space-y-2",
+                            grade.remedial.type === "remedial"
+                                ? "border-amber-200 bg-amber-50/40"
+                                : "border-purple-200 bg-purple-50/40"
+                        )}>
+                            <div className="flex items-center gap-2">
+                                <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center",
+                                    grade.remedial.type === "remedial" ? "bg-amber-100" : "bg-purple-100"
+                                )}>
+                                    {grade.remedial.type === "remedial"
+                                        ? <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
+                                        : <Star className="h-3.5 w-3.5 text-purple-600" />
+                                    }
+                                </div>
+                                <span className={cn("text-sm font-semibold",
+                                    grade.remedial.type === "remedial" ? "text-amber-800" : "text-purple-800"
+                                )}>
+                                    {grade.remedial.type === "remedial" ? "Remedial (RTL)" : "Pengayaan"}
+                                </span>
+                            </div>
+                            {grade.remedial.type === "remedial" && (
+                                <div className="grid grid-cols-2 gap-2 pt-1">
+                                    {grade.remedial.date && (
+                                        <div className="text-xs text-slate-600">
+                                            <span className="font-semibold text-slate-700">Tanggal: </span>
+                                            {new Date(grade.remedial.date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                                        </div>
+                                    )}
+                                    {grade.remedial.scoreAfter !== undefined && (
+                                        <div className="text-xs text-slate-600">
+                                            <span className="font-semibold text-slate-700">Nilai Setelah: </span>
+                                            <span className={cn("font-bold", getScoreColor(grade.remedial.scoreAfter, grade.kkm))}>
+                                                {grade.remedial.scoreAfter}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {grade.remedial.material && (
+                                        <div className="text-xs text-slate-600 col-span-2">
+                                            <span className="font-semibold text-slate-700">Materi: </span>
+                                            {grade.remedial.material}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            {grade.remedial.type === "pengayaan" && (
+                                <p className="text-xs text-purple-700">Siswa telah mencapai nilai di atas KKM dan mengikuti program pengayaan.</p>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+// ==================== TREND CHART ====================
+
+const TrendChart: React.FC<{ history: SemesterSummary[] }> = ({ history }) => {
+    // Reverse so oldest is on the left
+    const chartData = [...history].reverse().map(h => ({
+        name: `${h.semester.slice(0, 3)} ${h.academicYear.slice(-4)}`,
+        nilai: h.averageScore,
+        peringkat: h.rank,
+    }));
+
+    return (
+        <ResponsiveContainer width="100%" height={180}>
+            <LineChart data={chartData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
+                <YAxis domain={[70, 100]} tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
+                <ReferenceLine y={75} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: "KKM", position: "right", fontSize: 10, fill: "#f59e0b" }} />
+                <RechartsTooltip
+                    contentStyle={{ borderRadius: "12px", border: "1px solid #e2e8f0", fontSize: 12 }}
+                    formatter={(value: number) => [`${value}`, "Rata-rata"]}
+                />
+                <Line
+                    type="monotone"
+                    dataKey="nilai"
+                    stroke="#1d4ed8"
+                    strokeWidth={2.5}
+                    dot={{ fill: "#1d4ed8", r: 5, strokeWidth: 2, stroke: "#fff" }}
+                    activeDot={{ r: 7 }}
+                />
+            </LineChart>
+        </ResponsiveContainer>
+    );
 };
 
 // ==================== MAIN COMPONENT ====================
 
 export const ParentGrades: React.FC = () => {
-    // Filter dialog states
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [tempAcademicYear, setTempAcademicYear] = useState("all");
-    const [tempSemester, setTempSemester] = useState("all");
-    const [selectedAcademicYear, setSelectedAcademicYear] = useState("all");
-    const [selectedSemester, setSelectedSemester] = useState("all");
-    
-    // Data states
-    const [grades, setGrades] = useState<SubjectGrade[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    // Calculate final averages for all grades
-    useEffect(() => {
-        const processedGrades = mockGrades.map(grade => ({
-            ...grade,
-            finalAverage: calculateFinalAverage(grade.sumatifScore, grade.astsScore, grade.asasScore),
-        }));
-        setGrades(processedGrades);
-        setIsLoading(false);
-    }, []);
-
-    // Filter grades based on selected filters
-    const filteredGrades = useMemo(() => {
-        return grades.filter(grade => {
-            const yearMatch = selectedAcademicYear === "all" ||
-                grade.academicYear.includes(selectedAcademicYear);
-            const semesterMatch = selectedSemester === "all" ||
-                grade.semester === selectedSemester;
-            return yearMatch && semesterMatch;
-        });
-    }, [grades, selectedAcademicYear, selectedSemester]);
-
-    // Get current period status
-    const currentPeriodStatus = useMemo(() => {
-        if (selectedAcademicYear === "all" || selectedSemester === "all") {
-            return checkPeriodStatus("2025/2026", "ganjil");
+    const [selectedSemester, setSelectedSemester] = useState(() => {
+        // Default to first completed semester of the first year that has one
+        for (const year of academicYears) {
+            const completed = year.semesters.find(s => s.status === "completed");
+            if (completed) return completed.id;
         }
-        return checkPeriodStatus(
-            selectedAcademicYear === "2025" ? "2025/2026" : "2024/2025",
-            selectedSemester as "ganjil" | "genap"
-        );
-    }, [selectedAcademicYear, selectedSemester]);
-
-    // Calculate stats with edge case handling
-    const stats: GradeStats = useMemo(() => {
-        if (filteredGrades.length === 0) {
-            return {
-                totalAverage: 0,
-                highestSubject: null,
-                lowestSubject: null,
-                aboveKKM: 0,
-                totalSubjects: 0,
-                progressValue: 0,
-                needsRemedial: [],
-            };
+        return "ganjil";
+    });
+    const [selectedYearId, setSelectedYearId] = useState(() => {
+        // Default to first year that has a completed semester
+        for (const year of academicYears) {
+            if (year.semesters.some(s => s.status === "completed")) return year.id;
         }
+        return academicYears[0]?.id ?? "2025-2026";
+    });
+    const [selectedTab, setSelectedTab] = useState("nilai");
+    const [filterOpen, setFilterOpen] = useState(false);
+    const [selectedGrade, setSelectedGrade] = useState<SubjectGrade | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [selectedChildId, setSelectedChildId] = useState(mockParentProfile.children[0]?.id ?? "");
 
-        const totalAverage = filteredGrades.reduce((sum, g) => sum + g.finalAverage, 0) / filteredGrades.length;
-        
-        const highestSubject = filteredGrades.reduce((prev, current) =>
-            prev.finalAverage > current.finalAverage ? prev : current
-        );
-        
-        const lowestSubject = filteredGrades.reduce((prev, current) =>
-            prev.finalAverage < current.finalAverage ? prev : current
-        );
+    const children = mockParentProfile.children;
+    const selectedChild = children.find(c => c.id === selectedChildId);
 
-        const aboveKKM = filteredGrades.filter(g => g.finalAverage >= g.kkm).length;
-        const needsRemedial = filteredGrades.filter(g => g.finalAverage < g.kkm);
+    const activeYear = academicYears.find(y => y.id === selectedYearId);
+    const displaySemester = selectedSemester === "ganjil" ? "Ganjil" : "Genap";
 
+    // Determine current semester status
+    const currentSemesterStatus = activeYear?.semesters.find(s => s.id === selectedSemester)?.status ?? "completed";
+    const isReportAvailable = currentSemesterStatus === "completed";
+
+    const stats = useMemo(() => {
+        const totalAverage = mockGrades.reduce((sum, g) => sum + g.finalAverage, 0) / mockGrades.length;
+        const highestSubject = mockGrades.reduce((prev, current) => prev.finalAverage > current.finalAverage ? prev : current);
+        const lowestSubject = mockGrades.reduce((prev, current) => prev.finalAverage < current.finalAverage ? prev : current);
+        const aboveKKM = mockGrades.filter(g => g.finalAverage >= g.kkm).length;
+        const currentRank = mockSemesterHistory[0]?.rank ?? "-";
+        const totalStudents = mockSemesterHistory[0]?.totalStudents ?? "-";
         return {
             totalAverage: Math.round(totalAverage * 10) / 10,
             highestSubject,
             lowestSubject,
             aboveKKM,
-            totalSubjects: filteredGrades.length,
-            progressValue: Math.round((aboveKKM / filteredGrades.length) * 100),
-            needsRemedial,
+            totalSubjects: mockGrades.length,
+            currentRank,
+            totalStudents,
         };
-    }, [filteredGrades]);
+    }, []);
 
-    const currentSemester = mockSemesterHistory[0];
-    const hasActiveFilters = selectedAcademicYear !== "all" || selectedSemester !== "all";
-
-    const handleResetFilters = () => {
-        setTempAcademicYear("all");
-        setTempSemester("all");
-        setSelectedAcademicYear("all");
-        setSelectedSemester("all");
+    const handleApplyFilter = (yearId: string, semester: string) => {
+        setIsLoading(true);
+        setSelectedYearId(yearId);
+        setSelectedSemester(semester);
+        setTimeout(() => setIsLoading(false), 600);
     };
 
-    const handleApplyFilters = () => {
-        setSelectedAcademicYear(tempAcademicYear);
-        setSelectedSemester(tempSemester);
-        setIsFilterOpen(false);
-    };
-
-    // Get display academic year and semester
-    const displayAcademicYear = selectedAcademicYear === "all"
-        ? "2025/2026"
-        : selectedAcademicYear === "2025"
-            ? "2025/2026"
-            : "2024/2025";
-    
-    const displaySemester = selectedSemester === "all" ? "Ganjil" :
-        selectedSemester === "ganjil" ? "Ganjil" : "Genap";
-
-    // Loading state
-    if (isLoading) {
-        return <LoadingState showStats={true} />;
-    }
-
-    // Error state
-    if (error) {
-        return (
-            <div className="space-y-6">
-                <Alert variant="destructive" className="border-red-200 bg-red-50">
-                    <AlertCircle className="h-5 w-5 text-red-600" />
-                    <AlertTitle className="text-red-800">Gagal Memuat Data</AlertTitle>
-                    <AlertDescription className="text-red-700">
-                        {error}
-                    </AlertDescription>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => {
-                            setIsLoading(true);
-                            setError(null);
-                            const processedGrades = mockGrades.map(grade => ({
-                                ...grade,
-                                finalAverage: calculateFinalAverage(grade.sumatifScore, grade.astsScore, grade.asasScore),
-                            }));
-                            setGrades(processedGrades);
-                            setIsLoading(false);
-                        }}
-                        className="mt-2 gap-2"
-                    >
-                        <RotateCcw className="h-4 w-4" />
-                        Coba Lagi
-                    </Button>
-                </Alert>
-            </div>
-        );
-    }
+    if (isLoading) return <ParentGradesSkeleton />;
 
     return (
         <div className="space-y-6">
@@ -749,425 +969,267 @@ export const ParentGrades: React.FC = () => {
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
                             <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Nilai & </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Rapor Anak</span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Rapor</span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
                             <GraduationCap className="h-5 w-5" />
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Monitoring hasil belajar dan pencapaian akademik anak
+                        Laporan hasil belajar akademik
+                        {selectedChild && (
+                            <span className="font-medium text-slate-700"> · {selectedChild.name} <span className="text-slate-400">·</span> {selectedChild.class}</span>
+                        )}
                     </p>
                 </div>
-
-                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0">
-                    <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" className="h-9 gap-2 bg-white text-slate-700 border-slate-200 shadow-sm font-medium">
-                                <Filter className="h-4 w-4 text-slate-500" />
-                                <span className="hidden sm:inline">Filter</span>
-                                {hasActiveFilters && (
-                                    <Badge className="ml-0.5 h-5 w-5 min-w-[20px] px-0 bg-blue-800 text-white text-[10px] flex items-center justify-center border-0 rounded-full">
-                                        {(selectedAcademicYear !== "all" ? 1 : 0) + (selectedSemester !== "all" ? 1 : 0)}
-                                    </Badge>
-                                )}
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px] rounded-2xl">
-                            <DialogHeader className="flex-row items-center gap-4">
-                                <div className="p-2.5 bg-blue-100 rounded-xl">
-                                    <Filter className="h-5 w-5 text-blue-700" />
-                                </div>
-                                <div>
-                                    <DialogTitle className="text-lg font-semibold text-slate-900">Filter Nilai</DialogTitle>
-                                    <DialogDescription className="text-slate-500">
-                                        Sesuaikan tahun ajaran dan semester
-                                    </DialogDescription>
-                                </div>
-                            </DialogHeader>
-                            
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                            <Calendar className="h-4 w-4 text-slate-400" />
-                                            Tahun Ajaran
-                                        </label>
-                                        <Select value={tempAcademicYear} onValueChange={setTempAcademicYear}>
-                                            <SelectTrigger className="w-full bg-slate-50/50 border-slate-200">
-                                                <SelectValue placeholder="Tahun" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="all">Semua Tahun</SelectItem>
-                                                <SelectItem value="2025">TA. 2025/2026</SelectItem>
-                                                <SelectItem value="2024">TA. 2024/2025</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                            <BookText className="h-4 w-4 text-slate-400" />
-                                            Semester
-                                        </label>
-                                        <Select value={tempSemester} onValueChange={setTempSemester}>
-                                            <SelectTrigger className="w-full bg-slate-50/50 border-slate-200">
-                                                <SelectValue placeholder="Semester" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="all">Semua</SelectItem>
-                                                <SelectItem value="ganjil">Ganjil</SelectItem>
-                                                <SelectItem value="genap">Genap</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <DialogFooter className="sm:justify-between gap-2 border-t pt-4">
-                                <Button
-                                    variant="ghost"
-                                    onClick={handleResetFilters}
-                                    className="text-slate-500 hover:text-red-500 hover:bg-red-50 gap-2"
-                                >
-                                    <RotateCcw className="h-4 w-4" />
-                                    Reset Pilihan
-                                </Button>
-                                <Button
-                                    className="bg-blue-800 hover:bg-blue-900 text-white px-8 gap-2"
-                                    onClick={handleApplyFilters}
-                                >
-                                    <Check className="h-4 w-4" />
-                                    Terapkan
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                <div className="flex items-center gap-3 no-print">
+                    {children.length > 1 && (
+                        <Select value={selectedChildId} onValueChange={setSelectedChildId}>
+                            <SelectTrigger className="w-auto h-9 bg-white shadow-sm border-slate-200 gap-2 px-3">
+                                <Users className="w-4 h-4 text-muted-foreground shrink-0" />
+                                <span className="text-sm text-slate-700 font-medium">Ganti Anak</span>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {children.map(child => (
+                                    <SelectItem key={child.id} value={child.id}>
+                                        {child.name} — {child.class}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
+                    <GradesFilterDialog
+                        open={filterOpen}
+                        onOpenChange={setFilterOpen}
+                        selectedYearId={selectedYearId}
+                        selectedSemester={selectedSemester}
+                        academicYears={academicYears}
+                        onApply={handleApplyFilter}
+                    />
                 </div>
             </div>
 
-            {/* Active Global Filters */}
-            {hasActiveFilters && (
-                <div className="flex flex-wrap items-center gap-2 px-1">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-                        <SlidersHorizontal className="h-3 w-3" />
-                        <span>Filter Aktif:</span>
-                    </div>
-                    
-                    {selectedAcademicYear !== "all" && (
-                        <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                            <Calendar className="h-3.5 w-3.5" />
-                            TA. {selectedAcademicYear === "2025" ? "2025/2026" : "2024/2025"}
-                            <button
-                                onClick={() => setSelectedAcademicYear("all")}
-                                className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                                aria-label="Hapus filter tahun ajaran"
-                            >
-                                <X className="h-3.5 w-3.5" />
-                            </button>
-                        </Badge>
-                    )}
-
-                    {selectedSemester !== "all" && (
-                        <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                            <BookText className="h-3.5 w-3.5" />
-                            {selectedSemester === "ganjil" ? "Ganjil" : "Genap"}
-                            <button
-                                onClick={() => setSelectedSemester("all")}
-                                className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                                aria-label="Hapus filter semester"
-                            >
-                                <X className="h-3.5 w-3.5" />
-                            </button>
-                        </Badge>
-                    )}
-
-                    {(selectedAcademicYear !== "all" ? 1 : 0) + (selectedSemester !== "all" ? 1 : 0) > 1 && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
-                            onClick={handleResetFilters}
-                        >
-                            <RotateCcw className="h-3 w-3" />
-                            Hapus Semua
-                        </Button>
-                    )}
-                </div>
-            )}
-
-            {/* Period Alert */}
-            <PeriodAlert
-                periodStatus={currentPeriodStatus}
-                academicYear={displayAcademicYear}
-                semester={displaySemester}
+            {/* Active Filter Badges */}
+            <GradesFilterBadges
+                selectedYearId={selectedYearId}
+                selectedSemester={selectedSemester}
+                academicYears={academicYears}
+                onClearYear={() => handleApplyFilter(academicYears[0]?.id, selectedSemester)}
+                onClearSemester={() => {
+                    const firstCompleted = academicYears.find(y => y.id === selectedYearId)?.semesters.find(s => s.status === "completed");
+                    handleApplyFilter(selectedYearId, firstCompleted?.id ?? academicYears[0]?.semesters.find(s => s.status === "completed")?.id ?? "ganjil");
+                }}
             />
 
-            {/* Child Info Card */}
-            <Card className="border-blue-200 shadow-sm">
-                <CardContent className="p-6">
-                    <div className="flex items-center gap-5">
-                        <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-800 font-bold text-xl ring-2 ring-blue-200/50">
-                            {mockChildInfo.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
+            {/* Stats Cards + Rapor content — only when semester is completed */}
+            {!isReportAvailable ? (
+                <Card className={cn("border-dashed shadow-sm", currentSemesterStatus === "active" ? "border-blue-200 bg-blue-50/30" : "border-slate-200 bg-slate-50/30")}>
+                    <CardContent className="flex flex-col items-center justify-center py-20 text-center px-4">
+                        <div className={cn("w-16 h-16 rounded-full border border-dashed flex items-center justify-center mb-4",
+                            currentSemesterStatus === "active" ? "bg-blue-50 border-blue-200" : "bg-slate-50 border-slate-200"
+                        )}>
+                            <FileText className={cn("h-8 w-8", currentSemesterStatus === "active" ? "text-blue-400" : "text-slate-400")} />
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-slate-800 text-lg">{mockChildInfo.name}</h3>
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1 flex-wrap">
-                                <span>NIS: {mockChildInfo.nis}</span>
-                                <Badge className="bg-blue-100 text-blue-800 border-blue-200 font-medium rounded-full">
-                                    {mockChildInfo.class}
-                                </Badge>
-                            </div>
-                        </div>
-                        <div className="text-right pl-4 border-l border-slate-200">
-                            <p className="text-sm text-muted-foreground font-medium">Peringkat Kelas</p>
-                            <p className="text-3xl font-bold text-amber-600 mt-0.5">#{currentSemester.rank}</p>
-                            <p className="text-xs text-muted-foreground">dari {currentSemester.totalStudents} siswa</p>
-                        </div>
+                        <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                            {currentSemesterStatus === "active" ? "Rapor Belum Tersedia" : "Semester Belum Dimulai"}
+                        </h3>
+                        <p className="text-sm text-slate-500 max-w-md">
+                            {currentSemesterStatus === "active"
+                                ? `Semester ${displaySemester} sedang berlangsung. Rapor akan tersedia setelah semester berakhir dan nilai difinalisasi oleh guru.`
+                                : `Semester ${displaySemester} belum dimulai. Rapor akan tersedia setelah semester selesai.`
+                            }
+                        </p>
+                    </CardContent>
+                </Card>
+            ) : (
+                <div className="space-y-6">
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 items-stretch print:hidden">
+                        <StatCard title="Rata-rata Nilai" value={stats.totalAverage} subtitle="Semua mapel" icon={BarChart3} color="blue" />
+                        <StatCard title="Nilai Tertinggi" value={stats.highestSubject.finalAverage} subtitle={stats.highestSubject.subject} icon={TrendingUp} color="emerald" />
+                        <StatCard title="Nilai Terendah" value={stats.lowestSubject.finalAverage} subtitle={stats.lowestSubject.subject} icon={Target} color="amber" />
+                        <StatCard title="Tuntas KKM" value={`${stats.aboveKKM}/${stats.totalSubjects}`} subtitle="Mata pelajaran" icon={Check} color="green" />
+                        <StatCard title="Peringkat Kelas" value={`#${stats.currentRank}`} subtitle={`dari ${stats.totalStudents} siswa`} icon={Trophy} color="purple" />
                     </div>
-                </CardContent>
-            </Card>
 
-            {/* Summary Statistics */}
-            {filteredGrades.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatCard
-                        title="Rata-rata Nilai"
-                        value={stats.totalAverage}
-                        icon={BarChart3}
-                        color="blue"
-                    />
-                    <StatCard
-                        title="Nilai Tertinggi"
-                        value={stats.highestSubject?.finalAverage || "-"}
-                        subtitle={stats.highestSubject?.subject || ""}
-                        icon={Star}
-                        color="emerald"
-                    />
-                    <StatCard
-                        title="Perlu Perhatian"
-                        value={stats.lowestSubject?.finalAverage || "-"}
-                        subtitle={stats.lowestSubject?.subject || ""}
-                        icon={Target}
-                        color="amber"
-                    />
-                    <StatCard
-                        title="Tuntas KKM"
-                        value={`${stats.aboveKKM}/${stats.totalSubjects}`}
-                        icon={Award}
-                        color="green"
-                        progressValue={stats.progressValue}
-                    />
-                </div>
-            )}
+                    {/* Ketidakhadiran — per semester */}
+                    <AttendanceSection attendance={mockAttendance} />
 
-            {/* Tabs - Nilai & Catatan Rapor */}
-            <Tabs defaultValue="nilai" className="space-y-4">
-                <TabsList className="grid w-full max-w-md grid-cols-2 h-10 bg-slate-100 rounded-lg p-1">
-                    <TabsTrigger value="nilai" className="gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all text-sm font-medium">
-                        <BookOpen className="h-4 w-4" />
-                        Nilai Akademik
-                    </TabsTrigger>
-                    <TabsTrigger value="catatan" className="gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all text-sm font-medium">
-                        <FileText className="h-4 w-4" />
-                        Catatan Rapor
-                    </TabsTrigger>
-                </TabsList>
+                    {/* Main Tabs — Nilai & Catatan Rapor */}
+                    <Tabs value={selectedTab} onValueChange={setSelectedTab} className="print:hidden">
+                        <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:inline-grid lg:grid-cols-2">
+                            <TabsTrigger value="nilai">
+                                <BookOpen className="h-4 w-4 mr-2" />
+                                Nilai Akademik
+                            </TabsTrigger>
+                            <TabsTrigger value="catatan">
+                                <FileText className="h-4 w-4 mr-2" />
+                                Catatan Rapor
+                            </TabsTrigger>
+                        </TabsList>
 
-                <TabsContent value="nilai" className="space-y-4">
-                    {/* Grades Table */}
-                    {filteredGrades.length === 0 ? (
-                        <EmptyState hasActiveFilters={hasActiveFilters} onResetFilters={handleResetFilters} />
-                    ) : (
-                        <Card className="border-blue-200 shadow-sm">
-                            <CardHeader className="pb-3">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2.5 bg-blue-100 rounded-xl">
-                                            <BookOpen className="h-5 w-5 text-blue-700" />
+                        {/* Nilai Tab */}
+                        <TabsContent value="nilai" className="space-y-4 mt-4">
+                            <Card className="border-slate-200 shadow-sm">
+                                <CardHeader className="pb-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2.5 bg-blue-100 rounded-xl">
+                                                <BookText className="h-5 w-5 text-blue-700" />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-lg font-semibold text-slate-800">Nilai Mata Pelajaran</CardTitle>
+                                                <CardDescription className="text-sm text-slate-600">
+                                                    Semester {displaySemester} TA. {activeYear?.year} — klik baris untuk detail & deskripsi
+                                                </CardDescription>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <CardTitle className="text-lg font-semibold text-slate-800">Nilai Per Mata Pelajaran</CardTitle>
-                                            <CardDescription className="text-sm text-slate-600">
-                                                Semester {displaySemester} TA. {displayAcademicYear}
-                                            </CardDescription>
+                                        <div className="flex items-center gap-1.5 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+                                            <Info className="h-3.5 w-3.5" />
+                                            <span className="hidden sm:inline">KKM = 75</span>
                                         </div>
                                     </div>
-                                    <Badge className="bg-blue-100 text-blue-800 border-blue-200 font-semibold h-7 px-3 rounded-full text-xs self-start sm:self-center">
-                                        {filteredGrades.length} Mata Pelajaran
-                                    </Badge>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead>
-                                            <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                                <th className="text-left p-4 w-[50px] font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle">No</th>
-                                                <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle min-w-[200px]">Mata Pelajaran</th>
-                                                <th className="text-center p-4 w-[90px] font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle">Sumatif</th>
-                                                <th className="text-center p-4 w-[90px] font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle">ASTS</th>
-                                                <th className="text-center p-4 w-[90px] font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle">ASAS</th>
-                                                <th className="text-center p-4 w-[100px] font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle">Rata-rata</th>
-                                                <th className="text-center p-4 w-[100px] font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle">Predikat</th>
-                                                <th className="text-center p-4 w-[90px] font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {filteredGrades.map((grade, index) => {
-                                                const gradeStatus = getGradeStatus(grade);
-                                                return (
-                                                    <tr key={grade.id} className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50/80 transition-colors">
-                                                        <td className="p-4 align-middle">
-                                                            <span className="text-sm text-slate-500 font-medium">{index + 1}</span>
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className="bg-slate-50 border-b border-slate-200">
+                                                    <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-[40px]">No</th>
+                                                    <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle min-w-[180px]">Mata Pelajaran</th>
+                                                    <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-[70px]">KKM</th>
+                                                    <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-[80px]">KI-3</th>
+                                                    <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-[80px]">KI-4</th>
+                                                    <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-[80px]">Akhir</th>
+                                                    <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-[70px]">Predikat</th>
+                                                    <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider align-middle w-[80px]">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {mockGrades.map((grade, index) => (
+                                                    <tr
+                                                        key={grade.id}
+                                                        className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors cursor-pointer group"
+                                                        onClick={() => setSelectedGrade(grade)}
+                                                    >
+                                                        <td className="p-4 align-middle text-center">
+                                                            <span className="text-sm text-slate-600 font-medium">{index + 1}</span>
                                                         </td>
                                                         <td className="p-4 align-middle">
                                                             <div className="flex flex-col gap-0.5">
-                                                                <span className="text-sm text-slate-800 font-semibold">{grade.subject}</span>
-                                                                <span className="text-xs text-slate-500">{grade.teacher}</span>
+                                                                <span className="text-[15px] text-slate-800 font-semibold group-hover:text-blue-700 transition-colors">{grade.subject}</span>
+                                                                <span className="text-[13px] text-slate-500 font-medium">{grade.teacher}</span>
                                                             </div>
                                                         </td>
                                                         <td className="p-4 align-middle text-center">
-                                                            <span className={cn("text-sm font-semibold", getScoreColor(grade.sumatifScore, grade.kkm))}>
-                                                                {grade.sumatifScore}
-                                                            </span>
+                                                            <span className="text-sm font-semibold text-slate-500">{grade.kkm}</span>
                                                         </td>
                                                         <td className="p-4 align-middle text-center">
-                                                            <span className={cn("text-sm font-semibold", getScoreColor(grade.astsScore, grade.kkm))}>
-                                                                {grade.astsScore}
-                                                            </span>
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <span className={cn("text-sm font-bold", getScoreColor(grade.ki3Average, grade.kkm))}>{grade.ki3Average}</span>
+                                                                <Badge variant="outline" className={cn("text-xs", getGradeColor(grade.ki3Predicate))}>{grade.ki3Predicate}</Badge>
+                                                            </div>
                                                         </td>
                                                         <td className="p-4 align-middle text-center">
-                                                            <span className={cn("text-sm font-semibold", getScoreColor(grade.asasScore, grade.kkm))}>
-                                                                {grade.asasScore}
-                                                            </span>
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <span className={cn("text-sm font-bold", getScoreColor(grade.ki4Average, grade.kkm))}>{grade.ki4Average}</span>
+                                                                <Badge variant="outline" className={cn("text-xs", getGradeColor(grade.ki4Predicate))}>{grade.ki4Predicate}</Badge>
+                                                            </div>
                                                         </td>
                                                         <td className="p-4 align-middle text-center">
-                                                            <span className={cn("text-base font-bold", getScoreColor(grade.finalAverage, grade.kkm))}>
-                                                                {grade.finalAverage}
-                                                            </span>
+                                                            <span className={cn("text-base font-bold", getScoreColor(grade.finalAverage, grade.kkm))}>{grade.finalAverage}</span>
                                                         </td>
                                                         <td className="p-4 align-middle text-center">
-                                                            <Badge variant="outline" className={cn(
-                                                                "inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium border rounded-full",
-                                                                getGradeBadgeColor(grade.grade)
-                                                            )}>
-                                                                {grade.grade}
+                                                            <Badge variant="outline" className={cn("inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium border rounded-full", getGradeColor(grade.finalGrade))}>
+                                                                {grade.finalGrade}
                                                             </Badge>
                                                         </td>
                                                         <td className="p-4 align-middle text-center">
-                                                            {gradeStatus.status === "tuntas" ? (
-                                                                <Badge className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium bg-green-50 text-green-700 border-green-200 rounded-full">
-                                                                    <Check className="h-3.5 w-3.5" />
-                                                                    Tuntas
-                                                                </Badge>
+                                                            {grade.finalAverage >= grade.kkm ? (
+                                                                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px] font-semibold">Tuntas</Badge>
                                                             ) : (
-                                                                <Badge className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium bg-amber-50 text-amber-700 border-amber-200 rounded-full">
-                                                                    <AlertCircle className="h-3.5 w-3.5" />
-                                                                    Remedial
-                                                                </Badge>
+                                                                <Badge className="bg-red-100 text-red-700 border-red-200 text-[10px] font-semibold">Belum</Badge>
                                                             )}
                                                         </td>
                                                     </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                </TabsContent>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 flex items-center gap-1.5 text-xs text-slate-400">
+                                        <Info className="h-3.5 w-3.5" />
+                                        Klik baris untuk melihat deskripsi capaian kompetensi dan skor detail
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
 
-                <TabsContent value="catatan" className="space-y-4">
-                    {/* Catatan Rapor */}
-                    <Card className="border-blue-200 shadow-sm">
-                        <CardHeader className="pb-3">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2.5 bg-blue-100 rounded-xl">
-                                    <FileText className="h-5 w-5 text-blue-700" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg font-semibold text-slate-800">Catatan Rapor</CardTitle>
-                                    <CardDescription className="text-sm text-slate-600">
-                                        Semester {displaySemester} TA. {displayAcademicYear}
-                                    </CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            {mockReportCardNotes.map((item, index) => (
-                                <div
-                                    key={index}
-                                    className={cn(
-                                        "p-4 rounded-xl border bg-gradient-to-r from-slate-50/50 to-white hover:shadow-sm hover:border-slate-300 transition-all",
-                                        index === 0 ? "border-amber-200" :
-                                        index === 1 ? "border-blue-200" :
-                                        index === 2 ? "border-emerald-200" : "border-purple-200"
-                                    )}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <span className="text-2xl flex-shrink-0">{item.icon}</span>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="font-semibold text-slate-800 mb-1.5 text-sm">{item.category}</h4>
-                                            <p className="text-sm text-slate-600 leading-relaxed">{item.note}</p>
+                        {/* Catatan Tab */}
+                        <TabsContent value="catatan" className="space-y-4 mt-4">
+                            <Card className="border-blue-200 shadow-sm">
+                                <CardHeader className="pb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 bg-blue-100 rounded-xl">
+                                            <FileText className="h-5 w-5 text-blue-700" />
+                                        </div>
+                                        <div>
+                                            <CardTitle className="text-lg font-semibold text-slate-800">Catatan Rapor</CardTitle>
+                                            <CardDescription className="text-sm text-slate-600">Semester {displaySemester} TA. {activeYear?.year}</CardDescription>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    {mockReportCardNotes.map((item, index) => (
+                                        <div
+                                            key={index}
+                                            className={cn(
+                                                "p-4 rounded-xl border bg-gradient-to-r from-slate-50/50 to-white",
+                                                index === 0 ? "border-amber-200" :
+                                                index === 1 ? "border-blue-200" :
+                                                index === 2 ? "border-emerald-200" : "border-purple-200"
+                                            )}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <span className="text-2xl flex-shrink-0">{item.icon}</span>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-semibold text-slate-800 mb-1.5 text-sm">{item.category}</h4>
+                                                    <p className="text-sm text-slate-600 leading-relaxed">{item.note}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
 
-            {/* Semester History */}
-            <Card className="border-blue-200 shadow-sm">
+                    {/* Grade Detail Dialog */}
+                    <GradeDetailDialog grade={selectedGrade} onClose={() => setSelectedGrade(null)} />
+
+                    {/* Nilai Sikap — per semester */}
+                    <AttitudeSection attitude={mockAttitude} />
+
+                    {/* Ekstrakurikuler — per semester */}
+                    <ExtracurricularSection extracurriculars={mockExtracurriculars} />
+                </div>
+            )}
+
+            {/* Tren Nilai — selalu tampil sebagai konteks historis lintas semester */}
+            <Card className="border-blue-200 shadow-sm print:hidden">
                 <CardHeader className="pb-3">
                     <div className="flex items-center gap-3">
                         <div className="p-2.5 bg-blue-100 rounded-xl">
                             <TrendingUp className="h-5 w-5 text-blue-700" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg font-semibold text-slate-800">Riwayat Nilai</CardTitle>
-                            <CardDescription className="text-sm text-slate-600">Perbandingan nilai antar semester</CardDescription>
+                            <CardTitle className="text-lg font-semibold text-slate-800">Tren Nilai</CardTitle>
+                            <CardDescription className="text-sm text-slate-600">Perkembangan rata-rata nilai antar semester</CardDescription>
                         </div>
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {mockSemesterHistory.map((semester, index) => (
-                            <div
-                                key={`${semester.academicYear}-${semester.semester}`}
-                                className={cn(
-                                    "p-5 rounded-xl border transition-all hover:shadow-md",
-                                    index === 0 ? "bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200" : "bg-slate-50 border-slate-200"
-                                )}
-                            >
-                                <div className="flex items-center justify-between mb-3">
-                                    <Badge variant={index === 0 ? "default" : "outline"} className={cn("rounded-full px-3 py-0.5 text-xs font-semibold", index === 0 ? "bg-blue-800" : "")}>
-                                        {semester.semester}
-                                    </Badge>
-                                    {index === 0 && (
-                                        <Badge className="bg-green-50 text-green-700 border-green-200 rounded-full px-2.5 py-0.5 text-[10px] font-medium">
-                                            Aktif
-                                        </Badge>
-                                    )}
-                                </div>
-                                <p className="text-xs text-muted-foreground font-medium mb-3">{semester.academicYear}</p>
-                                <div className="space-y-2.5">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm text-muted-foreground font-medium">Rata-rata</span>
-                                        <span className={cn("font-bold text-lg", getScoreColor(semester.averageScore, 75))}>
-                                            {semester.averageScore}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center pt-2.5 border-t border-slate-200/60">
-                                        <span className="text-sm text-muted-foreground font-medium">Peringkat</span>
-                                        <span className="font-bold text-lg text-slate-700">#{semester.rank}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="p-4 rounded-xl bg-slate-50/50 border border-slate-200">
+                        <TrendChart history={mockSemesterHistory} />
                     </div>
                 </CardContent>
             </Card>
