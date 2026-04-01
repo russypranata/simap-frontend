@@ -93,10 +93,16 @@ export const getDashboardData = async (childId: string): Promise<DashboardData> 
     const child = mockParentProfile.children.find(c => c.id === childId);
     if (!child) throw new Error("Data anak tidak ditemukan.");
 
-    // Get latest completed semester grades
+    // Get latest completed semester grades (dynamic, not hardcoded)
     const gradesData = mockGradesChild1;
-    const latestSemester = gradesData.semesters.find(s => s.academicYear === "2024/2025" && s.semester === "Genap")
-        ?? gradesData.semesters[0];
+    const latestSemester = [...gradesData.semesters]
+        .filter(s => s.averageScore > 0)
+        .sort((a, b) => {
+            const yearDiff = b.academicYear.localeCompare(a.academicYear);
+            if (yearDiff !== 0) return yearDiff;
+            // Genap (2nd semester) is more recent than Ganjil (1st)
+            return a.semester === "Genap" ? -1 : 1;
+        })[0] ?? gradesData.semesters[0];
 
     const allSubjects = latestSemester?.grades ?? [];
     const sorted = [...allSubjects].sort((a, b) => b.averageScore - a.averageScore);
@@ -108,7 +114,7 @@ export const getDashboardData = async (childId: string): Promise<DashboardData> 
     const todayItems = mockScheduleChild1
         .filter(s => s.day === today)
         .sort((a, b) => a.startTime.localeCompare(b.startTime))
-        .slice(0, 5)
+        .slice(0, 3)
         .map(s => ({
             id: s.id,
             time: s.startTime,
@@ -149,7 +155,7 @@ export const getDashboardData = async (childId: string): Promise<DashboardData> 
         bottomSubjects,
         monthlyAttendance,
         ekskulSummary,
-        hasWarning: stats.violationCount >= 3 || stats.averageScore < 75,
+        hasWarning: stats.violationCount >= 3 || stats.averageScore < 70,
     };
 };
 

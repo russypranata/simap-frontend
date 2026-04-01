@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-    getPrayerAttendance,
+    getPrayerAttendanceByMonth,
     getParentChildren,
     type PrayerRecord,
     type ChildInfo,
@@ -9,23 +9,22 @@ import {
 export const useParentPrayerAttendance = () => {
     const [records, setRecords] = useState<PrayerRecord[]>([]);
     const [children, setChildren] = useState<ChildInfo[]>([]);
-    
     const [selectedChildId, setSelectedChildId] = useState<string>("");
-    const [weekOffset, setWeekOffset] = useState<number>(0);
-    
+
+    const today = new Date();
+    const [selectedMonth, setSelectedMonth] = useState<number>(today.getMonth());
+    const [selectedYear, setSelectedYear] = useState<number>(today.getFullYear());
+
     const [isLoading, setIsLoading] = useState(true);
     const [isFetching, setIsFetching] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Initial Fetch for Children
     useEffect(() => {
         const init = async () => {
             try {
                 const childrenData = await getParentChildren();
                 setChildren(childrenData);
-                if (childrenData.length > 0) {
-                    setSelectedChildId(childrenData[0].id);
-                }
+                if (childrenData.length > 0) setSelectedChildId(childrenData[0].id);
             } catch {
                 setError("Gagal memuat daftar anak.");
                 setIsLoading(false);
@@ -38,13 +37,11 @@ export const useParentPrayerAttendance = () => {
         if (!selectedChildId) return;
 
         const isInitial = records.length === 0 && isLoading;
-        if (!isInitial) {
-            setIsFetching(true);
-        }
+        if (!isInitial) setIsFetching(true);
         setError(null);
 
         try {
-            const data = await getPrayerAttendance(selectedChildId, weekOffset);
+            const data = await getPrayerAttendanceByMonth(selectedChildId, selectedYear, selectedMonth);
             setRecords(data);
         } catch (err) {
             const message = err instanceof Error ? err.message : "Gagal memuat riwayat presensi sholat.";
@@ -54,34 +51,42 @@ export const useParentPrayerAttendance = () => {
             setIsLoading(false);
             setIsFetching(false);
         }
-    }, [selectedChildId, weekOffset]); 
+    }, [selectedChildId, selectedMonth, selectedYear]);
 
     useEffect(() => {
-        if (selectedChildId) {
-            fetchRecords();
-        }
+        if (selectedChildId) fetchRecords();
     }, [fetchRecords]);
 
-    const refetch = useCallback(() => {
-        fetchRecords();
-    }, [fetchRecords]);
+    const handlePrevMonth = () => {
+        if (selectedMonth === 0) { setSelectedMonth(11); setSelectedYear(y => y - 1); }
+        else setSelectedMonth(m => m - 1);
+    };
+    const handleNextMonth = () => {
+        if (selectedYear === today.getFullYear() && selectedMonth === today.getMonth()) return;
+        if (selectedMonth === 11) { setSelectedMonth(0); setSelectedYear(y => y + 1); }
+        else setSelectedMonth(m => m + 1);
+    };
+    const handleCurrentMonth = () => {
+        setSelectedMonth(today.getMonth());
+        setSelectedYear(today.getFullYear());
+    };
 
-    const handleNextWeek = () => setWeekOffset(prev => prev + 1);
-    const handlePrevWeek = () => setWeekOffset(prev => prev - 1);
-    const handleTodayWeek = () => setWeekOffset(0);
+    const isCurrentMonth = selectedMonth === today.getMonth() && selectedYear === today.getFullYear();
 
     return {
         records,
         children,
         selectedChildId,
-        weekOffset,
+        selectedMonth,
+        selectedYear,
         isLoading,
         isFetching,
         error,
+        isCurrentMonth,
         setSelectedChildId,
-        handleNextWeek,
-        handlePrevWeek,
-        handleTodayWeek,
-        refetch,
+        handlePrevMonth,
+        handleNextMonth,
+        handleCurrentMonth,
+        refetch: fetchRecords,
     };
 };

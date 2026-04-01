@@ -260,8 +260,8 @@ export const ParentDashboard: React.FC = () => {
             {/* Row: Schedule + Attendance */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Today's Schedule */}
-                <Card className="border-slate-100 shadow-sm overflow-hidden">
-                    <CardHeader className="p-4 border-b border-slate-50 bg-slate-50/50">
+                <Card className="border-slate-100 shadow-sm overflow-hidden gap-0">
+                    <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-blue-100 rounded-lg">
@@ -281,7 +281,7 @@ export const ParentDashboard: React.FC = () => {
                             </Link>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-4">
+                    <CardContent className="p-3 pt-3">
                         {todaySchedule.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <Calendar className="h-8 w-8 text-slate-300 mb-2" />
@@ -314,60 +314,9 @@ export const ParentDashboard: React.FC = () => {
                     </CardContent>
                 </Card>
 
-                {/* Monthly Attendance */}
-                <Card className="border-slate-100 shadow-sm overflow-hidden">
-                    <CardHeader className="p-4 border-b border-slate-50 bg-slate-50/50">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-green-100 rounded-lg">
-                                    <CheckCircle className="h-5 w-5 text-green-700" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg text-slate-800">Kehadiran Bulan Ini</CardTitle>
-                                    <CardDescription>Rekap presensi harian</CardDescription>
-                                </div>
-                            </div>
-                            <Link href="/parent/attendance/daily">
-                                <Button variant="ghost" size="sm" className="gap-1 text-green-700 hover:text-green-800 hover:bg-green-50">
-                                    Detail <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </Link>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                        <div className="flex items-center justify-center mb-4">
-                            <div className="text-center">
-                                <p className="text-4xl font-bold text-green-600 tabular-nums">{monthlyAttendance.percentage}%</p>
-                                <p className="text-sm text-slate-500 mt-1">Tingkat Kehadiran</p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-4 gap-3">
-                            <div className="text-center p-3 rounded-xl bg-green-50 border border-green-200">
-                                <p className="text-xl font-bold text-green-600 tabular-nums">{monthlyAttendance.hadir}</p>
-                                <p className="text-xs text-slate-600 mt-1">Hadir</p>
-                            </div>
-                            <div className="text-center p-3 rounded-xl bg-amber-50 border border-amber-200">
-                                <p className="text-xl font-bold text-amber-600 tabular-nums">{monthlyAttendance.sakit}</p>
-                                <p className="text-xs text-slate-600 mt-1">Sakit</p>
-                            </div>
-                            <div className="text-center p-3 rounded-xl bg-blue-50 border border-blue-200">
-                                <p className="text-xl font-bold text-blue-600 tabular-nums">{monthlyAttendance.izin}</p>
-                                <p className="text-xs text-slate-600 mt-1">Izin</p>
-                            </div>
-                            <div className="text-center p-3 rounded-xl bg-red-50 border border-red-200">
-                                <p className={cn("text-xl font-bold tabular-nums", monthlyAttendance.alpa > 0 ? "text-red-600" : "text-slate-400")}>{monthlyAttendance.alpa}</p>
-                                <p className="text-xs text-slate-600 mt-1">Alpha</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Row: Top/Bottom Subjects + Ekskul */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Subject Performance */}
-                <Card className="border-slate-100 shadow-sm overflow-hidden">
-                    <CardHeader className="p-4 border-b border-slate-50 bg-slate-50/50">
+                <Card className="border-slate-100 shadow-sm overflow-hidden gap-0">
+                    <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-blue-100 rounded-lg">
@@ -385,7 +334,7 @@ export const ParentDashboard: React.FC = () => {
                             </Link>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-4 space-y-4">
+                    <CardContent className="p-3 pt-3 space-y-4">
                         <div>
                             <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-2">Tertinggi</p>
                             <div className="space-y-2">
@@ -416,10 +365,61 @@ export const ParentDashboard: React.FC = () => {
                         </div>
                     </CardContent>
                 </Card>
+            </div>
+
+            {/* Row: Attendance + Ekskul */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {/* Monthly Attendance */}
+                <Card className="border-slate-100 shadow-sm overflow-hidden gap-0">
+                    <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-green-100 rounded-lg">
+                                    <CheckCircle className="h-5 w-5 text-green-700" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-lg text-slate-800">Kehadiran Bulan Ini</CardTitle>
+                                    <CardDescription>Rekap presensi harian</CardDescription>
+                                </div>
+                            </div>
+                            <Link href="/parent/attendance/daily">
+                                <Button variant="ghost" size="sm" className="gap-1 text-green-700 hover:text-green-800 hover:bg-green-50">
+                                    Detail <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-3 pt-3">
+                        <div className="flex items-center justify-center mb-3">
+                            <div className="text-center">
+                                <p className="text-4xl font-bold text-green-600 tabular-nums">{monthlyAttendance.percentage}%</p>
+                                <p className="text-sm text-slate-500 mt-0.5">Tingkat Kehadiran</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                            <div className="text-center p-3 rounded-xl bg-green-50 border border-green-200">
+                                <p className="text-xl font-bold text-green-600 tabular-nums">{monthlyAttendance.hadir}</p>
+                                <p className="text-xs text-slate-600 mt-1">Hadir</p>
+                            </div>
+                            <div className="text-center p-3 rounded-xl bg-amber-50 border border-amber-200">
+                                <p className="text-xl font-bold text-amber-600 tabular-nums">{monthlyAttendance.sakit}</p>
+                                <p className="text-xs text-slate-600 mt-1">Sakit</p>
+                            </div>
+                            <div className="text-center p-3 rounded-xl bg-blue-50 border border-blue-200">
+                                <p className="text-xl font-bold text-blue-600 tabular-nums">{monthlyAttendance.izin}</p>
+                                <p className="text-xs text-slate-600 mt-1">Izin</p>
+                            </div>
+                            <div className="text-center p-3 rounded-xl bg-red-50 border border-red-200">
+                                <p className={cn("text-xl font-bold tabular-nums", monthlyAttendance.alpa > 0 ? "text-red-600" : "text-slate-400")}>{monthlyAttendance.alpa}</p>
+                                <p className="text-xs text-slate-600 mt-1">Alpha</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 {/* Ekskul Summary */}
-                <Card className="border-slate-100 shadow-sm overflow-hidden">
-                    <CardHeader className="p-4 border-b border-slate-50 bg-slate-50/50">
+                <Card className="border-slate-100 shadow-sm overflow-hidden gap-0">
+                    <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-purple-100 rounded-lg">
@@ -437,7 +437,7 @@ export const ParentDashboard: React.FC = () => {
                             </Link>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-4">
+                    <CardContent className="p-3 pt-3">
                         {ekskulSummary.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <Activity className="h-8 w-8 text-slate-300 mb-2" />
