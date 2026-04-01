@@ -1,5 +1,5 @@
-import { StudentAttendance } from '@/features/student/pages/Attendance';
+import { redirect } from "next/navigation";
 
 export default function StudentAttendancePage() {
-    return <StudentAttendance />;
+    redirect("/student/attendance/daily");
 }

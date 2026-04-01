@@ -193,19 +193,19 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
                     {/* Avatar Section */}
                     <div className="flex flex-col items-center space-y-4 pb-6 border-b">
                         <div className="relative group">
-                            <Avatar className="w-32 h-auto aspect-3/4 rounded-xl border-4 border-primary/10">
+                            <Avatar className="w-32 h-32 rounded-full border-4 border-primary/10">
                                 <AvatarImage
                                     src={formData.avatar}
                                     alt={formData.name}
                                     className="object-cover"
                                 />
-                                <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-xl">
+                                <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-full">
                                     {getInitials(formData.name)}
                                 </AvatarFallback>
                             </Avatar>
                             <div
                                 onClick={handleImageClick}
-                                className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl cursor-pointer"
+                                className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
                             >
                                 <Camera className="h-8 w-8 text-white" />
                             </div>
