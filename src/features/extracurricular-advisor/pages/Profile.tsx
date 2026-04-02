@@ -27,10 +27,7 @@ import {
 } from "lucide-react";
 import { ProfileSkeleton } from "../components/profile";
 
-import {
-    advisorService,
-    AdvisorDashboardStats
-} from "../services/advisorService";
+import { getProfile, getDashboardStats, type AdvisorDashboardStats } from "../services";
 import { AdvisorProfileData } from "../data/mockAdvisorData";
 import { useAcademicYear } from "@/context/AcademicYearContext";
 
@@ -46,10 +43,8 @@ export const ExtracurricularAdvisorProfile: React.FC = () => {
         const fetchProfile = async () => {
             try {
                 const [profile, stats] = await Promise.all([
-                    advisorService.getProfile(),
-                    advisorService.getDashboardStats({
-                        academicYear: academicYear.academicYear
-                    }),
+                    getProfile(),
+                    getDashboardStats({ academicYear: academicYear.academicYear }),
                 ]);
                 setProfileData(profile);
                 setStatsData(stats);

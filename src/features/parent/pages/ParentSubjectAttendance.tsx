@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, CheckCircle, Clock, AlertCircle, XCircle, BookOpen, Filter, Calendar, X, SlidersHorizontal, RotateCcw, Check, GraduationCap, Tag, BookText, Loader2, RefreshCw, AlertTriangle, Users } from "lucide-react";
+import { CheckCircle, Clock, AlertCircle, XCircle, BookOpen, Filter, Calendar, RotateCcw, Check, Tag, BookText } from "lucide-react";
 import {
     Card,
     CardContent,
@@ -31,6 +31,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { useParentSubjectAttendance } from "../hooks/useParentSubjectAttendance";
 import type { SubjectType, SubjectStatus } from "../services/parentSubjectAttendanceService";
+import {
+    ErrorState,
+    LoadingOverlay,
+    PageHeader,
+    ChildSelector,
+    FilterButton,
+    ActiveFilterBadges,
+    PaginationControls,
+    StatCard,
+} from "@/features/shared/components";
 
 const getSubjectTypeConfig = (type: SubjectType) => {
     const configs = {
@@ -50,72 +60,7 @@ const getStatusConfig = (status: SubjectStatus) => {
     return configs[status];
 };
 
-// Summary Statistics Card Component
-interface StatCardProps {
-    title: string;
-    value: number;
-    percentage: number;
-    icon: React.ElementType;
-    color: "green" | "blue" | "yellow" | "red";
-    subtitle?: string;
-}
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, percentage, icon: Icon, color, subtitle }) => {
-    const colorConfig = {
-        green: {
-            bg: "bg-green-100/80",
-            ring: "ring-green-200/50",
-            text: "text-green-600",
-            percentageBg: "bg-green-500",
-        },
-        blue: {
-            bg: "bg-blue-100/80",
-            ring: "ring-blue-200/50",
-            text: "text-blue-600",
-            percentageBg: "bg-blue-500",
-        },
-        yellow: {
-            bg: "bg-yellow-100/80",
-            ring: "ring-yellow-200/50",
-            text: "text-yellow-600",
-            percentageBg: "bg-yellow-500",
-        },
-        red: {
-            bg: "bg-red-100/80",
-            ring: "ring-red-200/50",
-            text: "text-red-600",
-            percentageBg: "bg-red-500",
-        },
-    };
-
-    const config = colorConfig[color];
-
-    return (
-        <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5">
-            <div className="px-5 py-4 pl-6 flex items-center gap-4">
-                <div className="relative flex-shrink-0">
-                    <div className={cn(
-                        "w-11 h-11 rounded-xl flex items-center justify-center ring-2 transition-transform duration-300 group-hover:scale-105",
-                        config.bg,
-                        config.ring
-                    )}>
-                        <Icon className={cn("h-5 w-5", config.text)} />
-                    </div>
-                </div>
-                <div className="min-w-0 flex-1">
-                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{title}</p>
-                    <div className="flex items-baseline gap-2 mt-0.5">
-                        <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">{value}</p>
-                        <p className="text-xs text-muted-foreground font-medium">
-                            {percentage >= 100 ? '' : percentage.toFixed(1) + '%'}
-                        </p>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground mt-1">{subtitle || 'Total records'}</p>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 // Skeleton Loading Component
 const ParentSubjectAttendanceSkeleton: React.FC = () => {
@@ -240,36 +185,7 @@ const ParentSubjectAttendanceSkeleton: React.FC = () => {
     );
 };
 
-const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
-    <div className="space-y-6 animate-in fade-in duration-500">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
-                        <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Mata Pelajaran</span>
-                    </h1>
-                    <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                        <BookOpen className="h-5 w-5" />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <Card className="border-red-200 shadow-sm mt-6">
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="p-4 bg-red-100 rounded-full mb-4">
-                    <AlertTriangle className="h-8 w-8 text-red-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
-                <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
-                <Button onClick={onRetry} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50">
-                    <RefreshCw className="h-4 w-4" />
-                    Coba Lagi
-                </Button>
-            </CardContent>
-        </Card>
-    </div>
-);
+
 
 export const ParentSubjectAttendance: React.FC = () => {
     const {
@@ -319,41 +235,25 @@ export const ParentSubjectAttendance: React.FC = () => {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Mata Pelajaran</span>
-                        </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <BookOpen className="h-5 w-5" />
-                        </div>
-                    </div>
-                    <p className="text-muted-foreground mt-1">
-                        Rekap kehadiran KBM di kelas
-                    </p>
-                </div>
-                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 no-print w-full lg:w-auto mt-4 lg:mt-0 flex-wrap lg:flex-nowrap justify-end">
-                    <Dialog open={isFilterOpen} onOpenChange={(open) => {
-                        if (open) {
-                            setTempAcademicYear(selectedAcademicYear);
-                            setTempSemester(selectedSemester);
-                            setTempSubject(selectedSubject);
-                        }
-                        setIsFilterOpen(open);
-                    }}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" className="h-9 gap-2 bg-white text-slate-700 border-slate-200 shadow-sm font-medium">
-                                <Filter className="h-4 w-4 text-slate-500" />
-                                <span className="hidden sm:inline">Filter</span>
-                                {(selectedAcademicYear !== "all" || selectedSemester !== "all" || selectedSubject !== "all") && (
-                                    <Badge className="ml-0.5 h-5 w-5 min-w-[20px] px-0 bg-blue-800 text-white text-[10px] flex items-center justify-center border-0 rounded-full">
-                                        {(selectedAcademicYear !== "all" ? 1 : 0) + (selectedSemester !== "all" ? 1 : 0) + (selectedSubject !== "all" ? 1 : 0)}
-                                    </Badge>
-                                )}
-                            </Button>
-                        </DialogTrigger>
+            <PageHeader
+                title="Presensi"
+                titleHighlight="Mata Pelajaran"
+                icon={BookOpen}
+                description="Rekap kehadiran KBM di kelas"
+            >
+                <Dialog open={isFilterOpen} onOpenChange={(open) => {
+                    if (open) {
+                        setTempAcademicYear(selectedAcademicYear);
+                        setTempSemester(selectedSemester);
+                        setTempSubject(selectedSubject);
+                    }
+                    setIsFilterOpen(open);
+                }}>
+                    <DialogTrigger asChild>
+                        <FilterButton
+                            activeCount={(selectedAcademicYear !== "all" ? 1 : 0) + (selectedSemester !== "all" ? 1 : 0) + (selectedSubject !== "all" ? 1 : 0)}
+                        />
+                    </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px] rounded-2xl">
                             <DialogHeader className="flex-row items-center gap-4">
                                 <div className="p-2.5 bg-blue-100 rounded-xl">
@@ -455,140 +355,78 @@ export const ParentSubjectAttendance: React.FC = () => {
                     </Dialog>
 
                     {/* Child Selector */}
-                    {children.length > 1 && (
-                        <Select value={selectedChildId} onValueChange={setSelectedChildId}>
-                            <SelectTrigger className="w-full sm:w-[220px] h-9 bg-white shadow-sm border-slate-200">
-                                <Users className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
-                                <div className="flex-1 text-left truncate">
-                                    <SelectValue placeholder="Pilih Anak" />
-                                </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {children.map(child => (
-                                    <SelectItem key={child.id} value={child.id}>
-                                        {child.name} — {child.class}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                </div>
-            </div>
+                    <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                </PageHeader>
 
             {/* Active Global Filters */}
-            {(selectedAcademicYear !== "all" || selectedSemester !== "all" || selectedSubject !== "all") && (
-                <div className="flex flex-wrap items-center gap-2 px-1 no-print">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-                        <SlidersHorizontal className="h-3 w-3" />
-                        <span>Filter Aktif:</span>
-                    </div>
-                    
-                    {selectedAcademicYear !== "all" && (
-                        <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                            <Calendar className="h-3.5 w-3.5" />
-                            TA. {selectedAcademicYear}
-                            <button
-                                onClick={() => { setSelectedAcademicYear("all"); triggerFetchingOverlay(); }}
-                                className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                            >
-                                <X className="h-3.5 w-3.5" />
-                            </button>
-                        </Badge>
-                    )}
-
-                    {selectedSemester !== "all" && (
-                        <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                            <BookOpen className="h-3.5 w-3.5" />
-                            Semester {selectedSemester === "1" ? "Ganjil" : "Genap"}
-                            <button
-                                onClick={() => { setSelectedSemester("all"); triggerFetchingOverlay(); }}
-                                className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                            >
-                                <X className="h-3.5 w-3.5" />
-                            </button>
-                        </Badge>
-                    )}
-
-                    {selectedSubject !== "all" && (
-                        <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                            <BookText className="h-3.5 w-3.5" />
-                            {selectedSubject}
-                            <button
-                                onClick={() => { setSelectedSubject("all"); triggerFetchingOverlay(); }}
-                                className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                            >
-                                <X className="h-3.5 w-3.5" />
-                            </button>
-                        </Badge>
-                    )}
-
-                    {/* Show "Hapus Semua" only if more than 1 filter is active */}
-                    {(selectedAcademicYear !== "all" ? 1 : 0) + (selectedSemester !== "all" ? 1 : 0) + (selectedSubject !== "all" ? 1 : 0) > 1 && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
-                            onClick={() => {
-                                setSelectedAcademicYear("all");
-                                setSelectedSemester("all");
-                                setSelectedSubject("all");
-                                triggerFetchingOverlay();
-                            }}
-                        >
-                            <RotateCcw className="h-3 w-3" />
-                            Hapus Semua
-                        </Button>
-                    )}
-                </div>
-            )}
+            <ActiveFilterBadges
+                badges={[
+                    ...(selectedAcademicYear !== "all" ? [{
+                        key: "year",
+                        label: `TA. ${selectedAcademicYear}`,
+                        icon: Calendar,
+                        onRemove: () => { setSelectedAcademicYear("all"); triggerFetchingOverlay(); },
+                    }] : []),
+                    ...(selectedSemester !== "all" ? [{
+                        key: "semester",
+                        label: `Semester ${selectedSemester === "1" ? "Ganjil" : "Genap"}`,
+                        icon: BookOpen,
+                        onRemove: () => { setSelectedSemester("all"); triggerFetchingOverlay(); },
+                    }] : []),
+                    ...(selectedSubject !== "all" ? [{
+                        key: "subject",
+                        label: selectedSubject,
+                        icon: BookText,
+                        onRemove: () => { setSelectedSubject("all"); triggerFetchingOverlay(); },
+                    }] : []),
+                ]}
+                onClearAll={() => {
+                    setSelectedAcademicYear("all");
+                    setSelectedSemester("all");
+                    setSelectedSubject("all");
+                    triggerFetchingOverlay();
+                }}
+            />
 
             {/* Summary Statistics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
                     title="Hadir"
                     value={stats.hadir.value}
-                    percentage={stats.hadir.percentage}
+                    unit={stats.hadir.percentage >= 100 ? undefined : `${stats.hadir.percentage.toFixed(1)}%`}
+                    subtitle="Kehadiran sempurna"
                     icon={CheckCircle}
                     color="green"
-                    subtitle="Kehadiran sempurna"
                 />
                 <StatCard
                     title="Izin"
                     value={stats.izin.value}
-                    percentage={stats.izin.percentage}
+                    unit={stats.izin.percentage >= 100 ? undefined : `${stats.izin.percentage.toFixed(1)}%`}
+                    subtitle="Dengan keterangan"
                     icon={Clock}
                     color="blue"
-                    subtitle="Dengan keterangan"
                 />
                 <StatCard
                     title="Sakit"
                     value={stats.sakit.value}
-                    percentage={stats.sakit.percentage}
-                    icon={AlertCircle}
-                    color="yellow"
+                    unit={stats.sakit.percentage >= 100 ? undefined : `${stats.sakit.percentage.toFixed(1)}%`}
                     subtitle="Surat sakit"
+                    icon={AlertCircle}
+                    color="amber"
                 />
                 <StatCard
                     title="Alpa"
                     value={stats.alpa.value}
-                    percentage={stats.alpa.percentage}
+                    unit={stats.alpa.percentage >= 100 ? undefined : `${stats.alpa.percentage.toFixed(1)}%`}
+                    subtitle="Tanpa keterangan"
                     icon={XCircle}
                     color="red"
-                    subtitle="Tanpa keterangan"
                 />
             </div>
 
             {/* Attendance History */}
             <Card className="border-blue-200 shadow-sm relative overflow-hidden">
-                {/* Fetching overlay */}
-                {isFetching && (
-                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-30 flex items-center justify-center rounded-xl">
-                        <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-lg rounded-xl px-5 py-3">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                            <span className="text-sm font-medium text-slate-600">Memuat data...</span>
-                        </div>
-                    </div>
-                )}
+                {isFetching && <LoadingOverlay />}
                 <CardHeader className="pb-1">
                     {/* Row 1: Title & Stats */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -766,99 +604,19 @@ export const ParentSubjectAttendance: React.FC = () => {
                     </div>
                     {/* Footer with Pagination */}
                     {filteredTotal > 0 && (
-                        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 mt-6 pt-4 border-t border-slate-100">
-                            {/* Left: Pagination Info */}
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground w-full lg:w-auto justify-center lg:justify-start">
-                                <span>Menampilkan</span>
-                                <span className="font-medium text-foreground">
-                                    {startIndexDisplay}
-                                </span>
-                                <span>-</span>
-                                <span className="font-medium text-foreground">
-                                    {endIndexDisplay}
-                                </span>
-                                <span>dari</span>
-                                <span className="font-medium text-foreground">{filteredTotal}</span>
-                                <span>entri</span>
-                            </div>
-
-                            {/* Right: Pagination Controls */}
-                            <div className="flex items-center gap-3 w-full lg:w-auto justify-center lg:justify-end">
-                                {/* Items per page */}
-                                <Select value={itemsPerPage.toString()} onValueChange={(val) => {
-                                    setItemsPerPage(Number(val));
-                                    goToPage(1);
-                                }}>
-                                    <SelectTrigger className="w-[100px] h-8">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="5">5 / hal</SelectItem>
-                                        <SelectItem value="10">10 / hal</SelectItem>
-                                        <SelectItem value="20">20 / hal</SelectItem>
-                                        <SelectItem value="50">50 / hal</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                {/* Page info */}
-                                <span className="text-sm text-muted-foreground">
-                                    Hal {currentPage}/{totalPages}
-                                </span>
-
-                                {/* Previous button */}
-                                <button
-                                    onClick={goToPrevPage}
-                                    disabled={currentPage === 1}
-                                    className="h-8 w-8 p-0 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </button>
-
-                                {/* Page number buttons */}
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        const pageNumber = i + 1;
-                                        return (
-                                            <button
-                                                key={pageNumber}
-                                                onClick={() => goToPage(pageNumber)}
-                                                className={cn(
-                                                    "w-8 h-8 p-0 rounded-lg font-medium text-sm transition-colors flex items-center justify-center",
-                                                    currentPage === pageNumber
-                                                        ? "bg-blue-800 text-white"
-                                                        : "border border-slate-300 bg-white text-slate-600 hover:bg-slate-100"
-                                                )}
-                                            >
-                                                {pageNumber}
-                                            </button>
-                                        );
-                                    })}
-                                    {totalPages > 5 && (
-                                        <>
-                                            <span className="text-sm text-muted-foreground px-1">...</span>
-                                            <button
-                                                onClick={() => goToPage(totalPages)}
-                                                className={cn(
-                                                    "w-8 h-8 p-0 rounded-lg font-medium text-sm transition-colors flex items-center justify-center border border-slate-300 bg-white text-slate-600 hover:bg-slate-100",
-                                                    currentPage === totalPages && "bg-blue-800 text-white"
-                                                )}
-                                            >
-                                                {totalPages}
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-
-                                {/* Next button */}
-                                <button
-                                    onClick={goToNextPage}
-                                    disabled={currentPage === totalPages}
-                                    className="h-8 w-8 p-0 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </button>
-                            </div>
-                        </div>
+                        <PaginationControls
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={filteredTotal}
+                            startIndex={startIndexDisplay}
+                            endIndex={endIndexDisplay}
+                            itemsPerPage={itemsPerPage}
+                            onPageChange={goToPage}
+                            onItemsPerPageChange={(val) => {
+                                setItemsPerPage(val);
+                                goToPage(1);
+                            }}
+                        />
                     )}
                 </CardContent>
             </Card>

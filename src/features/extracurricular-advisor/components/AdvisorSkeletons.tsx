@@ -2,6 +2,10 @@ import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
+// DashboardSkeleton, MembersSkeleton, AttendanceSkeleton sudah digantikan oleh shared skeleton components.
+// Hanya AttendanceDetailSkeleton yang masih digunakan di halaman detail.
+
+/** @deprecated Gunakan SkeletonPageHeader + SkeletonStatCard dari shared/components */
 export const DashboardSkeleton: React.FC = () => {
     return (
         <div className="space-y-6">

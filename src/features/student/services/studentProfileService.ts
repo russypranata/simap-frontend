@@ -123,7 +123,6 @@ export const updateStudentProfile = async (
     // ===== MOCK IMPLEMENTATION =====
     if (USE_MOCK_DATA) {
         await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
-        console.log('[Mock] Profile updated:', data);
         return { ...mockStudentProfile, ...data };
     }
 
@@ -153,7 +152,6 @@ export const uploadProfileAvatar = async (
     if (USE_MOCK_DATA) {
         await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
         const mockUrl = URL.createObjectURL(file);
-        console.log('[Mock] Avatar uploaded:', file.name);
         return {
             avatar: mockUrl,
             profilePicture: mockUrl,
@@ -231,7 +229,6 @@ export const updatePassword = async (
             throw error;
         }
 
-        console.log('[Mock] Password updated');
         return {
             passwordLastChanged: new Date().toISOString(),
         };

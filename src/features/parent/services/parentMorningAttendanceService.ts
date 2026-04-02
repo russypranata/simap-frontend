@@ -43,21 +43,17 @@ export const getMorningTardiness = async (
     academicYearId: string,
     semesterId: string
 ): Promise<LateRecord[]> => {
-    console.log(`[API Mock] getMorningTardiness called with childId: ${childId}, academicYearId: ${academicYearId}, semesterId: ${semesterId}`);
     return new Promise((resolve) => {
         setTimeout(() => {
             let filtered = mockLateRecords.filter(r => r.childId === childId);
-            console.log(`[API Mock] After child filter:`, filtered.length, filtered);
             
             if (academicYearId !== "all") {
                 filtered = filtered.filter(r => r.academicYearId === academicYearId);
             }
-            console.log(`[API Mock] After year filter:`, filtered.length, filtered);
             
             if (semesterId !== "all") {
                 filtered = filtered.filter(r => r.semesterId === semesterId);
             }
-            console.log(`[API Mock] After semester filter:`, filtered.length);
             
             // Sort by date descending
             filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

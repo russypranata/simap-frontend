@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
     Card,
     CardContent,
@@ -28,7 +28,6 @@ import {
     Trophy,
     ChevronLeft,
     ChevronRight,
-    Eye,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -38,147 +37,28 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-
-// Achievement interface
-interface Achievement {
-    id: number;
-    competitionName: string;
-    category: string;
-    rank: string;
-    eventName: string;
-    organizer: string;
-    level: string;
-    date: string;
-    photo: string | null;
-}
-
-// Mock data untuk prestasi siswa (filtered for current logged-in student "Ahmad Rizki")
-const mockAchievements: Achievement[] = [
-    {
-        id: 1,
-        competitionName: "Olimpiade Matematika",
-        category: "Akademik",
-        rank: "Juara 1",
-        eventName: "OSN Tingkat Provinsi",
-        organizer: "Dinas Pendidikan Provinsi Kalimantan Barat",
-        level: "Provinsi",
-        date: "2024-11-15",
-        photo: null,
-    },
-    {
-        id: 101,
-        competitionName: "Kompetisi Sains Madrasah",
-        category: "Akademik",
-        rank: "Juara 3",
-        eventName: "KSM Kabupaten",
-        organizer: "Kemenag Kabupaten",
-        level: "Kabupaten",
-        date: "2024-08-10",
-        photo: null,
-    },
-    {
-        id: 102,
-        competitionName: "Lomba Cerdas Cermat",
-        category: "Akademik",
-        rank: "Juara 1",
-        eventName: "LCC Sekolah",
-        organizer: "OSIS SMA",
-        level: "Sekolah",
-        date: "2024-05-02",
-        photo: null,
-    },
-    {
-        id: 103,
-        competitionName: "Olimpiade Matematika Nasional",
-        category: "Akademik",
-        rank: "Juara 2",
-        eventName: "OSN Nasional",
-        organizer: "Puspresnas",
-        level: "Nasional",
-        date: "2023-11-15",
-        photo: null,
-    },
-    {
-        id: 104,
-        competitionName: "Lomba Pidato Bahasa Arab",
-        category: "Bahasa",
-        rank: "Juara 1",
-        eventName: "Festival Bahasa Arab",
-        organizer: "MGMP Bahasa Arab",
-        level: "Provinsi",
-        date: "2023-08-20",
-        photo: null,
-    },
-    {
-        id: 105,
-        competitionName: "Musabaqah Tilawatil Quran",
-        category: "Keagamaan",
-        rank: "Harapan 1",
-        eventName: "MTQ Kabupaten",
-        organizer: "LPTQ Kabupaten",
-        level: "Kabupaten",
-        date: "2023-05-10",
-        photo: null,
-    },
-    {
-        id: 106,
-        competitionName: "Lomba Kaligrafi Islam",
-        category: "Seni",
-        rank: "Juara 3",
-        eventName: "Pekan Seni Islami",
-        organizer: "Yayasan Al-Fityan",
-        level: "Sekolah",
-        date: "2023-03-05",
-        photo: null,
-    },
-    {
-        id: 107,
-        competitionName: "Science Fair Project",
-        category: "Sains",
-        rank: "Juara 2",
-        eventName: "Expo Pendidikan",
-        organizer: "Dinas Pendidikan Kota",
-        level: "Kecamatan",
-        date: "2023-01-20",
-        photo: null,
-    },
-];
+import { useStudentAchievements } from "../hooks/useStudentAchievements";
+import type { Achievement } from "../services/studentAchievementsService";
+import { PaginationControls } from "@/features/shared/components";
 
 export const StudentAchievements: React.FC = () => {
-    const [achievements] = useState<Achievement[]>(mockAchievements);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [levelFilter, setLevelFilter] = useState("all");
-    const [currentPage, setCurrentPage] = useState(1);
+    const {
+        searchQuery,
+        setSearchQuery,
+        levelFilter,
+        setLevelFilter,
+        currentPage,
+        setCurrentPage,
+        filteredAchievements,
+        paginatedAchievements,
+        totalPages,
+        totalAchievements,
+        nationalAchievements,
+        firstPlaceCount,
+        ITEMS_PER_PAGE,
+    } = useStudentAchievements();
+
     const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
-    const itemsPerPage = 5;
-
-    // Filter achievements
-    const filteredAchievements = useMemo(() => {
-        return achievements.filter((achievement) => {
-            const matchesSearch =
-                achievement.competitionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                achievement.eventName.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesLevel = levelFilter === "all" || achievement.level === levelFilter;
-            return matchesSearch && matchesLevel;
-        });
-    }, [achievements, searchQuery, levelFilter]);
-
-    // Pagination
-    const totalPages = Math.ceil(filteredAchievements.length / itemsPerPage);
-    const paginatedAchievements = filteredAchievements.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
-
-    // Reset to page 1 when filters change
-    useMemo(() => {
-        setCurrentPage(1);
-    }, [searchQuery, levelFilter]);
-
-    // Stats
-    const totalAchievements = achievements.length;
-    const nationalAchievements = achievements.filter((a) => a.level === "Nasional" || a.level === "Internasional").length;
-    const firstPlaceCount = achievements.filter((a) => a.rank === "Juara 1").length;
 
     const handleViewDetail = (achievement: Achievement) => {
         setSelectedAchievement(achievement);
@@ -374,7 +254,7 @@ export const StudentAchievements: React.FC = () => {
                                     <div className="flex items-start gap-3">
                                         {/* Number Badge */}
                                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-semibold text-blue-800 mt-0.5">
-                                            {(currentPage - 1) * itemsPerPage + index + 1}
+                                            {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
                                         </div>
 
                                         <div className="flex-1 min-w-0 space-y-1">
@@ -424,68 +304,18 @@ export const StudentAchievements: React.FC = () => {
 
                     {/* Footer with Pagination */}
                     {filteredAchievements.length > 0 && (
-                        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 bg-muted/20">
-                            {/* Left: Pagination Info */}
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>Menampilkan</span>
-                                <span className="font-medium text-foreground">
-                                    {(currentPage - 1) * itemsPerPage + 1}
-                                </span>
-                                <span>-</span>
-                                <span className="font-medium text-foreground">
-                                    {Math.min(currentPage * itemsPerPage, filteredAchievements.length)}
-                                </span>
-                                <span>dari</span>
-                                <span className="font-medium text-foreground">{filteredAchievements.length}</span>
-                                <span>prestasi</span>
-                            </div>
-
-                            {/* Right: Pagination */}
-                            {totalPages > 1 && (
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground">
-                                        Hal {currentPage}/{totalPages}
-                                    </span>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                                        disabled={currentPage === 1}
-                                        className="h-8 w-8 p-0"
-                                    >
-                                        <ChevronLeft className="h-4 w-4" />
-                                    </Button>
-                                    <div className="flex items-center space-x-1">
-                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                            const pageNumber = i + 1;
-                                            return (
-                                                <Button
-                                                    key={pageNumber}
-                                                    variant={currentPage === pageNumber ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => setCurrentPage(pageNumber)}
-                                                    className={cn(
-                                                        "w-8 h-8 p-0",
-                                                        currentPage === pageNumber && "bg-blue-800 hover:bg-blue-900 text-white"
-                                                    )}
-                                                >
-                                                    {pageNumber}
-                                                </Button>
-                                            );
-                                        })}
-                                    </div>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                                        disabled={currentPage === totalPages}
-                                        className="h-8 w-8 p-0"
-                                    >
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
+                        <PaginationControls
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={filteredAchievements.length}
+                            startIndex={(currentPage - 1) * ITEMS_PER_PAGE + 1}
+                            endIndex={Math.min(currentPage * ITEMS_PER_PAGE, filteredAchievements.length)}
+                            itemsPerPage={ITEMS_PER_PAGE}
+                            itemLabel="prestasi"
+                            onPageChange={setCurrentPage}
+                            onItemsPerPageChange={() => {}}
+                            itemsPerPageOptions={[5]}
+                        />
                     )}
                 </CardContent>
             </Card>

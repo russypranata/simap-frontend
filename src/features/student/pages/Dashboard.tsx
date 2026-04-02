@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { Calendar, GraduationCap, CheckCircle, Trophy, User, ChevronRight, TrendingUp, AlertTriangle, ClipboardList, MapPin, RefreshCw, Timer, Moon, Activity, Megaphone } from "lucide-react";
+import { Calendar, GraduationCap, CheckCircle, Trophy, User, ChevronRight, AlertTriangle, ClipboardList, MapPin, RefreshCw, Timer, Moon, Activity, Megaphone } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { getStudentDashboardData, type StudentDashboardData } from "../services/studentDashboardService";
+import { ErrorState } from "@/features/shared/components";
 
 const DashboardSkeleton = () => (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -26,8 +27,8 @@ const DashboardSkeleton = () => (
 
 const StatCard: React.FC<{ title: string; value: string | number; subtitle: string; icon: React.ElementType; color: string; href: string; alert?: boolean }> = ({ title, value, subtitle, icon: Icon, color, href, alert }) => (
     <Link href={href}>
-        <div className={cn("group relative overflow-hidden rounded-xl bg-white border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 h-full", `hover:border-${color}-200`)}>
-            <div className="p-4">
+        <div className={cn("group relative overflow-hidden rounded-xl bg-white border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 flex flex-col", `hover:border-${color}-200`)}>
+            <div className="p-4 flex-1">
                 <div className="flex items-center justify-between mb-3">
                     <div className={cn("p-2.5 rounded-xl group-hover:scale-110 transition-transform duration-300", `bg-${color}-50`)}>
                         <Icon className={cn("h-5 w-5", `text-${color}-600`)} />
@@ -42,7 +43,9 @@ const StatCard: React.FC<{ title: string; value: string | number; subtitle: stri
                     )}
                 </div>
                 <p className={cn("text-2xl font-bold tabular-nums", alert ? `text-${color}-600` : "text-slate-800")}>{value}</p>
-                <p className="text-[11px] text-muted-foreground mt-1 font-medium">{subtitle}</p>
+            </div>
+            <div className={cn("mx-3 mb-3 px-2.5 py-1 rounded-md border text-[11px] font-medium truncate", `bg-${color}-50 text-${color}-600 border-${color}-100`)}>
+                {subtitle}
             </div>
         </div>
     </Link>
@@ -77,13 +80,7 @@ export const StudentDashboard: React.FC = () => {
                     <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Siswa</span>
                 </h1>
             </div>
-            <Card className="border-red-200 shadow-sm">
-                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="p-4 bg-red-100 rounded-full mb-4"><AlertTriangle className="h-8 w-8 text-red-600" /></div>
-                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
-                    <Button onClick={() => window.location.reload()} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50 mt-4"><RefreshCw className="h-4 w-4" />Coba Lagi</Button>
-                </CardContent>
-            </Card>
+            <ErrorState error={error ?? "Terjadi kesalahan"} onRetry={() => window.location.reload()} />
         </div>
     );
 

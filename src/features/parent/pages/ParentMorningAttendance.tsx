@@ -21,22 +21,12 @@ import {
     Calendar,
     Clock,
     Timer,
-    AlertCircle,
     FileText,
-    Eye,
-    Users,
-    RefreshCw,
-    AlertTriangle,
-    Loader2,
-    Filter,
     RotateCcw,
     Check,
-    ChevronLeft,
-    ChevronRight,
-    X,
     MapPin,
     UserCheck,
-    SlidersHorizontal,
+    Filter,
     BookOpen,
 } from "lucide-react";
 import {
@@ -52,6 +42,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useParentMorningAttendance } from "../hooks/useParentMorningAttendance";
 import type { LateRecord } from "../services/parentMorningAttendanceService";
+import {
+    ErrorState,
+    LoadingOverlay,
+    PageHeader,
+    ChildSelector,
+    FilterButton,
+    ActiveFilterBadges,
+    PaginationControls,
+} from "@/features/shared/components";
 
 const ParentMorningAttendanceSkeleton = () => {
     return (
@@ -93,36 +92,7 @@ const ParentMorningAttendanceSkeleton = () => {
     );
 };
 
-const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
-    <div className="space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Keterlambatan </span>
-                        <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Pagi</span>
-                    </h1>
-                    <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                        <Timer className="h-5 w-5" />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <Card className="border-red-200 shadow-sm">
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="p-4 bg-red-100 rounded-full mb-4">
-                    <AlertTriangle className="h-8 w-8 text-red-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
-                <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
-                <Button onClick={onRetry} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50">
-                    <RefreshCw className="h-4 w-4" />
-                    Coba Lagi
-                </Button>
-            </CardContent>
-        </Card>
-    </div>
-);
+
 
 export const ParentMorningAttendance: React.FC = () => {
     const {
@@ -176,41 +146,24 @@ export const ParentMorningAttendance: React.FC = () => {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Keterlambatan </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Pagi</span>
-                        </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <Timer className="h-5 w-5" />
-                        </div>
-                    </div>
-                    <p className="text-muted-foreground mt-1">
-                        Rekap informasi keterlambatan kedatangan siswa di sekolah
-                    </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 no-print w-full lg:w-auto mt-4 lg:mt-0 flex-wrap lg:flex-nowrap justify-end">
-                    <Dialog open={isFilterOpen} onOpenChange={(open) => {
-                        if (open) {
-                            setTempYearId(selectedYearId);
-                            setTempSemesterId(selectedSemesterId);
-                        }
-                        setIsFilterOpen(open);
-                    }}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" className="h-9 gap-2 bg-white text-slate-700 border-slate-200 shadow-sm font-medium">
-                                <Filter className="h-4 w-4 text-slate-500" />
-                                <span className="hidden sm:inline">Filter</span>
-                                {(selectedYearId !== "all" || selectedSemesterId !== "all") && (
-                                    <Badge className="ml-0.5 h-5 w-5 min-w-[20px] px-0 bg-blue-800 text-white text-[10px] flex items-center justify-center border-0 rounded-full">
-                                        {(selectedYearId !== "all" ? 1 : 0) + (selectedSemesterId !== "all" ? 1 : 0)}
-                                    </Badge>
-                                )}
-                            </Button>
-                        </DialogTrigger>
+            <PageHeader
+                title="Keterlambatan"
+                titleHighlight="Pagi"
+                icon={Timer}
+                description="Rekap informasi keterlambatan kedatangan siswa di sekolah"
+            >
+                <Dialog open={isFilterOpen} onOpenChange={(open) => {
+                    if (open) {
+                        setTempYearId(selectedYearId);
+                        setTempSemesterId(selectedSemesterId);
+                    }
+                    setIsFilterOpen(open);
+                }}>
+                    <DialogTrigger asChild>
+                        <FilterButton
+                            activeCount={(selectedYearId !== "all" ? 1 : 0) + (selectedSemesterId !== "all" ? 1 : 0)}
+                        />
+                    </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px] rounded-2xl">
                             <DialogHeader className="flex-row items-center gap-4">
                                 <div className="p-2.5 bg-blue-100 rounded-xl">
@@ -301,92 +254,38 @@ export const ParentMorningAttendance: React.FC = () => {
                     </Dialog>
 
                     {/* Child Selector */}
-                    {children.length > 1 && (
-                        <Select value={selectedChildId} onValueChange={setSelectedChildId}>
-                            <SelectTrigger className="w-full sm:w-[220px] h-9 bg-white shadow-sm border-slate-200">
-                                <Users className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
-                                <div className="flex-1 text-left truncate">
-                                    <SelectValue placeholder="Pilih Anak" />
-                                </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {children.map(child => (
-                                    <SelectItem key={child.id} value={child.id}>
-                                        {child.name} — {child.class}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                </div>
-            </div>
+                    <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                </PageHeader>
 
             {/* Active Global Filters */}
-            {(selectedYearId !== "all" || selectedSemesterId !== "all") && (
-                <div className="flex flex-wrap items-center gap-2 px-1 no-print">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-                        <SlidersHorizontal className="h-3 w-3" />
-                        <span>Filter Aktif:</span>
-                    </div>
-                    
-                    {selectedYearId !== "all" && (
-                        <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                            <Calendar className="h-3.5 w-3.5" />
-                            TA. {academicYears.find(y => y.id === selectedYearId)?.name || selectedYearId}
-                            <button
-                                onClick={() => setSelectedYearId("all")}
-                                className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                            >
-                                <X className="h-3.5 w-3.5" />
-                            </button>
-                        </Badge>
-                    )}
-
-                    {selectedSemesterId !== "all" && (
-                        <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                            <BookOpen className="h-3.5 w-3.5" />
-                            Semester {
-                                selectedYearId !== "all"
-                                    ? academicYears.find(y => y.id === selectedYearId)?.semesters.find(s => s.id === selectedSemesterId)?.name
-                                    : selectedSemesterId === "1" ? "Ganjil" : "Genap"
-                            }
-                            <button
-                                onClick={() => setSelectedSemesterId("all")}
-                                className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                            >
-                                <X className="h-3.5 w-3.5" />
-                            </button>
-                        </Badge>
-                    )}
-
-                    {/* Show "Hapus Semua" only if more than 1 filter is active */}
-                    {(selectedYearId !== "all" ? 1 : 0) + (selectedSemesterId !== "all" ? 1 : 0) > 1 && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
-                            onClick={() => {
-                                setSelectedYearId("all");
-                                setSelectedSemesterId("all");
-                            }}
-                        >
-                            <RotateCcw className="h-3 w-3" />
-                            Hapus Semua
-                        </Button>
-                    )}
-                </div>
-            )}
+            <ActiveFilterBadges
+                badges={[
+                    ...(selectedYearId !== "all" ? [{
+                        key: "year",
+                        label: `TA. ${academicYears.find(y => y.id === selectedYearId)?.name || selectedYearId}`,
+                        icon: Calendar,
+                        onRemove: () => setSelectedYearId("all"),
+                    }] : []),
+                    ...(selectedSemesterId !== "all" ? [{
+                        key: "semester",
+                        label: `Semester ${
+                            selectedYearId !== "all"
+                                ? academicYears.find(y => y.id === selectedYearId)?.semesters.find(s => s.id === selectedSemesterId)?.name
+                                : selectedSemesterId === "1" ? "Ganjil" : "Genap"
+                        }`,
+                        icon: BookOpen,
+                        onRemove: () => setSelectedSemesterId("all"),
+                    }] : []),
+                ]}
+                onClearAll={() => {
+                    setSelectedYearId("all");
+                    setSelectedSemesterId("all");
+                }}
+            />
 
             {/* Late Records Table */}
             <Card className="overflow-hidden border-blue-200 relative shadow-sm">
-                {isFetching && (
-                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-30 flex items-center justify-center rounded-xl">
-                        <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-lg rounded-xl px-5 py-3">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                            <span className="text-sm font-medium text-slate-600">Memuat data...</span>
-                        </div>
-                    </div>
-                )}
+                {isFetching && <LoadingOverlay />}
                 
                 <CardHeader className="pb-1">
                     {/* Row 1: Title & Stats */}
@@ -482,99 +381,19 @@ export const ParentMorningAttendance: React.FC = () => {
 
                     {/* Footer with Pagination */}
                     {showPagination && (
-                        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 mt-6 pt-4 border-t border-slate-100">
-                            {/* Left: Pagination Info */}
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground w-full lg:w-auto justify-center lg:justify-start">
-                                <span>Menampilkan</span>
-                                <span className="font-medium text-foreground">
-                                    {startIndexDisplay}
-                                </span>
-                                <span>-</span>
-                                <span className="font-medium text-foreground">
-                                    {endIndexDisplay}
-                                </span>
-                                <span>dari</span>
-                                <span className="font-medium text-foreground">{totalRecords}</span>
-                                <span>entri</span>
-                            </div>
-
-                            {/* Right: Pagination Controls */}
-                            <div className="flex items-center gap-3 w-full lg:w-auto justify-center lg:justify-end">
-                                {/* Items per page */}
-                                <Select value={itemsPerPage.toString()} onValueChange={(val) => {
-                                    setItemsPerPage(Number(val));
-                                    setCurrentPage(1);
-                                }}>
-                                    <SelectTrigger className="w-[100px] h-8">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="5">5 / hal</SelectItem>
-                                        <SelectItem value="10">10 / hal</SelectItem>
-                                        <SelectItem value="20">20 / hal</SelectItem>
-                                        <SelectItem value="50">50 / hal</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                {/* Page info */}
-                                <span className="text-sm text-muted-foreground">
-                                    Hal {currentPage}/{totalPages}
-                                </span>
-
-                                {/* Previous button */}
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                    disabled={currentPage === 1}
-                                    className="h-8 w-8 p-0 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </button>
-
-                                {/* Page number buttons */}
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        const pageNumber = i + 1;
-                                        return (
-                                            <button
-                                                key={pageNumber}
-                                                onClick={() => setCurrentPage(pageNumber)}
-                                                className={cn(
-                                                    "w-8 h-8 p-0 rounded-lg font-medium text-sm transition-colors flex items-center justify-center",
-                                                    currentPage === pageNumber
-                                                        ? "bg-blue-800 text-white"
-                                                        : "border border-slate-300 bg-white text-slate-600 hover:bg-slate-100"
-                                                )}
-                                            >
-                                                {pageNumber}
-                                            </button>
-                                        );
-                                    })}
-                                    {totalPages > 5 && (
-                                        <>
-                                            <span className="text-sm text-muted-foreground px-1">...</span>
-                                            <button
-                                                onClick={() => setCurrentPage(totalPages)}
-                                                className={cn(
-                                                    "w-8 h-8 p-0 rounded-lg font-medium text-sm transition-colors flex items-center justify-center border border-slate-300 bg-white text-slate-600 hover:bg-slate-100",
-                                                    currentPage === totalPages && "bg-blue-800 text-white"
-                                                )}
-                                            >
-                                                {totalPages}
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-
-                                {/* Next button */}
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="h-8 w-8 p-0 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </button>
-                            </div>
-                        </div>
+                        <PaginationControls
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={totalRecords}
+                            startIndex={startIndexDisplay}
+                            endIndex={endIndexDisplay}
+                            itemsPerPage={itemsPerPage}
+                            onPageChange={setCurrentPage}
+                            onItemsPerPageChange={(val) => {
+                                setItemsPerPage(val);
+                                setCurrentPage(1);
+                            }}
+                        />
                     )}
                 </CardContent>
             </Card>

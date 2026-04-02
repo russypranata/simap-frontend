@@ -15,6 +15,7 @@ import {
 } from "../components/schedule";
 import { useParentSchedule } from "../hooks/useParentSchedule";
 import type { ScheduleItem } from "../services/parentScheduleService";
+import { ErrorState, EmptyState } from "@/features/shared/components";
 
 // Inline simple components to avoid extra files
 const ParentScheduleSkeleton = () => (
@@ -102,47 +103,6 @@ const ParentScheduleSkeleton = () => (
     </div>
 );
 
-const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
-    <div className="space-y-6">
-        <ScheduleHeader childName="" childClass="" />
-        <div className="border-red-200 shadow-sm rounded-lg border bg-white p-8 text-center">
-            <div className="p-4 bg-red-100 rounded-full mb-4 inline-block">
-                <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
-            <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
-            <Button onClick={onRetry} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Coba Lagi
-            </Button>
-        </div>
-    </div>
-);
-
-const EmptyState = ({ onRetry }: { onRetry: () => void }) => (
-    <div className="border-slate-200 shadow-sm border-dashed bg-slate-50/30 rounded-lg border p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-white border border-dashed border-slate-200 flex items-center justify-center mb-4 transition-transform hover:scale-110 shadow-sm mx-auto">
-            <svg className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-        </div>
-        <h3 className="text-lg font-semibold text-slate-800">Tidak Ada Data Jadwal</h3>
-        <p className="text-sm text-slate-500 max-w-md mb-6">
-            Belum ada data jadwal pelajaran yang terdaftar. Silakan muat ulang atau hubungi administrator.
-        </p>
-        <Button onClick={onRetry} variant="outline" className="gap-2 bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm rounded-xl px-6 h-10 transition-all active:scale-95">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Muat Ulang Data
-        </Button>
-    </div>
-);
-
 const ScheduleInfoCard = ({ stats, currentDay }: { stats: { totalLessons: number; uniqueSubjects: number; todayLessons: number }; currentDay: string }) => (
     <div className="bg-blue-50 border-blue-200 rounded-lg border p-4">
         <div className="flex items-start gap-3">
@@ -213,7 +173,15 @@ export const ParentSchedule: React.FC = () => {
         return (
             <div className="space-y-6">
                 <ScheduleHeader childName={childName} childClass={childClass} />
-                <EmptyState onRetry={refetch} />
+                <EmptyState
+                    icon={() => (
+                        <svg className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    )}
+                    title="Tidak Ada Data Jadwal"
+                    description="Belum ada data jadwal pelajaran yang terdaftar. Silakan muat ulang atau hubungi administrator."
+                />
             </div>
         );
     }

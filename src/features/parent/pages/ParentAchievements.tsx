@@ -26,12 +26,6 @@ import {
     Filter,
     TrendingUp,
     Trophy,
-    ChevronLeft,
-    ChevronRight,
-    Users,
-    AlertTriangle,
-    RefreshCw,
-    Loader2,
     X,
     RotateCcw,
     Check,
@@ -50,6 +44,15 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParentAchievements } from "../hooks/useParentAchievements";
+import {
+    ErrorState,
+    PageHeader,
+    ChildSelector,
+    FilterButton,
+    ActiveFilterBadges,
+    PaginationControls,
+    StatCard,
+} from "@/features/shared/components";
 
 // Skeleton Loading Component - Mengikuti style original
 const ParentAchievementsSkeleton: React.FC = () => {
@@ -136,36 +139,7 @@ const ParentAchievementsSkeleton: React.FC = () => {
     );
 };
 
-const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
-    <div className="space-y-6 animate-in fade-in duration-500">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Prestasi </span>
-                        <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Anak</span>
-                    </h1>
-                    <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                        <Award className="h-5 w-5" />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <Card className="border-red-200 shadow-sm mt-6">
-            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="p-4 bg-red-100 rounded-full mb-4">
-                    <AlertTriangle className="h-8 w-8 text-red-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
-                <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
-                <Button onClick={onRetry} variant="outline" className="gap-2">
-                    <RefreshCw className="h-4 w-4" />
-                    Coba Lagi
-                </Button>
-            </CardContent>
-        </Card>
-    </div>
-);
+
 
 export const ParentAchievements: React.FC = () => {
     const {
@@ -204,7 +178,7 @@ export const ParentAchievements: React.FC = () => {
 
     const { totalAchievements, nationalAchievements, firstPlaceCount } = stats;
 
-    const handleViewDetail = (achievement: any) => {
+    const handleViewDetail = (achievement: AchievementRecord) => {
         setSelectedAchievement(achievement);
     };
 
@@ -239,39 +213,21 @@ export const ParentAchievements: React.FC = () => {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Prestasi </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Anak</span>
-                        </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <Award className="h-5 w-5" />
-                        </div>
-                    </div>
-                    <p className="text-muted-foreground mt-1">
-                        Daftar pencapaian dan prestasi anak yang telah diraih
-                    </p>
-                </div>
-                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 no-print w-full lg:w-auto mt-4 lg:mt-0 flex-wrap lg:flex-nowrap justify-end">
-                    <Dialog open={isFilterOpen} onOpenChange={(open) => {
-                        if (open) {
-                            setTempAcademicYear(selectedAcademicYear);
-                        }
-                        setIsFilterOpen(open);
-                    }}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" className="h-9 gap-2 bg-white text-slate-700 border-slate-200 shadow-sm font-medium">
-                                <Filter className="h-4 w-4 text-slate-500" />
-                                <span className="hidden sm:inline">Filter</span>
-                                {selectedAcademicYear !== "all" && (
-                                    <Badge className="ml-0.5 h-5 w-5 min-w-[20px] px-0 bg-blue-800 text-white text-[10px] flex items-center justify-center border-0 rounded-full">
-                                        1
-                                    </Badge>
-                                )}
-                            </Button>
-                        </DialogTrigger>
+            <PageHeader
+                title="Prestasi"
+                titleHighlight="Anak"
+                icon={Award}
+                description="Daftar pencapaian dan prestasi anak yang telah diraih"
+            >
+                <Dialog open={isFilterOpen} onOpenChange={(open) => {
+                    if (open) {
+                        setTempAcademicYear(selectedAcademicYear);
+                    }
+                    setIsFilterOpen(open);
+                }}>
+                    <DialogTrigger asChild>
+                        <FilterButton activeCount={selectedAcademicYear !== "all" ? 1 : 0} />
+                    </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px] rounded-2xl">
                             <DialogHeader className="flex-row items-center gap-4">
                                 <div className="p-2.5 bg-blue-100 rounded-xl">
@@ -329,105 +285,24 @@ export const ParentAchievements: React.FC = () => {
                     </Dialog>
 
                     {/* Child Selector */}
-                    {children.length > 1 && (
-                        <Select value={selectedChildId} onValueChange={setSelectedChildId}>
-                            <SelectTrigger className="w-full sm:w-[220px] h-9 bg-white shadow-sm border-slate-200">
-                                <Users className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
-                                <div className="flex-1 text-left truncate">
-                                    <SelectValue placeholder="Pilih Anak" />
-                                </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {children.map(child => (
-                                    <SelectItem key={child.id} value={child.id}>
-                                        {child.name} — {child.class}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                </div>
-            </div>
+                    <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                </PageHeader>
 
             {/* Active Global Filters */}
-            {selectedAcademicYear !== "all" && (
-                <div className="flex flex-wrap items-center gap-2 px-1 no-print">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-                        <SlidersHorizontal className="h-3 w-3" />
-                        <span>Filter Aktif:</span>
-                    </div>
-                    
-                    <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                        <Calendar className="h-3.5 w-3.5" />
-                        TA. {selectedAcademicYear}
-                        <button
-                            onClick={() => setSelectedAcademicYear("all")}
-                            className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                        >
-                            <X className="h-3.5 w-3.5" />
-                        </button>
-                    </Badge>
-                </div>
-            )}
+            <ActiveFilterBadges
+                badges={selectedAcademicYear !== "all" ? [{
+                    key: "year",
+                    label: `TA. ${selectedAcademicYear}`,
+                    icon: Calendar,
+                    onRemove: () => setSelectedAcademicYear("all"),
+                }] : []}
+            />
 
             {/* Summary Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Total Prestasi */}
-                <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="px-5 py-4 pl-6 flex items-center gap-4">
-                        <div className="relative flex-shrink-0">
-                            <div className="w-11 h-11 rounded-xl bg-blue-100/80 flex items-center justify-center ring-2 ring-blue-200/50 transition-transform duration-300 group-hover:scale-105">
-                                <Trophy className="h-5 w-5 text-blue-600" />
-                            </div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total Prestasi</p>
-                            <div className="flex items-baseline gap-2 mt-0.5">
-                                <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">{totalAchievements}</p>
-                                <p className="text-xs text-muted-foreground font-medium">pencapaian</p>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground mt-1">Sepanjang waktu</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Nasional & Internasional */}
-                <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="px-5 py-4 pl-6 flex items-center gap-4">
-                        <div className="relative flex-shrink-0">
-                            <div className="w-11 h-11 rounded-xl bg-red-100/80 flex items-center justify-center ring-2 ring-red-200/50 transition-transform duration-300 group-hover:scale-105">
-                                <Star className="h-5 w-5 text-red-600" />
-                            </div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Nasional+</p>
-                            <div className="flex items-baseline gap-2 mt-0.5">
-                                <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">{nationalAchievements}</p>
-                                <p className="text-xs text-muted-foreground font-medium">pencapaian</p>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground mt-1">Nasional & Internasional</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Juara 1 */}
-                <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="px-5 py-4 pl-6 flex items-center gap-4">
-                        <div className="relative flex-shrink-0">
-                            <div className="w-11 h-11 rounded-xl bg-emerald-100/80 flex items-center justify-center ring-2 ring-emerald-200/50 transition-transform duration-300 group-hover:scale-105">
-                                <TrendingUp className="h-5 w-5 text-emerald-600" />
-                            </div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Juara 1</p>
-                            <div className="flex items-baseline gap-2 mt-0.5">
-                                <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">{firstPlaceCount}</p>
-                                <p className="text-xs text-muted-foreground font-medium">pencapaian</p>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground mt-1">Pencapaian tertinggi</p>
-                        </div>
-                    </div>
-                </div>
+                <StatCard title="Total Prestasi" value={totalAchievements} unit="pencapaian" subtitle="Sepanjang waktu" icon={Trophy} color="blue" />
+                <StatCard title="Nasional+" value={nationalAchievements} unit="pencapaian" subtitle="Nasional & Internasional" icon={Star} color="red" />
+                <StatCard title="Juara 1" value={firstPlaceCount} unit="pencapaian" subtitle="Pencapaian tertinggi" icon={TrendingUp} color="emerald" />
             </div>
 
             {/* Achievements List */}
@@ -577,99 +452,20 @@ export const ParentAchievements: React.FC = () => {
 
                     {/* Footer with Pagination */}
                     {filteredTotal > 0 && (
-                        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 mt-6 pt-4 border-t border-slate-100">
-                            {/* Left: Pagination Info */}
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground w-full lg:w-auto justify-center lg:justify-start">
-                                <span>Menampilkan</span>
-                                <span className="font-medium text-foreground">
-                                    {startIndexDisplay}
-                                </span>
-                                <span>-</span>
-                                <span className="font-medium text-foreground">
-                                    {Math.min(currentPage * itemsPerPage, filteredTotal)}
-                                </span>
-                                <span>dari</span>
-                                <span className="font-medium text-foreground">{filteredTotal}</span>
-                                <span>prestasi</span>
-                            </div>
-
-                            {/* Right: Pagination Controls */}
-                            <div className="flex items-center gap-3 w-full lg:w-auto justify-center lg:justify-end">
-                                {/* Items per page */}
-                                <Select value={itemsPerPage.toString()} onValueChange={(val) => {
-                                    setItemsPerPage(Number(val));
-                                    goToPage(1);
-                                }}>
-                                    <SelectTrigger className="w-[100px] h-8">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="5">5 / hal</SelectItem>
-                                        <SelectItem value="10">10 / hal</SelectItem>
-                                        <SelectItem value="20">20 / hal</SelectItem>
-                                        <SelectItem value="50">50 / hal</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                {/* Page info */}
-                                <span className="text-sm text-muted-foreground">
-                                    Hal {currentPage}/{totalPages}
-                                </span>
-
-                                {/* Previous button */}
-                                <button
-                                    onClick={() => goToPage(Math.max(1, currentPage - 1))}
-                                    disabled={currentPage === 1}
-                                    className="h-8 w-8 p-0 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </button>
-
-                                {/* Page number buttons */}
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        const pageNumber = i + 1;
-                                        return (
-                                            <button
-                                                key={pageNumber}
-                                                onClick={() => goToPage(pageNumber)}
-                                                className={cn(
-                                                    "w-8 h-8 p-0 rounded-lg font-medium text-sm transition-colors flex items-center justify-center",
-                                                    currentPage === pageNumber
-                                                        ? "bg-blue-800 text-white"
-                                                        : "border border-slate-300 bg-white text-slate-600 hover:bg-slate-100"
-                                                )}
-                                            >
-                                                {pageNumber}
-                                            </button>
-                                        );
-                                    })}
-                                    {totalPages > 5 && (
-                                        <>
-                                            <span className="text-sm text-muted-foreground px-1">...</span>
-                                            <button
-                                                onClick={() => goToPage(totalPages)}
-                                                className={cn(
-                                                    "w-8 h-8 p-0 rounded-lg font-medium text-sm transition-colors flex items-center justify-center border border-slate-300 bg-white text-slate-600 hover:bg-slate-100",
-                                                    currentPage === totalPages && "bg-blue-800 text-white"
-                                                )}
-                                            >
-                                                {totalPages}
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-
-                                {/* Next button */}
-                                <button
-                                    onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="h-8 w-8 p-0 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </button>
-                            </div>
-                        </div>
+                        <PaginationControls
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={filteredTotal}
+                            startIndex={startIndexDisplay}
+                            endIndex={Math.min(currentPage * itemsPerPage, filteredTotal)}
+                            itemsPerPage={itemsPerPage}
+                            itemLabel="prestasi"
+                            onPageChange={goToPage}
+                            onItemsPerPageChange={(val) => {
+                                setItemsPerPage(val);
+                                goToPage(1);
+                            }}
+                        />
                     )}
                 </CardContent>
             </Card>

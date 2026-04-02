@@ -46,22 +46,26 @@ import {
     HandHeart,
     X,
     Info,
-    AlertTriangle,
     RefreshCw,
     RotateCcw,
     Check,
     CalendarOff,
-    Users,
     Filter,
-    SlidersHorizontal,
-    Loader2,
-    CircleDashed,
     BookOpen,
+    CircleDashed,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParentDailyAttendance } from "../hooks/useParentDailyAttendance";
 import type { AttendanceStatus, DailyAttendanceRecord } from "../services/dailyAttendanceService";
+import {
+    ErrorState,
+    LoadingOverlay,
+    PageHeader,
+    ChildSelector,
+    FilterButton,
+    ActiveFilterBadges,
+} from "@/features/shared/components";
 
 // Types
 interface SelectedRecord {
@@ -126,37 +130,7 @@ const ParentDailyAttendanceSkeleton = () => {
     );
 };
 
-// Error State Component
-const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
-    <div className="space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
-                        <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Harian</span>
-                    </h1>
-                    <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                        <CalendarCheck className="h-5 w-5" />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <Card className="border-red-200 shadow-sm">
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="p-4 bg-red-100 rounded-full mb-4">
-                    <AlertTriangle className="h-8 w-8 text-red-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
-                <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
-                <Button onClick={onRetry} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50">
-                    <RefreshCw className="h-4 w-4" />
-                    Coba Lagi
-                </Button>
-            </CardContent>
-        </Card>
-    </div>
-);
+
 
 // Empty State Component
 const EmptyState = ({ monthLabel, onRetry }: { monthLabel: string; onRetry: () => void }) => (
@@ -270,42 +244,24 @@ export const ParentDailyAttendance: React.FC = () => {
     return (
         <div className="space-y-6">
                 {/* Header */}
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-bold tracking-tight">
-                                <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
-                                <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Harian</span>
-                            </h1>
-                            <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                                <CalendarCheck className="h-5 w-5" />
-                            </div>
-                        </div>
-                        <p className="text-muted-foreground mt-1">
-                            Status kehadiran resmi harian dari Wali Kelas
-                        </p>
-                    </div>
-
-                    {/* Filter Button + Child Selector */}
-                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 no-print w-full lg:w-auto mt-4 lg:mt-0 flex-wrap lg:flex-nowrap justify-end">
-                        <Dialog open={isFilterOpen} onOpenChange={(open) => {
-                            if (open) {
-                                setTempYearId(selectedYearId);
-                                setTempSemesterId(selectedSemesterId);
-                            }
-                            setIsFilterOpen(open);
-                        }}>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" className="h-9 gap-2 bg-white text-slate-700 border-slate-200 shadow-sm font-medium">
-                                    <Filter className="h-4 w-4 text-slate-500" />
-                                    <span className="hidden sm:inline">Filter</span>
-                                    {(selectedYearId !== academicYears[0]?.id || selectedSemesterId !== academicYears[0]?.semesters[0]?.id) && (
-                                        <Badge className="ml-0.5 h-5 w-5 min-w-[20px] px-0 bg-blue-800 text-white text-[10px] flex items-center justify-center border-0 rounded-full">
-                                            {(selectedYearId !== academicYears[0]?.id ? 1 : 0) + (selectedSemesterId !== academicYears[0]?.semesters[0]?.id ? 1 : 0)}
-                                        </Badge>
-                                    )}
-                                </Button>
-                            </DialogTrigger>
+                <PageHeader
+                    title="Presensi"
+                    titleHighlight="Harian"
+                    icon={CalendarCheck}
+                    description="Status kehadiran resmi harian dari Wali Kelas"
+                >
+                    <Dialog open={isFilterOpen} onOpenChange={(open) => {
+                        if (open) {
+                            setTempYearId(selectedYearId);
+                            setTempSemesterId(selectedSemesterId);
+                        }
+                        setIsFilterOpen(open);
+                    }}>
+                        <DialogTrigger asChild>
+                            <FilterButton
+                                activeCount={(selectedYearId !== academicYears[0]?.id ? 1 : 0) + (selectedSemesterId !== academicYears[0]?.semesters[0]?.id ? 1 : 0)}
+                            />
+                        </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px] rounded-2xl">
                                 <DialogHeader className="flex-row items-center gap-4">
                                     <div className="p-2.5 bg-blue-100 rounded-xl">
@@ -389,90 +345,35 @@ export const ParentDailyAttendance: React.FC = () => {
                         </Dialog>
 
                         {/* Child Selector */}
-                        {children.length > 1 && (
-                            <Select value={selectedChildId} onValueChange={setSelectedChildId}>
-                                <SelectTrigger className="w-full sm:w-[220px] h-9 bg-white shadow-sm border-slate-200">
-                                    <Users className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
-                                    <div className="flex-1 text-left truncate">
-                                        <SelectValue placeholder="Pilih Anak" />
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {children.map(child => (
-                                        <SelectItem key={child.id} value={child.id}>
-                                            {child.name} — {child.class}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        )}
-                    </div>
-                </div>
+                        <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                    </PageHeader>
 
                 {/* Active Global Filters */}
-                {(selectedYearId !== academicYears[0]?.id || selectedSemesterId !== academicYears[0]?.semesters[0]?.id) && (
-                    <div className="flex flex-wrap items-center gap-2 px-1 no-print">
-                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-                            <SlidersHorizontal className="h-3 w-3" />
-                            <span>Filter Aktif:</span>
-                        </div>
-                        
-                        {selectedYearId !== academicYears[0]?.id && (
-                            <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                                <CalendarIcon className="h-3.5 w-3.5" />
-                                TA {academicYears.find(y => y.id === selectedYearId)?.name || selectedYearId}
-                                <button
-                                    onClick={() => setSelectedYearId(academicYears[0]?.id)}
-                                    className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                                >
-                                    <X className="h-3.5 w-3.5" />
-                                </button>
-                            </Badge>
-                        )}
-
-                        {selectedSemesterId !== academicYears[0]?.semesters[0]?.id && (
-                            <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                                <BookOpen className="h-3.5 w-3.5" />
-                                Semester {academicYears.find(y => y.id === selectedYearId)?.semesters.find(s => s.id === selectedSemesterId)?.name || "-"}
-                                <button
-                                    onClick={() => setSelectedSemesterId(academicYears[0]?.semesters[0]?.id)}
-                                    className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                                >
-                                    <X className="h-3.5 w-3.5" />
-                                </button>
-                            </Badge>
-                        )}
-
-                        {/* Show "Hapus Semua" only if more than 1 filter is active */}
-                        {(selectedYearId !== academicYears[0]?.id ? 1 : 0) + (selectedSemesterId !== academicYears[0]?.semesters[0]?.id ? 1 : 0) > 1 && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 px-2 text-[11px] text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 ml-1"
-                                onClick={() => {
-                                    setSelectedYearId(academicYears[0]?.id);
-                                    setSelectedSemesterId(academicYears[0]?.semesters[0]?.id);
-                                }}
-                            >
-                                <RotateCcw className="h-3 w-3" />
-                                Hapus Semua
-                            </Button>
-                        )}
-                    </div>
-                )}
+                <ActiveFilterBadges
+                    badges={[
+                        ...(selectedYearId !== academicYears[0]?.id ? [{
+                            key: "year",
+                            label: `TA ${academicYears.find(y => y.id === selectedYearId)?.name || selectedYearId}`,
+                            icon: CalendarIcon,
+                            onRemove: () => setSelectedYearId(academicYears[0]?.id),
+                        }] : []),
+                        ...(selectedSemesterId !== academicYears[0]?.semesters[0]?.id ? [{
+                            key: "semester",
+                            label: `Semester ${academicYears.find(y => y.id === selectedYearId)?.semesters.find(s => s.id === selectedSemesterId)?.name || "-"}`,
+                            icon: BookOpen,
+                            onRemove: () => setSelectedSemesterId(academicYears[0]?.semesters[0]?.id),
+                        }] : []),
+                    ]}
+                    onClearAll={() => {
+                        setSelectedYearId(academicYears[0]?.id);
+                        setSelectedSemesterId(academicYears[0]?.semesters[0]?.id);
+                    }}
+                />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main Calendar Card */}
                     <Card className="lg:col-span-3 border-blue-200 shadow-sm relative">
-                        {/* Fetching overlay */}
-                        {isFetching && (
-                            <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-30 flex items-center justify-center rounded-xl">
-                                <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-lg rounded-xl px-5 py-3">
-                                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                                    <span className="text-sm font-medium text-slate-600">Memuat data...</span>
-                                </div>
-                            </div>
-                        )}
+                        {isFetching && <LoadingOverlay />}
 
                         <CardHeader className="pb-1">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

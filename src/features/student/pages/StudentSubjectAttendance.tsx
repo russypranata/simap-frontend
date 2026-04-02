@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, CheckCircle, Clock, AlertCircle, XCircle, BookOpen, Calendar, Filter, RotateCcw, Check, Loader2, RefreshCw, AlertTriangle, Tag, BookText } from "lucide-react";
+import { CheckCircle, Clock, AlertCircle, XCircle, BookOpen, Calendar, Filter, RotateCcw, Check, Tag, BookText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useStudentSubjectAttendance } from "../hooks/useStudentSubjectAttendance";
 import type { SubjectType, SubjectStatus } from "../services/studentSubjectAttendanceService";
+import { ErrorState, LoadingOverlay, PageHeader, PaginationControls, StatCard } from "@/features/shared/components";
 
 const getSubjectTypeConfig = (type: SubjectType) => ({
     wajib: { bg: "bg-blue-100", text: "text-blue-700", border: "border-blue-200", label: "Wajib" },
@@ -24,25 +25,6 @@ const getStatusConfig = (status: SubjectStatus) => ({
     alpa: { bg: "bg-red-100", text: "text-red-700", icon: XCircle, label: "Alpa" },
 }[status]);
 
-const StatCard: React.FC<{ title: string; value: number; percentage: number; icon: React.ElementType; color: "green" | "blue" | "yellow" | "red" }> = ({ title, value, percentage, icon: Icon, color }) => {
-    const cfg = { green: { bg: "bg-green-100/80", ring: "ring-green-200/50", text: "text-green-600" }, blue: { bg: "bg-blue-100/80", ring: "ring-blue-200/50", text: "text-blue-600" }, yellow: { bg: "bg-yellow-100/80", ring: "ring-yellow-200/50", text: "text-yellow-600" }, red: { bg: "bg-red-100/80", ring: "ring-red-200/50", text: "text-red-600" } }[color];
-    return (
-        <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5">
-            <div className="px-5 py-4 pl-6 flex items-center gap-4">
-                <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center ring-2 transition-transform duration-300 group-hover:scale-105", cfg.bg, cfg.ring)}>
-                    <Icon className={cn("h-5 w-5", cfg.text)} />
-                </div>
-                <div className="min-w-0 flex-1">
-                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{title}</p>
-                    <div className="flex items-baseline gap-2 mt-0.5">
-                        <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">{value}</p>
-                        <p className="text-xs text-muted-foreground font-medium">{percentage >= 100 ? "" : percentage.toFixed(1) + "%"}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 export const StudentSubjectAttendance: React.FC = () => {
     const {
@@ -55,7 +37,6 @@ export const StudentSubjectAttendance: React.FC = () => {
         isLoading, isFetching, error, refetch, triggerFetchingOverlay,
     } = useStudentSubjectAttendance();
 
-    const [tempStatus, setTempStatus] = useState("all");
     const [tempSubject, setTempSubject] = useState("all");
     const [tempAcademicYear, setTempAcademicYear] = useState<string>("all");
     const [tempSemester, setTempSemester] = useState<string>("all");
@@ -78,36 +59,19 @@ export const StudentSubjectAttendance: React.FC = () => {
 
     if (error) return (
         <div className="space-y-6">
-            <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold tracking-tight">
-                    <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
-                    <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Mata Pelajaran</span>
-                </h1>
-            </div>
-            <Card className="border-red-200 shadow-sm">
-                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="p-4 bg-red-100 rounded-full mb-4"><AlertTriangle className="h-8 w-8 text-red-600" /></div>
-                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
-                    <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
-                    <Button onClick={refetch} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50"><RefreshCw className="h-4 w-4" />Coba Lagi</Button>
-                </CardContent>
-            </Card>
+            <PageHeader title="Presensi" titleHighlight="Mata Pelajaran" icon={BookOpen} />
+            <ErrorState error={error} onRetry={refetch} />
         </div>
     );
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Mata Pelajaran</span>
-                        </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20"><BookOpen className="h-5 w-5" /></div>
-                    </div>
-                    <p className="text-muted-foreground mt-1">Rekap kehadiran KBM di kelas</p>
-                </div>
+            <PageHeader
+                title="Presensi"
+                titleHighlight="Mata Pelajaran"
+                icon={BookOpen}
+                description="Rekap kehadiran KBM di kelas"
+            >
                 <Dialog open={isFilterOpen} onOpenChange={(open) => {
                     if (open) { setTempAcademicYear(selectedAcademicYear); setTempSemester(selectedSemester); setTempSubject(selectedSubject); }
                     setIsFilterOpen(open);
@@ -176,24 +140,17 @@ export const StudentSubjectAttendance: React.FC = () => {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
-            </div>
+            </PageHeader>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard title="Hadir" value={stats.hadir.value} percentage={stats.hadir.percentage} icon={CheckCircle} color="green" />
-                <StatCard title="Izin" value={stats.izin.value} percentage={stats.izin.percentage} icon={Clock} color="blue" />
-                <StatCard title="Sakit" value={stats.sakit.value} percentage={stats.sakit.percentage} icon={AlertCircle} color="yellow" />
-                <StatCard title="Alpa" value={stats.alpa.value} percentage={stats.alpa.percentage} icon={XCircle} color="red" />
+                <StatCard title="Hadir" value={stats.hadir.value} unit={stats.hadir.percentage >= 100 ? undefined : `${stats.hadir.percentage.toFixed(1)}%`} subtitle="Kehadiran penuh" icon={CheckCircle} color="green" />
+                <StatCard title="Izin" value={stats.izin.value} unit={stats.izin.percentage >= 100 ? undefined : `${stats.izin.percentage.toFixed(1)}%`} subtitle="Dengan keterangan" icon={Clock} color="blue" />
+                <StatCard title="Sakit" value={stats.sakit.value} unit={stats.sakit.percentage >= 100 ? undefined : `${stats.sakit.percentage.toFixed(1)}%`} subtitle="Surat sakit" icon={AlertCircle} color="amber" />
+                <StatCard title="Alpa" value={stats.alpa.value} unit={stats.alpa.percentage >= 100 ? undefined : `${stats.alpa.percentage.toFixed(1)}%`} subtitle="Tanpa keterangan" icon={XCircle} color="red" />
             </div>
 
             <Card className="border-blue-200 shadow-sm relative overflow-hidden">
-                {isFetching && (
-                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-30 flex items-center justify-center rounded-xl">
-                        <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-lg rounded-xl px-5 py-3">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                            <span className="text-sm font-medium text-slate-600">Memuat data...</span>
-                        </div>
-                    </div>
-                )}
+                {isFetching && <LoadingOverlay />}
                 <CardHeader className="pb-1">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-start gap-3">
@@ -324,41 +281,17 @@ export const StudentSubjectAttendance: React.FC = () => {
                         </table>
                     </div>
                     {filteredTotal > 0 && (
-                        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 mt-6 pt-4 border-t border-slate-100">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>Menampilkan</span>
-                                <span className="font-medium text-foreground">{startIndexDisplay}</span>
-                                <span>-</span>
-                                <span className="font-medium text-foreground">{endIndexDisplay}</span>
-                                <span>dari</span>
-                                <span className="font-medium text-foreground">{filteredTotal}</span>
-                                <span>entri</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Select value={itemsPerPage.toString()} onValueChange={val => { setItemsPerPage(Number(val)); goToPage(1); }}>
-                                    <SelectTrigger className="w-[100px] h-8"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="5">5 / hal</SelectItem>
-                                        <SelectItem value="10">10 / hal</SelectItem>
-                                        <SelectItem value="20">20 / hal</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <span className="text-sm text-muted-foreground">Hal {currentPage}/{totalPages}</span>
-                                <button onClick={goToPrevPage} disabled={currentPage === 1} className="h-8 w-8 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-                                    <ChevronLeft className="h-4 w-4" />
-                                </button>
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1).map(p => (
-                                        <button key={p} onClick={() => goToPage(p)} className={cn("w-8 h-8 rounded-lg font-medium text-sm flex items-center justify-center", currentPage === p ? "bg-blue-800 text-white" : "border border-slate-300 bg-white text-slate-600 hover:bg-slate-100")}>
-                                            {p}
-                                        </button>
-                                    ))}
-                                </div>
-                                <button onClick={goToNextPage} disabled={currentPage === totalPages} className="h-8 w-8 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-                                    <ChevronRight className="h-4 w-4" />
-                                </button>
-                            </div>
-                        </div>
+                        <PaginationControls
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={filteredTotal}
+                            startIndex={startIndexDisplay}
+                            endIndex={endIndexDisplay}
+                            itemsPerPage={itemsPerPage}
+                            onPageChange={goToPage}
+                            onItemsPerPageChange={(val) => { setItemsPerPage(val); goToPage(1); }}
+                            itemsPerPageOptions={[5, 10, 20]}
+                        />
                     )}
                 </CardContent>
             </Card>

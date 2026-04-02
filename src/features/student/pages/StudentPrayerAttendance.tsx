@@ -1,13 +1,12 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Moon, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, RefreshCw, AlertTriangle, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Moon, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useStudentPrayerAttendance } from "../hooks/useStudentPrayerAttendance";
 import type { PrayerStatus, PrayerRecord } from "../services/studentPrayerAttendanceService";
+import { ErrorState, LoadingOverlay, PageHeader } from "@/features/shared/components";
 
 const MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
@@ -52,41 +51,19 @@ export const StudentPrayerAttendance: React.FC = () => {
     if (isLoading) return <Skeleton_ />;
     if (error) return (
         <div className="space-y-6">
-            <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold tracking-tight">
-                    <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
-                    <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Sholat</span>
-                </h1>
-            </div>
-            <Card className="border-red-200 shadow-sm mt-6">
-                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="p-4 bg-red-100 rounded-full mb-4"><AlertTriangle className="h-8 w-8 text-red-600" /></div>
-                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
-                    <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
-                    <Button onClick={refetch} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50">
-                        <RefreshCw className="h-4 w-4" /> Coba Lagi
-                    </Button>
-                </CardContent>
-            </Card>
+            <PageHeader title="Presensi" titleHighlight="Sholat" icon={Moon} />
+            <ErrorState error={error} onRetry={refetch} />
         </div>
     );
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Sholat</span>
-                        </h1>
-                        <div className="p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <Moon className="h-5 w-5" />
-                        </div>
-                    </div>
-                    <p className="text-muted-foreground mt-1">Monitoring kehadiran sholat wajib berjamaah di masjid/asrama</p>
-                </div>
-            </div>
+            <PageHeader
+                title="Presensi"
+                titleHighlight="Sholat"
+                icon={Moon}
+                description="Monitoring kehadiran sholat wajib berjamaah di masjid/asrama"
+            />
 
             <div className="flex flex-col sm:flex-row gap-3 justify-between items-center">
                 <div className="flex items-center gap-1.5 bg-white rounded-lg border shadow-sm px-3 py-1.5">
@@ -118,14 +95,7 @@ export const StudentPrayerAttendance: React.FC = () => {
             </div>
 
             <div className="rounded-xl border border-slate-200 overflow-hidden relative bg-white shadow-sm">
-                {isFetching && (
-                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-30 flex items-center justify-center rounded-xl">
-                        <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-lg rounded-xl px-5 py-3">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                            <span className="text-sm font-medium text-slate-600">Memuat data...</span>
-                        </div>
-                    </div>
-                )}
+                {isFetching && <LoadingOverlay />}
 
                 {records.length === 0 ? (
                     <div className="flex flex-col items-center justify-center text-center py-20 px-4">

@@ -13,15 +13,15 @@ import {
 import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
-import {
-    Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle, XCircle, Clock,
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle, XCircle, Clock,
     AlertCircle, CalendarCheck, FileText, Thermometer, HandHeart, X, Info, AlertTriangle,
-    RefreshCw, RotateCcw, Check, CalendarOff, Filter, SlidersHorizontal, Loader2, CircleDashed, BookOpen,
+    RefreshCw, RotateCcw, Check, CalendarOff, Filter, Loader2, CircleDashed, BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStudentDailyAttendance } from "../hooks/useStudentDailyAttendance";
 import type { AttendanceStatus, DailyAttendanceRecord } from "../services/studentAttendanceService";
+import { ErrorState, LoadingOverlay, PageHeader } from "@/features/shared/components";
 
 interface SelectedRecord {
     date: string;
@@ -92,41 +92,19 @@ export const StudentDailyAttendance: React.FC = () => {
     if (isLoading) return <Skeleton_ />;
     if (error) return (
         <div className="space-y-6">
-            <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold tracking-tight">
-                    <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
-                    <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Harian</span>
-                </h1>
-            </div>
-            <Card className="border-red-200 shadow-sm">
-                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="p-4 bg-red-100 rounded-full mb-4"><AlertTriangle className="h-8 w-8 text-red-600" /></div>
-                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
-                    <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
-                    <Button onClick={refetch} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50">
-                        <RefreshCw className="h-4 w-4" /> Coba Lagi
-                    </Button>
-                </CardContent>
-            </Card>
+            <PageHeader title="Presensi" titleHighlight="Harian" icon={CalendarCheck} />
+            <ErrorState error={error} onRetry={refetch} />
         </div>
     );
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Presensi </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Harian</span>
-                        </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <CalendarCheck className="h-5 w-5" />
-                        </div>
-                    </div>
-                    <p className="text-muted-foreground mt-1">Status kehadiran resmi harian dari Wali Kelas</p>
-                </div>
-
+            <PageHeader
+                title="Presensi"
+                titleHighlight="Harian"
+                icon={CalendarCheck}
+                description="Status kehadiran resmi harian dari Wali Kelas"
+            >
                 <div className="flex items-center gap-3">
                     <Dialog open={isFilterOpen} onOpenChange={(open) => {
                         if (open) { setTempYearId(selectedYearId); setTempSemesterId(selectedSemesterId); }
@@ -185,17 +163,10 @@ export const StudentDailyAttendance: React.FC = () => {
                         </DialogContent>
                     </Dialog>
                 </div>
-            </div>
+            </PageHeader>
 
             <Card className="lg:col-span-3 border-blue-200 shadow-sm relative">
-                {isFetching && (
-                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-30 flex items-center justify-center rounded-xl">
-                        <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-lg rounded-xl px-5 py-3">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                            <span className="text-sm font-medium text-slate-600">Memuat data...</span>
-                        </div>
-                    </div>
-                )}
+                {isFetching && <LoadingOverlay />}
                 <CardHeader className="pb-1">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3">

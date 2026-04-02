@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React from "react";
 import {
     Card,
     CardContent,
@@ -10,14 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import {
     Calendar,
@@ -33,52 +25,7 @@ import {
     Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// Types
-interface SubjectGrade {
-    id: number;
-    subject: string;
-    teacher: string;
-    dailyScore: number;        // Nilai Harian
-    midTermScore: number;      // UTS
-    finalScore: number;        // UAS
-    averageScore: number;      // Rata-rata
-    grade: string;             // Predikat
-    kkm: number;               // KKM
-}
-
-interface SemesterSummary {
-    semester: string;
-    academicYear: string;
-    averageScore: number;
-    rank: number;
-    totalStudents: number;
-    attendance: number;
-}
-
-// Mock data
-const mockGrades: SubjectGrade[] = [
-    { id: 1, subject: "Matematika", teacher: "Pak Ahmad", dailyScore: 85, midTermScore: 82, finalScore: 88, averageScore: 85, grade: "A-", kkm: 75 },
-    { id: 2, subject: "Fisika", teacher: "Bu Sari", dailyScore: 78, midTermScore: 80, finalScore: 82, averageScore: 80, grade: "B+", kkm: 75 },
-    { id: 3, subject: "Kimia", teacher: "Pak Rudi", dailyScore: 82, midTermScore: 85, finalScore: 84, averageScore: 84, grade: "A-", kkm: 75 },
-    { id: 4, subject: "Biologi", teacher: "Bu Ani", dailyScore: 88, midTermScore: 90, finalScore: 92, averageScore: 90, grade: "A", kkm: 75 },
-    { id: 5, subject: "Bahasa Indonesia", teacher: "Bu Dewi", dailyScore: 80, midTermScore: 78, finalScore: 82, averageScore: 80, grade: "B+", kkm: 75 },
-    { id: 6, subject: "Bahasa Inggris", teacher: "Pak Budi", dailyScore: 85, midTermScore: 88, finalScore: 86, averageScore: 86, grade: "A-", kkm: 75 },
-    { id: 7, subject: "Sejarah", teacher: "Pak Hendra", dailyScore: 78, midTermScore: 75, finalScore: 80, averageScore: 78, grade: "B", kkm: 75 },
-    { id: 8, subject: "Pendidikan Agama", teacher: "Pak Usman", dailyScore: 92, midTermScore: 95, finalScore: 93, averageScore: 93, grade: "A", kkm: 75 },
-    { id: 9, subject: "PKn", teacher: "Bu Rina", dailyScore: 82, midTermScore: 80, finalScore: 84, averageScore: 82, grade: "B+", kkm: 75 },
-    { id: 10, subject: "Seni Budaya", teacher: "Bu Ratna", dailyScore: 88, midTermScore: 85, finalScore: 90, averageScore: 88, grade: "A-", kkm: 75 },
-    { id: 11, subject: "PJOK", teacher: "Pak Dedi", dailyScore: 85, midTermScore: 88, finalScore: 85, averageScore: 86, grade: "A-", kkm: 75 },
-    { id: 12, subject: "Prakarya", teacher: "Pak Joko", dailyScore: 80, midTermScore: 82, finalScore: 80, averageScore: 81, grade: "B+", kkm: 75 },
-    { id: 13, subject: "TIK", teacher: "Pak Fajar", dailyScore: 90, midTermScore: 92, finalScore: 88, averageScore: 90, grade: "A", kkm: 75 },
-];
-
-const mockSemesterHistory: SemesterSummary[] = [
-    { semester: "Ganjil", academicYear: "2025/2026", averageScore: 85.2, rank: 5, totalStudents: 32, attendance: 98 },
-    { semester: "Genap", academicYear: "2024/2025", averageScore: 84.5, rank: 6, totalStudents: 32, attendance: 96 },
-    { semester: "Ganjil", academicYear: "2024/2025", averageScore: 83.8, rank: 8, totalStudents: 32, attendance: 95 },
-    { semester: "Genap", academicYear: "2023/2024", averageScore: 82.1, rank: 10, totalStudents: 32, attendance: 94 },
-];
+import { useStudentGrades } from "../hooks/useStudentGrades";
 
 // Helper functions
 const getGradeColor = (grade: string): string => {
@@ -108,31 +55,19 @@ const TrendIcon = ({ current, previous }: { current: number; previous: number })
 };
 
 export const StudentGrades: React.FC = () => {
-    const [selectedSemester, setSelectedSemester] = useState("current");
-    const [activeTab, setActiveTab] = useState("all");
+    const {
+        grades,
+        semesterHistory,
+        selectedSemester,
+        setSelectedSemester,
+        activeTab,
+        setActiveTab,
+        stats,
+        currentSemester,
+        previousSemester,
+    } = useStudentGrades();
 
-    // Calculate stats
-    const stats = useMemo(() => {
-        const totalAverage = mockGrades.reduce((sum, g) => sum + g.averageScore, 0) / mockGrades.length;
-        const highestSubject = mockGrades.reduce((prev, current) =>
-            prev.averageScore > current.averageScore ? prev : current
-        );
-        const lowestSubject = mockGrades.reduce((prev, current) =>
-            prev.averageScore < current.averageScore ? prev : current
-        );
-        const aboveKKM = mockGrades.filter(g => g.averageScore >= g.kkm).length;
-
-        return {
-            totalAverage: Math.round(totalAverage * 10) / 10,
-            highestSubject,
-            lowestSubject,
-            aboveKKM,
-            totalSubjects: mockGrades.length,
-        };
-    }, []);
-
-    const currentSemester = mockSemesterHistory[0];
-    const previousSemester = mockSemesterHistory[1];
+    if (!stats || !currentSemester || !previousSemester) return null;
 
     return (
         <div className="space-y-6">
@@ -276,7 +211,7 @@ export const StudentGrades: React.FC = () => {
                             </div>
                         </div>
                         <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                            {mockGrades.length} Mata Pelajaran
+                            {grades.length} Mata Pelajaran
                         </Badge>
                     </div>
                 </CardHeader>
@@ -297,7 +232,7 @@ export const StudentGrades: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {mockGrades.map((grade, index) => (
+                                {grades.map((grade, index) => (
                                     <tr key={grade.id} className="border-b hover:bg-muted/30 transition-colors">
                                         <td className="p-4 text-sm text-muted-foreground">{index + 1}</td>
                                         <td className="p-4">
@@ -391,7 +326,7 @@ export const StudentGrades: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {mockSemesterHistory.map((semester, index) => (
+                        {semesterHistory.map((semester, index) => (
                             <div
                                 key={`${semester.academicYear}-${semester.semester}`}
                                 className={cn(

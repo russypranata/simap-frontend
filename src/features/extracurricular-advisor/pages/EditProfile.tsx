@@ -8,9 +8,7 @@ import { User, Pencil, Lock, Key } from "lucide-react";
 import { AdvisorProfileForm, AdvisorProfileData } from "@/features/extracurricular-advisor/components/profile/AdvisorProfileForm";
 import { EditProfileSkeleton } from '@/features/extracurricular-advisor/components/profile';
 import { ChangePasswordDialog } from "@/features/extracurricular-advisor/components/profile/ChangePasswordDialog";
-import { 
-    advisorService 
-} from "@/features/extracurricular-advisor/services/advisorService";
+import { getProfile, updateProfile, uploadAvatar } from "@/features/extracurricular-advisor/services";
 import { toast } from "sonner";
 
 export const EditExtracurricularAdvisorProfile: React.FC = () => {
@@ -23,7 +21,7 @@ export const EditExtracurricularAdvisorProfile: React.FC = () => {
     React.useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await advisorService.getProfile();
+                const data = await getProfile();
                 setProfileData(data);
             } catch (error) {
                 console.error("Failed to fetch profile:", error);
@@ -48,11 +46,10 @@ export const EditExtracurricularAdvisorProfile: React.FC = () => {
                 address: data.address,
             };
             
-            await advisorService.updateProfile(updatePayload);
+            await updateProfile(updatePayload);
             
-            // 2. Upload Avatar if selected
             if (file) {
-                 await advisorService.uploadAvatar(file);
+                await uploadAvatar(file);
             }
 
             toast.success("Profil berhasil diperbarui!");

@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, AlertTriangle, Clock, MapPin, User, FileText, ClipboardList, Building, Home, AlertCircle, CheckCircle, Loader2, RefreshCw, RotateCcw, Check, ChevronLeft, ChevronRight, Filter, SlidersHorizontal, X } from "lucide-react";
+import { Calendar, AlertTriangle, Clock, MapPin, User, FileText, ClipboardList, Building, Home, CheckCircle, RotateCcw, Check, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useStudentBehavior } from "../hooks/useStudentBehavior";
+import { ErrorState, LoadingOverlay, PageHeader, PaginationControls, ActiveFilterBadges } from "@/features/shared/components";
+import type { FilterBadge } from "@/features/shared/components";
 
 const Skeleton_ = () => (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -37,40 +39,31 @@ export const StudentBehaviorRecord: React.FC = () => {
     const startIndexDisplay = (currentPage - 1) * itemsPerPage + 1;
     const endIndexDisplay = Math.min(currentPage * itemsPerPage, allFilteredCount);
 
+    const filterBadges: FilterBadge[] = selectedAcademicYear !== "all" ? [
+        {
+            key: "academicYear",
+            label: `TA. ${selectedAcademicYear}`,
+            icon: Calendar,
+            onRemove: () => handleAcademicYearChange("all"),
+        },
+    ] : [];
+
     if (isLoading) return <Skeleton_ />;
     if (error) return (
         <div className="space-y-6">
-            <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold tracking-tight">
-                    <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Catatan </span>
-                    <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Perilaku</span>
-                </h1>
-            </div>
-            <Card className="border-red-200 shadow-sm">
-                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="p-4 bg-red-100 rounded-full mb-4"><AlertTriangle className="h-8 w-8 text-red-600" /></div>
-                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
-                    <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
-                    <Button onClick={refetch} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50"><RefreshCw className="h-4 w-4" />Coba Lagi</Button>
-                </CardContent>
-            </Card>
+            <PageHeader title="Catatan" titleHighlight="Perilaku" icon={ClipboardList} />
+            <ErrorState error={error} onRetry={refetch} />
         </div>
     );
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Catatan </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Perilaku</span>
-                        </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20"><ClipboardList className="h-5 w-5" /></div>
-                    </div>
-                    <p className="text-muted-foreground mt-1">Catatan pelanggaran selama di sekolah dan asrama</p>
-                </div>
-
+            <PageHeader
+                title="Catatan"
+                titleHighlight="Perilaku"
+                icon={ClipboardList}
+                description="Catatan pelanggaran selama di sekolah dan asrama"
+            >
                 <Dialog open={isFilterOpen} onOpenChange={(open) => { if (open) setTempAcademicYear(selectedAcademicYear); setIsFilterOpen(open); }}>
                     <DialogTrigger asChild>
                         <Button variant="outline" className="h-9 gap-2 bg-white text-slate-700 border-slate-200 shadow-sm font-medium">
@@ -105,17 +98,9 @@ export const StudentBehaviorRecord: React.FC = () => {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
-            </div>
+            </PageHeader>
 
-            {selectedAcademicYear !== "all" && (
-                <div className="flex flex-wrap items-center gap-2 px-1">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1"><SlidersHorizontal className="h-3 w-3" /><span>Filter Aktif:</span></div>
-                    <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                        <Calendar className="h-3.5 w-3.5" />TA. {selectedAcademicYear}
-                        <button onClick={() => handleAcademicYearChange("all")} className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"><X className="h-3.5 w-3.5" /></button>
-                    </Badge>
-                </div>
-            )}
+            <ActiveFilterBadges badges={filterBadges} />
 
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -141,14 +126,7 @@ export const StudentBehaviorRecord: React.FC = () => {
 
             {/* Record List */}
             <Card className="relative">
-                {isFetching && (
-                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-30 flex items-center justify-center rounded-xl">
-                        <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-lg rounded-xl px-5 py-3">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                            <span className="text-sm font-medium text-slate-600">Memuat data...</span>
-                        </div>
-                    </div>
-                )}
+                {isFetching && <LoadingOverlay />}
                 <CardHeader className="pb-1">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
@@ -219,29 +197,17 @@ export const StudentBehaviorRecord: React.FC = () => {
                     )}
 
                     {showPagination && (
-                        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 mt-6 pt-4 border-t border-slate-100">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>Menampilkan</span><span className="font-medium text-foreground">{startIndexDisplay}</span><span>-</span><span className="font-medium text-foreground">{endIndexDisplay}</span><span>dari</span><span className="font-medium text-foreground">{allFilteredCount}</span><span>entri</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Select value={itemsPerPage.toString()} onValueChange={val => { setItemsPerPage(Number(val)); setCurrentPage(1); }}>
-                                    <SelectTrigger className="w-[100px] h-8"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="5">5 / hal</SelectItem>
-                                        <SelectItem value="10">10 / hal</SelectItem>
-                                        <SelectItem value="20">20 / hal</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <span className="text-sm text-muted-foreground">Hal {currentPage}/{totalPages}</span>
-                                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-8 w-8 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"><ChevronLeft className="h-4 w-4" /></button>
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1).map(p => (
-                                        <button key={p} onClick={() => setCurrentPage(p)} className={cn("w-8 h-8 rounded-lg font-medium text-sm flex items-center justify-center", currentPage === p ? "bg-blue-800 text-white" : "border border-slate-300 bg-white text-slate-600 hover:bg-slate-100")}>{p}</button>
-                                    ))}
-                                </div>
-                                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="h-8 w-8 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"><ChevronRight className="h-4 w-4" /></button>
-                            </div>
-                        </div>
+                        <PaginationControls
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={allFilteredCount}
+                            startIndex={startIndexDisplay}
+                            endIndex={endIndexDisplay}
+                            itemsPerPage={itemsPerPage}
+                            onPageChange={setCurrentPage}
+                            onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+                            itemsPerPageOptions={[5, 10, 20]}
+                        />
                     )}
                 </CardContent>
             </Card>

@@ -1,12 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React from "react";
 import {
     Card,
     CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,95 +30,16 @@ import {
     Clock,
     User,
     FileText,
-    AlertCircle,
     Bell,
     ChevronRight,
     ChevronLeft,
-    Eye,
     Paperclip,
     Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// Types
-interface Announcement {
-    id: number;
-    title: string;
-    content: string;
-    category: "academic" | "event" | "schedule" | "general" | "achievement";
-    date: string;
-    author: string;
-    isRead: boolean;
-    isPinned: boolean;
-    attachments?: string[];
-}
-
-const ITEMS_PER_PAGE = 5;
-
-// Mock data
-const initialAnnouncements: Announcement[] = [
-    {
-        id: 1,
-        title: "Jadwal Ujian Akhir Semester Ganjil 2025/2026",
-        content: "Diberitahukan kepada seluruh siswa bahwa Ujian Akhir Semester (UAS) Ganjil akan dilaksanakan pada tanggal 13-20 Januari 2026. Harap mempersiapkan diri dengan baik dan mempelajari materi yang telah diajarkan. Jadwal lengkap dapat dilihat pada lampiran.\n\nKetentuan UAS:\n1. Siswa hadir 30 menit sebelum ujian dimulai\n2. Membawa alat tulis lengkap\n3. Dilarang membawa HP ke ruang ujian\n4. Berpakaian rapi sesuai ketentuan",
-        category: "academic",
-        date: "2026-01-10",
-        author: "Tata Usaha / Admin",
-        isRead: false,
-        isPinned: true,
-        attachments: ["Jadwal_UAS_Ganjil_2025-2026.pdf"],
-    },
-    {
-        id: 2,
-        title: "Libur Semester Ganjil 2025/2026",
-        content: "Diberitahukan bahwa libur semester ganjil akan berlangsung dari tanggal 21 Januari - 3 Februari 2026. Siswa diharapkan memanfaatkan waktu libur dengan kegiatan positif dan mengerjakan tugas yang diberikan.",
-        category: "schedule",
-        date: "2026-01-09",
-        author: "Tata Usaha / Admin",
-        isRead: false,
-        isPinned: false,
-    },
-    {
-        id: 3,
-        title: "Pendaftaran Lomba Olimpiade Sains Nasional 2026",
-        content: "Bagi siswa yang berminat mengikuti OSN 2026, pendaftaran dibuka hingga 15 Januari 2026. Silakan hubungi Bapak/Ibu Pembina OSN di ruang guru atau mendaftar melalui website sekolah.",
-        category: "achievement",
-        date: "2026-01-08",
-        author: "Pak Ahmad (Guru Matematika)",
-        isRead: true,
-        isPinned: false,
-    },
-    {
-        id: 4,
-        title: "Peringatan Maulid Nabi Muhammad SAW",
-        content: "Dalam rangka memperingati Maulid Nabi Muhammad SAW, sekolah akan mengadakan acara peringatan pada hari Senin, 13 Januari 2026. Seluruh siswa wajib mengikuti acara dengan berpakaian muslim/muslimah.",
-        category: "event",
-        date: "2026-01-07",
-        author: "Drs. H. Syamsul (Kepala Sekolah)",
-        isRead: true,
-        isPinned: false,
-    },
-    {
-        id: 5,
-        title: "Pengumuman Hasil Seleksi Tim Basket SMAN 1",
-        content: "Selamat kepada siswa yang terpilih masuk tim basket sekolah! Daftar lengkap dapat dilihat di papan pengumuman atau hubungi Pak Dedi selaku pelatih basket.",
-        category: "achievement",
-        date: "2026-01-06",
-        author: "Coach Dedi (Tutor Ekstrakurikuler Basket)",
-        isRead: true,
-        isPinned: false,
-    },
-    {
-        id: 6,
-        title: "Perubahan Jadwal Pelajaran Sementara",
-        content: "Diinformasikan bahwa terdapat perubahan jadwal untuk beberapa mata pelajaran minggu ini dikarenakan ada guru yang berhalangan hadir. Silakan cek jadwal terbaru di website sekolah.",
-        category: "schedule",
-        date: "2026-01-05",
-        author: "Pak Hendra (Guru Piket)",
-        isRead: true,
-        isPinned: false,
-    },
-];
+import { useStudentAnnouncements } from "../hooks/useStudentAnnouncements";
+import type { Announcement } from "../services/studentAnnouncementsService";
+import { PaginationControls } from "@/features/shared/components";
 
 // Category config
 const getCategoryConfig = (category: Announcement["category"]) => {
@@ -136,52 +54,24 @@ const getCategoryConfig = (category: Announcement["category"]) => {
 };
 
 export const StudentAnnouncements: React.FC = () => {
-    const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [categoryFilter, setCategoryFilter] = useState("all");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-    // Filter announcements
-    const filteredAnnouncements = useMemo(() => {
-        return announcements.filter((announcement) => {
-            const matchesSearch =
-                announcement.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                announcement.content.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesCategory = categoryFilter === "all" || announcement.category === categoryFilter;
-            return matchesSearch && matchesCategory;
-        });
-    }, [announcements, searchQuery, categoryFilter]);
-
-    // Sort: pinned first, then by date
-    const sortedAnnouncements = useMemo(() => {
-        return [...filteredAnnouncements].sort((a, b) => {
-            if (a.isPinned && !b.isPinned) return -1;
-            if (!a.isPinned && b.isPinned) return 1;
-            return new Date(b.date).getTime() - new Date(a.date).getTime();
-        });
-    }, [filteredAnnouncements]);
-
-    // Pagination logic
-    const totalPages = Math.ceil(sortedAnnouncements.length / ITEMS_PER_PAGE);
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const paginatedAnnouncements = sortedAnnouncements.slice(startIndex, endIndex);
-
-    const unreadCount = announcements.filter(a => !a.isRead).length;
-
-    const handleViewDetail = (announcement: Announcement) => {
-        // Mark as read if not already
-        if (!announcement.isRead) {
-            setAnnouncements(prev => prev.map(a =>
-                a.id === announcement.id ? { ...a, isRead: true } : a
-            ));
-        }
-
-        setSelectedAnnouncement(announcement);
-        setIsDialogOpen(true);
-    };
+    const {
+        searchQuery,
+        setSearchQuery,
+        categoryFilter,
+        setCategoryFilter,
+        currentPage,
+        setCurrentPage,
+        selectedAnnouncement,
+        isDialogOpen,
+        setIsDialogOpen,
+        sortedAnnouncements,
+        paginatedAnnouncements,
+        totalPages,
+        startIndex,
+        endIndex,
+        unreadCount,
+        handleViewDetail,
+    } = useStudentAnnouncements();
 
     return (
         <div className="space-y-6">
@@ -349,75 +239,18 @@ export const StudentAnnouncements: React.FC = () => {
 
                         {/* Pagination Controls */}
                         {totalPages > 1 && (
-                            <div className="flex items-center justify-between pt-4">
-                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                    <span>Menampilkan</span>
-                                    <span className="font-medium text-foreground">
-                                        {startIndex + 1}
-                                    </span>
-                                    <span>-</span>
-                                    <span className="font-medium text-foreground">
-                                        {Math.min(endIndex, sortedAnnouncements.length)}
-                                    </span>
-                                    <span>dari</span>
-                                    <span className="font-medium text-foreground">
-                                        {sortedAnnouncements.length}
-                                    </span>
-                                    <span>pengumuman</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground mr-2">
-                                        Hal {currentPage}/{totalPages}
-                                    </span>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                        disabled={currentPage === 1}
-                                        className="h-8 w-8 p-0"
-                                    >
-                                        <ChevronLeft className="h-4 w-4" />
-                                    </Button>
-                                    <div className="flex items-center space-x-1">
-                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                            let pageNumber;
-                                            if (totalPages <= 5) {
-                                                pageNumber = i + 1;
-                                            } else if (currentPage <= 3) {
-                                                pageNumber = i + 1;
-                                            } else if (currentPage >= totalPages - 2) {
-                                                pageNumber = totalPages - 4 + i;
-                                            } else {
-                                                pageNumber = currentPage - 2 + i;
-                                            }
-
-                                            return (
-                                                <Button
-                                                    key={pageNumber}
-                                                    variant={currentPage === pageNumber ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => setCurrentPage(pageNumber)}
-                                                    className={cn(
-                                                        "w-8 h-8 p-0",
-                                                        currentPage === pageNumber && "bg-blue-800 hover:bg-blue-900 text-white"
-                                                    )}
-                                                >
-                                                    {pageNumber}
-                                                </Button>
-                                            );
-                                        })}
-                                    </div>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                        disabled={currentPage === totalPages}
-                                        className="h-8 w-8 p-0"
-                                    >
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
+                            <PaginationControls
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                totalItems={sortedAnnouncements.length}
+                                startIndex={startIndex + 1}
+                                endIndex={Math.min(endIndex, sortedAnnouncements.length)}
+                                itemsPerPage={ITEMS_PER_PAGE}
+                                itemLabel="pengumuman"
+                                onPageChange={setCurrentPage}
+                                onItemsPerPageChange={() => {}}
+                                itemsPerPageOptions={[5]}
+                            />
                         )}
                     </>
                 )}

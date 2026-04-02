@@ -17,7 +17,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
     Calendar,
     AlertTriangle,
@@ -28,18 +27,14 @@ import {
     ClipboardList,
     Building,
     Home,
-    AlertCircle,
     CheckCircle,
     Users,
     Loader2,
-    RefreshCw,
     RotateCcw,
     Check,
     ChevronLeft,
     ChevronRight,
     Filter,
-    SlidersHorizontal,
-    X
 } from "lucide-react";
 import {
     Dialog,
@@ -52,111 +47,36 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useParentBehavior } from "../hooks/useParentBehavior";
+import {
+    PageHeader,
+    ErrorState,
+    LoadingOverlay,
+    StatCard,
+    ActiveFilterBadges,
+    ChildSelector,
+    FilterButton,
+    PaginationControls,
+    SkeletonPageHeader,
+    SkeletonStatCard,
+    SkeletonListItem,
+} from "@/features/shared/components";
 
 // Skeleton Loading Component
-const ParentBehaviorSkeleton: React.FC = () => {
-    return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Header Skeleton */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                        <Skeleton className="h-10 w-72" />
-                        <Skeleton className="h-8 w-8 rounded-full" />
-                    </div>
-                    <Skeleton className="h-4 w-56" />
-                </div>
-            </div>
-
-            {/* Stats Cards Skeleton */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="group relative overflow-hidden rounded-xl bg-white shadow-sm">
-                        <div className="px-5 py-4 pl-6 flex items-center gap-4">
-                            <div className="relative flex-shrink-0">
-                                <Skeleton className="w-11 h-11 rounded-xl" />
-                            </div>
-                            <div className="min-w-0 flex-1 space-y-2">
-                                <Skeleton className="h-3 w-24" />
-                                <div className="flex items-baseline gap-2">
-                                    <Skeleton className="h-7 w-12" />
-                                    <Skeleton className="h-4 w-16" />
-                                </div>
-                                <Skeleton className="h-3 w-28" />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* List Skeleton */}
-            <Card>
-                <CardHeader>
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <Skeleton className="h-10 w-10 rounded-lg" />
-                            <div className="space-y-2">
-                                <Skeleton className="h-5 w-40" />
-                                <Skeleton className="h-4 w-56" />
-                            </div>
-                        </div>
-                        <Skeleton className="h-9 w-[130px]" />
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="rounded-xl border bg-card p-4 space-y-3">
-                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                    <Skeleton className="h-5 w-20 rounded-full" />
-                                    <div className="flex items-center gap-3">
-                                        <Skeleton className="h-4 w-28" />
-                                        <Skeleton className="h-4 w-16" />
-                                    </div>
-                                </div>
-                                <Skeleton className="h-5 w-full max-w-md" />
-                                <Skeleton className="h-16 w-full rounded-lg" />
-                                <Skeleton className="h-4 w-48 mt-2" />
-                            </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-    );
-};
-
-// Error State Component
-const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
+const ParentBehaviorSkeleton: React.FC = () => (
     <div className="space-y-6 animate-in fade-in duration-500">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Catatan </span>
-                        <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Perilaku Anak</span>
-                    </h1>
-                    <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                        <ClipboardList className="h-5 w-5" />
-                    </div>
-                </div>
-            </div>
+        <SkeletonPageHeader />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => <SkeletonStatCard key={i} />)}
         </div>
-        <Card className="border-red-200 shadow-sm mt-6">
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="p-4 bg-red-100 rounded-full mb-4">
-                    <AlertTriangle className="h-8 w-8 text-red-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Gagal Memuat Data</h3>
-                <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
-                <Button onClick={onRetry} variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50">
-                    <RefreshCw className="h-4 w-4" />
-                    Coba Lagi
-                </Button>
+        <Card>
+            <CardContent className="p-4 space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => <SkeletonListItem key={i} />)}
             </CardContent>
         </Card>
     </div>
 );
+
+// Error state dan stats cards menggunakan shared components
 
 export const ParentBehavior: React.FC = () => {
     const {
@@ -199,211 +119,73 @@ export const ParentBehavior: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Catatan </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Perilaku Anak</span>
-                        </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <ClipboardList className="h-5 w-5" />
-                        </div>
-                    </div>
-                    <p className="text-muted-foreground mt-1">
-                        Catatan perilaku dan pelanggaran anak selama di sekolah dan asrama
-                    </p>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 no-print w-full lg:w-auto mt-4 lg:mt-0 flex-wrap lg:flex-nowrap justify-end">
-                    {/* Filter Modal */}
-                    <Dialog open={isFilterOpen} onOpenChange={(open) => {
-                        if (open) {
-                            setTempAcademicYear(selectedAcademicYear);
-                        }
-                        setIsFilterOpen(open);
-                    }}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" className="h-9 gap-2 bg-white text-slate-700 border-slate-200 shadow-sm font-medium">
-                                <Filter className="h-4 w-4 text-slate-500" />
-                                <span className="hidden sm:inline">Filter</span>
-                                {selectedAcademicYear !== "all" && (
-                                    <Badge className="ml-0.5 h-5 w-5 min-w-[20px] px-0 bg-blue-800 text-white text-[10px] flex items-center justify-center border-0 rounded-full">
-                                        1
-                                    </Badge>
-                                )}
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px] rounded-2xl">
-                            <DialogHeader className="flex-row items-center gap-4">
-                                <div className="p-2.5 bg-blue-100 rounded-xl">
-                                    <Filter className="h-5 w-5 text-blue-700" />
-                                </div>
-                                <div>
-                                    <DialogTitle className="text-lg font-semibold text-slate-900">Filter Perilaku</DialogTitle>
-                                    <DialogDescription className="text-slate-500">
-                                        Sesuaikan tahun ajaran catatan perilaku
-                                    </DialogDescription>
-                                </div>
-                            </DialogHeader>
-                            
-                            <div className="grid gap-4 py-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-slate-400" />
-                                        Tahun Ajaran
-                                    </label>
-                                    <Select value={tempAcademicYear} onValueChange={setTempAcademicYear}>
-                                        <SelectTrigger className="w-full bg-slate-50/50 border-slate-200">
-                                            <SelectValue placeholder="Pilih Tahun" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">Semua Tahun</SelectItem>
-                                            {academicYears.map(year => (
-                                                <SelectItem key={year} value={year}>TA. {year}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+            <PageHeader
+                title="Catatan"
+                titleHighlight="Perilaku Anak"
+                icon={ClipboardList}
+                description="Catatan perilaku dan pelanggaran anak selama di sekolah dan asrama"
+            >
+                <Dialog open={isFilterOpen} onOpenChange={(open) => {
+                    if (open) setTempAcademicYear(selectedAcademicYear);
+                    setIsFilterOpen(open);
+                }}>
+                    <DialogTrigger asChild>
+                        <FilterButton activeCount={selectedAcademicYear !== "all" ? 1 : 0} />
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px] rounded-2xl">
+                        <DialogHeader className="flex-row items-center gap-4">
+                            <div className="p-2.5 bg-blue-100 rounded-xl"><Filter className="h-5 w-5 text-blue-700" /></div>
+                            <div>
+                                <DialogTitle className="text-lg font-semibold text-slate-900">Filter Perilaku</DialogTitle>
+                                <DialogDescription className="text-slate-500">Sesuaikan tahun ajaran catatan perilaku</DialogDescription>
                             </div>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                    <Calendar className="h-4 w-4 text-slate-400" />Tahun Ajaran
+                                </label>
+                                <Select value={tempAcademicYear} onValueChange={setTempAcademicYear}>
+                                    <SelectTrigger className="w-full bg-slate-50/50 border-slate-200"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Semua Tahun</SelectItem>
+                                        {academicYears.map(year => <SelectItem key={year} value={year}>TA. {year}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <DialogFooter className="sm:justify-between gap-2 border-t pt-4">
+                            <Button variant="ghost" onClick={() => setTempAcademicYear("all")} className="text-slate-500 hover:text-red-500 hover:bg-red-50 gap-2">
+                                <RotateCcw className="h-4 w-4" />Reset Pilihan
+                            </Button>
+                            <Button className="bg-blue-800 hover:bg-blue-900 text-white px-8 gap-2" onClick={() => { handleAcademicYearChange(tempAcademicYear); setIsFilterOpen(false); }}>
+                                <Check className="h-4 w-4" />Terapkan
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+                <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+            </PageHeader>
 
-                            <DialogFooter className="sm:justify-between gap-2 border-t pt-4">
-                                <Button 
-                                    variant="ghost" 
-                                    onClick={() => setTempAcademicYear("all")}
-                                    className="text-slate-500 hover:text-red-500 hover:bg-red-50 gap-2"
-                                >
-                                    <RotateCcw className="h-4 w-4" />
-                                    Reset Pilihan
-                                </Button>
-                                <Button 
-                                    className="bg-blue-800 hover:bg-blue-900 text-white px-8 gap-2"
-                                    onClick={() => {
-                                        handleAcademicYearChange(tempAcademicYear);
-                                        setIsFilterOpen(false);
-                                    }}
-                                >
-                                    <CheckCircle className="h-4 w-4" />
-                                    Terapkan
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-
-                    {/* Child Selector */}
-                    {children.length > 1 && (
-                        <Select value={selectedChildId} onValueChange={setSelectedChildId}>
-                            <SelectTrigger className="w-full sm:w-[220px] h-9 bg-white shadow-sm border-slate-200">
-                                <Users className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
-                                <div className="flex-1 text-left truncate">
-                                    <SelectValue placeholder="Pilih Anak" />
-                                </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {children.map(child => (
-                                    <SelectItem key={child.id} value={child.id}>
-                                        {child.name} — {child.class}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                </div>
-            </div>
-
-            {/* Active Global Filters */}
-            {selectedAcademicYear !== "all" && (
-                <div className="flex flex-wrap items-center gap-2 px-1 no-print">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-                        <SlidersHorizontal className="h-3 w-3" />
-                        <span>Filter Aktif:</span>
-                    </div>
-                    
-                    <Badge variant="secondary" className="gap-2 bg-blue-800 text-white border-none px-3 py-1 rounded-lg text-xs font-medium">
-                        <Calendar className="h-3.5 w-3.5" />
-                        TA. {selectedAcademicYear}
-                        <button
-                            onClick={() => handleAcademicYearChange("all")}
-                            className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                        >
-                            <X className="h-3.5 w-3.5" />
-                        </button>
-                    </Badge>
-                </div>
-            )}
+            <ActiveFilterBadges
+                badges={selectedAcademicYear !== "all" ? [{
+                    key: "year",
+                    label: `TA. ${selectedAcademicYear}`,
+                    icon: Calendar,
+                    onRemove: () => handleAcademicYearChange("all"),
+                }] : []}
+            />
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Total Pelanggaran */}
-                <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="px-5 py-4 pl-6 flex items-center gap-4">
-                        <div className="relative flex-shrink-0">
-                            <div className="w-11 h-11 rounded-xl bg-red-100/80 flex items-center justify-center ring-2 ring-red-200/50 transition-transform duration-300 group-hover:scale-105">
-                                <AlertTriangle className="h-5 w-5 text-red-600" />
-                            </div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Total Pelanggaran</p>
-                            <div className="flex items-baseline gap-2 mt-0.5">
-                                <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">{stats.totalViolations}</p>
-                                <p className="text-xs text-muted-foreground font-medium">catatan</p>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground mt-1">Sepanjang waktu</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Di Sekolah */}
-                <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="px-5 py-4 pl-6 flex items-center gap-4">
-                        <div className="relative flex-shrink-0">
-                            <div className="w-11 h-11 rounded-xl bg-blue-100/80 flex items-center justify-center ring-2 ring-blue-200/50 transition-transform duration-300 group-hover:scale-105">
-                                <Building className="h-5 w-5 text-blue-600" />
-                            </div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Di Sekolah</p>
-                            <div className="flex items-baseline gap-2 mt-0.5">
-                                <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">{stats.schoolViolations}</p>
-                                <p className="text-xs text-muted-foreground font-medium">catatan</p>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground mt-1">Pelanggaran di sekolah</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Di Asrama */}
-                <div className="group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="px-5 py-4 pl-6 flex items-center gap-4">
-                        <div className="relative flex-shrink-0">
-                            <div className="w-11 h-11 rounded-xl bg-amber-100/80 flex items-center justify-center ring-2 ring-amber-200/50 transition-transform duration-300 group-hover:scale-105">
-                                <Home className="h-5 w-5 text-amber-600" />
-                            </div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Di Asrama</p>
-                            <div className="flex items-baseline gap-2 mt-0.5">
-                                <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">{stats.dormViolations}</p>
-                                <p className="text-xs text-muted-foreground font-medium">catatan</p>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground mt-1">Pelanggaran di asrama</p>
-                        </div>
-                    </div>
-                </div>
+                <StatCard title="Total Pelanggaran" value={stats.totalViolations} unit="catatan" subtitle="Sepanjang waktu" icon={AlertTriangle} color="red" />
+                <StatCard title="Di Sekolah" value={stats.schoolViolations} unit="catatan" subtitle="Pelanggaran di sekolah" icon={Building} color="blue" />
+                <StatCard title="Di Asrama" value={stats.dormViolations} unit="catatan" subtitle="Pelanggaran di asrama" icon={Home} color="amber" />
             </div>
 
             {/* Record List */}
             <Card className="relative">
-                {/* Fetching overlay */}
-                {isFetching && (
-                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-30 flex items-center justify-center rounded-xl">
-                        <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-lg rounded-xl px-5 py-3">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                            <span className="text-sm font-medium text-slate-600">Memuat data...</span>
-                        </div>
-                    </div>
-                )}
+                {isFetching && <LoadingOverlay />}
                 <CardHeader className="pb-1">
                     {/* Row 1: Title & Stats */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -552,99 +334,16 @@ export const ParentBehavior: React.FC = () => {
 
                     {/* Footer with Pagination */}
                     {showPagination && (
-                        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 mt-6 pt-4 border-t border-slate-100">
-                            {/* Left: Pagination Info */}
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground w-full lg:w-auto justify-center lg:justify-start">
-                                <span>Menampilkan</span>
-                                <span className="font-medium text-foreground">
-                                    {startIndexDisplay}
-                                </span>
-                                <span>-</span>
-                                <span className="font-medium text-foreground">
-                                    {endIndexDisplay}
-                                </span>
-                                <span>dari</span>
-                                <span className="font-medium text-foreground">{allFilteredCount}</span>
-                                <span>entri</span>
-                            </div>
-
-                            {/* Right: Pagination Controls */}
-                            <div className="flex items-center gap-3 w-full lg:w-auto justify-center lg:justify-end">
-                                {/* Items per page */}
-                                <Select value={itemsPerPage.toString()} onValueChange={(val) => {
-                                    setItemsPerPage(Number(val));
-                                    setCurrentPage(1);
-                                }}>
-                                    <SelectTrigger className="w-[100px] h-8">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="5">5 / hal</SelectItem>
-                                        <SelectItem value="10">10 / hal</SelectItem>
-                                        <SelectItem value="20">20 / hal</SelectItem>
-                                        <SelectItem value="50">50 / hal</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                {/* Page info */}
-                                <span className="text-sm text-muted-foreground">
-                                    Hal {currentPage}/{totalPages}
-                                </span>
-
-                                {/* Previous button */}
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                    disabled={currentPage === 1}
-                                    className="h-8 w-8 p-0 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </button>
-
-                                {/* Page number buttons */}
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                        const pageNumber = i + 1;
-                                        return (
-                                            <button
-                                                key={pageNumber}
-                                                onClick={() => setCurrentPage(pageNumber)}
-                                                className={cn(
-                                                    "w-8 h-8 p-0 rounded-lg font-medium text-sm transition-colors flex items-center justify-center",
-                                                    currentPage === pageNumber
-                                                        ? "bg-blue-800 text-white"
-                                                        : "border border-slate-300 bg-white text-slate-600 hover:bg-slate-100"
-                                                )}
-                                            >
-                                                {pageNumber}
-                                            </button>
-                                        );
-                                    })}
-                                    {totalPages > 5 && (
-                                        <>
-                                            <span className="text-sm text-muted-foreground px-1">...</span>
-                                            <button
-                                                onClick={() => setCurrentPage(totalPages)}
-                                                className={cn(
-                                                    "w-8 h-8 p-0 rounded-lg font-medium text-sm transition-colors flex items-center justify-center border border-slate-300 bg-white text-slate-600 hover:bg-slate-100",
-                                                    currentPage === totalPages && "bg-blue-800 text-white"
-                                                )}
-                                            >
-                                                {totalPages}
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-
-                                {/* Next button */}
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="h-8 w-8 p-0 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </button>
-                            </div>
-                        </div>
+                        <PaginationControls
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={allFilteredCount}
+                            startIndex={startIndexDisplay}
+                            endIndex={endIndexDisplay}
+                            itemsPerPage={itemsPerPage}
+                            onPageChange={setCurrentPage}
+                            onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+                        />
                     )}
                 </CardContent>
             </Card>

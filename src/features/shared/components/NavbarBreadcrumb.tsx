@@ -88,17 +88,28 @@ const routeConfig: Record<string, RouteItem> = {
     'parent:extracurricular': { label: 'Ekstrakurikuler', icon: Trophy },
 
     // ── ROLE STUDENT ──────────────────────────────────────────────────────────
+    // Student category groups (non-clickable)
+    'student:academic': { label: 'Akademik', icon: GraduationCap, isClickable: false },
+    'student:attendance': { label: 'Kehadiran', icon: ClipboardList, isClickable: false },
+
+    // Student pages
     'student:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
     'student:kartu-pelajar': { label: 'Kartu Pelajar', icon: CreditCard },
     'student:data-diri': { label: 'Data Diri', icon: User },
     'student:grades': { label: 'Nilai & Rapor', icon: GraduationCap },
-    'student:attendance': { label: 'Kehadiran', icon: ClipboardList },
     'student:schedule': { label: 'Jadwal Pelajaran', icon: Calendar },
     'student:announcements': { label: 'Pengumuman', icon: Bell },
     'student:achievements': { label: 'Prestasi', icon: Trophy },
     'student:behavior': { label: 'Catatan Perilaku', icon: Activity },
     'student:extracurricular': { label: 'Ekstrakurikuler', icon: Users },
     'student:profile': { label: 'Profil Saya', icon: User },
+    'student:edit': { label: 'Edit Profil', icon: Pencil },
+
+    // Student attendance sub-pages
+    'student:morning': { label: 'Keterlambatan Pagi', icon: Clock },
+    'student:daily': { label: 'Presensi Harian', icon: ClipboardList },
+    'student:subject': { label: 'Presensi Mapel', icon: BookOpen },
+    'student:prayer': { label: 'Presensi Sholat', icon: Activity },
 
     // ── ROLE TEACHER ──────────────────────────────────────────────────────────
     'teacher:dashboard': { label: 'Dashboard', icon: LayoutDashboard },
