@@ -58,8 +58,9 @@ export const JournalReportPreview: React.FC<JournalReportPreviewProps> = ({
                 <div className="flex items-center gap-4">
                     <Button
                         size="icon"
+                        variant="outline"
                         onClick={onClose}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm h-8 w-8 rounded-full p-0"
+                        className="h-8 w-8 rounded-full p-0"
                     >
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
@@ -75,7 +76,7 @@ export const JournalReportPreview: React.FC<JournalReportPreviewProps> = ({
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button onClick={handlePrint} className="gap-2 shadow-sm">
+                    <Button onClick={handlePrint} className="gap-2 bg-blue-800 hover:bg-blue-900 text-white">
                         <Printer className="h-4 w-4" />
                         Cetak / Simpan PDF
                     </Button>

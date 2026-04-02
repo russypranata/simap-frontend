@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
 import { generateRecordKey } from '../../utils/attendanceStorage';
 import { AttendanceRecord } from '../../types/teacher';
@@ -18,7 +19,6 @@ import {
   Eye,
   Search,
   Filter,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -28,8 +28,10 @@ import {
   Trash2,
   ArrowDownUp
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { ConfirmationModal } from './ConfirmationModal';
 import { ACADEMIC_YEARS, SEMESTERS } from '../../constants/attendance';
+import { PaginationControls } from '@/features/shared/components';
 
 interface HistorySectionProps {
   // Filter controls
@@ -245,169 +247,91 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
             {/* Row 1: Academic Year and Semester */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Tahun Ajaran</label>
-                <div className="relative">
-                  <select
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                    value={academicYear}
-                    onChange={(e) => setAcademicYear(e.target.value)}
-                  >
-                    {ACADEMIC_YEARS.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <Label className="text-sm font-medium">Tahun Ajaran</Label>
+                <Select value={academicYear} onValueChange={setAcademicYear}>
+                  <SelectTrigger className="bg-white border-slate-200 shadow-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ACADEMIC_YEARS.map((year) => <SelectItem key={year} value={year}>{year}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
-
               <div className="space-y-2">
-                <label className="text-sm font-medium">Semester</label>
-                <div className="relative">
-                  <select
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                    value={semester}
-                    onChange={(e) => setSemester(e.target.value)}
-                  >
-                    <option value="">Semua Semester</option>
-                    {SEMESTERS.map((sem) => (
-                      <option key={sem} value={sem}>
-                        {sem}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <Label className="text-sm font-medium">Semester</Label>
+                <Select value={semester || 'all'} onValueChange={(v) => setSemester(v === 'all' ? '' : v)}>
+                  <SelectTrigger className="bg-white border-slate-200 shadow-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Semester</SelectItem>
+                    {SEMESTERS.map((sem) => <SelectItem key={sem} value={sem}>{sem}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             {/* Row 2: Class, Subject, Status, Search */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Kelas</label>
-                <div className="relative">
-                  <select
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                    value={selectedClass}
-                    onChange={(e) => setSelectedClass(e.target.value)}
-                  >
-                    <option value="">Semua Kelas</option>
-                    {classes.map((c) => (
-                      <option key={c.id} value={c.name}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <Label className="text-sm font-medium">Kelas</Label>
+                <Select value={selectedClass || 'all'} onValueChange={(v) => setSelectedClass(v === 'all' ? '' : v)}>
+                  <SelectTrigger className="bg-white border-slate-200 shadow-sm"><SelectValue placeholder="Semua Kelas" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Kelas</SelectItem>
+                    {classes.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
-
               <div className="space-y-2">
-                <label className="text-sm font-medium">Mata Pelajaran</label>
-                <div className="relative">
-                  <select
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                    value={selectedSubject}
-                    onChange={(e) => setSelectedSubject(e.target.value)}
-                  >
-                    <option value="">Semua Mata Pelajaran</option>
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <Label className="text-sm font-medium">Mata Pelajaran</Label>
+                <Select value={selectedSubject || 'all'} onValueChange={(v) => setSelectedSubject(v === 'all' ? '' : v)}>
+                  <SelectTrigger className="bg-white border-slate-200 shadow-sm"><SelectValue placeholder="Semua Mapel" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Mata Pelajaran</SelectItem>
+                    {subjects.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
-
               <div className="space-y-2">
-                <label className="text-sm font-medium">Status</label>
-                <div className="relative">
-                  <select
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                  >
-                    {ATTENDANCE_STATUS_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <Label className="text-sm font-medium">Status</Label>
+                <Select value={selectedStatus || 'all'} onValueChange={(v) => setSelectedStatus(v === 'all' ? '' : v)}>
+                  <SelectTrigger className="bg-white border-slate-200 shadow-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ATTENDANCE_STATUS_OPTIONS.map((opt) => <SelectItem key={opt.value || 'all'} value={opt.value || 'all'}>{opt.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
-
               <div className="space-y-2">
-                <label className="text-sm font-medium">Cari</label>
+                <Label className="text-sm font-medium">Cari</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    placeholder="Nama siswa..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                  />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Nama siswa..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
                 </div>
               </div>
             </div>
 
             {/* Row 3: Date Filters */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Quick Filters */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Filter Cepat</Label>
-                <div className="flex items-center gap-2 h-10">
-                  <Button
-                    variant={activeDateFilter === 'today' ? 'default' : 'outline'}
-                    size="sm"
-                    className="h-9 text-xs flex-1"
-                    onClick={setToday}
-                  >
-                    Hari Ini
-                  </Button>
-                  <Button
-                    variant={activeDateFilter === 'week' ? 'default' : 'outline'}
-                    size="sm"
-                    className="h-9 text-xs flex-1"
-                    onClick={setThisWeek}
-                  >
-                    Minggu Ini
-                  </Button>
-                  <Button
-                    variant={activeDateFilter === 'month' ? 'default' : 'outline'}
-                    size="sm"
-                    className="h-9 text-xs flex-1"
-                    onClick={setThisMonth}
-                  >
-                    Bulan Ini
-                  </Button>
+                <div className="flex items-center bg-muted/50 p-1 rounded-lg border border-border/50">
+                  {([
+                    { key: 'today' as const, label: 'Hari Ini', fn: setToday },
+                    { key: 'week' as const, label: 'Minggu Ini', fn: setThisWeek },
+                    { key: 'month' as const, label: 'Bulan Ini', fn: setThisMonth },
+                  ]).map(({ key, label, fn }, i) => (
+                    <React.Fragment key={key}>
+                      {i > 0 && <div className="w-px h-4 bg-border/50 mx-1" />}
+                      <button onClick={fn} className={cn(
+                        "px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 flex-1",
+                        activeDateFilter === key ? "bg-blue-800 text-white shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      )}>{label}</button>
+                    </React.Fragment>
+                  ))}
                 </div>
               </div>
-
-              {/* Date Range Inputs */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Rentang Tanggal</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={dateRange.from}
-                      onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={dateRange.to}
-                      onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                  </div>
+                  <Input type="date" value={dateRange.from} onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })} className="bg-white border-slate-200" />
+                  <Input type="date" value={dateRange.to} onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })} className="bg-white border-slate-200" />
                 </div>
               </div>
             </div>
@@ -515,29 +439,17 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
                               {formatDate(record.date, 'dd MMM yyyy')}
                             </p>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              size="sm"
-                              onClick={() => onViewDetails(record)}
-                              title="Lihat Detail"
-                              className="bg-green-500 hover:bg-green-600 text-white border-0"
-                            >
+                          <div className="flex items-center gap-1">
+                            <Button size="sm" variant="ghost" onClick={() => onViewDetails(record)}
+                              className="h-8 w-8 p-0 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg">
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => onEditRecord(record)}
-                              title="Edit Presensi"
-                              className="bg-blue-500 hover:bg-blue-600 text-white border-0"
-                            >
+                            <Button size="sm" variant="ghost" onClick={() => onEditRecord(record)}
+                              className="h-8 w-8 p-0 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg">
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => handleDeleteClick(record)}
-                              title="Hapus Presensi"
-                              className="bg-red-500 hover:bg-red-600 text-white border-0"
-                            >
+                            <Button size="sm" variant="ghost" onClick={() => handleDeleteClick(record)}
+                              className="h-8 w-8 p-0 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -545,79 +457,19 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
                       </div>
                     ))}
 
-                    {/* Datatable-style Pagination */}
+                    {/* Pagination */}
                     {totalPages > 1 && (
-                      <div className="flex items-center justify-between pt-4 border-t">
-                        <div className="flex items-center gap-4">
-                          <div className="text-sm text-muted-foreground">
-                            Menampilkan {totalRecordsCount > 0 ? startIndex : 0} sampai {endIndex} dari {totalRecordsCount} data
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">Baris:</span>
-                            <select
-                              className="h-8 w-16 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                              value={itemsPerPage}
-                              onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => goToPage(1)}
-                            disabled={currentPage === 1}
-                          >
-                            <ChevronsLeft className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={previousPage}
-                            disabled={currentPage === 1}
-                          >
-                            <ChevronLeft className="h-4 w-4" />
-                          </Button>
-
-                          {getPageNumbers().map((page, index) => (
-                            page === '...' ? (
-                              <span key={`ellipsis-${index}`} className="px-2">...</span>
-                            ) : (
-                              <Button
-                                key={page}
-                                variant={currentPage === page ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => goToPage(page as number)}
-                                className="min-w-[40px]"
-                              >
-                                {page}
-                              </Button>
-                            )
-                          ))}
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={nextPage}
-                            disabled={currentPage === totalPages}
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => goToPage(totalPages)}
-                            disabled={currentPage === totalPages}
-                          >
-                            <ChevronsRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
+                      <PaginationControls
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={totalRecordsCount}
+                        startIndex={totalRecordsCount > 0 ? startIndex : 0}
+                        endIndex={endIndex}
+                        itemsPerPage={itemsPerPage}
+                        itemLabel="data"
+                        onPageChange={goToPage}
+                        onItemsPerPageChange={setItemsPerPage}
+                      />
                     )}
                   </>
                 ) : (

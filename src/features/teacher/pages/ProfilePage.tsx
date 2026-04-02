@@ -5,17 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { ProfileCard } from '../components/profile';
 import { useProfileData } from '../hooks/useProfileData';
-import {
-    User,
-    ArrowLeft,
-    Users,
-    GraduationCap,
-    Clock,
-    Calendar,
-    Home
-} from 'lucide-react';
-
+import { User, Users, GraduationCap, Clock, Home } from 'lucide-react';
 import { ProfileSkeleton } from '../components/profile';
+import { PageHeader } from '@/features/shared/components';
 
 export const ProfilePage: React.FC = () => {
     const { profileData, isFetching } = useProfileData();
@@ -31,25 +23,12 @@ export const ProfilePage: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                        Profil <span className="text-primary">Saya</span>
-                    </h1>
-                    <p className="text-muted-foreground">
-                        Kelola informasi profil dan pengaturan akun Anda
-                    </p>
-                    <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                title="Profil"
+                titleHighlight="Saya"
+                icon={User}
+                description="Kelola informasi profil dan pengaturan akun Anda"
+            />
 
             {/* Profile Content */}
             <ProfileCard

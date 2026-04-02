@@ -115,6 +115,7 @@ interface JournalFormProps {
   teachingMethods: string[];
   mediaOptions: string[];
   isSaving: boolean;
+  mode?: 'create' | 'edit';
   onSave: (data: JournalFormData) => void;
   onCancel: () => void;
 }
@@ -126,6 +127,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
   teachingMethods,
   mediaOptions,
   isSaving,
+  mode = 'create',
   onSave,
   onCancel,
 }) => {
@@ -260,7 +262,6 @@ export const JournalForm: React.FC<JournalFormProps> = ({
   return (
     <div className="space-y-6">
       {/* Basic Information */}
-
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="space-y-2">
           <Label htmlFor="date" className="flex items-center gap-2">
@@ -282,7 +283,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             Kelas *
           </Label>
           <Select value={formData.class} onValueChange={(value) => handleInputChange('class', value)}>
-            <SelectTrigger>
+            <SelectTrigger className="bg-white border-slate-200 shadow-sm">
               <SelectValue placeholder="Pilih kelas" />
             </SelectTrigger>
             <SelectContent>
@@ -301,7 +302,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             Mata Pelajaran *
           </Label>
           <Select value={formData.subject} onValueChange={(value) => handleInputChange('subject', value)}>
-            <SelectTrigger>
+            <SelectTrigger className="bg-white border-slate-200 shadow-sm">
               <SelectValue placeholder="Pilih mata pelajaran" />
             </SelectTrigger>
             <SelectContent>
@@ -324,7 +325,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
             value={formData.lessonHour}
             onValueChange={(value) => handleInputChange('lessonHour', value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white border-slate-200 shadow-sm">
               <SelectValue placeholder="Pilih jam pelajaran" />
             </SelectTrigger>
             <SelectContent>
@@ -474,7 +475,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
           </Label>
           <div className="flex gap-2">
             <Select onValueChange={handleTeachingMethodChange}>
-              <SelectTrigger className="flex-1">
+              <SelectTrigger className="flex-1 bg-white border-slate-200 shadow-sm">
                 <SelectValue placeholder="Pilih metode mengajar" />
               </SelectTrigger>
               <SelectContent>
@@ -495,7 +496,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
                 type="button"
                 size="icon"
                 onClick={() => setShowCustomMethodInput(true)}
-                className="shrink-0 bg-primary hover:bg-primary/90 text-white"
+                className="shrink-0 bg-blue-800 hover:bg-blue-900 text-white"
                 title="Tambah metode kustom"
               >
                 <Plus className="h-4 w-4" />
@@ -512,22 +513,10 @@ export const JournalForm: React.FC<JournalFormProps> = ({
                 onChange={(e) => setCustomMethod(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomMethod())}
               />
-              <Button
-                type="button"
-                size="sm"
-                onClick={addCustomMethod}
-              >
+              <Button type="button" size="sm" onClick={addCustomMethod} className="bg-blue-800 hover:bg-blue-900 text-white">
                 <Plus className="h-4 w-4" />
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setShowCustomMethodInput(false);
-                  setCustomMethod('');
-                }}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => { setShowCustomMethodInput(false); setCustomMethod(''); }}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -559,7 +548,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
           </Label>
           <div className="flex gap-2">
             <Select onValueChange={handleMediaChange}>
-              <SelectTrigger className="flex-1">
+              <SelectTrigger className="flex-1 bg-white border-slate-200 shadow-sm">
                 <SelectValue placeholder="Pilih media pembelajaran" />
               </SelectTrigger>
               <SelectContent>
@@ -580,7 +569,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
                 type="button"
                 size="icon"
                 onClick={() => setShowCustomMediaInput(true)}
-                className="shrink-0 bg-primary hover:bg-primary/90 text-white"
+                className="shrink-0 bg-blue-800 hover:bg-blue-900 text-white"
                 title="Tambah media kustom"
               >
                 <Plus className="h-4 w-4" />
@@ -597,22 +586,10 @@ export const JournalForm: React.FC<JournalFormProps> = ({
                 onChange={(e) => setCustomMedia(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomMedia())}
               />
-              <Button
-                type="button"
-                size="sm"
-                onClick={addCustomMedia}
-              >
+              <Button type="button" size="sm" onClick={addCustomMedia} className="bg-blue-800 hover:bg-blue-900 text-white">
                 <Plus className="h-4 w-4" />
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setShowCustomMediaInput(false);
-                  setCustomMedia('');
-                }}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => { setShowCustomMediaInput(false); setCustomMedia(''); }}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -737,7 +714,7 @@ export const JournalForm: React.FC<JournalFormProps> = ({
         <Button variant="outline" onClick={onCancel}>
           Batal
         </Button>
-        <Button onClick={handleSubmit} disabled={isSaving}>
+        <Button onClick={handleSubmit} disabled={isSaving} className="bg-blue-800 hover:bg-blue-900 text-white">
           {isSaving ? (
             <div className="flex items-center space-x-2">
               <RefreshCw className="h-4 w-4 animate-spin" />

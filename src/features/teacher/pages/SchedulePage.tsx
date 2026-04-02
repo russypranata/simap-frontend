@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTeacherData } from '@/features/teacher/hooks/useTeacherData';
 import {
-  ScheduleStatsCards,
   ScheduleFilterSection,
   WeeklyScheduleGrid,
   DailyScheduleCalendar,
@@ -25,6 +24,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard } from '@/features/shared/components';
 
 // Mock subjects for filtering
 const SUBJECTS = [
@@ -127,82 +127,41 @@ export const SchedulePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        {/* Header Skeleton */}
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/3 mb-2"></div>
-          <div className="h-4 bg-muted rounded w-1/2"></div>
+      <div className="space-y-6 animate-in fade-in duration-500">
+        <SkeletonPageHeader withAction />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
         </div>
-
-        {/* Stats Cards Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-4">
-                <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
-                <div className="h-3 bg-muted rounded w-full"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Schedule Grid Skeleton */}
-        <Card className="animate-pulse">
-          <CardContent className="p-6">
-            <div className="space-y-3">
-              <div className="h-6 bg-muted rounded w-1/4"></div>
-              <div className="h-64 bg-muted rounded"></div>
-            </div>
-          </CardContent>
-        </Card>
+        <Card><CardContent className="p-6"><div className="h-64 bg-slate-100 rounded animate-pulse" /></CardContent></Card>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">
-            Jadwal <span className="text-primary">Mengajar</span>
-          </h1>
-          <p className="text-muted-foreground">
-            Kelola dan pantau jadwal mengajar Anda dengan mudah
-          </p>
-          <div className="flex items-center gap-3 mt-4">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-              <Calendar className="h-4 w-4" />
-              <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
-            </div>
-            <div className="h-4 w-[1px] bg-border" />
-            <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            className="flex items-center space-x-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            <span>Refresh</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={handlePrint}
-            className="flex items-center space-x-2"
-          >
-            <Printer className="h-4 w-4" />
-            <span>Cetak</span>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Jadwal"
+        titleHighlight="Mengajar"
+        icon={Calendar}
+        description="Kelola dan pantau jadwal mengajar Anda dengan mudah"
+      >
+        <Button variant="outline" onClick={handleRefresh} className="flex items-center space-x-2">
+          <RefreshCw className="h-4 w-4" />
+          <span>Refresh</span>
+        </Button>
+        <Button variant="outline" onClick={handlePrint} className="flex items-center space-x-2">
+          <Printer className="h-4 w-4" />
+          <span>Cetak</span>
+        </Button>
+      </PageHeader>
 
       {/* Statistics Cards */}
-      <ScheduleStatsCards stats={stats} />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <StatCard title="Total Jam Mengajar" value={stats.totalHours} subtitle="Jam per minggu" icon={Calendar} color="blue" />
+        <StatCard title="Jadwal Hari Ini" value={stats.todaySchedule} subtitle="Sesi hari ini" icon={Calendar} color="green" />
+        <StatCard title="Jadwal Minggu Ini" value={stats.weeklySchedule} subtitle="Total sesi seminggu" icon={BarChart3} color="purple" />
+        <StatCard title="Mata Pelajaran" value={stats.totalSubjects} subtitle="Mapel yang diajar" icon={Grid3x3} color="amber" />
+      </div>
 
       {/* Filters */}
       <ScheduleFilterSection
@@ -220,18 +179,18 @@ export const SchedulePage: React.FC = () => {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="weekly" className="flex items-center space-x-2">
-            <Grid3x3 className="h-4 w-4" />
-            <span>Tampilan Mingguan</span>
+        <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1.5 gap-1">
+          <TabsTrigger value="weekly" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <Grid3x3 className="h-4 w-4 mr-2" />
+            Tampilan Mingguan
           </TabsTrigger>
-          <TabsTrigger value="daily" className="flex items-center space-x-2">
-            <Calendar className="h-4 w-4" />
-            <span>Tampilan Harian</span>
+          <TabsTrigger value="daily" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <Calendar className="h-4 w-4 mr-2" />
+            Tampilan Harian
           </TabsTrigger>
-          <TabsTrigger value="statistics" className="flex items-center space-x-2">
-            <BarChart3 className="h-4 w-4" />
-            <span>Statistik</span>
+          <TabsTrigger value="statistics" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Statistik
           </TabsTrigger>
         </TabsList>
 

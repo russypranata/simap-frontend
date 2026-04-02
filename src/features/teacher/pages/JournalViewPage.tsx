@@ -30,11 +30,11 @@ export const JournalViewPage: React.FC<JournalViewPageProps> = ({ journal }) => 
   const router = useRouter();
 
   const handleEdit = () => {
-    router.push(`/journal/edit?id=${journal.id}`);
+    router.push(`/teacher/journal/edit?id=${journal.id}`);
   };
 
   const handleBack = () => {
-    router.push('/journal');
+    router.push('/teacher/journal');
   };
 
   const getAttendancePercentage = () => {

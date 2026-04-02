@@ -11,7 +11,6 @@ import {
   TeachingJournal,
   Grade,
   Schedule,
-  Announcement,
   Document,
   EReport,
 } from '../types/teacher';
@@ -44,9 +43,6 @@ export const useTeacherData = () => {
   
   // Schedule data
   const [schedule, setSchedule] = useState<Schedule[]>([]);
-  
-  // Announcements data
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   
   // Documents data
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -303,22 +299,6 @@ export const useTeacherData = () => {
     }
   };
 
-  // Announcements
-  const fetchAnnouncements = async (type?: string, priority?: string) => {
-    if (role !== 'guru') return;
-    
-    setLoading(true);
-    try {
-      const announcementsData = await teacherApi.getAnnouncements(type, priority);
-      setAnnouncements(announcementsData);
-      setError(null);
-    } catch (err) {
-      handleError(err, 'Gagal memuat pengumuman');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Documents
   const fetchDocuments = async (type?: string, status?: string) => {
     if (role !== 'guru') return;
@@ -381,7 +361,6 @@ export const useTeacherData = () => {
       fetchClasses();
       fetchStudents();
       fetchSchedule();
-      fetchAnnouncements();
       fetchDocuments();
       fetchEReports();
     }
@@ -399,7 +378,6 @@ export const useTeacherData = () => {
     teachingJournals,
     grades,
     schedule,
-    announcements,
     documents,
     ereports,
     
@@ -419,7 +397,6 @@ export const useTeacherData = () => {
     fetchGrades,
     saveGrade,
     fetchSchedule,
-    fetchAnnouncements,
     fetchDocuments,
     uploadDocument,
     fetchEReports,

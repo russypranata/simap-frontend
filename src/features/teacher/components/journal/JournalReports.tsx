@@ -161,7 +161,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             <div className="space-y-2">
               <Label>Bulan</Label>
               <Select value={monthlyMonth} onValueChange={setMonthlyMonth}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white border-slate-200 shadow-sm">
                   <SelectValue placeholder="Pilih Bulan" />
                 </SelectTrigger>
                 <SelectContent>
@@ -174,7 +174,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             <div className="space-y-2">
               <Label>Tahun</Label>
               <Select value={monthlyYear} onValueChange={setMonthlyYear}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white border-slate-200 shadow-sm">
                   <SelectValue placeholder="Pilih Tahun" />
                 </SelectTrigger>
                 <SelectContent>
@@ -190,7 +190,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             <div className="space-y-2">
               <Label>Kelas (Opsional)</Label>
               <Select value={monthlyClass} onValueChange={setMonthlyClass}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white border-slate-200 shadow-sm">
                   <SelectValue placeholder="Semua Kelas" />
                 </SelectTrigger>
                 <SelectContent>
@@ -205,7 +205,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             <div className="space-y-2">
               <Label>Mata Pelajaran (Opsional)</Label>
               <Select value={monthlySubject} onValueChange={setMonthlySubject}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white border-slate-200 shadow-sm">
                   <SelectValue placeholder="Semua Mapel" />
                 </SelectTrigger>
                 <SelectContent>
@@ -219,38 +219,15 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           </div>
 
           <div className="pt-4 flex gap-3 mt-auto">
-            <Button
-              className="flex-1 gap-2"
-              variant="secondary"
-              onClick={() => handlePreview('monthly')}
-            >
+            <Button className="flex-1 gap-2 bg-blue-800 hover:bg-blue-900 text-white" onClick={() => handlePreview('monthly')}>
               <Eye className="h-4 w-4" />
               Preview
             </Button>
-            <Button
-              className="flex-1 gap-2"
-              variant="outline"
-              onClick={() => handleExport('monthly', 'pdf', {
-                classId: monthlyClass !== 'all' ? monthlyClass : '',
-                className: monthlyClass !== 'all' ? classes.find(c => c.id === monthlyClass)?.name : '',
-                subject: monthlySubject !== 'all' ? monthlySubject : '',
-                month: monthlyMonth,
-                year: monthlyYear
-              })}
-            >
+            <Button className="flex-1 gap-2" variant="outline" onClick={() => handleExport('monthly', 'pdf', { classId: monthlyClass !== 'all' ? monthlyClass : '', className: monthlyClass !== 'all' ? classes.find(c => c.id === monthlyClass)?.name : '', subject: monthlySubject !== 'all' ? monthlySubject : '', month: monthlyMonth, year: monthlyYear })}>
               <Printer className="h-4 w-4" />
               PDF
             </Button>
-            <Button
-              className="flex-1 gap-2"
-              onClick={() => handleExport('monthly', 'excel', {
-                classId: monthlyClass !== 'all' ? monthlyClass : '',
-                className: monthlyClass !== 'all' ? classes.find(c => c.id === monthlyClass)?.name : '',
-                subject: monthlySubject !== 'all' ? monthlySubject : '',
-                month: monthlyMonth,
-                year: monthlyYear
-              })}
-            >
+            <Button className="flex-1 gap-2" variant="outline" onClick={() => handleExport('monthly', 'excel', { classId: monthlyClass !== 'all' ? monthlyClass : '', className: monthlyClass !== 'all' ? classes.find(c => c.id === monthlyClass)?.name : '', subject: monthlySubject !== 'all' ? monthlySubject : '', month: monthlyMonth, year: monthlyYear })}>
               <Download className="h-4 w-4" />
               Excel
             </Button>
@@ -280,7 +257,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             <div className="space-y-2">
               <Label>Tahun Ajaran</Label>
               <Select value={semesterAcademicYear} onValueChange={setSemesterAcademicYear}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white border-slate-200 shadow-sm">
                   <SelectValue placeholder="Pilih Tahun Ajaran" />
                 </SelectTrigger>
                 <SelectContent>
@@ -293,7 +270,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             <div className="space-y-2">
               <Label>Semester</Label>
               <Select value={semesterValue} onValueChange={setSemesterValue}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white border-slate-200 shadow-sm">
                   <SelectValue placeholder="Pilih Semester" />
                 </SelectTrigger>
                 <SelectContent>
@@ -309,7 +286,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             <div className="space-y-2">
               <Label>Kelas (Opsional)</Label>
               <Select value={semesterClass} onValueChange={setSemesterClass}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white border-slate-200 shadow-sm">
                   <SelectValue placeholder="Semua Kelas" />
                 </SelectTrigger>
                 <SelectContent>
@@ -324,7 +301,7 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
             <div className="space-y-2">
               <Label>Mata Pelajaran (Opsional)</Label>
               <Select value={semesterSubject} onValueChange={setSemesterSubject}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white border-slate-200 shadow-sm">
                   <SelectValue placeholder="Semua Mapel" />
                 </SelectTrigger>
                 <SelectContent>
@@ -338,38 +315,15 @@ export const JournalReports: React.FC<JournalReportsProps> = ({
           </div>
 
           <div className="pt-4 flex gap-3 mt-auto">
-            <Button
-              className="flex-1 gap-2"
-              variant="secondary"
-              onClick={() => handlePreview('semester')}
-            >
+            <Button className="flex-1 gap-2 bg-blue-800 hover:bg-blue-900 text-white" onClick={() => handlePreview('semester')}>
               <Eye className="h-4 w-4" />
               Preview
             </Button>
-            <Button
-              className="flex-1 gap-2"
-              variant="outline"
-              onClick={() => handleExport('semester', 'pdf', {
-                classId: semesterClass !== 'all' ? semesterClass : '',
-                className: semesterClass !== 'all' ? classes.find(c => c.id === semesterClass)?.name : '',
-                subject: semesterSubject !== 'all' ? semesterSubject : '',
-                academicYear: semesterAcademicYear,
-                semester: semesterValue
-              })}
-            >
+            <Button className="flex-1 gap-2" variant="outline" onClick={() => handleExport('semester', 'pdf', { classId: semesterClass !== 'all' ? semesterClass : '', className: semesterClass !== 'all' ? classes.find(c => c.id === semesterClass)?.name : '', subject: semesterSubject !== 'all' ? semesterSubject : '', academicYear: semesterAcademicYear, semester: semesterValue })}>
               <Printer className="h-4 w-4" />
               PDF
             </Button>
-            <Button
-              className="flex-1 gap-2"
-              onClick={() => handleExport('semester', 'excel', {
-                classId: semesterClass !== 'all' ? semesterClass : '',
-                className: semesterClass !== 'all' ? classes.find(c => c.id === semesterClass)?.name : '',
-                subject: semesterSubject !== 'all' ? semesterSubject : '',
-                academicYear: semesterAcademicYear,
-                semester: semesterValue
-              })}
-            >
+            <Button className="flex-1 gap-2" variant="outline" onClick={() => handleExport('semester', 'excel', { classId: semesterClass !== 'all' ? semesterClass : '', className: semesterClass !== 'all' ? classes.find(c => c.id === semesterClass)?.name : '', subject: semesterSubject !== 'all' ? semesterSubject : '', academicYear: semesterAcademicYear, semester: semesterValue })}>
               <Download className="h-4 w-4" />
               Excel
             </Button>

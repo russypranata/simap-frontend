@@ -27,8 +27,6 @@ import {
     X,
     Filter,
     FileText,
-    ChevronLeft,
-    ChevronRight,
     Eye,
     Plus,
     ThumbsUp,
@@ -61,6 +59,7 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { PageHeader, PaginationControls } from "@/features/shared/components";
 
 // Mock data for students
 const mockStudentsInitial = [
@@ -338,49 +337,25 @@ export default function StudentBehaviorPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                            Catatan <span className="text-primary">Pelanggaran Siswa</span>
-                        </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <ClipboardList className="h-5 w-5" />
-                        </div>
-                    </div>
-                    <p className="text-muted-foreground mt-1">
-                        Catat dan kelola pelanggaran atau perilaku negatif siswa.
-                    </p>
-                    <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90">
-                        <FileText className="mr-2 h-4 w-4" />
-                        Unduh Laporan
-                    </Button>
-                </div>
-            </div>
+            <PageHeader
+                title="Catatan"
+                titleHighlight="Pelanggaran Siswa"
+                icon={ClipboardList}
+                description="Catat dan kelola pelanggaran atau perilaku negatif siswa."
+            >
+                <Button className="bg-blue-800 hover:bg-blue-900 text-white shadow-sm">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Unduh Laporan
+                </Button>
+            </PageHeader>
 
             <Tabs defaultValue="record" className="space-y-6">
                 <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1.5 gap-1">
-                    <TabsTrigger
-                        value="record"
-                        className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
-                    >
+                    <TabsTrigger value="record" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
                         <ClipboardList className="h-4 w-4 mr-2" />
                         Catat Pelanggaran
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="history"
-                        className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
-                    >
+                    <TabsTrigger value="history" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
                         <History className="h-4 w-4 mr-2" />
                         Riwayat Pelanggaran
                     </TabsTrigger>
@@ -457,49 +432,17 @@ export default function StudentBehaviorPage() {
                             </div>
 
                             {/* Pagination */}
-                            {totalStudentPages > 1 && (
-                                <div className="flex items-center justify-between pt-6 border-t mt-6">
-                                    <div className="text-sm text-muted-foreground">
-                                        Menampilkan {studentStartIndex + 1}-{Math.min(studentStartIndex + discoveryItemsPerPage, totalStudents)} dari {totalStudents} siswa
-                                    </div>
-
-                                    <div className="flex items-center space-x-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setDiscoveryPage(p => Math.max(1, p - 1))}
-                                            disabled={discoveryPage === 1}
-                                            className="w-9 h-9 p-0"
-                                        >
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Button>
-
-                                        <div className="flex items-center space-x-1">
-                                            {Array.from({ length: totalStudentPages }, (_, i) => i + 1).map((page) => (
-                                                <Button
-                                                    key={page}
-                                                    variant={discoveryPage === page ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => setDiscoveryPage(page)}
-                                                    className="w-9 h-9"
-                                                >
-                                                    {page}
-                                                </Button>
-                                            ))}
-                                        </div>
-
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setDiscoveryPage(p => Math.min(totalStudentPages, p + 1))}
-                                            disabled={discoveryPage === totalStudentPages}
-                                            className="w-9 h-9 p-0"
-                                        >
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
+                            <PaginationControls
+                                currentPage={discoveryPage}
+                                totalPages={totalStudentPages}
+                                totalItems={totalStudents}
+                                startIndex={totalStudents === 0 ? 0 : studentStartIndex + 1}
+                                endIndex={Math.min(studentStartIndex + discoveryItemsPerPage, totalStudents)}
+                                itemsPerPage={discoveryItemsPerPage}
+                                itemLabel="siswa"
+                                onPageChange={setDiscoveryPage}
+                                onItemsPerPageChange={(val) => { setDiscoveryItemsPerPage(val); setDiscoveryPage(1); }}
+                            />
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -694,21 +637,21 @@ export default function StudentBehaviorPage() {
 
                             <div className="rounded-md border overflow-x-auto">
                                 <table className="w-full text-sm">
-                                    <thead>
-                                        <tr className="border-b bg-muted/50 text-left">
-                                            <th className="p-4 font-medium text-muted-foreground w-[140px]">Waktu</th>
-                                            <th className="p-4 font-medium text-muted-foreground w-[100px]">Lokasi</th>
-                                            <th className="p-4 font-medium text-muted-foreground w-[150px]">Guru Penemu</th>
-                                            <th className="p-4 font-medium text-muted-foreground w-[200px]">Siswa</th>
-                                            <th className="p-4 font-medium text-muted-foreground">Masalah / Pelanggaran</th>
-                                            <th className="p-4 font-medium text-muted-foreground">Tindak Lanjut</th>
-                                            <th className="p-4 font-medium text-muted-foreground text-right w-[80px]">Aksi</th>
+                                    <thead className="bg-slate-50 border-b border-slate-200">
+                                        <tr>
+                                            <th className="p-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[140px]">Waktu</th>
+                                            <th className="p-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[100px]">Lokasi</th>
+                                            <th className="p-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[150px]">Guru Penemu</th>
+                                            <th className="p-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[200px]">Siswa</th>
+                                            <th className="p-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Masalah / Pelanggaran</th>
+                                            <th className="p-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Tindak Lanjut</th>
+                                            <th className="p-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 text-right w-[80px]">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {paginatedRecords.length > 0 ? (
                                             paginatedRecords.map((record) => (
-                                                <tr key={record.id} className="border-b last:border-0 hover:bg-muted/30">
+                                                <tr key={record.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                                     <td className="p-4 align-top">
                                                         <span className="font-medium text-foreground">
                                                             {format(new Date(record.date), "dd MMMM yyyy", { locale: id })}
@@ -775,50 +718,17 @@ export default function StudentBehaviorPage() {
                                 </table>
                             </div>
 
-                            {/* Pagination for History */}
-                            {totalHistoryPages > 1 && (
-                                <div className="flex items-center justify-between pt-6 border-t mt-6">
-                                    <div className="text-sm text-muted-foreground">
-                                        Menampilkan {historyStartIndex + 1}-{Math.min(historyStartIndex + historyItemsPerPage, totalRecords)} dari {totalRecords} data
-                                    </div>
-
-                                    <div className="flex items-center space-x-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
-                                            disabled={historyPage === 1}
-                                            className="w-9 h-9 p-0"
-                                        >
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Button>
-
-                                        <div className="flex items-center space-x-1">
-                                            {Array.from({ length: totalHistoryPages }, (_, i) => i + 1).map((page) => (
-                                                <Button
-                                                    key={page}
-                                                    variant={historyPage === page ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => setHistoryPage(page)}
-                                                    className="w-9 h-9"
-                                                >
-                                                    {page}
-                                                </Button>
-                                            ))}
-                                        </div>
-
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setHistoryPage(p => Math.min(totalHistoryPages, p + 1))}
-                                            disabled={historyPage === totalHistoryPages}
-                                            className="w-9 h-9 p-0"
-                                        >
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
+                            <PaginationControls
+                                currentPage={historyPage}
+                                totalPages={totalHistoryPages}
+                                totalItems={totalRecords}
+                                startIndex={totalRecords === 0 ? 0 : historyStartIndex + 1}
+                                endIndex={Math.min(historyStartIndex + historyItemsPerPage, totalRecords)}
+                                itemsPerPage={historyItemsPerPage}
+                                itemLabel="data"
+                                onPageChange={setHistoryPage}
+                                onItemsPerPageChange={(val) => { setHistoryItemsPerPage(val); setHistoryPage(1); }}
+                            />
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -901,10 +811,7 @@ export default function StudentBehaviorPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Batal</Button>
-                        <Button
-                            onClick={handleSubmit}
-                            className="bg-primary text-primary-foreground hover:bg-primary/90"
-                        >
+                        <Button onClick={handleSubmit} className="bg-blue-800 hover:bg-blue-900 text-white">
                             Simpan Pelanggaran
                         </Button>
                     </DialogFooter>

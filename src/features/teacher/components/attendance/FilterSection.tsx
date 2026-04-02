@@ -88,7 +88,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 value={selectedClass || ''}
                 onValueChange={(val) => { setSelectedClass(val); onFilterChange(); }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-white border-slate-200 shadow-sm">
                   <SelectValue placeholder="Pilih kelas" />
                 </SelectTrigger>
                 <SelectContent>
@@ -144,7 +144,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                       value={selectedSubject || undefined}
                       onValueChange={(val) => { setSelectedSubject(val); onFilterChange(); }}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-white border-slate-200 shadow-sm">
                         <SelectValue placeholder="Pilih mata pelajaran" />
                       </SelectTrigger>
                       <SelectContent>
@@ -170,7 +170,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                       value={selectedLessonHour || undefined}
                       onValueChange={setSelectedLessonHour}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-white border-slate-200 shadow-sm">
                         <SelectValue placeholder="Pilih jam pelajaran" />
                       </SelectTrigger>
                       <SelectContent>

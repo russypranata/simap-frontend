@@ -450,7 +450,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 Filter Status:
               </Label>
               <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'hadir' | 'sakit' | 'izin' | 'tanpa-keterangan')}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-32 bg-white border-slate-200 shadow-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -468,7 +468,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 Tampilkan:
               </Label>
               <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(parseInt(value))}>
-                <SelectTrigger className="w-20">
+                <SelectTrigger className="w-20 bg-white border-slate-200 shadow-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -498,15 +498,15 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-muted/50 sticky top-0">
+              <thead className="bg-slate-50 border-b border-slate-200 sticky top-0">
                 <tr>
-                  <th className="text-left p-4 font-medium text-sm w-12">No</th>
-                  <th className="text-left p-4 font-medium text-sm w-24">NIS</th>
-                  <th className="text-left p-4 font-medium text-sm min-w-48">Nama Siswa</th>
-                  <th className="text-left p-4 font-medium text-sm w-32">Jenis Kelamin</th>
-                  <th className="text-left p-4 font-medium text-sm w-40">Status Kehadiran</th>
-                  <th className="text-left p-4 font-medium text-sm min-w-64">Catatan</th>
-                  <th className="text-left p-4 font-medium text-sm w-24">Aksi</th>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 w-12">No</th>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 w-24">NIS</th>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 min-w-48">Nama Siswa</th>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 w-32">Jenis Kelamin</th>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 w-40">Status Kehadiran</th>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 min-w-64">Catatan</th>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 w-24">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -518,8 +518,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                     return (
                       <tr
                         key={student.id}
-                        className={`border-b hover:bg-muted/30 transition-colors ${currentData?.status === 'tanpa-keterangan' ? 'bg-red-50/30' : ''
-                          }`}
+                        className={`border-b border-slate-100 hover:bg-slate-50/50 transition-colors ${currentData?.status === 'tanpa-keterangan' ? 'bg-red-50/30' : ''}`}
                       >
                         <td className="p-4 text-sm font-medium">{globalIndex}</td>
                         <td className="p-4 text-sm font-mono">{student.nis}</td>

@@ -10,10 +10,10 @@ import {
     GraduationCap,
     Calendar,
     Home,
-    Megaphone,
     FileText,
     User,
     ClipboardList,
+    ClipboardCheck,
 } from "lucide-react";
 
 export const TeacherSidebar: React.FC = () => {
@@ -29,6 +29,11 @@ export const TeacherSidebar: React.FC = () => {
             title: "Jurnal Mengajar",
             href: "/teacher/journal",
             icon: BookOpen,
+        },
+        {
+            title: "Presensi Mapel",
+            href: "/teacher/attendance",
+            icon: ClipboardCheck,
         },
         {
             title: "Nilai Siswa",
@@ -61,12 +66,6 @@ export const TeacherSidebar: React.FC = () => {
             title: "Administrasi",
             href: "/teacher/documents",
             icon: FileText,
-        },
-        {
-            title: "Pengumuman",
-            href: "/teacher/announcements",
-            icon: Megaphone,
-            badge: "3",
         },
         {
             title: "Profil",

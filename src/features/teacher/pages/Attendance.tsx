@@ -26,6 +26,7 @@ import {
 import { SUBJECTS, LESSON_HOURS, ACADEMIC_YEARS, SEMESTERS } from '../constants/attendance';
 import { getHolidayInfo } from '../constants/holidays';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
+import { PageHeader } from '@/features/shared/components';
 import {
   Users,
   RefreshCw,
@@ -750,70 +751,50 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
         </div>
       )}
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-        {!isEmbedded ? (
-          <div>
-            <h1 className="text-3xl font-bold text-foreground tracking-tight">
-              Presensi Mapel <span className="text-primary">Siswa</span>
-            </h1>
-            <p className="text-muted-foreground">
-              Kelola presensi siswa untuk setiap mata pelajaran
-            </p>
-            <div className="flex items-center gap-3 mt-4">
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                <Calendar className="h-4 w-4" />
-                <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
-              </div>
-              <div className="h-4 w-[1px] bg-border" />
-              <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <h2 className="text-2xl font-bold text-foreground tracking-tight">
-              Presensi <span className="text-primary">Siswa</span>
-            </h2>
-            <p className="text-muted-foreground">
-              Kelola kehadiran siswa untuk setiap mata pelajaran
-            </p>
-          </div>
-        )}
-
-        <div className="flex items-center space-x-2">
+      {!isEmbedded ? (
+        <PageHeader
+          title="Presensi Mapel"
+          titleHighlight="Siswa"
+          icon={ClipboardCheck}
+          description="Kelola presensi siswa untuk setiap mata pelajaran"
+        >
           <Button
             variant="outline"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center space-x-2"
           >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </PageHeader>
+      ) : (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Presensi <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Siswa</span>
+            </h2>
+            <p className="text-muted-foreground text-sm">Kelola kehadiran siswa untuk setiap mata pelajaran</p>
+          </div>
+          <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
           </Button>
         </div>
-      </div>
+      )}
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 rounded-xl mb-6">
-          <TabsTrigger
-            value="attendance"
-            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
-          >
-            <ClipboardCheck className="h-4 w-4" />
+        <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1.5 gap-1">
+          <TabsTrigger value="attendance" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <ClipboardCheck className="h-4 w-4 mr-2" />
             Presensi
           </TabsTrigger>
-          <TabsTrigger
-            value="statistics"
-            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
-          >
-            <BarChart3 className="h-4 w-4" />
+          <TabsTrigger value="statistics" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <BarChart3 className="h-4 w-4 mr-2" />
             Statistik
           </TabsTrigger>
-          <TabsTrigger
-            value="history"
-            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
-          >
-            <Clock className="h-4 w-4" />
+          <TabsTrigger value="history" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <Clock className="h-4 w-4 mr-2" />
             Riwayat
           </TabsTrigger>
         </TabsList>

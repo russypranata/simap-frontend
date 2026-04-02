@@ -12,15 +12,13 @@ import {
     JournalStatistics,
     JournalForm,
     JournalReports,
-    JournalStatsCards,
 } from '@/features/teacher/components/journal';
-import { Attendance } from './Attendance';
 import { TeachingJournal } from '@/features/teacher/types/teacher';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
 import { LESSON_HOURS } from '@/features/teacher/constants/attendance';
 import {
     BookOpen,
-    Plus,
+    FilePen,
     RefreshCw,
     Grid,
     List as ListIcon,
@@ -31,6 +29,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { PageHeader, StatCard } from '@/features/shared/components';
 
 const SUBJECTS = [
     'Matematika',
@@ -185,7 +184,7 @@ export const JournalPage: React.FC = () => {
             const formattedData = formatJournalData(formData);
             await saveTeachingJournal(formattedData);
             toast.success('Jurnal mengajar berhasil disimpan!');
-            router.push('/journal/new');
+            router.push('/teacher/journal/new');
             resetForm();
             fetchTeachingJournals();
         } catch (error) {
@@ -220,11 +219,11 @@ export const JournalPage: React.FC = () => {
     };
 
     const handleViewJournal = (journal: TeachingJournal) => {
-        router.push(`/journal/view?id=${journal.id}`);
+        router.push(`/teacher/journal/view?id=${journal.id}`);
     };
 
     const handleEditJournal = (journal: TeachingJournal) => {
-        router.push(`/journal/edit?id=${journal.id}`);
+        router.push(`/teacher/journal/edit?id=${journal.id}`);
     };
 
     const resetForm = () => {
@@ -342,73 +341,55 @@ export const JournalPage: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                        Jurnal <span className="text-primary">Mengajar</span>
-                    </h1>
-                    <p className="text-muted-foreground">
-                        Catatan kegiatan pembelajaran dan evaluasi proses mengajar
-                    </p>
-                    <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
-                    </div>
-                </div>
-                <Button className="flex items-center space-x-2" onClick={() => router.push('/journal/new')}>
-                    <Plus className="h-4 w-4" />
+            <PageHeader
+                title="Jurnal"
+                titleHighlight="Mengajar"
+                icon={BookOpen}
+                description="Catatan kegiatan pembelajaran dan evaluasi proses mengajar"
+            >
+                <Button variant="outline" onClick={() => router.push('/teacher/attendance')}>
+                    <ClipboardCheck className="h-4 w-4 mr-2" />
+                    Presensi Mapel
+                </Button>
+                <Button className="bg-blue-800 hover:bg-blue-900 text-white flex items-center space-x-2" onClick={() => router.push('/teacher/journal/new')}>
+                    <FilePen className="h-4 w-4" />
                     <span>Tambah Jurnal Baru</span>
                 </Button>
-            </div>
+            </PageHeader>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted/50 rounded-xl mb-6">
-                    <TabsTrigger
-                        value="list"
-                        className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
-                    >
-                        <BookOpen className="h-4 w-4" />
+                <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1.5 gap-1">
+                    <TabsTrigger value="list" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <BookOpen className="h-4 w-4 mr-2" />
                         Daftar Jurnal
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="attendance"
-                        className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
-                    >
-                        <ClipboardCheck className="h-4 w-4" />
-                        Presensi Siswa
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="statistics"
-                        className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
-                    >
-                        <BarChart3 className="h-4 w-4" />
+                    <TabsTrigger value="statistics" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <BarChart3 className="h-4 w-4 mr-2" />
                         Statistik
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="reports"
-                        className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
-                    >
-                        <FileText className="h-4 w-4" />
+                    <TabsTrigger value="reports" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <FileText className="h-4 w-4 mr-2" />
                         Laporan
                     </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="list" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
-                    <JournalStatsCards stats={stats} />
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <StatCard title="Total Jurnal" value={stats.totalJournals} subtitle="Jurnal yang dibuat" icon={BookOpen} color="blue" />
+                        <StatCard title="Kelas Diajar" value={stats.totalClasses} subtitle="Kelas unik" icon={BarChart3} color="purple" />
+                        <StatCard title="Mata Pelajaran" value={stats.totalSubjects} subtitle="Mapel unik" icon={FileText} color="green" />
+                        <StatCard title="Jam Mengajar" value={`${stats.totalHours} JP`} subtitle="Total jam pelajaran" icon={ClipboardCheck} color="amber" />
+                    </div>
 
                     <div className="flex justify-end">
-                        <Tabs value={viewType} onValueChange={setViewType} className="w-48">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="card" className="flex items-center justify-center gap-2">
-                                    <Grid className="h-4 w-4" />
+                        <Tabs value={viewType} onValueChange={setViewType}>
+                            <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1.5 gap-1">
+                                <TabsTrigger value="card" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                                    <Grid className="h-4 w-4 mr-1.5" />
                                     Kartu
                                 </TabsTrigger>
-                                <TabsTrigger value="table" className="flex items-center justify-center gap-2">
-                                    <ListIcon className="h-4 w-4" />
+                                <TabsTrigger value="table" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                                    <ListIcon className="h-4 w-4 mr-1.5" />
                                     Tabel
                                 </TabsTrigger>
                             </TabsList>
@@ -425,7 +406,7 @@ export const JournalPage: React.FC = () => {
                         classes={classes}
                         subjects={SUBJECTS}
                         onExportData={handleExportData}
-                        onCreateNew={() => router.push('/journal/new')}
+                        onCreateNew={() => router.push('/teacher/journal/new')}
                         totalJournals={teachingJournals.length}
                         filteredCount={filteredJournals.length}
                         academicYear={academicYear}
@@ -449,7 +430,7 @@ export const JournalPage: React.FC = () => {
                             onView={handleViewJournal}
                             onEdit={handleEditJournal}
                             onDelete={handleDeleteJournal}
-                            onCreateNew={() => router.push('/journal/new')}
+                            onCreateNew={() => router.push('/teacher/journal/new')}
                             totalJournals={teachingJournals.length}
                         />
                     ) : (
@@ -463,10 +444,6 @@ export const JournalPage: React.FC = () => {
                             onDelete={handleDeleteJournal}
                         />
                     )}
-                </TabsContent>
-
-                <TabsContent value="attendance" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
-                    <Attendance isEmbedded={true} />
                 </TabsContent>
 
                 <TabsContent value="statistics" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">

@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Edit, Trash2, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, Edit, Trash2, FileText, Search } from 'lucide-react';
 import { TeachingJournal } from '@/features/teacher/types/teacher';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
+import { PaginationControls, EmptyState } from '@/features/shared/components';
 
 interface JournalTableProps {
   journals: TeachingJournal[];
@@ -19,224 +20,113 @@ interface JournalTableProps {
 }
 
 export const JournalTable: React.FC<JournalTableProps> = ({
-  journals,
-  searchTerm,
-  filterClass,
-  filterSubject,
-  onView,
-  onEdit,
-  onDelete,
+  journals, searchTerm, filterClass, filterSubject,
+  onView, onEdit, onDelete,
 }) => {
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Calculate pagination values
-  // Note: journals are already filtered by the parent component
   const totalPages = Math.ceil(journals.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentJournals = journals.slice(startIndex, endIndex);
+  const currentJournals = journals.slice(startIndex, startIndex + itemsPerPage);
 
-  // Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterClass, filterSubject, journals.length]);
-
-  // Pagination handlers
-  const goToPreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  // Generate page numbers for pagination controls
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= Math.min(maxVisiblePages, totalPages); i++) {
-          pages.push(i);
-        }
-        if (totalPages > maxVisiblePages) {
-          pages.push('ellipsis');
-          pages.push(totalPages);
-        }
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1);
-        pages.push('ellipsis');
-        for (let i = totalPages - maxVisiblePages + 1; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(1);
-        pages.push('ellipsis');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push('ellipsis');
-        pages.push(totalPages);
-      }
-    }
-    return pages;
-  };
+  useEffect(() => { setCurrentPage(1); }, [searchTerm, filterClass, filterSubject, journals.length]);
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
             <FileText className="h-5 w-5" />
           </div>
           <div>
-            <CardTitle className="text-lg font-semibold text-gray-900">
-              Tabel Jurnal Mengajar
-            </CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">
-              Daftar jurnal mengajar dalam format tabel
-            </CardDescription>
+            <CardTitle className="text-lg font-semibold">Tabel Jurnal Mengajar</CardTitle>
+            <CardDescription>Daftar jurnal mengajar dalam format tabel</CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="text-left p-4 font-medium text-sm">Tanggal</th>
-                  <th className="text-left p-4 font-medium text-sm">Kelas</th>
-                  <th className="text-left p-4 font-medium text-sm">Mata Pelajaran</th>
-                  <th className="text-left p-4 font-medium text-sm">Materi</th>
-                  <th className="text-left p-4 font-medium text-sm">Topik</th>
-                  <th className="text-left p-4 font-medium text-sm">Kehadiran</th>
-                  <th className="text-left p-4 font-medium text-sm">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentJournals.length > 0 ? (
-                  currentJournals.map((journal) => (
-                    <tr key={journal.id} className="border-b hover:bg-muted/30">
-                      <td className="p-4 text-sm">{formatDate(journal.date, 'dd MMM yyyy')}</td>
-                      <td className="p-4 text-sm">{journal.class}</td>
-                      <td className="p-4 text-sm">{journal.subject}</td>
-                      <td className="p-4 text-sm max-w-xs truncate">{journal.material}</td>
-                      <td className="p-4 text-sm max-w-xs truncate">{journal.topic}</td>
-                      <td className="p-4 text-sm">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs">{journal.attendance.present}/{journal.attendance.total}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {((journal.attendance.present / journal.attendance.total) * 100).toFixed(0)}%
-                          </Badge>
-                        </div>
-                      </td>
-                      <td className="p-4 text-sm">
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            size="sm"
-                            onClick={() => onView(journal)}
-                            className="h-8 w-8 p-0 bg-green-500 hover:bg-green-600 text-white border-0"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => onEdit(journal)}
-                            className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600 text-white border-0"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => onDelete(journal)}
-                            className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white border-0"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="p-8 text-center text-muted-foreground">
-                      Tidak ada data jurnal yang ditemukan.
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Tanggal</th>
+                <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Kelas</th>
+                <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Mata Pelajaran</th>
+                <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Materi</th>
+                <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Topik</th>
+                <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Kehadiran</th>
+                <th className="text-center p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 w-28">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentJournals.length > 0 ? (
+                currentJournals.map((journal) => (
+                  <tr key={journal.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                    <td className="p-4 text-sm text-slate-600">{formatDate(journal.date, 'dd MMM yyyy')}</td>
+                    <td className="p-4">
+                      <Badge variant="secondary" className="bg-blue-50 text-blue-800 border-blue-200">{journal.class}</Badge>
+                    </td>
+                    <td className="p-4 text-sm font-medium text-slate-800">{journal.subject}</td>
+                    <td className="p-4 text-sm text-slate-600 max-w-xs truncate">{journal.material}</td>
+                    <td className="p-4 text-sm text-slate-600 max-w-xs truncate">{journal.topic}</td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-slate-600">{journal.attendance.present}/{journal.attendance.total}</span>
+                        <Badge variant="outline" className={
+                          (journal.attendance.present / journal.attendance.total) >= 0.9
+                            ? "bg-green-50 text-green-700 border-green-200"
+                            : (journal.attendance.present / journal.attendance.total) >= 0.75
+                            ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                            : "bg-red-50 text-red-700 border-red-200"
+                        }>
+                          {((journal.attendance.present / journal.attendance.total) * 100).toFixed(0)}%
+                        </Badge>
+                      </div>
+                    </td>
+                    <td className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => onView(journal)}
+                          className="h-8 w-8 p-0 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => onEdit(journal)}
+                          className="h-8 w-8 p-0 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => onDelete(journal)}
+                          className="h-8 w-8 p-0 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-4 border-t">
-              <div className="text-sm text-muted-foreground">
-                Menampilkan {startIndex + 1}-{Math.min(endIndex, journals.length)} dari {journals.length} data
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={goToPreviousPage}
-                  disabled={currentPage === 1}
-                  className="flex items-center"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span className="ml-1">Sebelumnya</span>
-                </Button>
-
-                <div className="flex items-center space-x-1">
-                  {getPageNumbers().map((page, index) => (
-                    page === 'ellipsis' ? (
-                      <span key={`ellipsis-${index}`} className="px-2 py-1 text-muted-foreground">...</span>
-                    ) : (
-                      <Button
-                        key={page}
-                        variant={currentPage === page ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => goToPage(page as number)}
-                        className="w-9 h-9"
-                      >
-                        {page}
-                      </Button>
-                    )
-                  ))}
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={goToNextPage}
-                  disabled={currentPage === totalPages}
-                  className="flex items-center"
-                >
-                  <span className="mr-1">Berikutnya</span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7}>
+                    <EmptyState
+                      icon={Search}
+                      title="Tidak ada jurnal ditemukan"
+                      description="Coba ubah kata kunci pencarian atau filter yang dipilih"
+                    />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={journals.length}
+          startIndex={journals.length === 0 ? 0 : startIndex + 1}
+          endIndex={Math.min(startIndex + itemsPerPage, journals.length)}
+          itemsPerPage={itemsPerPage}
+          itemLabel="jurnal"
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+        />
       </CardContent>
     </Card>
   );
