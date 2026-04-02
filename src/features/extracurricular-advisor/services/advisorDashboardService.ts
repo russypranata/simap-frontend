@@ -152,3 +152,24 @@ export const getRecentActivities = async (): Promise<RecentActivityItem[]> => {
     const result = await response.json();
     return result.data;
 };
+
+export interface ActiveAcademicYear {
+    academicYear: string;
+    semester: string;
+    label: string;
+}
+
+export const getActiveAcademicYear = async (): Promise<ActiveAcademicYear> => {
+    if (USE_MOCK_DATA) {
+        await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+        return { academicYear: "2025/2026", semester: "1", label: "Ganjil" };
+    }
+
+    const response = await fetch(`${ADVISOR_API_URL}/academic-year/active`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    return result.data;
+};

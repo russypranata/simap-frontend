@@ -27,42 +27,18 @@ import {
 } from "lucide-react";
 import { ProfileSkeleton } from "../components/profile";
 
-import { getProfile, getDashboardStats, type AdvisorDashboardStats } from "../services";
-import { AdvisorProfileData } from "../data/mockAdvisorData";
-import { useAcademicYear } from "@/context/AcademicYearContext";
+import { useAdvisorProfile } from "../hooks/useAdvisorProfile";
 
 export const ExtracurricularAdvisorProfile: React.FC = () => {
     const router = useRouter();
-    const [profileData, setProfileData] = useState<AdvisorProfileData | null>(null);
-    const [statsData, setStatsData] = useState<AdvisorDashboardStats | null>(null);
-    const [loading, setLoading] = useState(true);
+    const { profile: profileData, stats: statsData, isLoading } = useAdvisorProfile();
     const [isPhotoOpen, setIsPhotoOpen] = useState(false);
-    const { academicYear } = useAcademicYear();
-
-    React.useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const [profile, stats] = await Promise.all([
-                    getProfile(),
-                    getDashboardStats({ academicYear: academicYear.academicYear }),
-                ]);
-                setProfileData(profile);
-                setStatsData(stats);
-            } catch (error) {
-                console.error("Failed to fetch profile:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProfile();
-    }, [academicYear.academicYear, academicYear.semester]);
 
     const handleEditProfile = () => {
         router.push("/extracurricular-advisor/profile/edit");
     };
 
-    if (loading || !profileData) return <ProfileSkeleton />;
+    if (isLoading || !profileData) return <ProfileSkeleton />;
 
     const initials = profileData.name
         .split(" ")

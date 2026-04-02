@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Search, CheckCircle, AlertCircle, Clock, XCircle, CheckCheck, Save } from "lucide-react";
+import { Users, Search, CheckCircle, AlertCircle, Clock, XCircle, CheckCheck, Save, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EmptyState, PaginationControls, SkeletonTableRow } from "@/features/shared/components";
+import { EmptyState, SkeletonTableRow } from "@/features/shared/components";
 import { type AdvisorMember } from "../../services/advisorMembersService";
 import { type AttendanceStatus, type AttendanceRecord } from "../../hooks/useAdvisorAttendance";
 
@@ -185,19 +185,45 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 </table>
             </div>
 
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 border-t border-slate-100">
-                <PaginationControls
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={filteredMembers.length}
-                    startIndex={filteredMembers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
-                    endIndex={Math.min(currentPage * itemsPerPage, filteredMembers.length)}
-                    itemsPerPage={itemsPerPage}
-                    itemLabel="anggota"
-                    onPageChange={onPageChange}
-                    onItemsPerPageChange={(val) => { onItemsPerPageChange(val); onPageChange(1); }}
-                />
-                <Button onClick={onSave} className="bg-blue-800 text-white hover:bg-blue-900 w-full lg:w-auto">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-3 px-4 pt-4 pb-4 border-t border-slate-100">
+                <div className="flex flex-col lg:flex-row items-center gap-3 w-full lg:w-auto">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>Menampilkan</span>
+                        <span className="font-medium text-foreground">{filteredMembers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}</span>
+                        <span>-</span>
+                        <span className="font-medium text-foreground">{Math.min(currentPage * itemsPerPage, filteredMembers.length)}</span>
+                        <span>dari</span>
+                        <span className="font-medium text-foreground">{filteredMembers.length}</span>
+                        <span>anggota</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={itemsPerPage}
+                            onChange={(e) => { onItemsPerPageChange(Number(e.target.value)); onPageChange(1); }}
+                            className="h-8 rounded-lg border border-slate-300 bg-white text-sm px-2 text-slate-600"
+                        >
+                            {[5, 10, 20, 50].map((n) => <option key={n} value={n}>{n} / hal</option>)}
+                        </select>
+                        <span className="text-sm text-muted-foreground">Hal {currentPage}/{totalPages}</span>
+                        <button onClick={() => onPageChange(Math.max(1, currentPage - 1))} disabled={currentPage === 1}
+                            className="h-8 w-8 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 flex items-center justify-center">
+                            <ChevronLeft className="h-4 w-4" />
+                        </button>
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1).map((p) => (
+                            <button key={p} onClick={() => onPageChange(p)}
+                                className={cn("w-8 h-8 rounded-lg font-medium text-sm flex items-center justify-center border",
+                                    currentPage === p ? "bg-blue-800 text-white border-blue-800" : "border-slate-300 bg-white text-slate-600 hover:bg-slate-100"
+                                )}>
+                                {p}
+                            </button>
+                        ))}
+                        <button onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}
+                            className="h-8 w-8 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 flex items-center justify-center">
+                            <ChevronRight className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+                <Button onClick={onSave} className="bg-blue-800 text-white hover:bg-blue-900 w-full lg:w-auto shrink-0">
                     <Save className="h-4 w-4 mr-2" />
                     Simpan Presensi
                 </Button>

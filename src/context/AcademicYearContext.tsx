@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { advisorService, ActiveAcademicYear } from "@/features/extracurricular-advisor/services/advisorService";
+import { getActiveAcademicYear, type ActiveAcademicYear } from "@/features/extracurricular-advisor/services/advisorDashboardService";
 
 // Default fallback
 const DEFAULT_ACADEMIC_YEAR: ActiveAcademicYear = {
@@ -24,7 +24,7 @@ export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ childr
 
     const fetchAcademicYear = async () => {
         try {
-            const data = await advisorService.getActiveAcademicYear();
+            const data = await getActiveAcademicYear();
             setAcademicYear(data);
         } catch (error) {
             console.error("Failed to fetch academic year context:", error);

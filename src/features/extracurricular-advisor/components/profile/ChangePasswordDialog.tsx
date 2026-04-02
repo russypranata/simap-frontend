@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2, KeyRound, AlertCircle, ChevronDown, ChevronUp, ShieldCheck, Check, X } from "lucide-react";
-import { advisorService } from "@/features/extracurricular-advisor/services/advisorService";
+import { updatePassword } from "@/features/extracurricular-advisor/services/advisorProfileService";
 
 // ============================================
 // VALIDATION SCHEMA
@@ -103,7 +103,7 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
         setApiError(null);
 
         try {
-            await advisorService.updatePassword({
+            await updatePassword({
                 currentPassword: data.currentPassword,
                 newPassword: data.newPassword,
                 confirmPassword: data.confirmPassword,
