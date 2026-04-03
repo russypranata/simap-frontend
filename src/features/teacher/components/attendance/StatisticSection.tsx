@@ -75,40 +75,40 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
   const FilterBadges = () => (
     <div className="flex flex-wrap gap-2 mt-3">
       {academicYear && (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+        <Badge variant="secondary" className="gap-1.5 bg-blue-800 text-white border-none px-2.5 py-0.5 text-xs font-medium">
           <Calendar className="h-3 w-3" />
           {academicYear}
         </Badge>
       )}
       {semester ? (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+        <Badge variant="secondary" className="gap-1.5 bg-blue-800 text-white border-none px-2.5 py-0.5 text-xs font-medium">
           <Calendar className="h-3 w-3" />
           {semester}
         </Badge>
       ) : (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+        <Badge variant="secondary" className="gap-1.5 bg-blue-800 text-white border-none px-2.5 py-0.5 text-xs font-medium">
           <Calendar className="h-3 w-3" />
           Satu Tahun Ajaran
         </Badge>
       )}
       {selectedClassName ? (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+        <Badge variant="secondary" className="gap-1.5 bg-blue-800 text-white border-none px-2.5 py-0.5 text-xs font-medium">
           <Users className="h-3 w-3" />
           {selectedClassName}
         </Badge>
       ) : (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+        <Badge variant="secondary" className="gap-1.5 bg-blue-800 text-white border-none px-2.5 py-0.5 text-xs font-medium">
           <Users className="h-3 w-3" />
           Semua Kelas
         </Badge>
       )}
       {selectedSubjectName ? (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+        <Badge variant="secondary" className="gap-1.5 bg-blue-800 text-white border-none px-2.5 py-0.5 text-xs font-medium">
           <BookOpen className="h-3 w-3" />
           {selectedSubjectName}
         </Badge>
       ) : (
-        <Badge variant="outline" className="text-xs font-normal gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+        <Badge variant="secondary" className="gap-1.5 bg-blue-800 text-white border-none px-2.5 py-0.5 text-xs font-medium">
           <BookOpen className="h-3 w-3" />
           Semua Mata Pelajaran
         </Badge>
@@ -130,7 +130,7 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
                 <BarChart3 className="h-5 w-5" />
               </div>
               <div>
-                <CardTitle className="text-lg font-semibold text-gray-900">
+                <CardTitle className="text-lg font-semibold text-slate-900">
                   Analisis Tren Kehadiran Bulanan
                 </CardTitle>
                 <CardDescription className="text-sm text-muted-foreground">

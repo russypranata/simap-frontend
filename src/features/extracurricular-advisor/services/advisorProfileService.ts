@@ -17,9 +17,14 @@ const getAuthHeaders = (): HeadersInit => {
 };
 
 const handleApiError = async (response: Response): Promise<never> => {
-    const errorData = await response.json();
-    const error = new Error(errorData.message) as Error & { code: number; errors?: Record<string, string[]> };
-    error.code = errorData.code;
+    let errorData: { message?: string; code?: number; errors?: Record<string, string[]> } = {};
+    try {
+        errorData = await response.json();
+    } catch {
+        // Non-JSON response (e.g. 500 HTML page)
+    }
+    const error = new Error(errorData.message || `HTTP ${response.status}`) as Error & { code: number; errors?: Record<string, string[]> };
+    error.code = errorData.code ?? response.status;
     error.errors = errorData.errors;
     throw error;
 };
@@ -82,8 +87,25 @@ export const getProfile = async (): Promise<AdvisorProfileData> => {
         headers: getAuthHeaders(),
     });
     if (!response.ok) await handleApiError(response);
-    const result: ApiResponse<AdvisorProfileData> = await response.json();
-    return result.data;
+    const result: ApiResponse<Record<string, unknown>> = await response.json();
+    const d = result.data;
+    // Normalize snake_case from Laravel to camelCase
+    return {
+        name: (d.name as string) ?? "",
+        username: (d.username as string) ?? "",
+        email: (d.email as string) ?? "",
+        phone: (d.phone as string) ?? "",
+        role: (d.role as string) ?? "",
+        profilePicture: (d.profile_picture ?? d.profilePicture ?? d.avatar ?? "") as string,
+        address: (d.address as string) ?? "",
+        joinDate: (d.join_date ?? d.joinDate ?? "") as string,
+        nip: (d.nip as string | undefined),
+        extracurricular: (d.extracurricular as string) ?? "",
+        totalMembers: (d.total_members ?? d.totalMembers ?? 0) as number,
+        activeMembers: (d.active_members ?? d.activeMembers ?? 0) as number,
+        totalMeetings: (d.total_meetings ?? d.totalMeetings ?? 0) as number,
+        avgStudentAttendance: (d.avg_student_attendance ?? d.avgStudentAttendance ?? 0) as number,
+    };
 };
 
 export const updateProfile = async (data: UpdateAdvisorProfileRequest): Promise<AdvisorProfileData> => {
@@ -99,8 +121,24 @@ export const updateProfile = async (data: UpdateAdvisorProfileRequest): Promise<
         body: JSON.stringify(data),
     });
     if (!response.ok) await handleApiError(response);
-    const result: ApiResponse<AdvisorProfileData> = await response.json();
-    return result.data;
+    const result: ApiResponse<Record<string, unknown>> = await response.json();
+    const d = result.data;
+    return {
+        name: (d.name as string) ?? "",
+        username: (d.username as string) ?? "",
+        email: (d.email as string) ?? "",
+        phone: (d.phone as string) ?? "",
+        role: (d.role as string) ?? "",
+        profilePicture: (d.profile_picture ?? d.profilePicture ?? d.avatar ?? "") as string,
+        address: (d.address as string) ?? "",
+        joinDate: (d.join_date ?? d.joinDate ?? "") as string,
+        nip: (d.nip as string | undefined),
+        extracurricular: (d.extracurricular as string) ?? "",
+        totalMembers: (d.total_members ?? d.totalMembers ?? 0) as number,
+        activeMembers: (d.active_members ?? d.activeMembers ?? 0) as number,
+        totalMeetings: (d.total_meetings ?? d.totalMeetings ?? 0) as number,
+        avgStudentAttendance: (d.avg_student_attendance ?? d.avgStudentAttendance ?? 0) as number,
+    };
 };
 
 export const uploadAvatar = async (file: File): Promise<AvatarUploadResponse> => {
@@ -147,7 +185,11 @@ export const updatePassword = async (data: UpdatePasswordRequest): Promise<Passw
     const response = await fetch(`${ADVISOR_API_URL}/profile/password`, {
         method: "PUT",
         headers: getAuthHeaders(),
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+            current_password: data.currentPassword,
+            new_password: data.newPassword,
+            password_confirmation: data.confirmPassword,
+        }),
     });
     if (!response.ok) await handleApiError(response);
     const result: ApiResponse<PasswordUpdateResponse> = await response.json();

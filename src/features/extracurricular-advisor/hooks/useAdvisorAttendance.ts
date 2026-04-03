@@ -293,14 +293,14 @@ export const useAdvisorAttendance = (): UseAdvisorAttendanceReturn => {
         setIsSubmitting(true);
         try {
             const attendanceList = Array.from(attendanceRecords.entries()).map(([studentId, record]) => ({
-                studentId,
+                student_id: studentId,
                 status: record.status,
                 note: record.note,
             }));
             const payload: CreateAttendanceRequest = {
                 date: selectedDate,
-                startTime,
-                endTime,
+                start_time: startTime,
+                end_time: endTime,
                 topic: "Kegiatan Rutin",
                 students: attendanceList,
             };

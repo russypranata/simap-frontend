@@ -15,9 +15,14 @@ const getAuthHeaders = (): HeadersInit => {
 };
 
 const handleApiError = async (response: Response): Promise<never> => {
-    const errorData = await response.json();
-    const error = new Error(errorData.message) as Error & { code: number; errors?: Record<string, string[]> };
-    error.code = errorData.code;
+    let errorData: { message?: string; code?: number; errors?: Record<string, string[]> } = {};
+    try {
+        errorData = await response.json();
+    } catch {
+        // Non-JSON response (e.g. 500 HTML page)
+    }
+    const error = new Error(errorData.message || `HTTP ${response.status}`) as Error & { code: number; errors?: Record<string, string[]> };
+    error.code = errorData.code ?? response.status;
     error.errors = errorData.errors;
     throw error;
 };
@@ -90,6 +95,19 @@ const MOCK_HISTORY_23_24: AdvisorMember[] = [
 
 export const MOCK_MEMBERS_ALL = [...MOCK_MEMBERS_DATA, ...MOCK_HISTORY_24_25, ...MOCK_HISTORY_23_24];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const normalizeMember = (d: any): AdvisorMember => ({
+    id: d.id,
+    nis: d.nis,
+    name: d.name,
+    class: d.class ?? d.class_name ?? d.kelas ?? "",
+    joinDate: d.join_date ?? d.joinDate ?? "",
+    attendance: d.attendance ?? d.attendance_percentage ?? 0,
+    status: d.status,
+    inactiveDate: d.inactive_date ?? d.inactiveDate,
+    inactiveReason: d.inactive_reason ?? d.inactiveReason,
+});
+
 // ==================== SERVICE FUNCTIONS ====================
 
 export const getMembers = async (params: GetMembersParams = {}): Promise<MembersListResponse> => {
@@ -153,7 +171,17 @@ export const getMembers = async (params: GetMembersParams = {}): Promise<Members
     });
     if (!response.ok) await handleApiError(response);
     const result = await response.json();
-    return result;
+
+    // Normalize Laravel pagination envelope to our MembersListResponse shape
+    const meta = result.meta ?? result;
+    return {
+        data: (result.data ?? []).map(normalizeMember),
+        meta: {
+            currentPage: meta.current_page ?? meta.currentPage ?? page,
+            totalPages: meta.last_page ?? meta.totalPages ?? 1,
+            totalItems: meta.total ?? meta.totalItems ?? 0,
+        },
+    };
 };
 
 export const getMemberDetail = async (id: number): Promise<AdvisorMember> => {
@@ -170,7 +198,7 @@ export const getMemberDetail = async (id: number): Promise<AdvisorMember> => {
     });
     if (!response.ok) await handleApiError(response);
     const result = await response.json();
-    return result.data;
+    return normalizeMember(result.data);
 };
 
 export const addMember = async (memberData: Partial<AdvisorMember>) => {

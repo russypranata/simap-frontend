@@ -15,9 +15,14 @@ const getAuthHeaders = (): HeadersInit => {
 };
 
 const handleApiError = async (response: Response): Promise<never> => {
-    const errorData = await response.json();
-    const error = new Error(errorData.message) as Error & { code: number; errors?: Record<string, string[]> };
-    error.code = errorData.code;
+    let errorData: { message?: string; code?: number; errors?: Record<string, string[]> } = {};
+    try {
+        errorData = await response.json();
+    } catch {
+        // Non-JSON response (e.g. 500 HTML page)
+    }
+    const error = new Error(errorData.message || `HTTP ${response.status}`) as Error & { code: number; errors?: Record<string, string[]> };
+    error.code = errorData.code ?? response.status;
     error.errors = errorData.errors;
     throw error;
 };
@@ -113,7 +118,16 @@ export const getDashboardStats = async (
     });
     if (!response.ok) await handleApiError(response);
     const result = await response.json();
-    return result.data;
+    // Normalize snake_case from Laravel to camelCase
+    const d = result.data;
+    return {
+        totalMembers: d.total_members ?? d.totalMembers ?? 0,
+        lastAttendancePresent: d.last_attendance_present ?? d.lastAttendancePresent ?? 0,
+        averageAttendance: d.average_attendance ?? d.averageAttendance ?? 0,
+        totalMeetings: d.total_meetings ?? d.totalMeetings ?? 0,
+        activeStudents: d.active_students ?? d.activeStudents ?? 0,
+        needsAttention: d.needs_attention ?? d.needsAttention ?? 0,
+    };
 };
 
 export const getUpcomingSchedule = async (): Promise<UpcomingScheduleItem[]> => {

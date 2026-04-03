@@ -71,7 +71,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
               <Filter className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-semibold text-slate-900">
                 Filter Presensi
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground">

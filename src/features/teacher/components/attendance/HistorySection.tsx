@@ -227,7 +227,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
               <Filter className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-semibold text-slate-900">
                 Filter Riwayat
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground">
@@ -247,7 +247,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
             {/* Row 1: Academic Year and Semester */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Tahun Ajaran</Label>
+                <Label className="text-sm font-semibold text-slate-700">Tahun Ajaran</Label>
                 <Select value={academicYear} onValueChange={setAcademicYear}>
                   <SelectTrigger className="bg-white border-slate-200 shadow-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -256,7 +256,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Semester</Label>
+                <Label className="text-sm font-semibold text-slate-700">Semester</Label>
                 <Select value={semester || 'all'} onValueChange={(v) => setSemester(v === 'all' ? '' : v)}>
                   <SelectTrigger className="bg-white border-slate-200 shadow-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -270,7 +270,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
             {/* Row 2: Class, Subject, Status, Search */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Kelas</Label>
+                <Label className="text-sm font-semibold text-slate-700">Kelas</Label>
                 <Select value={selectedClass || 'all'} onValueChange={(v) => setSelectedClass(v === 'all' ? '' : v)}>
                   <SelectTrigger className="bg-white border-slate-200 shadow-sm"><SelectValue placeholder="Semua Kelas" /></SelectTrigger>
                   <SelectContent>
@@ -280,7 +280,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Mata Pelajaran</Label>
+                <Label className="text-sm font-semibold text-slate-700">Mata Pelajaran</Label>
                 <Select value={selectedSubject || 'all'} onValueChange={(v) => setSelectedSubject(v === 'all' ? '' : v)}>
                   <SelectTrigger className="bg-white border-slate-200 shadow-sm"><SelectValue placeholder="Semua Mapel" /></SelectTrigger>
                   <SelectContent>
@@ -290,7 +290,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Status</Label>
+                <Label className="text-sm font-semibold text-slate-700">Status</Label>
                 <Select value={selectedStatus || 'all'} onValueChange={(v) => setSelectedStatus(v === 'all' ? '' : v)}>
                   <SelectTrigger className="bg-white border-slate-200 shadow-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -299,7 +299,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Cari</Label>
+                <Label className="text-sm font-semibold text-slate-700">Cari</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input placeholder="Nama siswa..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
@@ -310,7 +310,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
             {/* Row 3: Date Filters */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Filter Cepat</Label>
+                <Label className="text-sm font-semibold text-slate-700">Filter Cepat</Label>
                 <div className="flex items-center bg-muted/50 p-1 rounded-lg border border-border/50">
                   {([
                     { key: 'today' as const, label: 'Hari Ini', fn: setToday },
@@ -328,7 +328,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Rentang Tanggal</Label>
+                <Label className="text-sm font-semibold text-slate-700">Rentang Tanggal</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <Input type="date" value={dateRange.from} onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })} className="bg-white border-slate-200" />
                   <Input type="date" value={dateRange.to} onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })} className="bg-white border-slate-200" />
@@ -348,7 +348,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
                 <Clock className="h-5 w-5" />
               </div>
               <div>
-                <CardTitle className="text-lg font-semibold text-gray-900">
+                <CardTitle className="text-lg font-semibold text-slate-900">
                   Riwayat Presensi
                 </CardTitle>
                 <CardDescription className="text-sm text-muted-foreground">
