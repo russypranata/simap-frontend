@@ -15,45 +15,46 @@ import {
 } from "@/features/shared/components";
 
 // ==================== SKELETON ====================
-const DashboardSkeleton: React.FC = () => (
-    <div className="space-y-6 animate-in fade-in duration-500">
-        <SkeletonPageHeader withAction />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
+const CardSkeleton: React.FC = () => (
+    <Card>
+        <div className="p-6 pb-3">
+            <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-slate-100 animate-pulse" />
+                <div className="space-y-1.5">
+                    <div className="h-5 w-32 bg-slate-100 rounded animate-pulse" />
+                    <div className="h-4 w-48 bg-slate-100 rounded animate-pulse" />
+                </div>
+            </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {Array.from({ length: 2 }).map((_, i) => (
-                <Card key={i}>
-                    <div className="p-6 pb-3">
-                        <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-slate-100" />
-                            <div className="space-y-1.5">
-                                <div className="h-5 w-32 bg-slate-100 rounded" />
-                                <div className="h-4 w-48 bg-slate-100 rounded" />
-                            </div>
-                        </div>
-                    </div>
-                    <CardContent className="space-y-3">
-                        {Array.from({ length: 2 }).map((_, j) => (
-                            <div key={j} className="h-16 w-full rounded-lg bg-slate-100" />
-                        ))}
-                    </CardContent>
-                </Card>
+        <CardContent className="space-y-3">
+            {Array.from({ length: 2 }).map((_, j) => (
+                <div key={j} className="h-16 w-full rounded-lg bg-slate-100 animate-pulse" />
             ))}
-        </div>
-    </div>
+        </CardContent>
+    </Card>
 );
 
 // ==================== MAIN ====================
 export const ExtracurricularDashboard: React.FC = () => {
     const router = useRouter();
-    const { stats, upcomingSchedules, recentActivities, advisorName, extracurricularName, isLoading } = useAdvisorDashboard();
+    const { stats, upcomingSchedules, recentActivities, advisorName, extracurricularName, isLoading, isStatsLoading } = useAdvisorDashboard();
 
-    if (isLoading) return <DashboardSkeleton />;
+    if (isLoading && !advisorName) return (
+        <div className="space-y-6 animate-in fade-in duration-500">
+            <SkeletonPageHeader withAction />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <CardSkeleton />
+                <CardSkeleton />
+            </div>
+        </div>
+    );
 
     const attendanceColor =
         stats.averageAttendance >= 90 ? "green" :
-        stats.averageAttendance >= 75 ? "amber" : "red";
+        stats.averageAttendance >= 75 ? "amber" : "red" as const;
 
     return (
         <div className="space-y-6">
@@ -73,15 +74,24 @@ export const ExtracurricularDashboard: React.FC = () => {
             </PageHeader>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <StatCard title="Total Anggota" value={stats.totalMembers} subtitle="Anggota aktif" icon={Users} color="blue" />
-                <StatCard title="Hadir Terakhir" value={stats.lastAttendancePresent} subtitle="Pertemuan lalu" icon={CheckCircle} color="green" />
-                <StatCard title="Rata-rata Kehadiran" value={`${stats.averageAttendance}%`} subtitle="Tahun ajaran ini" icon={TrendingUp} color={attendanceColor} />
-                <StatCard title="Total Pertemuan" value={stats.totalMeetings} subtitle="Kegiatan tercatat" icon={Calendar} color="purple" />
+                <StatCard title="Total Anggota" value={isStatsLoading ? "..." : stats.totalMembers} subtitle="Anggota aktif" icon={Users} color="blue" />
+                <StatCard title="Hadir Terakhir" value={isStatsLoading ? "..." : stats.lastAttendancePresent} subtitle="Pertemuan lalu" icon={CheckCircle} color="green" />
+                <StatCard title="Rata-rata Kehadiran" value={isStatsLoading ? "..." : `${stats.averageAttendance}%`} subtitle="Tahun ajaran ini" icon={TrendingUp} color={attendanceColor} />
+                <StatCard title="Total Pertemuan" value={isStatsLoading ? "..." : stats.totalMeetings} subtitle="Kegiatan tercatat" icon={Calendar} color="purple" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ScheduleCard upcomingSchedules={upcomingSchedules} extracurricularName={extracurricularName} />
-                <RecentActivitiesCard recentActivities={recentActivities} />
+                {isLoading ? (
+                    <>
+                        <CardSkeleton />
+                        <CardSkeleton />
+                    </>
+                ) : (
+                    <>
+                        <ScheduleCard upcomingSchedules={upcomingSchedules} extracurricularName={extracurricularName} />
+                        <RecentActivitiesCard recentActivities={recentActivities} />
+                    </>
+                )}
             </div>
 
             <Card className="bg-blue-50 border-blue-800/20">

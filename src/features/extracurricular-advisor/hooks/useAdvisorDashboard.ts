@@ -17,6 +17,7 @@ interface UseAdvisorDashboardReturn {
     advisorName: string;
     extracurricularName: string;
     isLoading: boolean;
+    isStatsLoading: boolean;
     refetch: () => void;
 }
 
@@ -38,9 +39,11 @@ export const useAdvisorDashboard = (): UseAdvisorDashboardReturn => {
     const [advisorName, setAdvisorName] = useState("Tutor Ekskul");
     const [extracurricularName, setExtracurricularName] = useState("");
     const [isLoading, setIsLoading] = useState(true);
+    const [isStatsLoading, setIsStatsLoading] = useState(true);
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
+        setIsStatsLoading(true);
         try {
             const [statsData, scheduleData, activitiesData, profileData] = await Promise.all([
                 getDashboardStats({ academicYear: academicYear.academicYear }),
@@ -49,12 +52,14 @@ export const useAdvisorDashboard = (): UseAdvisorDashboardReturn => {
                 getProfile(),
             ]);
             setStats(statsData);
+            setIsStatsLoading(false);
             setUpcomingSchedules(scheduleData);
             setRecentActivities(activitiesData);
             setAdvisorName(profileData.name);
             setExtracurricularName(profileData.extracurricular ?? "");
         } catch (error) {
             console.error("Failed to fetch dashboard data:", error);
+            setIsStatsLoading(false);
         } finally {
             setIsLoading(false);
         }
@@ -71,6 +76,7 @@ export const useAdvisorDashboard = (): UseAdvisorDashboardReturn => {
         advisorName,
         extracurricularName,
         isLoading,
+        isStatsLoading,
         refetch: fetchData,
     };
 };
