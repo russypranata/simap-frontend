@@ -15,6 +15,7 @@ interface UseAdvisorDashboardReturn {
     upcomingSchedules: UpcomingScheduleItem[];
     recentActivities: RecentActivityItem[];
     advisorName: string;
+    extracurricularName: string;
     isLoading: boolean;
     refetch: () => void;
 }
@@ -35,6 +36,7 @@ export const useAdvisorDashboard = (): UseAdvisorDashboardReturn => {
     const [upcomingSchedules, setUpcomingSchedules] = useState<UpcomingScheduleItem[]>([]);
     const [recentActivities, setRecentActivities] = useState<RecentActivityItem[]>([]);
     const [advisorName, setAdvisorName] = useState("Tutor Ekskul");
+    const [extracurricularName, setExtracurricularName] = useState("");
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchData = useCallback(async () => {
@@ -50,6 +52,7 @@ export const useAdvisorDashboard = (): UseAdvisorDashboardReturn => {
             setUpcomingSchedules(scheduleData);
             setRecentActivities(activitiesData);
             setAdvisorName(profileData.name);
+            setExtracurricularName(profileData.extracurricular ?? "");
         } catch (error) {
             console.error("Failed to fetch dashboard data:", error);
         } finally {
@@ -66,6 +69,7 @@ export const useAdvisorDashboard = (): UseAdvisorDashboardReturn => {
         upcomingSchedules,
         recentActivities,
         advisorName,
+        extracurricularName,
         isLoading,
         refetch: fetchData,
     };

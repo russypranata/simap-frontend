@@ -47,7 +47,7 @@ const DashboardSkeleton: React.FC = () => (
 // ==================== MAIN ====================
 export const ExtracurricularDashboard: React.FC = () => {
     const router = useRouter();
-    const { stats, upcomingSchedules, recentActivities, advisorName, isLoading } = useAdvisorDashboard();
+    const { stats, upcomingSchedules, recentActivities, advisorName, extracurricularName, isLoading } = useAdvisorDashboard();
 
     if (isLoading) return <DashboardSkeleton />;
 
@@ -80,7 +80,7 @@ export const ExtracurricularDashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ScheduleCard upcomingSchedules={upcomingSchedules} />
+                <ScheduleCard upcomingSchedules={upcomingSchedules} extracurricularName={extracurricularName} />
                 <RecentActivitiesCard recentActivities={recentActivities} />
             </div>
 

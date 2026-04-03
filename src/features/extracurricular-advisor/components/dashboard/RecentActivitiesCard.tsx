@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { EmptyState } from "@/features/shared/components";
 import { type RecentActivityItem } from "../../services/advisorDashboardService";
 
 interface RecentActivitiesCardProps {
@@ -42,7 +43,15 @@ export const RecentActivitiesCard: React.FC<RecentActivitiesCardProps> = ({ rece
             </CardHeader>
             <CardContent className="pt-0">
                 <div className="space-y-2">
-                    {recentActivities.map((activity) => (
+                    {recentActivities.length === 0 ? (
+                        <EmptyState
+                            icon={ClipboardList}
+                            title="Belum ada presensi"
+                            description="Riwayat presensi siswa akan muncul di sini."
+                            className="py-10"
+                        />
+                    ) : (
+                        recentActivities.map((activity) => (
                         <div
                             key={activity.id}
                             onClick={() => router.push(`/extracurricular-advisor/attendance/${activity.id}`)}
@@ -107,7 +116,8 @@ export const RecentActivitiesCard: React.FC<RecentActivitiesCardProps> = ({ rece
                                 {activity.attendance}%
                             </Badge>
                         </div>
-                    ))}
+                        ))
+                    )}
                 </div>
             </CardContent>
         </Card>
