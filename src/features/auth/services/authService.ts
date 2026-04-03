@@ -6,19 +6,21 @@ const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== 'false'; // Default to tru
 
 // Role mapping: backend role names -> frontend role names
 const ROLE_MAP: Record<string, UserRole> = {
-    'extracurricular_tutor': 'tutor_ekskul',
-    'tutor_ekskul': 'tutor_ekskul',
-    'pj_mutamayizin': 'pj_mutamayizin',
-    'guru': 'guru',
-    'siswa': 'siswa',
-    'admin': 'admin',
-    'orang_tua': 'orang_tua',
+    subject_teacher: 'guru',
+    picket_teacher: 'guru',
+    homeroom_teacher: 'guru',
+    extracurricular_tutor: 'tutor_ekskul',
+    mutamayizin_coordinator: 'pj_mutamayizin',
+    student: 'siswa',
+    headmaster: 'admin',
+    admin: 'admin',
+    parent: 'orang_tua',
 };
 
 const normalizeRole = (rawRole: string | undefined): UserRole => {
     if (!rawRole) return null;
     const lower = rawRole.toLowerCase();
-    return ROLE_MAP[lower] || lower as UserRole;
+    return ROLE_MAP[lower] || (lower as UserRole);
 };
 
 export interface LoginRequest {
