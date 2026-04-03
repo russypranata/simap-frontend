@@ -15,6 +15,7 @@ export const AttendanceDetailPage: React.FC = () => {
 
     const {
         detail, stats, isLoading,
+        extracurricularName,
         searchTerm, setSearchTerm,
         statusFilter, setStatusFilter,
         classFilter, setClassFilter,
@@ -43,7 +44,7 @@ export const AttendanceDetailPage: React.FC = () => {
                 description="Rincian lengkap data kehadiran siswa pada pertemuan ekstrakurikuler"
             />
 
-            <AttendanceInfoCard detail={detail} stats={stats} />
+            <AttendanceInfoCard detail={detail} stats={stats} extracurricularName={extracurricularName} />
 
             <AttendanceStudentTable
                 paginatedStudents={paginatedStudents}

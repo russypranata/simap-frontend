@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import { getAttendanceDetail, type AttendanceDetail } from "../services/advisorAttendanceService";
+import { getProfile } from "../services/advisorProfileService";
 
 interface AttendanceStats {
     present: number;
@@ -15,6 +16,7 @@ interface UseAdvisorAttendanceDetailReturn {
     detail: AttendanceDetail | null;
     stats: AttendanceStats;
     isLoading: boolean;
+    extracurricularName: string;
     // Filters
     searchTerm: string;
     setSearchTerm: (s: string) => void;
@@ -37,6 +39,7 @@ const DEFAULT_STATS: AttendanceStats = { present: 0, sick: 0, permit: 0, absent:
 export const useAdvisorAttendanceDetail = (id: number): UseAdvisorAttendanceDetailReturn => {
     const [detail, setDetail] = useState<AttendanceDetail | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [extracurricularName, setExtracurricularName] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [classFilter, setClassFilter] = useState("all");
@@ -47,8 +50,12 @@ export const useAdvisorAttendanceDetail = (id: number): UseAdvisorAttendanceDeta
         if (!id) return;
         setIsLoading(true);
         try {
-            const data = await getAttendanceDetail(id);
+            const [data, profileData] = await Promise.all([
+                getAttendanceDetail(id),
+                getProfile(),
+            ]);
             setDetail(data);
+            setExtracurricularName(profileData.extracurricular ?? "");
         } catch {
             toast.error("Gagal memuat detail presensi");
         } finally {
@@ -98,6 +105,7 @@ export const useAdvisorAttendanceDetail = (id: number): UseAdvisorAttendanceDeta
 
     return {
         detail, stats, isLoading,
+        extracurricularName,
         searchTerm, setSearchTerm,
         statusFilter, setStatusFilter,
         classFilter, setClassFilter,

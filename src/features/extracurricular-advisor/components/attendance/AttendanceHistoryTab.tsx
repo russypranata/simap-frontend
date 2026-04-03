@@ -99,7 +99,7 @@ export const AttendanceHistoryTab: React.FC<AttendanceHistoryTabProps> = ({
                 </div>
             </CardHeader>
 
-            <div className="px-6 py-3 border-b bg-slate-50/50">
+            <div className="px-6 pb-2 pt-1">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-3">
                     <div className="relative w-full md:w-72">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -138,7 +138,7 @@ export const AttendanceHistoryTab: React.FC<AttendanceHistoryTabProps> = ({
                 </div>
             </div>
 
-            <CardContent className="pt-4">
+            <CardContent className="pt-1">
                 <div className="space-y-3">
                     {isHistoryLoading ? (
                         Array.from({ length: 3 }).map((_, i) => (
