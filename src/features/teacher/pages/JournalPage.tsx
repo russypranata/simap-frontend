@@ -143,8 +143,8 @@ export const JournalPage: React.FC = () => {
             media: Array.isArray(data.media)
                 ? data.media.join(', ')
                 : data.media,
-            academicYear: academicYear,
-            semester: semester,
+            academicYear: defaultAcademicYear,
+            semester: defaultSemester as 'Ganjil' | 'Genap',
         };
     };
 

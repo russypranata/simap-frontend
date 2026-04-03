@@ -71,6 +71,7 @@ export const StudentAnnouncements: React.FC = () => {
         endIndex,
         unreadCount,
         handleViewDetail,
+        ITEMS_PER_PAGE,
     } = useStudentAnnouncements();
 
     return (

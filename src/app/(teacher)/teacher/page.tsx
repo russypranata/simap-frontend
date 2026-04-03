@@ -1,5 +1,5 @@
-import { Announcements } from '@/features/teacher/pages/Announcements';
+import { redirect } from 'next/navigation';
 
-export default function AnnouncementsPage() {
-  return <Announcements />;
+export default function TeacherRootPage() {
+    redirect('/teacher/dashboard');
 }

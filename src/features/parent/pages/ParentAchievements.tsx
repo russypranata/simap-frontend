@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParentAchievements } from "../hooks/useParentAchievements";
+import { type AchievementRecord } from "../services/parentAchievementsService";
 import {
     ErrorState,
     PageHeader,
