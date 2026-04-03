@@ -4,6 +4,23 @@ const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== 'false'; // Default to true if not set
 
+// Role mapping: backend role names -> frontend role names
+const ROLE_MAP: Record<string, UserRole> = {
+    'extracurricular_tutor': 'tutor_ekskul',
+    'tutor_ekskul': 'tutor_ekskul',
+    'pj_mutamayizin': 'pj_mutamayizin',
+    'guru': 'guru',
+    'siswa': 'siswa',
+    'admin': 'admin',
+    'orang_tua': 'orang_tua',
+};
+
+const normalizeRole = (rawRole: string | undefined): UserRole => {
+    if (!rawRole) return null;
+    const lower = rawRole.toLowerCase();
+    return ROLE_MAP[lower] || lower as UserRole;
+};
+
 export interface LoginRequest {
     username: string; // NIP, NIS, or specific username
     password: string;
@@ -101,13 +118,14 @@ export const authService = {
             const result = await response.json();
             const payload = result.data;
 
-            // Normalize role to lowercase to match frontend expectations
-            // Backend returns "Siswa", "Guru", etc. but frontend expects "siswa", "guru", etc.
+            // Normalize role: lowercase + map backend names to frontend names
+            // Backend returns "Siswa", "Guru", "extracurricular_tutor", etc.
+            // Frontend expects "siswa", "guru", "tutor_ekskul", etc.
             const normalizedResult: LoginResponse = {
                 token: payload.token,
                 user: {
                     ...payload.user,
-                    role: payload.user.role?.toLowerCase() as UserRole,
+                    role: normalizeRole(payload.user.role),
                 },
             };
 
