@@ -1,5 +1,9 @@
 export { JournalStatsCards } from './JournalStatsCards';
 export { JournalFilterSection } from './JournalFilterSection';
+export { JournalListFilterDialog } from './JournalListFilterDialog';
+export type { QuickDateFilter } from './JournalListFilterDialog';
+export { JournalPeriodSelector } from './JournalPeriodSelector';
+export { JournalFilterDialog, JournalFilterBadges } from './JournalFilterDialog';
 export { JournalList } from './JournalList';
 export { JournalTable } from './JournalTable';
 export { JournalStatistics } from './JournalStatistics';

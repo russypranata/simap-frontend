@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Edit, Trash2, FileText, Search } from 'lucide-react';
@@ -33,21 +32,9 @@ export const JournalTable: React.FC<JournalTableProps> = ({
   useEffect(() => { setCurrentPage(1); }, [searchTerm, filterClass, filterSubject, journals.length]);
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-            <FileText className="h-5 w-5" />
-          </div>
-          <div>
-            <CardTitle className="text-lg font-semibold">Tabel Jurnal Mengajar</CardTitle>
-            <CardDescription>Daftar jurnal mengajar dalam format tabel</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+    <div>
+      <div className="overflow-x-auto">
+        <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Tanggal</th>
@@ -65,7 +52,7 @@ export const JournalTable: React.FC<JournalTableProps> = ({
                   <tr key={journal.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                     <td className="p-4 text-sm text-slate-600">{formatDate(journal.date, 'dd MMM yyyy')}</td>
                     <td className="p-4">
-                      <Badge variant="secondary" className="bg-blue-50 text-blue-800 border-blue-200">{journal.class}</Badge>
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-0">{journal.class}</Badge>
                     </td>
                     <td className="p-4 text-sm font-medium text-slate-800">{journal.subject}</td>
                     <td className="p-4 text-sm text-slate-600 max-w-xs truncate">{journal.material}</td>
@@ -127,7 +114,6 @@ export const JournalTable: React.FC<JournalTableProps> = ({
           onPageChange={setCurrentPage}
           onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
         />
-      </CardContent>
-    </Card>
+    </div>
   );
 };

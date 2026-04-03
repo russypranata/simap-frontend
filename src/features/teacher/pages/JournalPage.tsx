@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTeacherData } from '@/features/teacher/hooks/useTeacherData';
+import { useAcademicYear } from '@/context/AcademicYearContext';
 import {
     JournalFilterSection,
     JournalList,
@@ -12,7 +13,9 @@ import {
     JournalStatistics,
     JournalForm,
     JournalReports,
+    JournalPeriodSelector,
 } from '@/features/teacher/components/journal';
+import type { QuickDateFilter } from '@/features/teacher/components/journal';
 import { TeachingJournal } from '@/features/teacher/types/teacher';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
 import { LESSON_HOURS } from '@/features/teacher/constants/attendance';
@@ -20,12 +23,11 @@ import {
     BookOpen,
     FilePen,
     RefreshCw,
-    Grid,
-    List as ListIcon,
     Calendar,
     BarChart3,
     FileText,
     ClipboardCheck,
+    Users,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -62,78 +64,50 @@ export const JournalPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterClass, setFilterClass] = useState('all');
     const [filterSubject, setFilterSubject] = useState('all');
+    const [activeDateFilter, setActiveDateFilter] = useState<'today' | 'week' | 'month' | null>(null);
     const [activeTab, setActiveTab] = useState('list');
     const [viewType, setViewType] = useState('card');
 
-    // PRIMARY FILTERS (Mandatory - always applied)
-    const [academicYear, setAcademicYear] = useState('2025/2026');
-    const [semester, setSemester] = useState<'Ganjil' | 'Genap'>('Ganjil');
+    // Filter periode untuk tab Daftar — default dari context, independen dari tab lain
+    const { academicYear: academicYearCtx } = useAcademicYear();
+    const defaultAcademicYear = academicYearCtx.academicYear;
+    const defaultSemester = academicYearCtx.semester === '1' ? 'Ganjil' : 'Genap';
+    const [listAcademicYear, setListAcademicYear] = useState(defaultAcademicYear);
+    const [listSemester, setListSemester] = useState<'Ganjil' | 'Genap'>(defaultSemester as 'Ganjil' | 'Genap');
 
-    // SECONDARY FILTERS (Optional - only applied when user explicitly sets them)
-    const [dateRange, setDateRange] = useState({
-        from: '', // Empty = not set (will show placeholder)
-        to: ''
-    });
-    const [activeDateFilter, setActiveDateFilter] = useState<'today' | 'week' | 'month' | null>(null);
-    const [isDateFilterActive, setIsDateFilterActive] = useState(false);
-
-    // Quick date filter helpers
     const formatLocalDate = (d: Date) => {
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return `${y}-${m}-${day}`;
     };
 
-    const setToday = () => {
+    const getDateRangeForFilter = (filter: 'today' | 'week' | 'month' | null) => {
+        if (!filter) return null;
         const today = new Date();
-        const formatted = formatLocalDate(today);
-        setDateRange({ from: formatted, to: formatted });
-        setActiveDateFilter('today');
-        setIsDateFilterActive(true);
+        if (filter === 'today') { const d = formatLocalDate(today); return { from: d, to: d }; }
+        if (filter === 'week') {
+            const dow = today.getDay();
+            const diff = dow === 0 ? -6 : 1 - dow;
+            const first = new Date(today); first.setDate(today.getDate() + diff); first.setHours(12);
+            const last = new Date(first); last.setDate(first.getDate() + 6); last.setHours(12);
+            return { from: formatLocalDate(first), to: formatLocalDate(last) };
+        }
+        const first = new Date(today.getFullYear(), today.getMonth(), 1, 12);
+        const last = new Date(today.getFullYear(), today.getMonth() + 1, 0, 12);
+        return { from: formatLocalDate(first), to: formatLocalDate(last) };
     };
 
-    const setThisWeek = () => {
-        const today = new Date();
-        const dayOfWeek = today.getDay();
-        const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-
-        const firstDay = new Date(today);
-        firstDay.setDate(today.getDate() + diff);
-        firstDay.setHours(12, 0, 0, 0); // Set to noon to avoid timezone shifts
-
-        const lastDay = new Date(firstDay);
-        lastDay.setDate(firstDay.getDate() + 6);
-        lastDay.setHours(12, 0, 0, 0);
-
-        setDateRange({
-            from: formatLocalDate(firstDay),
-            to: formatLocalDate(lastDay)
-        });
-        setActiveDateFilter('week');
-        setIsDateFilterActive(true);
+    const handleApplyListFilter = (cls: string, subject: string, dateFilter: QuickDateFilter) => {
+        setFilterClass(cls);
+        setFilterSubject(subject);
+        setActiveDateFilter(dateFilter);
     };
 
-    const setThisMonth = () => {
-        const date = new Date();
-        // Set to noon to avoid timezone shifts
-        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1, 12, 0, 0);
-        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0, 12, 0, 0);
-
-        setDateRange({
-            from: formatLocalDate(firstDay),
-            to: formatLocalDate(lastDay)
-        });
-        setActiveDateFilter('month');
-        setIsDateFilterActive(true);
-    };
-
-    // Custom setDateRange wrapper to track manual changes
-    const handleDateRangeChange = (newRange: { from: string; to: string }) => {
-        setDateRange(newRange);
+    const handleResetListFilter = () => {
+        setFilterClass('all');
+        setFilterSubject('all');
         setActiveDateFilter(null);
-        // Activate date filter if user has set both dates
-        setIsDateFilterActive(newRange.from !== '' && newRange.to !== '');
     };
 
     const [formData, setFormData] = useState({
@@ -248,77 +222,58 @@ export const JournalPage: React.FC = () => {
         });
     };
 
-    const handleExportData = (format: 'excel' | 'pdf' | 'csv') => {
-        toast.success(`Data jurnal berhasil diunduh dalam format ${format.toUpperCase()}!`);
-    };
 
 
 
-    // HIERARCHICAL FILTER LOGIC
-    const filteredJournals = teachingJournals.filter(journal => {
-        // Basic filters (always applied)
-        const matchesSearch = journal.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            journal.material.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            journal.topic.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesClass = filterClass === 'all' || journal.class === filterClass;
-        const matchesSubject = filterSubject === 'all' || journal.subject === filterSubject;
 
-        // PRIMARY FILTERS (Mandatory)
-        const matchesAcademicYear = journal.academicYear === academicYear;
-        const matchesSemester = journal.semester === semester;
+    // Filter hanya periode — untuk stats card (tidak terpengaruh search/kelas/mapel)
+    const periodJournals = useMemo(() =>
+        teachingJournals.filter(j =>
+            j.academicYear === listAcademicYear && j.semester === listSemester
+        ), [teachingJournals, listAcademicYear, listSemester]);
 
-        // SECONDARY FILTER (Optional - only if user explicitly set it)
-        let matchesDate = true; // Default to true (disabled)
-        if (isDateFilterActive) {
-            const journalDate = new Date(journal.date);
-            const fromDate = new Date(dateRange.from);
-            const toDate = new Date(dateRange.to);
-            journalDate.setHours(0, 0, 0, 0);
-            fromDate.setHours(0, 0, 0, 0);
-            toDate.setHours(0, 0, 0, 0);
-            matchesDate = journalDate >= fromDate && journalDate <= toDate;
-        }
+    // Filter lengkap — untuk daftar jurnal
+    const filteredJournals = useMemo(() => {
+        const dateRange = getDateRangeForFilter(activeDateFilter);
+        return periodJournals.filter(journal => {
+            const matchesSearch = journal.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                journal.material.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                journal.topic.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesClass = filterClass === 'all' || journal.class === filterClass;
+            const matchesSubject = filterSubject === 'all' || journal.subject === filterSubject;
+            let matchesDate = true;
+            if (dateRange) {
+                const d = new Date(journal.date); d.setHours(0, 0, 0, 0);
+                const from = new Date(dateRange.from); from.setHours(0, 0, 0, 0);
+                const to = new Date(dateRange.to); to.setHours(0, 0, 0, 0);
+                matchesDate = d >= from && d <= to;
+            }
+            return matchesSearch && matchesClass && matchesSubject && matchesDate;
+        });
+    }, [periodJournals, searchTerm, filterClass, filterSubject, activeDateFilter]);
 
-        return matchesSearch && matchesClass && matchesSubject &&
-            matchesAcademicYear && matchesSemester && matchesDate;
-    });
-
-    const getJournalStats = () => {
-        const uniqueClasses = new Set(filteredJournals.map(j => j.class));
-        const uniqueSubjects = new Set(filteredJournals.map(j => j.subject));
-
-        const totalHours = filteredJournals.reduce((total, journal) => {
+    const stats = useMemo(() => {
+        const uniqueClasses = new Set(periodJournals.map(j => j.class));
+        const totalHours = periodJournals.reduce((total, journal) => {
             const hourStr = journal.lessonHour;
             if (!hourStr) return total;
-
-            // Try range format "1-3"
             if (hourStr.includes('-')) {
                 const [start, end] = hourStr.split('-').map(Number);
-                if (!isNaN(start) && !isNaN(end)) {
-                    return total + (end - start + 1);
-                }
+                if (!isNaN(start) && !isNaN(end)) return total + (end - start + 1);
             }
-
-            // Try comma format "1,2,3"
-            if (hourStr.includes(',')) {
-                return total + hourStr.split(',').length;
-            }
-
-            // Single hour or fallback
+            if (hourStr.includes(',')) return total + hourStr.split(',').length;
             return total + 1;
         }, 0);
-
+        const totalPresent = periodJournals.reduce((sum, j) => sum + (j.attendance?.present || 0), 0);
+        const totalStudents = periodJournals.reduce((sum, j) => sum + (j.attendance?.total || 0), 0);
+        const avgAttendance = totalStudents > 0 ? Math.round((totalPresent / totalStudents) * 100) : 0;
         return {
-            totalJournals: filteredJournals.length,
+            totalJournals: periodJournals.length,
             totalClasses: uniqueClasses.size,
-            totalSubjects: uniqueSubjects.size,
-            totalHours: totalHours,
+            avgAttendance,
+            totalHours,
         };
-    };
-
-    const stats = getJournalStats();
-
-    if (loading) {
+    }, [periodJournals]);    if (loading) {
         return (
             <div className="space-y-6">
                 <div className="animate-pulse">
@@ -347,10 +302,6 @@ export const JournalPage: React.FC = () => {
                 icon={BookOpen}
                 description="Catatan kegiatan pembelajaran dan evaluasi proses mengajar"
             >
-                <Button variant="outline" onClick={() => router.push('/teacher/attendance')}>
-                    <ClipboardCheck className="h-4 w-4 mr-2" />
-                    Presensi Mapel
-                </Button>
                 <Button className="bg-blue-800 hover:bg-blue-900 text-white flex items-center space-x-2" onClick={() => router.push('/teacher/journal/new')}>
                     <FilePen className="h-4 w-4" />
                     <span>Tambah Jurnal Baru</span>
@@ -358,92 +309,81 @@ export const JournalPage: React.FC = () => {
             </PageHeader>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1.5 gap-1">
-                    <TabsTrigger value="list" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
-                        <BookOpen className="h-4 w-4 mr-2" />
+                <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1 gap-0.5">
+                    <TabsTrigger value="list" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <BookOpen className="h-3.5 w-3.5 mr-1.5" />
                         Daftar Jurnal
                     </TabsTrigger>
-                    <TabsTrigger value="statistics" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
-                        <BarChart3 className="h-4 w-4 mr-2" />
+                    <TabsTrigger value="statistics" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
                         Statistik
                     </TabsTrigger>
-                    <TabsTrigger value="reports" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 h-9 py-2 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
-                        <FileText className="h-4 w-4 mr-2" />
+                    <TabsTrigger value="reports" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <FileText className="h-3.5 w-3.5 mr-1.5" />
                         Laporan
                     </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="list" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
+                    <JournalPeriodSelector
+                        academicYear={listAcademicYear}
+                        semester={listSemester}
+                        defaultAcademicYear={defaultAcademicYear}
+                        defaultSemester={defaultSemester}
+                        onApply={(year, sem) => {
+                            setListAcademicYear(year);
+                            setListSemester(sem as 'Ganjil' | 'Genap');
+                        }}
+                        onClear={() => {
+                            setListAcademicYear(defaultAcademicYear);
+                            setListSemester(defaultSemester as 'Ganjil' | 'Genap');
+                        }}
+                    />
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <StatCard title="Total Jurnal" value={stats.totalJournals} subtitle="Jurnal yang dibuat" icon={BookOpen} color="blue" />
+                        <StatCard title="Total Jurnal" value={stats.totalJournals} subtitle={`${listAcademicYear} • ${listSemester}`} icon={BookOpen} color="blue" />
                         <StatCard title="Kelas Diajar" value={stats.totalClasses} subtitle="Kelas unik" icon={BarChart3} color="purple" />
-                        <StatCard title="Mata Pelajaran" value={stats.totalSubjects} subtitle="Mapel unik" icon={FileText} color="green" />
+                        <StatCard title="Rata-rata Kehadiran" value={`${stats.avgAttendance}%`} subtitle="Kehadiran siswa" icon={Users} color="green" />
                         <StatCard title="Jam Mengajar" value={`${stats.totalHours} JP`} subtitle="Total jam pelajaran" icon={ClipboardCheck} color="amber" />
-                    </div>
-
-                    <div className="flex justify-end">
-                        <Tabs value={viewType} onValueChange={setViewType}>
-                            <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1.5 gap-1">
-                                <TabsTrigger value="card" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
-                                    <Grid className="h-4 w-4 mr-1.5" />
-                                    Kartu
-                                </TabsTrigger>
-                                <TabsTrigger value="table" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
-                                    <ListIcon className="h-4 w-4 mr-1.5" />
-                                    Tabel
-                                </TabsTrigger>
-                            </TabsList>
-                        </Tabs>
                     </div>
 
                     <JournalFilterSection
                         searchTerm={searchTerm}
                         setSearchTerm={setSearchTerm}
                         filterClass={filterClass}
-                        setFilterClass={setFilterClass}
                         filterSubject={filterSubject}
-                        setFilterSubject={setFilterSubject}
+                        activeDateFilter={activeDateFilter}
                         classes={classes}
                         subjects={SUBJECTS}
-                        onExportData={handleExportData}
-                        onCreateNew={() => router.push('/teacher/journal/new')}
-                        totalJournals={teachingJournals.length}
                         filteredCount={filteredJournals.length}
-                        academicYear={academicYear}
-                        setAcademicYear={setAcademicYear}
-                        semester={semester}
-                        setSemester={setSemester}
-                        dateRange={dateRange}
-                        setDateRange={handleDateRangeChange}
-                        activeDateFilter={activeDateFilter}
-                        setToday={setToday}
-                        setThisWeek={setThisWeek}
-                        setThisMonth={setThisMonth}
-                    />
-
-                    {viewType === 'card' ? (
-                        <JournalList
-                            journals={filteredJournals}
-                            searchTerm={searchTerm}
-                            filterClass={filterClass}
-                            filterSubject={filterSubject}
-                            onView={handleViewJournal}
-                            onEdit={handleEditJournal}
-                            onDelete={handleDeleteJournal}
-                            onCreateNew={() => router.push('/teacher/journal/new')}
-                            totalJournals={teachingJournals.length}
-                        />
-                    ) : (
-                        <JournalTable
-                            journals={filteredJournals}
-                            searchTerm={searchTerm}
-                            filterClass={filterClass}
-                            filterSubject={filterSubject}
-                            onView={handleViewJournal}
-                            onEdit={handleEditJournal}
-                            onDelete={handleDeleteJournal}
-                        />
-                    )}
+                        viewType={viewType}
+                        onViewTypeChange={setViewType}
+                        onApplyFilter={handleApplyListFilter}
+                        onResetFilter={handleResetListFilter}
+                    >
+                        {viewType === 'card' ? (
+                            <JournalList
+                                journals={filteredJournals}
+                                searchTerm={searchTerm}
+                                filterClass={filterClass}
+                                filterSubject={filterSubject}
+                                onView={handleViewJournal}
+                                onEdit={handleEditJournal}
+                                onDelete={handleDeleteJournal}
+                                onCreateNew={() => router.push('/teacher/journal/new')}
+                                totalJournals={teachingJournals.length}
+                            />
+                        ) : (
+                            <JournalTable
+                                journals={filteredJournals}
+                                searchTerm={searchTerm}
+                                filterClass={filterClass}
+                                filterSubject={filterSubject}
+                                onView={handleViewJournal}
+                                onEdit={handleEditJournal}
+                                onDelete={handleDeleteJournal}
+                            />
+                        )}
+                    </JournalFilterSection>
                 </TabsContent>
 
                 <TabsContent value="statistics" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
@@ -451,8 +391,8 @@ export const JournalPage: React.FC = () => {
                         journals={teachingJournals}
                         subjects={SUBJECTS}
                         classes={classes}
-                        initialAcademicYear={academicYear}
-                        initialSemester={semester}
+                        initialAcademicYear={defaultAcademicYear}
+                        initialSemester={defaultSemester as 'Ganjil' | 'Genap'}
                     />
                 </TabsContent>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { StatCard } from '@/features/shared/components';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TeachingJournal, TeacherClass } from '@/features/teacher/types/teacher';
 import {
@@ -53,16 +54,22 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
   initialAcademicYear,
   initialSemester,
 }) => {
-  // Local state for independent filtering
-  const [academicYear, setAcademicYear] = useState(initialAcademicYear);
+  // Local state for independent filtering — synced from global on change
+  const [academicYear, setAcademicYear] = useState<string>(initialAcademicYear);
   const [semester, setSemester] = useState<'all' | 'Ganjil' | 'Genap'>(initialSemester);
+
+  // Sync from global filter when parent changes
+  React.useEffect(() => {
+    setAcademicYear(initialAcademicYear);
+    setSemester(initialSemester);
+  }, [initialAcademicYear, initialSemester]);
   const [filterClass, setFilterClass] = useState('all');
   const [filterSubject, setFilterSubject] = useState('all');
 
   // Filter journals based on local state
   const filteredJournals = useMemo(() => {
     return journals.filter(journal => {
-      const matchesAcademicYear = journal.academicYear === academicYear;
+      const matchesAcademicYear = academicYear === 'all' || journal.academicYear === academicYear;
       const matchesSemester = semester === 'all' || journal.semester === semester;
       const matchesClass = filterClass === 'all' || journal.class === filterClass;
       const matchesSubject = filterSubject === 'all' || journal.subject === filterSubject;
@@ -107,14 +114,19 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
       });
     });
 
-    const mostUsedMethod = Object.entries(methodCounts)
-      .sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
+    const mostUsedEntry = Object.entries(methodCounts)
+      .sort((a, b) => b[1] - a[1])[0];
+    const mostUsedMethod = mostUsedEntry?.[0] || '-';
+    const mostUsedMethodCount = mostUsedEntry?.[1] || 0;
+    const totalClasses = new Set(filteredJournals.map(j => j.class)).size;
 
     return {
       totalMeetings,
       totalHours,
       avgAttendance,
       mostUsedMethod,
+      mostUsedMethodCount,
+      totalClasses,
     };
   }, [filteredJournals]);
 
@@ -222,9 +234,15 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
       });
     });
 
-    return Object.entries(methodCounts)
+    const sorted = Object.entries(methodCounts)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
+
+    if (sorted.length <= 5) return sorted;
+
+    const top5 = sorted.slice(0, 5);
+    const othersValue = sorted.slice(5).reduce((sum, item) => sum + item.value, 0);
+    return [...top5, { name: 'Lainnya', value: othersValue }];
   }, [filteredJournals]);
 
   // 4. Class Attendance Data
@@ -256,6 +274,9 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
     setFilterSubject('all');
   };
 
+  const academicYearLabel = academicYear === 'all' ? 'Semua TA' : academicYear;
+  const semesterLabel = semester === 'all' ? 'Ganjil & Genap' : semester;
+
   return (
     <div className="space-y-6">
       {/* Filter Section */}
@@ -267,12 +288,12 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
                 <Filter className="h-5 w-5" />
               </div>
               <div>
-                <CardTitle className="text-lg font-semibold text-gray-900">Filter Statistik</CardTitle>
+                <CardTitle className="text-lg font-semibold text-slate-900">Filter Statistik</CardTitle>
                 <CardDescription className="text-sm text-muted-foreground">Sesuaikan data yang ditampilkan</CardDescription>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8 text-xs">
-              <RefreshCw className="mr-2 h-3 w-3" />
+            <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8 text-xs text-slate-500 hover:text-red-500 hover:bg-red-50 gap-1.5">
+              <RefreshCw className="h-3 w-3" />
               Reset
             </Button>
           </div>
@@ -280,12 +301,13 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Tahun Ajaran</Label>
-              <Select value={academicYear} onValueChange={setAcademicYear}>
-                <SelectTrigger className="h-10">
+              <Label className="text-sm font-semibold text-slate-700">Tahun Ajaran</Label>
+              <Select value={academicYearLabel} onValueChange={setAcademicYear}>
+                <SelectTrigger className="h-10 bg-slate-50/50 border-slate-200">
                   <SelectValue placeholder="Pilih Tahun" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">Semua Tahun Ajaran</SelectItem>
                   {ACADEMIC_YEARS.map((year) => (
                     <SelectItem key={year} value={year}>
                       {year}
@@ -296,9 +318,9 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Semester</Label>
+              <Label className="text-sm font-semibold text-slate-700">Semester</Label>
               <Select value={semester} onValueChange={(v) => setSemester(v as 'all' | 'Ganjil' | 'Genap')}>
-                <SelectTrigger className="h-10">
+                <SelectTrigger className="h-10 bg-slate-50/50 border-slate-200">
                   <SelectValue placeholder="Pilih Semester" />
                 </SelectTrigger>
                 <SelectContent>
@@ -310,9 +332,9 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Kelas</Label>
+              <Label className="text-sm font-semibold text-slate-700">Kelas</Label>
               <Select value={filterClass} onValueChange={setFilterClass}>
-                <SelectTrigger className="h-10">
+                <SelectTrigger className="h-10 bg-slate-50/50 border-slate-200">
                   <SelectValue placeholder="Semua Kelas" />
                 </SelectTrigger>
                 <SelectContent>
@@ -327,9 +349,9 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Mata Pelajaran</Label>
+              <Label className="text-sm font-semibold text-slate-700">Mata Pelajaran</Label>
               <Select value={filterSubject} onValueChange={setFilterSubject}>
-                <SelectTrigger className="h-10">
+                <SelectTrigger className="h-10 bg-slate-50/50 border-slate-200 [&>span]:truncate [&>span]:block [&>span]:text-ellipsis [&>span]:overflow-hidden">
                   <SelectValue placeholder="Semua Mapel" />
                 </SelectTrigger>
                 <SelectContent>
@@ -357,57 +379,10 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-blue-50 border-blue-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-blue-900">Total Pertemuan</CardTitle>
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <BookOpen className="h-4 w-4 text-blue-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-700">{summaryStats.totalMeetings}</div>
-                <p className="text-xs text-blue-600/80">Jurnal mengajar</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-green-50 border-green-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-green-900">Total JP Mengajar</CardTitle>
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <Clock className="h-4 w-4 text-green-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-700">{summaryStats.totalHours}</div>
-                <p className="text-xs text-green-600/80">Jam pelajaran</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-purple-50 border-purple-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-purple-900">Rata-rata Kehadiran</CardTitle>
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Users className="h-4 w-4 text-purple-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-purple-700">{summaryStats.avgAttendance}%</div>
-                <p className="text-xs text-purple-600/80">Kehadiran siswa</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-amber-50 border-amber-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-amber-900">Metode Terfavorit</CardTitle>
-                <div className="p-2 bg-amber-100 rounded-lg">
-                  <Award className="h-4 w-4 text-amber-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-lg font-bold text-amber-700 truncate">{summaryStats.mostUsedMethod}</div>
-                <p className="text-xs text-amber-600/80">Paling sering dipakai</p>
-              </CardContent>
-            </Card>
+            <StatCard title="Total Pertemuan" value={summaryStats.totalMeetings} subtitle="Jurnal mengajar" icon={BookOpen} color="blue" />
+            <StatCard title="Total JP Mengajar" value={summaryStats.totalHours} subtitle="Jam pelajaran" icon={Clock} color="green" />
+            <StatCard title="Rata-rata Kehadiran" value={`${summaryStats.avgAttendance}%`} subtitle="Kehadiran siswa" icon={Users} color="purple" />
+            <StatCard title="Metode Terfavorit" value={summaryStats.mostUsedMethodCount} subtitle={summaryStats.mostUsedMethod} icon={Award} color="amber" />
           </div>
 
           {/* Charts Grid */}
@@ -432,10 +407,10 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 text-xs font-normal">
-                    {academicYear}
+                    {academicYearLabel}
                   </Badge>
                   <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 text-xs font-normal">
-                    {semester === 'all' ? 'Ganjil dan Genap' : semester}
+                    {semesterLabel}
                   </Badge>
                   <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 text-xs font-normal">
                     {filterClass === 'all' ? 'Semua Kelas' : filterClass}
@@ -523,10 +498,10 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 text-xs font-normal">
-                    {academicYear}
+                    {academicYearLabel}
                   </Badge>
                   <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 text-xs font-normal">
-                    {semester === 'all' ? 'Ganjil dan Genap' : semester}
+                    {semesterLabel}
                   </Badge>
                   <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 text-xs font-normal">
                     {filterClass === 'all' ? 'Semua Kelas' : filterClass}
@@ -584,10 +559,10 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 text-xs font-normal">
-                    {academicYear}
+                    {academicYearLabel}
                   </Badge>
                   <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 text-xs font-normal">
-                    {semester === 'all' ? 'Ganjil dan Genap' : semester}
+                    {semesterLabel}
                   </Badge>
                   <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 text-xs font-normal">
                     {filterClass === 'all' ? 'Semua Kelas' : filterClass}

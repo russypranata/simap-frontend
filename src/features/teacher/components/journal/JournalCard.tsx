@@ -53,16 +53,16 @@ export const JournalCard: React.FC<JournalCardProps> = ({
 
   if (compact) {
     return (
-      <Card className="hover:shadow-md transition-all duration-200 cursor-pointer border-border bg-card overflow-hidden rounded-xl group">
+      <Card className="transition-all duration-200 cursor-pointer border-border bg-card overflow-hidden rounded-xl group">
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-3 mb-3">
-            <Badge variant="secondary" className="font-medium">
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800 font-medium border-0">
               {journal.class}
             </Badge>
             {showActions && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button variant="ghost" size="icon" className="h-6 w-6 p-0 opacity-100 transition-opacity">
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -80,7 +80,7 @@ export const JournalCard: React.FC<JournalCardProps> = ({
 
           <div className="space-y-2">
             <div>
-              <h4 className="font-semibold text-sm line-clamp-1 group-hover:text-primary transition-colors">
+              <h4 className="font-semibold text-sm line-clamp-1">
                 {journal.subject}
               </h4>
               <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
@@ -106,16 +106,16 @@ export const JournalCard: React.FC<JournalCardProps> = ({
 
   // Full version
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 border-border bg-card overflow-hidden rounded-xl flex flex-col h-full">
+    <Card className="group transition-all duration-300 border-border bg-card overflow-hidden rounded-xl flex flex-col h-full">
       <CardHeader className="pb-1 px-5 pt-5">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-2 flex-1">
-            <Badge variant="outline" className="px-2.5 py-0.5 text-xs font-semibold bg-primary/5 text-primary border-primary/20 w-fit">
+            <Badge variant="outline" className="px-2.5 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 border-0 w-fit">
               {journal.class}
             </Badge>
 
             <div className="space-y-1">
-              <CardTitle className="text-lg font-bold leading-tight group-hover:text-primary transition-colors">
+              <CardTitle className="text-lg font-bold leading-tight">
                 {journal.subject}
               </CardTitle>
               <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
