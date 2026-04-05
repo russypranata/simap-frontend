@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAcademicYear } from "@/context/AcademicYearContext";
 import { useDebounce } from "@/hooks/use-debounce";
 import {
@@ -20,8 +21,6 @@ interface UseAdvisorMembersReturn {
     stats: MembersStats;
     isLoading: boolean;
     isStatsLoading: boolean;
-
-    // Pagination
     currentPage: number;
     setCurrentPage: (page: number) => void;
     totalPages: number;
@@ -30,14 +29,10 @@ interface UseAdvisorMembersReturn {
     setItemsPerPage: (n: number) => void;
     startIndex: number;
     endIndex: number;
-
-    // Filters
     searchQuery: string;
     setSearchQuery: (q: string) => void;
     classFilter: string;
     setClassFilter: (c: string) => void;
-
-    // Detail dialog
     isDetailDialogOpen: boolean;
     setIsDetailDialogOpen: (open: boolean) => void;
     selectedMember: AdvisorMember | null;
@@ -45,26 +40,22 @@ interface UseAdvisorMembersReturn {
     handleViewDetail: (member: AdvisorMember) => void;
 }
 
+const DEFAULT_STATS: MembersStats = {
+    totalMembers: 0,
+    avgAttendance: 0,
+    topPerformers: 0,
+    needsAttention: 0,
+};
+
 export const useAdvisorMembers = (): UseAdvisorMembersReturn => {
-    const { academicYear, isLoading: isConfigLoading } = useAcademicYear();
+    const { academicYear } = useAcademicYear();
+    const ay = academicYear.academicYear;
+    const semester = academicYear.semester;
 
-    const [members, setMembers] = useState<AdvisorMember[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [classFilter, setClassFilter] = useState("all");
-
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [totalItems, setTotalItems] = useState(0);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
-
-    const [isStatsLoading, setIsStatsLoading] = useState(true);
-    const [stats, setStats] = useState<MembersStats>({
-        totalMembers: 0,
-        avgAttendance: 0,
-        topPerformers: 0,
-        needsAttention: 0,
-    });
+    const [searchQuery, setSearchQueryRaw] = useState("");
+    const [classFilter, setClassFilterRaw] = useState("all");
+    const [currentPage, setCurrentPageRaw] = useState(1);
+    const [itemsPerPage, setItemsPerPageRaw] = useState(10);
 
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<AdvisorMember | null>(null);
@@ -72,64 +63,53 @@ export const useAdvisorMembers = (): UseAdvisorMembersReturn => {
 
     const debouncedSearch = useDebounce(searchQuery, 500);
 
-    // Fetch members list
-    useEffect(() => {
-        if (isConfigLoading) return;
-        const fetchMembers = async () => {
-            try {
-                setIsLoading(true);
-                const response = await getMembers({
-                    page: currentPage,
-                    limit: itemsPerPage,
-                    search: debouncedSearch,
-                    class: classFilter,
-                    academicYear: academicYear.academicYear,
-                    status: "Aktif",
-                });
-                setMembers(response.data || []);
-                if (response.meta) {
-                    setTotalPages(response.meta.totalPages);
-                    setTotalItems(response.meta.totalItems);
-                }
-            } catch (error) {
-                console.error("Failed to fetch members:", error);
-                setMembers([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchMembers();
-    }, [currentPage, debouncedSearch, classFilter, academicYear.academicYear, itemsPerPage, isConfigLoading]);
+    // Reset page saat filter berubah
+    const setSearchQuery = useCallback((q: string) => {
+        setSearchQueryRaw(q);
+        setCurrentPageRaw(1);
+    }, []);
+    const setClassFilter = useCallback((c: string) => {
+        setClassFilterRaw(c);
+        setCurrentPageRaw(1);
+    }, []);
+    const setItemsPerPage = useCallback((n: number) => {
+        setItemsPerPageRaw(n);
+        setCurrentPageRaw(1);
+    }, []);
+    const setCurrentPage = useCallback((p: number) => setCurrentPageRaw(p), []);
 
-    // Reset page on filter change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [debouncedSearch, classFilter, academicYear.academicYear]);
+    const membersQuery = useQuery({
+        queryKey: ["advisor-members", ay, debouncedSearch, classFilter, currentPage, itemsPerPage],
+        queryFn: () => getMembers({
+            page: currentPage,
+            limit: itemsPerPage,
+            search: debouncedSearch,
+            class: classFilter,
+            academicYear: ay,
+            status: "Aktif",
+        }),
+        placeholderData: (prev) => prev, // keep previous data saat filter berubah (no flicker)
+    });
 
-    // Fetch stats
-    useEffect(() => {
-        if (isConfigLoading) return;
-        const fetchStats = async () => {
-            try {
-                setIsStatsLoading(true);
-                const data = await getDashboardStats({
-                    academicYear: academicYear.academicYear,
-                    semester: academicYear.semester,
-                });
-                setStats({
-                    totalMembers: data.totalMembers,
-                    avgAttendance: data.averageAttendance,
-                    topPerformers: data.activeStudents,
-                    needsAttention: data.needsAttention,
-                });
-            } catch (e) {
-                console.error("Stats fetch error", e);
-            } finally {
-                setIsStatsLoading(false);
-            }
-        };
-        fetchStats();
-    }, [academicYear.academicYear, academicYear.semester, isConfigLoading]);
+    const statsQuery = useQuery({
+        queryKey: ["advisor-members-stats", ay, semester],
+        queryFn: () => getDashboardStats({ academicYear: ay, semester }),
+        staleTime: 5 * 60 * 1000,
+    });
+
+    const members = membersQuery.data?.data ?? [];
+    const totalItems = membersQuery.data?.meta?.totalItems ?? 0;
+    const totalPages = membersQuery.data?.meta?.totalPages ?? 1;
+
+    const rawStats = statsQuery.data;
+    const stats: MembersStats = rawStats
+        ? {
+            totalMembers: rawStats.totalMembers,
+            avgAttendance: rawStats.averageAttendance,
+            topPerformers: rawStats.activeStudents,
+            needsAttention: rawStats.needsAttention,
+        }
+        : DEFAULT_STATS;
 
     const handleViewDetail = useCallback(async (member: AdvisorMember) => {
         setIsDetailDialogOpen(true);
@@ -151,8 +131,8 @@ export const useAdvisorMembers = (): UseAdvisorMembersReturn => {
     return {
         members,
         stats,
-        isLoading,
-        isStatsLoading,
+        isLoading: membersQuery.isLoading,
+        isStatsLoading: statsQuery.isLoading,
         currentPage,
         setCurrentPage,
         totalPages,

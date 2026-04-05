@@ -29,13 +29,13 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ upcomingSchedules, e
             </div>
         </CardHeader>
         <CardContent className="pt-0">
-            <div className="relative ml-3">
+            <div className={upcomingSchedules.length === 0 ? "flex items-center justify-center min-h-[180px]" : "relative ml-3"}>
                 {upcomingSchedules.length === 0 ? (
                     <EmptyState
                         icon={Calendar}
                         title="Belum ada jadwal"
                         description="Jadwal mendatang akan muncul di sini."
-                        className="py-10"
+                        className="py-0"
                     />
                 ) : (
                     <>

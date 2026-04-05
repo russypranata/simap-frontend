@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAcademicYear } from "@/context/AcademicYearContext";
 import {
     getDashboardStats,
@@ -10,17 +10,6 @@ import {
 } from "../services/advisorDashboardService";
 import { getProfile } from "../services/advisorProfileService";
 
-interface UseAdvisorDashboardReturn {
-    stats: AdvisorDashboardStats;
-    upcomingSchedules: UpcomingScheduleItem[];
-    recentActivities: RecentActivityItem[];
-    advisorName: string;
-    extracurricularName: string;
-    isLoading: boolean;
-    isStatsLoading: boolean;
-    refetch: () => void;
-}
-
 const DEFAULT_STATS: AdvisorDashboardStats = {
     totalMembers: 0,
     lastAttendancePresent: 0,
@@ -30,53 +19,51 @@ const DEFAULT_STATS: AdvisorDashboardStats = {
     needsAttention: 0,
 };
 
-export const useAdvisorDashboard = (): UseAdvisorDashboardReturn => {
+export const useAdvisorDashboard = () => {
     const { academicYear } = useAcademicYear();
+    const ay = academicYear.academicYear;
 
-    const [stats, setStats] = useState<AdvisorDashboardStats>(DEFAULT_STATS);
-    const [upcomingSchedules, setUpcomingSchedules] = useState<UpcomingScheduleItem[]>([]);
-    const [recentActivities, setRecentActivities] = useState<RecentActivityItem[]>([]);
-    const [advisorName, setAdvisorName] = useState("Tutor Ekskul");
-    const [extracurricularName, setExtracurricularName] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
-    const [isStatsLoading, setIsStatsLoading] = useState(true);
+    const statsQuery = useQuery({
+        queryKey: ["advisor-dashboard-stats", ay],
+        queryFn: () => getDashboardStats({ academicYear: ay }),
+        placeholderData: DEFAULT_STATS,
+    });
 
-    const fetchData = useCallback(async () => {
-        setIsLoading(true);
-        setIsStatsLoading(true);
-        try {
-            const [statsData, scheduleData, activitiesData, profileData] = await Promise.all([
-                getDashboardStats({ academicYear: academicYear.academicYear }),
-                getUpcomingSchedule(),
-                getRecentActivities(),
-                getProfile(),
-            ]);
-            setStats(statsData);
-            setIsStatsLoading(false);
-            setUpcomingSchedules(scheduleData);
-            setRecentActivities(activitiesData);
-            setAdvisorName(profileData.name);
-            setExtracurricularName(profileData.extracurricular ?? "");
-        } catch (error) {
-            console.error("Failed to fetch dashboard data:", error);
-            setIsStatsLoading(false);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [academicYear.academicYear, academicYear.semester]); // eslint-disable-line react-hooks/exhaustive-deps
+    const scheduleQuery = useQuery({
+        queryKey: ["advisor-dashboard-schedule"],
+        queryFn: getUpcomingSchedule,
+        staleTime: 10 * 60 * 1000, // jadwal jarang berubah, cache 10 menit
+    });
 
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+    const activitiesQuery = useQuery({
+        queryKey: ["advisor-dashboard-activities"],
+        queryFn: getRecentActivities,
+    });
+
+    const profileQuery = useQuery({
+        queryKey: ["advisor-profile"],
+        queryFn: getProfile,
+        staleTime: 30 * 60 * 1000, // profil sangat jarang berubah, cache 30 menit
+    });
+
+    const isLoading =
+        scheduleQuery.isLoading ||
+        activitiesQuery.isLoading ||
+        profileQuery.isLoading;
 
     return {
-        stats,
-        upcomingSchedules,
-        recentActivities,
-        advisorName,
-        extracurricularName,
+        stats: statsQuery.data ?? DEFAULT_STATS,
+        upcomingSchedules: scheduleQuery.data ?? ([] as UpcomingScheduleItem[]),
+        recentActivities: activitiesQuery.data ?? ([] as RecentActivityItem[]),
+        advisorName: profileQuery.data?.name ?? "Tutor Ekskul",
+        extracurricularName: profileQuery.data?.extracurricular ?? "",
         isLoading,
-        isStatsLoading,
-        refetch: fetchData,
+        isStatsLoading: statsQuery.isLoading,
+        refetch: () => {
+            statsQuery.refetch();
+            scheduleQuery.refetch();
+            activitiesQuery.refetch();
+            profileQuery.refetch();
+        },
     };
 };
