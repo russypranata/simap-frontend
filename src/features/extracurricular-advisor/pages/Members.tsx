@@ -35,7 +35,7 @@ const MembersSkeleton: React.FC = () => (
 // ==================== MAIN ====================
 export const ExtracurricularMembers: React.FC = () => {
     const {
-        members, stats, isLoading, isStatsLoading,
+        members, stats, isLoading,
         currentPage, setCurrentPage, totalPages, totalItems, itemsPerPage, setItemsPerPage,
         startIndex, endIndex,
         searchQuery, setSearchQuery, classFilter, setClassFilter,
@@ -54,10 +54,16 @@ export const ExtracurricularMembers: React.FC = () => {
             />
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <StatCard title="Total Anggota" value={isStatsLoading ? "..." : (stats.totalMembers || totalItems)} subtitle="Anggota aktif" icon={Users} color="blue" />
-                <StatCard title="Siswa Rajin" value={isStatsLoading ? "..." : stats.topPerformers} subtitle="Kehadiran ≥ 90%" icon={CheckCircle} color="green" />
-                <StatCard title="Rata-rata Kehadiran" value={isStatsLoading ? "..." : `${stats.avgAttendance}%`} subtitle="Tahun ajaran ini" icon={Activity} color="purple" />
-                <StatCard title="Perlu Perhatian" value={isStatsLoading ? "..." : stats.needsAttention} subtitle="Kehadiran < 75%" icon={AlertCircle} color="red" />
+                {isLoading ? (
+                    Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)
+                ) : (
+                    <>
+                        <StatCard title="Total Anggota" value={stats.totalMembers || totalItems} subtitle="Anggota aktif" icon={Users} color="blue" />
+                        <StatCard title="Siswa Rajin" value={stats.topPerformers} subtitle="Kehadiran ≥ 90%" icon={CheckCircle} color="green" />
+                        <StatCard title="Rata-rata Kehadiran" value={`${stats.avgAttendance}%`} subtitle="Tahun ajaran ini" icon={Activity} color="purple" />
+                        <StatCard title="Perlu Perhatian" value={stats.needsAttention} subtitle="Kehadiran < 75%" icon={AlertCircle} color="red" />
+                    </>
+                )}
             </div>
 
             <MembersTable

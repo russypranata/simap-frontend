@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getAttendanceDetail, type AttendanceDetail } from "../services/advisorAttendanceService";
 import { getProfile } from "../services/advisorProfileService";
@@ -17,7 +18,6 @@ interface UseAdvisorAttendanceDetailReturn {
     stats: AttendanceStats;
     isLoading: boolean;
     extracurricularName: string;
-    // Filters
     searchTerm: string;
     setSearchTerm: (s: string) => void;
     statusFilter: string;
@@ -25,7 +25,6 @@ interface UseAdvisorAttendanceDetailReturn {
     classFilter: string;
     setClassFilter: (s: string) => void;
     uniqueClasses: string[];
-    // Pagination
     currentPage: number;
     setCurrentPage: (p: number) => void;
     itemsPerPage: number;
@@ -37,35 +36,33 @@ interface UseAdvisorAttendanceDetailReturn {
 const DEFAULT_STATS: AttendanceStats = { present: 0, sick: 0, permit: 0, absent: 0, total: 0, percentage: 0 };
 
 export const useAdvisorAttendanceDetail = (id: number): UseAdvisorAttendanceDetailReturn => {
-    const [detail, setDetail] = useState<AttendanceDetail | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [extracurricularName, setExtracurricularName] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [classFilter, setClassFilter] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    const fetchData = useCallback(async () => {
-        if (!id) return;
-        setIsLoading(true);
-        try {
-            const [data, profileData] = await Promise.all([
-                getAttendanceDetail(id),
-                getProfile(),
-            ]);
-            setDetail(data);
-            setExtracurricularName(profileData.extracurricular ?? "");
-        } catch {
-            toast.error("Gagal memuat detail presensi");
-        } finally {
-            setIsLoading(false);
-        }
-    }, [id]);
+    const detailQuery = useQuery({
+        queryKey: ["advisor-attendance-detail", id],
+        queryFn: () => getAttendanceDetail(id),
+        enabled: !!id,
+        staleTime: 5 * 60 * 1000,
+    });
 
-    useEffect(() => { fetchData(); }, [fetchData]);
+    const profileQuery = useQuery({
+        queryKey: ["advisor-profile"],
+        queryFn: getProfile,
+        staleTime: 30 * 60 * 1000,
+    });
 
-    const students = detail?.students || [];
+    // Show error toast jika fetch gagal
+    useEffect(() => {
+        if (detailQuery.isError) toast.error("Gagal memuat detail presensi");
+    }, [detailQuery.isError]);
+
+    const detail = detailQuery.data ?? null;
+    const students = detail?.students ?? [];
+    const isLoading = detailQuery.isLoading || profileQuery.isLoading;
 
     const uniqueClasses = useMemo(
         () => [...new Set(students.map((s) => s.class))].sort(),
@@ -105,7 +102,7 @@ export const useAdvisorAttendanceDetail = (id: number): UseAdvisorAttendanceDeta
 
     return {
         detail, stats, isLoading,
-        extracurricularName,
+        extracurricularName: profileQuery.data?.extracurricular ?? "",
         searchTerm, setSearchTerm,
         statusFilter, setStatusFilter,
         classFilter, setClassFilter,

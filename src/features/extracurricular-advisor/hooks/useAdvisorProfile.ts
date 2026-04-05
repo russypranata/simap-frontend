@@ -1,40 +1,32 @@
-import { useState, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAcademicYear } from "@/context/AcademicYearContext";
-import { getProfile, type AdvisorProfileData } from "../services/advisorProfileService";
-import { getDashboardStats, type AdvisorDashboardStats } from "../services/advisorDashboardService";
+import { getProfile } from "../services/advisorProfileService";
+import { getDashboardStats } from "../services/advisorDashboardService";
 
-interface UseAdvisorProfileReturn {
-    profile: AdvisorProfileData | null;
-    stats: AdvisorDashboardStats | null;
-    isLoading: boolean;
-    refetch: () => void;
-}
-
-export const useAdvisorProfile = (): UseAdvisorProfileReturn => {
+export const useAdvisorProfile = () => {
     const { academicYear } = useAcademicYear();
-    const [profile, setProfile] = useState<AdvisorProfileData | null>(null);
-    const [stats, setStats] = useState<AdvisorDashboardStats | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const ay = academicYear.academicYear;
 
-    const fetchData = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const [profileData, statsData] = await Promise.all([
-                getProfile(),
-                getDashboardStats({ academicYear: academicYear.academicYear }),
-            ]);
-            setProfile(profileData);
-            setStats(statsData);
-        } catch (error) {
-            console.error("Failed to fetch profile:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [academicYear.academicYear, academicYear.semester]); // eslint-disable-line react-hooks/exhaustive-deps
+    const profileQuery = useQuery({
+        queryKey: ["advisor-profile"],
+        queryFn: getProfile,
+        staleTime: 30 * 60 * 1000,
+    });
 
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+    const statsQuery = useQuery({
+        queryKey: ["advisor-dashboard-stats", ay],
+        queryFn: () => getDashboardStats({ academicYear: ay }),
+    });
 
-    return { profile, stats, isLoading, refetch: fetchData };
+    const isLoading = profileQuery.isLoading || statsQuery.isLoading;
+
+    return {
+        profile: profileQuery.data ?? null,
+        stats: statsQuery.data ?? null,
+        isLoading,
+        refetch: () => {
+            profileQuery.refetch();
+            statsQuery.refetch();
+        },
+    };
 };

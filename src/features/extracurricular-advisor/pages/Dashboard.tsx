@@ -37,9 +37,10 @@ const CardSkeleton: React.FC = () => (
 // ==================== MAIN ====================
 export const ExtracurricularDashboard: React.FC = () => {
     const router = useRouter();
-    const { stats, upcomingSchedules, recentActivities, advisorName, extracurricularName, isLoading, isStatsLoading } = useAdvisorDashboard();
+    const { stats, upcomingSchedules, recentActivities, advisorName, extracurricularName, isLoading } = useAdvisorDashboard();
 
-    if (isLoading && !advisorName) return (
+    // Pertama kali buka tanpa cache — tampilkan full skeleton
+    if (isLoading) return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <SkeletonPageHeader withAction />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -62,7 +63,7 @@ export const ExtracurricularDashboard: React.FC = () => {
                 title="Dashboard"
                 titleHighlight="Tutor Ekstrakurikuler"
                 icon={Award}
-                description={`Selamat datang, ${advisorName}`}
+                description={`Selamat datang, ${advisorName ?? "Tutor Ekskul"}`}
             >
                 <Button
                     className="bg-blue-800 hover:bg-blue-900 text-white"
@@ -74,24 +75,15 @@ export const ExtracurricularDashboard: React.FC = () => {
             </PageHeader>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <StatCard title="Total Anggota" value={isStatsLoading ? "..." : stats.totalMembers} subtitle="Anggota aktif" icon={Users} color="blue" />
-                <StatCard title="Hadir Terakhir" value={isStatsLoading ? "..." : stats.lastAttendancePresent} subtitle="Pertemuan lalu" icon={CheckCircle} color="green" />
-                <StatCard title="Rata-rata Kehadiran" value={isStatsLoading ? "..." : `${stats.averageAttendance}%`} subtitle="Tahun ajaran ini" icon={TrendingUp} color={attendanceColor} />
-                <StatCard title="Total Pertemuan" value={isStatsLoading ? "..." : stats.totalMeetings} subtitle="Kegiatan tercatat" icon={Calendar} color="purple" />
+                <StatCard title="Total Anggota" value={stats.totalMembers} subtitle="Anggota aktif" icon={Users} color="blue" />
+                <StatCard title="Hadir Terakhir" value={stats.lastAttendancePresent} subtitle="Pertemuan lalu" icon={CheckCircle} color="green" />
+                <StatCard title="Rata-rata Kehadiran" value={`${stats.averageAttendance}%`} subtitle="Tahun ajaran ini" icon={TrendingUp} color={attendanceColor} />
+                <StatCard title="Total Pertemuan" value={stats.totalMeetings} subtitle="Kegiatan tercatat" icon={Calendar} color="purple" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {isLoading ? (
-                    <>
-                        <CardSkeleton />
-                        <CardSkeleton />
-                    </>
-                ) : (
-                    <>
-                        <ScheduleCard upcomingSchedules={upcomingSchedules} extracurricularName={extracurricularName} />
-                        <RecentActivitiesCard recentActivities={recentActivities} />
-                    </>
-                )}
+                <ScheduleCard upcomingSchedules={upcomingSchedules} extracurricularName={extracurricularName} />
+                <RecentActivitiesCard recentActivities={recentActivities} />
             </div>
 
             <Card className="bg-blue-50 border-blue-800/20">

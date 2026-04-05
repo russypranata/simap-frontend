@@ -26,13 +26,13 @@ export const useAdvisorDashboard = () => {
     const statsQuery = useQuery({
         queryKey: ["advisor-dashboard-stats", ay],
         queryFn: () => getDashboardStats({ academicYear: ay }),
-        placeholderData: DEFAULT_STATS,
+        // tidak pakai placeholderData — biarkan isLoading bekerja natural
     });
 
     const scheduleQuery = useQuery({
         queryKey: ["advisor-dashboard-schedule"],
         queryFn: getUpcomingSchedule,
-        staleTime: 10 * 60 * 1000, // jadwal jarang berubah, cache 10 menit
+        staleTime: 10 * 60 * 1000,
     });
 
     const activitiesQuery = useQuery({
@@ -43,10 +43,12 @@ export const useAdvisorDashboard = () => {
     const profileQuery = useQuery({
         queryKey: ["advisor-profile"],
         queryFn: getProfile,
-        staleTime: 30 * 60 * 1000, // profil sangat jarang berubah, cache 30 menit
+        staleTime: 30 * 60 * 1000,
     });
 
+    // isLoading true hanya saat pertama kali fetch (tidak ada cache sama sekali)
     const isLoading =
+        statsQuery.isLoading ||
         scheduleQuery.isLoading ||
         activitiesQuery.isLoading ||
         profileQuery.isLoading;
@@ -55,10 +57,9 @@ export const useAdvisorDashboard = () => {
         stats: statsQuery.data ?? DEFAULT_STATS,
         upcomingSchedules: scheduleQuery.data ?? ([] as UpcomingScheduleItem[]),
         recentActivities: activitiesQuery.data ?? ([] as RecentActivityItem[]),
-        advisorName: profileQuery.data?.name ?? "Tutor Ekskul",
+        advisorName: profileQuery.data?.name ?? null, // null = belum ada data, bukan fallback string
         extracurricularName: profileQuery.data?.extracurricular ?? "",
         isLoading,
-        isStatsLoading: statsQuery.isLoading,
         refetch: () => {
             statsQuery.refetch();
             scheduleQuery.refetch();

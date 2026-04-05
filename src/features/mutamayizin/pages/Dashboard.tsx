@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import {
-    Calendar,
     Award,
     Users,
     Trophy,
     Star,
-    Briefcase,
     ClipboardList,
     ArrowRight,
     AlertCircle,
@@ -17,70 +15,44 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useMutamayizinDashboard } from "../hooks/useMutamayizinDashboard";
+import { SkeletonPageHeader, SkeletonStatCard } from "@/features/shared/components";
 
-import {
-    mutamayizinService,
-    type MutamayizinDashboardStats,
-    type RecentAchievement,
-    type EkskulSummary,
-} from "../services/mutamayizinService";
-
-// Skeleton component for loading state
-const DashboardSkeleton: React.FC = () => (
-    <div className="space-y-6 animate-pulse">
-        <div>
-            <div className="h-9 bg-muted rounded w-80 mb-2" />
-            <div className="h-5 bg-muted rounded w-48 mb-4" />
-            <div className="h-7 bg-muted rounded-full w-56" />
+const CardSkeleton: React.FC = () => (
+    <Card>
+        <div className="p-6 pb-3">
+            <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-slate-100 animate-pulse" />
+                <div className="space-y-1.5">
+                    <div className="h-5 w-32 bg-slate-100 rounded animate-pulse" />
+                    <div className="h-4 w-48 bg-slate-100 rounded animate-pulse" />
+                </div>
+            </div>
         </div>
-        <div className="h-32 bg-muted rounded-lg" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="h-72 bg-muted rounded-lg" />
-            <div className="h-72 bg-muted rounded-lg" />
-        </div>
-    </div>
+        <CardContent className="space-y-3">
+            {Array.from({ length: 3 }).map((_, j) => (
+                <div key={j} className="h-16 w-full rounded-lg bg-slate-100 animate-pulse" />
+            ))}
+        </CardContent>
+    </Card>
 );
 
 export const MutamayizinDashboard: React.FC = () => {
     const router = useRouter();
+    const { userName, stats, recentAchievements, ekskulSummary, isLoading } = useMutamayizinDashboard();
 
-
-    const [isLoading, setIsLoading] = useState(true);
-    const [userName, setUserName] = useState("Koordinator Program Mutamayizin");
-    const [stats, setStats] = useState<MutamayizinDashboardStats>({
-        totalStudents: 0,
-        activeStudents: 0,
-        totalAchievements: 0,
-        totalEkskul: 0,
-        totalTutors: 0,
-        activeTutors: 0,
-    });
-    const [recentAchievements, setRecentAchievements] = useState<RecentAchievement[]>([]);
-    const [ekskulSummary, setEkskulSummary] = useState<EkskulSummary[]>([]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [profileData, statsData, achievementsData, ekskulData] = await Promise.all([
-                    mutamayizinService.getProfileData(),
-                    mutamayizinService.getDashboardStats(),
-                    mutamayizinService.getRecentAchievements(),
-                    mutamayizinService.getEkskulSummary(),
-                ]);
-
-                setUserName(profileData.name);
-                setStats(statsData);
-                setRecentAchievements(achievementsData);
-                setEkskulSummary(ekskulData);
-            } catch (error) {
-                console.error("Failed to fetch dashboard data:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
+    if (isLoading) return (
+        <div className="space-y-6 animate-in fade-in duration-500">
+            <SkeletonPageHeader withAction />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-0">
+                {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <CardSkeleton />
+                <CardSkeleton />
+            </div>
+        </div>
+    );
 
     const getRankColor = (rank: string) => {
         if (rank === "Juara 1") return "bg-emerald-100 text-emerald-700 border-emerald-200";
@@ -94,10 +66,6 @@ export const MutamayizinDashboard: React.FC = () => {
         if (level === "Provinsi") return "bg-amber-50 text-amber-700 border-amber-200";
         return "bg-blue-50 text-blue-700 border-blue-200";
     };
-
-    if (isLoading) {
-        return <DashboardSkeleton />;
-    }
 
     return (
         <div className="space-y-6">
@@ -114,7 +82,7 @@ export const MutamayizinDashboard: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Selamat datang, <span className="font-medium text-foreground">{userName}</span>
+                        Selamat datang, <span className="font-medium text-foreground">{userName ?? "Koordinator"}</span>
                     </p>
 
                 </div>
@@ -165,7 +133,7 @@ export const MutamayizinDashboard: React.FC = () => {
                             <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
                                 <Users className="h-4 w-4 text-blue-800" />
                             </div>
-                            <p className="text-2xl font-bold text-slate-900">{stats.totalStudents}</p>
+                            <p className="text-2xl font-bold text-slate-900">{stats?.totalStudents}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Siswa</p>
                         </div>
 
@@ -173,7 +141,7 @@ export const MutamayizinDashboard: React.FC = () => {
                             <div className="inline-flex p-2 bg-green-100 rounded-full mb-1.5">
                                 <CheckCircle className="h-4 w-4 text-green-600" />
                             </div>
-                            <p className="text-2xl font-bold text-green-600">{stats.activeStudents}</p>
+                            <p className="text-2xl font-bold text-green-600">{stats?.activeStudents}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Siswa Aktif</p>
                         </div>
 
@@ -181,7 +149,7 @@ export const MutamayizinDashboard: React.FC = () => {
                             <div className="inline-flex p-2 bg-amber-100 rounded-full mb-1.5">
                                 <Trophy className="h-4 w-4 text-amber-600" />
                             </div>
-                            <p className="text-2xl font-bold text-amber-600">{stats.totalAchievements}</p>
+                            <p className="text-2xl font-bold text-amber-600">{stats?.totalAchievements}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Prestasi</p>
                         </div>
 
@@ -189,7 +157,7 @@ export const MutamayizinDashboard: React.FC = () => {
                             <div className="inline-flex p-2 bg-purple-100 rounded-full mb-1.5">
                                 <Star className="h-4 w-4 text-purple-600" />
                             </div>
-                            <p className="text-2xl font-bold text-purple-600">{stats.totalEkskul}</p>
+                            <p className="text-2xl font-bold text-purple-600">{stats?.totalEkskul}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Ekstrakurikuler</p>
                         </div>
                     </div>
