@@ -125,13 +125,13 @@ export const AttendanceStudentTable: React.FC<AttendanceStudentTableProps> = ({
 
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-muted/50">
+                    <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                            <th className="text-left p-4 font-medium text-sm w-12">No</th>
-                            <th className="text-left p-4 font-medium text-sm w-24">NIS</th>
-                            <th className="text-left p-4 font-medium text-sm min-w-48">Nama Siswa</th>
-                            <th className="text-left p-4 font-medium text-sm w-24">Kelas</th>
-                            <th className="text-center p-4 font-medium text-sm w-32">Status</th>
+                            <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 w-12">No</th>
+                            <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 w-24">NIS</th>
+                            <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 min-w-48">Nama Siswa</th>
+                            <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 w-24">Kelas</th>
+                            <th className="text-center p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 w-32">Status</th>
                         </tr>
                     </thead>
                     <tbody>
