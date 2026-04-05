@@ -29,14 +29,15 @@ Backend **wajib** mengikuti struktur request/response di bawah ini persis agar f
 | 8 | PUT | `/extracurricular-advisor/profile/password` | Ganti password |
 | 9 | GET | `/extracurricular-advisor/dashboard/stats` | Statistik dashboard |
 | 10 | GET | `/extracurricular-advisor/dashboard/schedule` | Jadwal mendatang |
-| 11 | GET | `/extracurricular-advisor/dashboard/recent-activities` | Aktivitas terakhir |
-| 12 | GET | `/extracurricular-advisor/members` | Daftar anggota |
-| 13 | GET | `/extracurricular-advisor/members/:id` | Detail anggota |
-| 14 | POST | `/extracurricular-advisor/members` | Tambah anggota |
-| 15 | DELETE | `/extracurricular-advisor/members/:id` | Hapus anggota |
-| 16 | GET | `/extracurricular-advisor/attendance` | Riwayat presensi |
-| 17 | POST | `/extracurricular-advisor/attendance` | Submit presensi |
-| 18 | GET | `/extracurricular-advisor/attendance/:id` | Detail presensi |
+| 11 | GET | `/extracurricular-advisor/dashboard/regular-schedule` | Jadwal rutin mingguan |
+| 12 | GET | `/extracurricular-advisor/dashboard/recent-activities` | Aktivitas terakhir |
+| 13 | GET | `/extracurricular-advisor/members` | Daftar anggota |
+| 14 | GET | `/extracurricular-advisor/members/:id` | Detail anggota |
+| 15 | POST | `/extracurricular-advisor/members` | Tambah anggota |
+| 16 | DELETE | `/extracurricular-advisor/members/:id` | Hapus anggota |
+| 17 | GET | `/extracurricular-advisor/attendance` | Riwayat presensi |
+| 18 | POST | `/extracurricular-advisor/attendance` | Submit presensi |
+| 19 | GET | `/extracurricular-advisor/attendance/:id` | Detail presensi |
 
 ---
 
@@ -376,7 +377,41 @@ avatar: <File> (jpg/png, max 2MB)
 
 ---
 
-### 11. Get Recent Activities
+### 11. Get Regular Schedule
+
+- **GET** `/extracurricular-advisor/dashboard/regular-schedule`
+- **Auth**: Bearer Token
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "day": "Senin",
+      "time": "14:00 - 16:00"
+    },
+    {
+      "id": 2,
+      "day": "Jumat",
+      "time": "14:00 - 16:00"
+    }
+  ]
+}
+```
+
+> Endpoint ini mengembalikan jadwal **rutin mingguan** ekstrakurikuler — bukan jadwal spesifik per tanggal.
+> Tidak ada field `date` karena jadwal rutin hanya menampilkan hari dan jam.
+> Jika ekstrakurikuler hanya punya 1 jadwal per minggu, kembalikan array dengan 1 item.
+> Jika lebih dari 1 hari (misal Senin & Jumat), kembalikan semua item — frontend akan menampilkan item pertama dan tombol "lainnya" untuk membuka modal semua jadwal.
+> `day` menggunakan nama hari dalam Bahasa Indonesia: `"Senin"`, `"Selasa"`, `"Rabu"`, `"Kamis"`, `"Jumat"`, `"Sabtu"`.
+> `time` format string: `"HH:MM - HH:MM"`.
+> Data di-scope ke ekstrakurikuler milik tutor yang sedang login.
+
+---
+
+### 12. Get Recent Activities
 
 - **GET** `/extracurricular-advisor/dashboard/recent-activities`
 - **Auth**: Bearer Token
@@ -419,7 +454,7 @@ avatar: <File> (jpg/png, max 2MB)
 
 ## V. Member Management (Anggota)
 
-### 12. Get Members List
+### 13. Get Members List
 
 - **GET** `/extracurricular-advisor/members`
 - **Auth**: Bearer Token
@@ -479,7 +514,7 @@ avatar: <File> (jpg/png, max 2MB)
 
 ---
 
-### 13. Get Member Detail
+### 14. Get Member Detail
 
 - **GET** `/extracurricular-advisor/members/:id`
 - **Auth**: Bearer Token
@@ -511,7 +546,7 @@ avatar: <File> (jpg/png, max 2MB)
 
 ---
 
-### 14. Add Member
+### 15. Add Member
 
 - **POST** `/extracurricular-advisor/members`
 - **Auth**: Bearer Token
@@ -544,7 +579,7 @@ avatar: <File> (jpg/png, max 2MB)
 
 ---
 
-### 15. Delete Member
+### 16. Delete Member
 
 - **DELETE** `/extracurricular-advisor/members/:id`
 - **Auth**: Bearer Token
@@ -561,7 +596,7 @@ avatar: <File> (jpg/png, max 2MB)
 
 ## VI. Attendance (Presensi)
 
-### 16. Get Attendance History
+### 17. Get Attendance History
 
 - **GET** `/extracurricular-advisor/attendance`
 - **Auth**: Bearer Token
@@ -621,7 +656,7 @@ avatar: <File> (jpg/png, max 2MB)
 
 ---
 
-### 17. Submit Attendance
+### 18. Submit Attendance
 
 - **POST** `/extracurricular-advisor/attendance`
 - **Auth**: Bearer Token
@@ -675,7 +710,7 @@ avatar: <File> (jpg/png, max 2MB)
 
 ---
 
-### 18. Get Attendance Detail
+### 19. Get Attendance Detail
 
 - **GET** `/extracurricular-advisor/attendance/:id`
 - **Auth**: Bearer Token

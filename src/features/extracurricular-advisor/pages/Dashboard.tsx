@@ -37,7 +37,7 @@ const CardSkeleton: React.FC = () => (
 // ==================== MAIN ====================
 export const ExtracurricularDashboard: React.FC = () => {
     const router = useRouter();
-    const { stats, upcomingSchedules, recentActivities, advisorName, extracurricularName, isLoading } = useAdvisorDashboard();
+    const { stats, upcomingSchedules, regularSchedules, recentActivities, advisorName, extracurricularName, isLoading } = useAdvisorDashboard();
 
     // Pertama kali buka tanpa cache — tampilkan full skeleton
     if (isLoading) return (
@@ -82,7 +82,7 @@ export const ExtracurricularDashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ScheduleCard upcomingSchedules={upcomingSchedules} extracurricularName={extracurricularName} />
+                <ScheduleCard upcomingSchedules={upcomingSchedules} regularSchedules={regularSchedules} extracurricularName={extracurricularName} />
                 <RecentActivitiesCard recentActivities={recentActivities} />
             </div>
 

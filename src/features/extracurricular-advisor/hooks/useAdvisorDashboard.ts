@@ -3,9 +3,11 @@ import { useAcademicYear } from "@/context/AcademicYearContext";
 import {
     getDashboardStats,
     getUpcomingSchedule,
+    getRegularSchedule,
     getRecentActivities,
     type AdvisorDashboardStats,
     type UpcomingScheduleItem,
+    type RegularScheduleItem,
     type RecentActivityItem,
 } from "../services/advisorDashboardService";
 import { getProfile } from "../services/advisorProfileService";
@@ -35,6 +37,12 @@ export const useAdvisorDashboard = () => {
         staleTime: 10 * 60 * 1000,
     });
 
+    const regularScheduleQuery = useQuery({
+        queryKey: ["advisor-dashboard-regular-schedule"],
+        queryFn: getRegularSchedule,
+        staleTime: 0,
+    });
+
     const activitiesQuery = useQuery({
         queryKey: ["advisor-dashboard-activities"],
         queryFn: getRecentActivities,
@@ -50,12 +58,14 @@ export const useAdvisorDashboard = () => {
     const isLoading =
         statsQuery.isLoading ||
         scheduleQuery.isLoading ||
+        regularScheduleQuery.isLoading ||
         activitiesQuery.isLoading ||
         profileQuery.isLoading;
 
     return {
         stats: statsQuery.data ?? DEFAULT_STATS,
         upcomingSchedules: scheduleQuery.data ?? ([] as UpcomingScheduleItem[]),
+        regularSchedules: regularScheduleQuery.data ?? ([] as RegularScheduleItem[]),
         recentActivities: activitiesQuery.data ?? ([] as RecentActivityItem[]),
         advisorName: profileQuery.data?.name ?? null, // null = belum ada data, bukan fallback string
         extracurricularName: profileQuery.data?.extracurricular ?? "",
@@ -63,6 +73,7 @@ export const useAdvisorDashboard = () => {
         refetch: () => {
             statsQuery.refetch();
             scheduleQuery.refetch();
+            regularScheduleQuery.refetch();
             activitiesQuery.refetch();
             profileQuery.refetch();
         },

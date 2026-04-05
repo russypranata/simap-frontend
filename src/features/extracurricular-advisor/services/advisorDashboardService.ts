@@ -38,6 +38,12 @@ export interface AdvisorDashboardStats {
     needsAttention: number;
 }
 
+export interface RegularScheduleItem {
+    id: number;
+    day: string;
+    time: string;
+}
+
 export interface UpcomingScheduleItem {
     id: number;
     day: string;
@@ -128,6 +134,24 @@ export const getDashboardStats = async (
         activeStudents: d.active_students ?? d.activeStudents ?? 0,
         needsAttention: d.needs_attention ?? d.needsAttention ?? 0,
     };
+};
+
+export const getRegularSchedule = async (): Promise<RegularScheduleItem[]> => {
+    if (USE_MOCK_DATA) {
+        await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
+        return [
+            { id: 1, day: "Senin", time: "14:00 - 16:00" },
+            { id: 2, day: "Jumat", time: "14:00 - 16:00" },
+        ];
+    }
+
+    const response = await fetch(`${ADVISOR_API_URL}/dashboard/regular-schedule`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    return result.data;
 };
 
 export const getUpcomingSchedule = async (): Promise<UpcomingScheduleItem[]> => {
