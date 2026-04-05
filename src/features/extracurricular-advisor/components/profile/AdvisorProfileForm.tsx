@@ -227,10 +227,12 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                             <Input
                                 id="nip"
                                 name="nip"
-                                value={formData.nip || ""}
-                                onChange={handleInputChange}
-                                placeholder="Masukkan NIP (jika ada)"
+                                value={formData.nip || "-"}
+                                readOnly
+                                disabled
+                                className="bg-muted"
                             />
+                            <p className="text-xs text-muted-foreground">NIP tidak dapat diubah</p>
                         </div>
 
                         {/* Username */}

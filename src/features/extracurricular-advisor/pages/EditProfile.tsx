@@ -124,7 +124,7 @@ export const EditExtracurricularAdvisorProfile: React.FC = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="pt-0">
-                    <div className="group relative flex items-center justify-between p-4 rounded-xl border border-border/60 bg-muted/30 hover:bg-muted/50 transition-all duration-300">
+                    <div className="group relative flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl border border-border/60 bg-muted/30 hover:bg-muted/50 transition-all duration-300">
                         {/* Left side - Password info */}
                         <div className="flex items-center gap-4">
                             <div className="p-2.5 rounded-full bg-yellow-100 text-yellow-600 border border-yellow-200 shrink-0">

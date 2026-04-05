@@ -50,7 +50,7 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ profile, onEdi
                             className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white"
                         >
                             <Edit className="h-4 w-4" />
-                            <span>Edit Profil</span>
+                            <span className="hidden sm:inline">Edit Profil</span>
                         </Button>
                     </div>
                 </div>
@@ -111,7 +111,7 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ profile, onEdi
                     {/* Personal Info */}
                     <div className="space-y-4 pt-4 border-t">
                         <h3 className="text-base font-medium text-foreground flex items-center gap-2">
-                            <User className="h-4.5 w-4.5 text-primary" />
+                            <User className="h-4 w-4 text-primary" />
                             Informasi Pribadi
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -141,7 +141,7 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ profile, onEdi
                     {/* Contact Info */}
                     <div className="space-y-4 pt-6 border-t">
                         <h3 className="text-base font-medium text-foreground flex items-center gap-2">
-                            <Phone className="h-4.5 w-4.5 text-primary" />
+                            <Phone className="h-4 w-4 text-primary" />
                             Informasi Kontak
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

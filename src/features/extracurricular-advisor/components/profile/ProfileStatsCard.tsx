@@ -17,7 +17,7 @@ export const ProfileStatsCard: React.FC<ProfileStatsCardProps> = ({ stats }) => 
                     <BarChart3 className="h-5 w-5" />
                 </div>
                 <div>
-                    <CardTitle className="text-lg">Statistik Ekstrakurikuler</CardTitle>
+                    <CardTitle className="text-lg">Informasi Ekstrakurikuler</CardTitle>
                     <p className="text-sm text-muted-foreground mt-0.5 font-normal">
                         Ringkasan data anggota dan kegiatan ekstrakurikuler
                     </p>

@@ -6,15 +6,12 @@ export const EditProfileSkeleton = () => {
     return (
         <div className="space-y-6">
             {/* Header Skeleton */}
-            <div className="flex items-center gap-4">
-                <Skeleton className="h-9 w-9 rounded-md" /> {/* Back Button */}
-                <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                        <Skeleton className="h-8 w-48" /> {/* Title */}
-                        <Skeleton className="h-8 w-8 rounded-full" /> {/* Icon */}
-                    </div>
-                    <Skeleton className="h-4 w-64" /> {/* Subtitle */}
+            <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-48 sm:w-64" />
+                    <Skeleton className="h-9 w-9 rounded-full" />
                 </div>
+                <Skeleton className="h-4 w-64" />
             </div>
 
             {/* Profile Form Card Skeleton */}
@@ -22,17 +19,9 @@ export const EditProfileSkeleton = () => {
                 <CardContent className="p-6">
                     <div className="space-y-8">
                         {/* Photo Upload Skeleton */}
-                        <div className="flex items-center gap-6 pb-6 border-b">
-                            <Skeleton className="h-24 w-24 rounded-full" />
-                            <div className="space-y-3">
-                                <div className="space-y-2">
-                                    <Skeleton className="h-4 w-32" />
-                                    <Skeleton className="h-3 w-48" />
-                                </div>
-                                <div className="flex gap-3">
-                                    <Skeleton className="h-9 w-36 rounded-md" />
-                                </div>
-                            </div>
+                        <div className="flex flex-col items-center gap-4 pb-6 border-b">
+                            <Skeleton className="h-32 w-32 rounded-full" />
+                            <Skeleton className="h-9 w-36 rounded-md" />
                         </div>
 
                         {/* Form Fields Grid */}
@@ -50,9 +39,9 @@ export const EditProfileSkeleton = () => {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex justify-end gap-4 pt-4 border-t">
-                            <Skeleton className="h-10 w-24 rounded-md" />
-                            <Skeleton className="h-10 w-24 rounded-md" />
+                        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t">
+                            <Skeleton className="h-10 w-full sm:w-24 rounded-md" />
+                            <Skeleton className="h-10 w-full sm:w-36 rounded-md" />
                         </div>
                     </div>
                 </CardContent>
