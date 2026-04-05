@@ -15,20 +15,43 @@ import {
 } from "@/features/shared/components";
 
 // ==================== SKELETON ====================
-const CardSkeleton: React.FC = () => (
+const ScheduleCardSkeleton: React.FC = () => (
     <Card>
         <div className="p-6 pb-3">
             <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-lg bg-slate-100 animate-pulse" />
                 <div className="space-y-1.5">
                     <div className="h-5 w-32 bg-slate-100 rounded animate-pulse" />
-                    <div className="h-4 w-48 bg-slate-100 rounded animate-pulse" />
+                    <div className="h-4 w-44 bg-slate-100 rounded animate-pulse" />
                 </div>
             </div>
         </div>
-        <CardContent className="space-y-3">
-            {Array.from({ length: 2 }).map((_, j) => (
-                <div key={j} className="h-16 w-full rounded-lg bg-slate-100 animate-pulse" />
+        <CardContent className="space-y-4">
+            <div className="h-4 w-24 bg-slate-100 rounded animate-pulse" />
+            <div className="h-14 w-full rounded-lg bg-slate-100 animate-pulse" />
+            <div className="h-4 w-28 bg-slate-100 rounded animate-pulse" />
+            <div className="h-14 w-full rounded-lg bg-slate-100 animate-pulse" />
+        </CardContent>
+    </Card>
+);
+
+const RecentActivitiesSkeleton: React.FC = () => (
+    <Card>
+        <div className="p-6 pb-3">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-slate-100 animate-pulse" />
+                    <div className="space-y-1.5">
+                        <div className="h-5 w-28 bg-slate-100 rounded animate-pulse" />
+                        <div className="h-4 w-40 bg-slate-100 rounded animate-pulse" />
+                    </div>
+                </div>
+                <div className="h-8 w-24 bg-slate-100 rounded animate-pulse" />
+            </div>
+        </div>
+        <CardContent className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-14 w-full rounded-lg bg-slate-100 animate-pulse" />
             ))}
         </CardContent>
     </Card>
@@ -47,8 +70,8 @@ export const ExtracurricularDashboard: React.FC = () => {
                 {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <CardSkeleton />
-                <CardSkeleton />
+                <ScheduleCardSkeleton />
+                <RecentActivitiesSkeleton />
             </div>
         </div>
     );
