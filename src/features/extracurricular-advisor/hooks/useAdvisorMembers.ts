@@ -94,7 +94,6 @@ export const useAdvisorMembers = (): UseAdvisorMembersReturn => {
     const statsQuery = useQuery({
         queryKey: ["advisor-members-stats", ay, semester],
         queryFn: () => getDashboardStats({ academicYear: ay, semester }),
-        staleTime: 5 * 60 * 1000,
     });
 
     const members = membersQuery.data?.data ?? [];

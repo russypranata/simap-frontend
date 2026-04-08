@@ -96,7 +96,7 @@ const MOCK_HISTORY_23_24: AdvisorMember[] = [
 export const MOCK_MEMBERS_ALL = [...MOCK_MEMBERS_DATA, ...MOCK_HISTORY_24_25, ...MOCK_HISTORY_23_24];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const normalizeMember = (d: any): AdvisorMember => ({
+const normalizeMember = (d: Record<string, any>): AdvisorMember => ({
     id: d.id,
     nis: d.nis,
     name: d.name,
@@ -201,7 +201,12 @@ export const getMemberDetail = async (id: number): Promise<AdvisorMember> => {
     return normalizeMember(result.data);
 };
 
-export const addMember = async (memberData: Partial<AdvisorMember>) => {
+export interface AddMemberRequest {
+    nis: string;
+    join_date: string;
+}
+
+export const addMember = async (memberData: AddMemberRequest) => {
     if (USE_MOCK_DATA) {
         await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
         return { success: true, data: { id: Math.floor(Math.random() * 1000), ...memberData } };

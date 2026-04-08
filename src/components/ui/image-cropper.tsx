@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import getCroppedImg from "@/features/shared/utils/canvasUtils";
-import { Loader2 } from "lucide-react";
+import { Loader2, X, Check } from "lucide-react";
 
 interface ImageCropperProps {
     open: boolean;
@@ -74,7 +74,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
                             onCropChange={onCropChange}
                             onZoomChange={onZoomChange}
                             onCropComplete={onCropCompleteCallback}
-                            cropShape="round" // Round mask for avatars
+                            cropShape="rect"
                             showGrid={false}
                         />
                     )}
@@ -100,10 +100,11 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
                         onClick={() => onOpenChange(false)}
                         disabled={isLoading}
                     >
+                        <X className="h-4 w-4 mr-2" />
                         Batal
                     </Button>
                     <Button onClick={handleSave} disabled={isLoading} className="bg-blue-800 hover:bg-blue-900 text-white">
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
                         Simpan Foto
                     </Button>
                 </DialogFooter>

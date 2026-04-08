@@ -30,7 +30,8 @@ import { User, LogOut, Calendar } from 'lucide-react';
 import { formatDate, getDayName } from '@/features/shared/utils/dateFormatter';
 import { getStudentProfile } from '@/features/student/services/studentProfileService';
 import { StudentProfileData } from '@/features/student/data/mockStudentData';
-import { mockAdvisorData } from '@/features/extracurricular-advisor/data/mockAdvisorData';
+import { type AdvisorProfileData } from '@/features/extracurricular-advisor/services/advisorProfileService';
+import { getProfile as getAdvisorProfile } from '@/features/extracurricular-advisor/services/advisorProfileService';
 import { getParentProfile } from '@/features/parent/services/parentProfileService';
 import { ParentProfileData } from '@/features/parent/data/mockParentData';
 
@@ -43,7 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
     const { role, isAuthenticated, logout } = useRole();
     const [studentProfile, setStudentProfile] =
         React.useState<StudentProfileData | null>(null);
-    const [advisorProfile, setAdvisorProfile] = React.useState<typeof mockAdvisorData | null>(null);
+    const [advisorProfile, setAdvisorProfile] = React.useState<AdvisorProfileData | null>(null);
     const [parentProfile, setParentProfile] = React.useState<ParentProfileData | null>(null);
 
     React.useEffect(() => {
@@ -59,7 +60,15 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                 };
                 fetchProfile();
             } else if (role === 'tutor_ekskul') {
-                setAdvisorProfile(mockAdvisorData);
+                const fetchAdvisor = async () => {
+                    try {
+                        const data = await getAdvisorProfile();
+                        setAdvisorProfile(data);
+                    } catch (error) {
+                        console.error('Failed to fetch advisor profile for navbar', error);
+                    }
+                };
+                fetchAdvisor();
             } else if (role === 'orang_tua') {
                 const fetchParent = async () => {
                     try {

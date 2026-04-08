@@ -128,41 +128,47 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
                 </div>
               </div>
 
-              {phone && (
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                  <div className="p-2 rounded-full bg-primary/10">
-                    <Phone className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-muted-foreground">Telepon</p>
+              <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
+                <div className="p-2 rounded-full bg-primary/10">
+                  <Phone className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground">Telepon</p>
+                  {phone ? (
                     <p className="text-sm font-medium">{phone}</p>
-                  </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {address && (
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 md:col-span-2">
-                  <div className="p-2 rounded-full bg-primary/10">
-                    <MapPin className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-muted-foreground">Alamat</p>
+              <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 md:col-span-2">
+                <div className="p-2 rounded-full bg-primary/10">
+                  <MapPin className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground">Alamat</p>
+                  {address ? (
                     <p className="text-sm font-medium">{address}</p>
-                  </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {joinDate && (
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                  <div className="p-2 rounded-full bg-primary/10">
-                    <Calendar className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-muted-foreground">Bergabung Sejak</p>
-                    <p className="text-sm font-medium">{joinDate}</p>
-                  </div>
+              <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
+                <div className="p-2 rounded-full bg-primary/10">
+                  <Calendar className="h-5 w-5 text-primary" />
                 </div>
-              )}
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground">Bergabung Sejak</p>
+                  {joinDate ? (
+                    <p className="text-sm font-medium">{joinDate}</p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

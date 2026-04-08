@@ -22,7 +22,6 @@ interface AttendanceHistoryTabProps {
     historyPage: number;
     historyItemsPerPage: number;
     totalHistoryPages: number;
-    activeTab: string;
     onSearchChange: (s: string) => void;
     onDateRangeChange: (r: { from: string; to: string }) => void;
     onActiveDateFilterChange: (f: "today" | "week" | "month" | null) => void;
@@ -44,7 +43,6 @@ export const AttendanceHistoryTab: React.FC<AttendanceHistoryTabProps> = ({
     historyPage,
     historyItemsPerPage,
     totalHistoryPages,
-    activeTab,
     onSearchChange,
     onDateRangeChange,
     onActiveDateFilterChange,

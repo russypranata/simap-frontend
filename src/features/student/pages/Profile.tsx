@@ -202,14 +202,22 @@ export const StudentProfile: React.FC = () => {
                                     <div className="p-2 rounded-full bg-primary/10"><Phone className="h-5 w-5 text-primary" /></div>
                                     <div className="flex-1">
                                         <p className="text-xs text-muted-foreground">Telepon</p>
-                                        <p className="text-sm font-medium">{profileData.phone}</p>
+                                        {profileData.phone ? (
+                                            <p className="text-sm font-medium">{profileData.phone}</p>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 md:col-span-2">
                                     <div className="p-2 rounded-full bg-primary/10"><MapPin className="h-5 w-5 text-primary" /></div>
                                     <div className="flex-1">
                                         <p className="text-xs text-muted-foreground">Alamat</p>
-                                        <p className="text-sm font-medium">{profileData.address}</p>
+                                        {profileData.address ? (
+                                            <p className="text-sm font-medium">{profileData.address}</p>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>

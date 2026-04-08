@@ -106,7 +106,7 @@ const MOCK_HISTORY: AttendanceHistoryEntry[] = [
 // ==================== NORMALIZERS ====================
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const normalizeHistoryEntry = (d: any): AttendanceHistoryEntry => ({
+const normalizeHistoryEntry = (d: Record<string, any>): AttendanceHistoryEntry => ({
     id: d.id,
     date: d.date,
     studentStats: {
@@ -124,7 +124,7 @@ const normalizeHistoryEntry = (d: any): AttendanceHistoryEntry => ({
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const normalizeMember = (d: any): AttendanceStudent => ({
+const normalizeMember = (d: Record<string, any>): AttendanceStudent => ({
     id: d.id,
     nis: d.nis,
     name: d.name,
@@ -169,16 +169,10 @@ export const getAttendanceDetail = async (id: number): Promise<AttendanceDetail>
 
         let sickCount = 0;
         let permitCount = 0;
-        let absentCount = 0;
 
-        if (nonPresentCount > 0) {
-            if (nonPresentCount === 1) {
-                absentCount = 1;
-            } else {
-                sickCount = Math.floor(nonPresentCount * 0.4);
-                permitCount = Math.floor(nonPresentCount * 0.4);
-                absentCount = nonPresentCount - sickCount - permitCount;
-            }
+        if (nonPresentCount > 1) {
+            sickCount = Math.floor(nonPresentCount * 0.4);
+            permitCount = Math.floor(nonPresentCount * 0.4);
         }
 
         // Use only active members from the base mock data (first 15)

@@ -330,6 +330,7 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
                                 onClick={() => handleOpenChange(false)}
                                 disabled={isLoading}
                             >
+                                <X className="h-4 w-4 mr-2" />
                                 Batal
                             </Button>
                             <Button
@@ -343,7 +344,10 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
                                         Menyimpan...
                                     </>
                                 ) : (
-                                    "Simpan Perubahan"
+                                    <>
+                                        <Check className="h-4 w-4 mr-2" />
+                                        Simpan Perubahan
+                                    </>
                                 )}
                             </Button>
                         </DialogFooter>

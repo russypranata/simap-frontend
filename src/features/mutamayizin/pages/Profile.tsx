@@ -188,9 +188,11 @@ export const MutamayizinProfile: React.FC = () => {
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-xs text-muted-foreground">Telepon</p>
-                                        <p className="text-sm font-medium">
-                                            {profileData.phone}
-                                        </p>
+                                        {profileData.phone ? (
+                                            <p className="text-sm font-medium">{profileData.phone}</p>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -200,9 +202,11 @@ export const MutamayizinProfile: React.FC = () => {
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-xs text-muted-foreground">Alamat</p>
-                                        <p className="text-sm font-medium">
-                                            {profileData.address}
-                                        </p>
+                                        {profileData.address ? (
+                                            <p className="text-sm font-medium">{profileData.address}</p>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -214,9 +218,11 @@ export const MutamayizinProfile: React.FC = () => {
                                         <p className="text-xs text-muted-foreground">
                                             Bergabung Sejak
                                         </p>
-                                        <p className="text-sm font-medium">
-                                            {profileData.joinDate}
-                                        </p>
+                                        {profileData.joinDate ? (
+                                            <p className="text-sm font-medium">{profileData.joinDate}</p>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>

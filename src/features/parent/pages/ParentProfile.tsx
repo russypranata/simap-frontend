@@ -240,9 +240,13 @@ export const ParentProfile: React.FC = () => {
                                         <p className="text-xs text-muted-foreground">
                                             Telepon
                                         </p>
-                                        <p className="text-sm font-medium font-mono">
-                                            {profileData.phone}
-                                        </p>
+                                        {profileData.phone ? (
+                                            <p className="text-sm font-medium font-mono">
+                                                {profileData.phone}
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -254,9 +258,13 @@ export const ParentProfile: React.FC = () => {
                                         <p className="text-xs text-muted-foreground">
                                             Alamat
                                         </p>
-                                        <p className="text-sm font-medium">
-                                            {profileData.address}
-                                        </p>
+                                        {profileData.address ? (
+                                            <p className="text-sm font-medium">
+                                                {profileData.address}
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>

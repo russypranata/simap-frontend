@@ -34,13 +34,11 @@ export const useAdvisorDashboard = () => {
     const scheduleQuery = useQuery({
         queryKey: ["advisor-dashboard-schedule"],
         queryFn: getUpcomingSchedule,
-        staleTime: 10 * 60 * 1000,
     });
 
     const regularScheduleQuery = useQuery({
         queryKey: ["advisor-dashboard-regular-schedule"],
         queryFn: getRegularSchedule,
-        staleTime: 0,
     });
 
     const activitiesQuery = useQuery({
@@ -51,7 +49,6 @@ export const useAdvisorDashboard = () => {
     const profileQuery = useQuery({
         queryKey: ["advisor-profile"],
         queryFn: getProfile,
-        staleTime: 30 * 60 * 1000,
     });
 
     // isLoading true hanya saat pertama kali fetch (tidak ada cache sama sekali)

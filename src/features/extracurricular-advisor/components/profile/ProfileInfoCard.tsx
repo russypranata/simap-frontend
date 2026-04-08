@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
     User, Mail, Phone, MapPin, Calendar, Edit, Camera, Award, Star, CheckCircle2,
 } from "lucide-react";
@@ -25,6 +25,8 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ profile, onEdi
         .join("")
         .toUpperCase()
         .substring(0, 2);
+
+    const hasPhoto = Boolean(profile.profilePicture && profile.profilePicture.trim() !== "");
 
     return (
         <Card>
@@ -60,8 +62,8 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ profile, onEdi
                     {/* Avatar + Name */}
                     <div className="flex flex-col md:flex-row items-center md:items-center space-y-4 md:space-y-0 md:space-x-6">
                         <div
-                            onClick={() => profile.profilePicture && setIsPhotoOpen(true)}
-                            className={`relative group ${profile.profilePicture ? "cursor-pointer" : "cursor-default"}`}
+                            onClick={() => hasPhoto && setIsPhotoOpen(true)}
+                            className={`relative group ${hasPhoto ? "cursor-pointer" : "cursor-default"}`}
                         >
                             <Avatar className="w-32 h-32 rounded-full border-4 border-primary/10 transition-transform duration-300 group-hover:scale-105">
                                 <AvatarImage src={profile.profilePicture} alt={profile.name} className="object-cover" />
@@ -69,29 +71,14 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ profile, onEdi
                                     {initials}
                                 </AvatarFallback>
                             </Avatar>
-                            {profile.profilePicture && (
+                            {hasPhoto && (
                                 <div className="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                    <div className="bg-white/90 p-2 rounded-full shadow-sm backdrop-blur-sm">
+                                    <div className="bg-white/90 p-2 rounded-full backdrop-blur-sm">
                                         <Camera className="h-5 w-5 text-gray-800" />
                                     </div>
                                 </div>
                             )}
                         </div>
-
-                        <Dialog open={isPhotoOpen} onOpenChange={setIsPhotoOpen}>
-                            <DialogContent className="max-w-md md:max-w-lg p-1 bg-transparent border-none shadow-none text-transparent">
-                                <div className="relative rounded-lg overflow-hidden bg-white shadow-2xl">
-                                    {profile.profilePicture && (
-                                        /* eslint-disable-next-line @next/next/no-img-element */
-                                        <img
-                                            src={profile.profilePicture}
-                                            alt={`Foto Profil ${profile.name}`}
-                                            className="w-full h-auto object-contain max-h-[80vh] rounded-lg"
-                                        />
-                                    )}
-                                </div>
-                            </DialogContent>
-                        </Dialog>
 
                         <div className="flex-1 text-center md:text-left space-y-2">
                             <h2 className="text-2xl font-bold text-foreground">{profile.name}</h2>
@@ -107,6 +94,25 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ profile, onEdi
                             </div>
                         </div>
                     </div>
+
+                    {/* Lightbox — hanya mount jika ada foto */}
+                    {hasPhoto && (
+                        <Dialog open={isPhotoOpen} onOpenChange={setIsPhotoOpen}>
+                            <DialogContent className="max-w-sm p-4 gap-3">
+                                <DialogTitle className="text-sm font-medium text-muted-foreground">
+                                    Foto Profil
+                                </DialogTitle>
+                                <div className="rounded-xl overflow-hidden">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={profile.profilePicture}
+                                        alt={`Foto Profil ${profile.name}`}
+                                        className="w-full h-auto object-cover aspect-square rounded-xl"
+                                    />
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    )}
 
                     {/* Personal Info */}
                     <div className="space-y-4 pt-4 border-t">
@@ -155,7 +161,11 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ profile, onEdi
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-xs text-muted-foreground">{label}</p>
-                                        <p className={`text-sm font-medium ${className ?? ""}`}>{value}</p>
+                                        {value ? (
+                                            <p className={`text-sm font-medium ${className ?? ""}`}>{value}</p>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -165,7 +175,11 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ profile, onEdi
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-xs text-muted-foreground">Alamat</p>
-                                    <p className="text-sm font-medium">{profile.address}</p>
+                                    {profile.address ? (
+                                        <p className="text-sm font-medium">{profile.address}</p>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                    )}
                                 </div>
                             </div>
                             <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
@@ -174,7 +188,11 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ profile, onEdi
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-xs text-muted-foreground">Bergabung Sejak</p>
-                                    <p className="text-sm font-medium">{profile.joinDate}</p>
+                                    {profile.joinDate ? (
+                                        <p className="text-sm font-medium">{profile.joinDate}</p>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                    )}
                                 </div>
                             </div>
                         </div>

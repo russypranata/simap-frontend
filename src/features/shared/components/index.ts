@@ -9,6 +9,7 @@ export { ChildSelector } from "./ChildSelector";
 export { FilterButton } from "./FilterButton";
 export { ActiveFilterBadges } from "./ActiveFilterBadges";
 export type { FilterBadge } from "./ActiveFilterBadges";
+export { BackButton } from "./BackButton";
 export {
     SkeletonStatCard,
     SkeletonPageHeader,

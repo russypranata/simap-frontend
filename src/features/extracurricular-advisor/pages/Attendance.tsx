@@ -30,7 +30,7 @@ export const ExtracurricularAttendance: React.FC = () => {
     const searchParams = useSearchParams();
 
     const {
-        members, history, tutorName, isLoading, isHistoryLoading, isRefreshing,
+        members, history, tutorName, extracurricularName, isLoading, isHistoryLoading, isRefreshing,
         selectedDate, setSelectedDate, startTime, setStartTime, endTime, setEndTime,
         attendanceRecords, handleStatusChange, handleMarkAllPresent, handleSaveAttendance,
         searchTerm, setSearchTerm, statusFilter, setStatusFilter,
@@ -93,6 +93,7 @@ export const ExtracurricularAttendance: React.FC = () => {
                 <TabsContent value="attendance" className="space-y-6">
                     <AttendanceForm
                         tutorName={tutorName}
+                        extracurricularName={extracurricularName}
                         selectedDate={selectedDate}
                         startTime={startTime}
                         endTime={endTime}
@@ -135,7 +136,6 @@ export const ExtracurricularAttendance: React.FC = () => {
                         historyPage={historyPage}
                         historyItemsPerPage={historyItemsPerPage}
                         totalHistoryPages={totalHistoryPages}
-                        activeTab={activeTab}
                         onSearchChange={setHistorySearchTerm}
                         onDateRangeChange={setHistoryDateRange}
                         onActiveDateFilterChange={setActiveDateFilter}

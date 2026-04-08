@@ -10,7 +10,6 @@ export const useAdvisorProfile = () => {
     const profileQuery = useQuery({
         queryKey: ["advisor-profile"],
         queryFn: getProfile,
-        staleTime: 30 * 60 * 1000,
     });
 
     const statsQuery = useQuery({
@@ -19,11 +18,13 @@ export const useAdvisorProfile = () => {
     });
 
     const isLoading = profileQuery.isLoading || statsQuery.isLoading;
+    const isFetching = profileQuery.isFetching || statsQuery.isFetching;
 
     return {
         profile: profileQuery.data ?? null,
         stats: statsQuery.data ?? null,
         isLoading,
+        isFetching,
         refetch: () => {
             profileQuery.refetch();
             statsQuery.refetch();

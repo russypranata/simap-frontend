@@ -25,6 +25,7 @@ interface UseAdvisorAttendanceReturn {
     members: AdvisorMember[];
     history: AttendanceHistoryEntry[];
     tutorName: string;
+    extracurricularName: string;
     isLoading: boolean;
     isHistoryLoading: boolean;
     isRefreshing: boolean;
@@ -90,7 +91,6 @@ export const useAdvisorAttendance = (): UseAdvisorAttendanceReturn => {
     const profileQuery = useQuery({
         queryKey: ["advisor-profile"],
         queryFn: getProfile,
-        staleTime: 30 * 60 * 1000,
     });
 
     const membersQuery = useQuery({
@@ -120,9 +120,10 @@ export const useAdvisorAttendance = (): UseAdvisorAttendanceReturn => {
     const [historyPage, setHistoryPage] = useState(1);
     const [historyItemsPerPage, setHistoryItemsPerPage] = useState(10);
 
-    const members = membersQuery.data?.data ?? [];
-    const history = historyQuery.data ?? [];
+    const members = useMemo(() => membersQuery.data?.data ?? [], [membersQuery.data?.data]);
+    const history = useMemo(() => historyQuery.data ?? [], [historyQuery.data]);
     const tutorName = profileQuery.data?.name ?? "";
+    const extracurricularName = profileQuery.data?.extracurricular ?? "";
     const isLoading = membersQuery.isLoading || profileQuery.isLoading;
     const isHistoryLoading = historyQuery.isLoading;
 
@@ -277,7 +278,7 @@ export const useAdvisorAttendance = (): UseAdvisorAttendanceReturn => {
     }[status]), []);
 
     return {
-        members, history, tutorName, isLoading, isHistoryLoading, isRefreshing,
+        members, history, tutorName, extracurricularName, isLoading, isHistoryLoading, isRefreshing,
         selectedDate, setSelectedDate, startTime, setStartTime, endTime, setEndTime,
         attendanceRecords, handleStatusChange, handleMarkAllPresent, handleSaveAttendance,
         searchTerm, setSearchTerm, statusFilter, setStatusFilter,

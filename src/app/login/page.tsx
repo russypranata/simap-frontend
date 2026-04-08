@@ -518,7 +518,7 @@ export default function LoginPage() {
 
                     <div className="mt-8 text-center">
                         <p className="text-slate-400 text-xs font-medium">
-                            &copy; 2025 SMAIT Al-Fityan Kubu Raya. All rights reserved.
+                            &copy; 2026 SMAIT Al-Fityan Kubu Raya. All rights reserved.
                         </p>
                     </div>
                 </div>

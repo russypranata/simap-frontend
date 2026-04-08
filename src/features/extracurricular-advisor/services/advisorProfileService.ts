@@ -76,6 +76,12 @@ export interface ApiErrorResponse {
 
 // ==================== SERVICE FUNCTIONS ====================
 
+const normalizeProfilePicture = (d: Record<string, unknown>): string => {
+    const raw = (d.profile_picture ?? d.profilePicture ?? d.avatar ?? "") as string;
+    if (!raw || raw.includes("default.jpg") || raw.includes("default.png")) return "";
+    return raw;
+};
+
 export const getProfile = async (): Promise<AdvisorProfileData> => {
     if (USE_MOCK_DATA) {
         await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY_MS));
@@ -96,7 +102,7 @@ export const getProfile = async (): Promise<AdvisorProfileData> => {
         email: (d.email as string) ?? "",
         phone: (d.phone as string) ?? "",
         role: (d.role as string) ?? "",
-        profilePicture: (d.profile_picture ?? d.profilePicture ?? d.avatar ?? "") as string,
+        profilePicture: normalizeProfilePicture(d),
         address: (d.address as string) ?? "",
         joinDate: (d.join_date ?? d.joinDate ?? "") as string,
         nip: (d.nip as string | undefined),
@@ -129,7 +135,7 @@ export const updateProfile = async (data: UpdateAdvisorProfileRequest): Promise<
         email: (d.email as string) ?? "",
         phone: (d.phone as string) ?? "",
         role: (d.role as string) ?? "",
-        profilePicture: (d.profile_picture ?? d.profilePicture ?? d.avatar ?? "") as string,
+        profilePicture: normalizeProfilePicture(d),
         address: (d.address as string) ?? "",
         joinDate: (d.join_date ?? d.joinDate ?? "") as string,
         nip: (d.nip as string | undefined),
@@ -188,7 +194,7 @@ export const updatePassword = async (data: UpdatePasswordRequest): Promise<Passw
         body: JSON.stringify({
             current_password: data.currentPassword,
             new_password: data.newPassword,
-            password_confirmation: data.confirmPassword,
+            new_password_confirmation: data.confirmPassword,
         }),
     });
     if (!response.ok) await handleApiError(response);

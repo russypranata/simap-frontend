@@ -13,7 +13,6 @@ import {
     Camera,
     FileImage,
     CheckCircle2,
-    XCircle,
     AlertCircle,
     X,
 } from "lucide-react";

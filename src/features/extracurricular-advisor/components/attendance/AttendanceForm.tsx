@@ -8,6 +8,7 @@ import { Calendar, Clock } from "lucide-react";
 
 interface AttendanceFormProps {
     tutorName: string;
+    extracurricularName: string;
     selectedDate: string;
     startTime: string;
     endTime: string;
@@ -18,6 +19,7 @@ interface AttendanceFormProps {
 
 export const AttendanceForm: React.FC<AttendanceFormProps> = ({
     tutorName,
+    extracurricularName,
     selectedDate,
     startTime,
     endTime,
@@ -46,7 +48,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="type-eskul" className="text-sm font-semibold">Jenis Ekstrakurikuler</Label>
-                        <Input id="type-eskul" value="Pramuka" readOnly className="h-11 bg-muted/50" />
+                        <Input id="type-eskul" value={extracurricularName || "—"} readOnly className="h-11 bg-muted/50" />
                     </div>
                 </div>
                 <div className="space-y-4">
