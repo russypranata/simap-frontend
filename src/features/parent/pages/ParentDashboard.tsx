@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {
     Calendar,
     GraduationCap,
-    Clock,
     CheckCircle,
     Trophy,
     User,
@@ -13,10 +12,10 @@ import {
     TrendingUp,
     AlertTriangle,
     ClipboardList,
-    MapPin,
     Timer,
     Moon,
     Activity,
+    Clock,
 } from 'lucide-react';
 import {
     Card,
@@ -31,6 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useParentDashboard } from '../hooks/useParentDashboard';
 import { ErrorState, ChildSelector } from "@/features/shared/components";
+import { RefreshCw } from 'lucide-react';
 
 // ==================== SKELETON ====================
 
@@ -90,7 +90,16 @@ const StatCard: React.FC<{
     color: string;
     href: string;
     alert?: boolean;
-}> = ({ title, value, subtitle, icon: Icon, color, href, alert }) => (
+    badgeColor?: "green" | "amber" | "red";
+}> = ({ title, value, subtitle, icon: Icon, color, href, badgeColor }) => {
+    const badge = badgeColor ?? (color as "green" | "amber" | "red");
+    const badgeClass = {
+        green: "bg-green-50 text-green-600 border-green-100",
+        amber: "bg-amber-50 text-amber-600 border-amber-100",
+        red:   "bg-red-50 text-red-600 border-red-100",
+    }[badge] ?? `bg-${color}-50 text-${color}-600 border-${color}-100`;
+
+    return (
     <Link href={href}>
         <div className={cn(
             "group relative overflow-hidden rounded-xl bg-white border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 flex flex-col",
@@ -101,23 +110,17 @@ const StatCard: React.FC<{
                     <div className={cn("p-2.5 rounded-xl group-hover:scale-110 transition-transform duration-300", `bg-${color}-50`)}>
                         <Icon className={cn("h-5 w-5", `text-${color}-600`)} />
                     </div>
-                    {alert ? (
-                        <span className="flex items-center gap-1">
-                            <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", `bg-${color}-500`)} />
-                            <span className={cn("text-[10px] font-semibold", `text-${color}-600`)}>Cek</span>
-                        </span>
-                    ) : (
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{title}</span>
-                    )}
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{title}</span>
                 </div>
-                <p className={cn("text-2xl font-bold tabular-nums", alert ? `text-${color}-600` : "text-slate-800")}>{value}</p>
+                <p className="text-2xl font-bold tabular-nums text-slate-800">{value}</p>
             </div>
-            <div className={cn("mx-3 mb-3 px-2.5 py-1 rounded-md border text-[11px] font-medium truncate", `bg-${color}-50 text-${color}-600 border-${color}-100`)}>
+            <div className={cn("mx-3 mb-3 px-2.5 py-1 rounded-md border text-[11px] font-medium truncate", badgeClass)}>
                 {subtitle}
             </div>
         </div>
     </Link>
-);
+    );
+};
 
 // ==================== MAIN COMPONENT ====================
 
@@ -170,45 +173,44 @@ export const ParentDashboard: React.FC = () => {
                 </div>
 
                 {/* Child Selector */}
-                <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                <div className="flex items-center gap-2">
+                    {isFetching && (
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                            <span className="hidden sm:inline">Memperbarui...</span>
+                        </div>
+                    )}
+                    <ChildSelector childList={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                </div>
             </div>
 
             {/* Warning Banner */}
             {hasWarning && (
-                <Card className={cn('border-2', stats.violationCount >= 5 || stats.averageScore < 70 ? 'bg-red-50 border-red-300' : 'bg-amber-50 border-amber-300')}>
-                    <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                            <div className={cn('p-2 rounded-lg', stats.violationCount >= 5 || stats.averageScore < 70 ? 'bg-red-100' : 'bg-amber-100')}>
-                                <AlertTriangle className={cn('h-5 w-5', stats.violationCount >= 5 || stats.averageScore < 70 ? 'text-red-600' : 'text-amber-600')} />
-                            </div>
-                            <div className="flex-1">
-                                <h3 className={cn('font-semibold', stats.violationCount >= 5 || stats.averageScore < 70 ? 'text-red-900' : 'text-amber-900')}>
-                                    Perhatian Diperlukan untuk {data.child.name}!
-                                </h3>
-                                <p className={cn('text-sm mt-1', stats.violationCount >= 5 || stats.averageScore < 70 ? 'text-red-800' : 'text-amber-800')}>
-                                    {stats.violationCount >= 3 && `Anak Anda memiliki ${stats.violationCount} catatan pelanggaran. `}
-                                    {stats.averageScore < 75 && `Nilai rata-rata di bawah KKM. `}
-                                    Mohon pantau perkembangan dan hubungi Wali Kelas jika diperlukan.
-                                </p>
-                            </div>
-                            <Link href="/parent/behavior">
-                                <Button variant="outline" size="sm" className="gap-1 text-amber-800 border-amber-300 hover:bg-amber-100">
-                                    Lihat Detail <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </Link>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200">
+                    <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+                    <p className="text-sm text-amber-800 flex-1">
+                        {stats.violationCount >= 3 && `${data.child.name} memiliki ${stats.violationCount} catatan pelanggaran. `}
+                        {stats.averageScore < 75 && `Nilai rata-rata di bawah KKM. `}
+                        {stats.attendanceRate < 80 && `Tingkat kehadiran rendah (${stats.attendanceRate}%). `}
+                        Pantau perkembangan anak Anda.
+                    </p>
+                </div>
             )}
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-                <StatCard title="Nilai" value={stats.averageScore} subtitle="Rata-rata Akademik" icon={GraduationCap} color="blue" href="/parent/academic/grades" />
-                <StatCard title="Kehadiran" value={`${stats.attendanceRate}%`} subtitle="Hadir di Sekolah" icon={CheckCircle} color="green" href="/parent/attendance/daily" />
-                <StatCard title="Pagi" value={stats.lateCount} subtitle="Kali Terlambat" icon={Timer} color="amber" href="/parent/attendance/morning" alert={stats.lateCount > 0} />
-                <StatCard title="Ibadah" value={`${stats.prayerRate}%`} subtitle="Keaktifan Sholat" icon={Moon} color="indigo" href="/parent/attendance/prayer" />
-                <StatCard title="Prestasi" value={stats.achievementsCount} subtitle="Penghargaan Siswa" icon={Trophy} color="purple" href="/parent/academic/achievements" />
-                <StatCard title="Perilaku" value={stats.violationCount} subtitle="Pelanggaran Aktif" icon={ClipboardList} color="rose" href="/parent/behavior" alert={stats.violationCount > 0} />
+                <StatCard title="Nilai" value={stats.averageScore} subtitle="Rata-rata Akademik" icon={GraduationCap} color="blue" href="/parent/academic/grades"
+                    badgeColor={stats.averageScore >= 75 ? "green" : stats.averageScore >= 70 ? "amber" : "red"} />
+                <StatCard title="Kehadiran" value={`${stats.attendanceRate}%`} subtitle="Kehadiran Harian" icon={CheckCircle} color="green" href="/parent/attendance/daily"
+                    badgeColor={stats.attendanceRate >= 80 ? "green" : stats.attendanceRate >= 75 ? "amber" : "red"} />
+                <StatCard title="Pagi" value={stats.lateCount} subtitle="Keterlambatan Pagi" icon={Timer} color="amber" href="/parent/attendance/morning"
+                    badgeColor={stats.lateCount <= 5 ? "green" : stats.lateCount <= 10 ? "amber" : "red"} />
+                <StatCard title="Ibadah" value={`${stats.prayerRate}%`} subtitle="Keaktifan Sholat" icon={Moon} color="indigo" href="/parent/attendance/prayer"
+                    badgeColor={stats.prayerRate >= 85 ? "green" : stats.prayerRate >= 75 ? "amber" : "red"} />
+                <StatCard title="Prestasi" value={stats.achievementsCount} subtitle="Penghargaan Siswa" icon={Trophy} color="purple" href="/parent/academic/achievements"
+                    badgeColor="green" />
+                <StatCard title="Perilaku" value={stats.violationCount} subtitle="Pelanggaran Aktif" icon={ClipboardList} color="rose" href="/parent/behavior"
+                    badgeColor={stats.violationCount === 0 ? "green" : stats.violationCount <= 3 ? "amber" : "red"} />
             </div>
 
             {/* Row: Schedule + Attendance */}
@@ -235,32 +237,34 @@ export const ParentDashboard: React.FC = () => {
                             </Link>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-3 pt-3">
+                    <CardContent className="p-4">
                         {todaySchedule.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-8 text-center">
                                 <Calendar className="h-8 w-8 text-slate-300 mb-2" />
                                 <p className="text-sm text-slate-500">Tidak ada jadwal hari ini</p>
                             </div>
                         ) : (
-                            <div className="space-y-3">
-                                {todaySchedule.map((item, index) => (
+                            <div className="space-y-2">
+                                {todaySchedule.map((item) => (
                                     <div key={item.id} className={cn(
-                                        'group flex items-center gap-4 p-3 rounded-xl border transition-all duration-200',
-                                        item.isOngoing ? 'bg-blue-50/50 border-blue-200' : 'bg-white border-slate-100 hover:border-blue-100 hover:shadow-sm'
+                                        'flex items-center justify-between p-2.5 rounded-lg border',
+                                        item.isOngoing
+                                            ? 'bg-blue-100/60 border-blue-200'
+                                            : 'bg-blue-50/50 border-blue-100'
                                     )}>
-                                        <div className="text-center min-w-[50px] shrink-0">
-                                            <p className={cn('text-sm font-bold', item.isOngoing ? 'text-blue-700' : 'text-slate-600')}>{item.time}</p>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className={cn('font-semibold text-sm truncate', item.isOngoing ? 'text-blue-900' : 'text-slate-800')}>{item.subject}</p>
-                                            <div className="flex flex-wrap items-center gap-3 mt-1 text-[11px] font-medium text-slate-500">
-                                                <span className="flex items-center gap-1.5"><User className="h-3 w-3 opacity-70" />{item.teacher}</span>
-                                                <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3 opacity-70" />{item.room}</span>
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                            <div className="p-1.5 rounded-md bg-blue-100 shrink-0">
+                                                <Calendar className="h-3.5 w-3.5 text-blue-700" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-slate-800 truncate">{item.subject}</p>
+                                                <p className="text-[11px] text-slate-500 mt-0.5">{data.child?.class ?? ''}</p>
                                             </div>
                                         </div>
-                                        {item.isOngoing && (
-                                            <Badge className="bg-blue-100 text-blue-700 border-0 hover:bg-blue-100 px-2 py-0.5 text-[10px]">Berlangsung</Badge>
-                                        )}
+                                        <div className="flex items-center gap-1 text-sm font-medium text-slate-800 shrink-0 tabular-nums ml-2">
+                                            <Clock className="h-3.5 w-3.5 text-slate-400" />
+                                            {item.time}{item.endTime && ` – ${item.endTime}`}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -288,11 +292,13 @@ export const ParentDashboard: React.FC = () => {
                             </Link>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-3 pt-3 space-y-4">
+                    <CardContent className="p-4 space-y-4">
                         <div>
                             <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-2">Tertinggi</p>
                             <div className="space-y-2">
-                                {topSubjects.map((s, i) => (
+                                {topSubjects.length === 0 ? (
+                                    <p className="text-sm text-slate-400 italic text-center py-3">Belum ada data nilai</p>
+                                ) : topSubjects.map((s, i) => (
                                     <div key={i} className="flex items-center justify-between p-2.5 rounded-lg bg-emerald-50/50 border border-emerald-100">
                                         <span className="text-sm font-medium text-slate-700 truncate">{s.subject}</span>
                                         <div className="flex items-center gap-2 shrink-0">
@@ -306,7 +312,9 @@ export const ParentDashboard: React.FC = () => {
                         <div>
                             <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">Perlu Perhatian</p>
                             <div className="space-y-2">
-                                {bottomSubjects.map((s, i) => (
+                                {bottomSubjects.length === 0 ? (
+                                    <p className="text-sm text-slate-400 italic text-center py-3">Belum ada data nilai</p>
+                                ) : bottomSubjects.map((s, i) => (
                                     <div key={i} className="flex items-center justify-between p-2.5 rounded-lg bg-amber-50/50 border border-amber-100">
                                         <span className="text-sm font-medium text-slate-700 truncate">{s.subject}</span>
                                         <div className="flex items-center gap-2 shrink-0">

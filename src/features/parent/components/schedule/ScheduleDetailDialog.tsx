@@ -8,7 +8,6 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Clock, User, Calendar, BookOpen, Users } from "lucide-react";
 import type { ScheduleItem } from "@/features/parent/services/parentScheduleService";
 

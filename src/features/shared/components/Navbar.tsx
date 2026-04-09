@@ -23,6 +23,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useRole } from '@/app/context/RoleContext';
+import { useQuery } from '@tanstack/react-query';
 
 import { NotificationBell } from './NotificationBell';
 import { ActiveAcademicYearBadge } from './ActiveAcademicYearBadge';
@@ -33,7 +34,7 @@ import { StudentProfileData } from '@/features/student/data/mockStudentData';
 import { type AdvisorProfileData } from '@/features/extracurricular-advisor/services/advisorProfileService';
 import { getProfile as getAdvisorProfile } from '@/features/extracurricular-advisor/services/advisorProfileService';
 import { getParentProfile } from '@/features/parent/services/parentProfileService';
-import { ParentProfileData } from '@/features/parent/data/mockParentData';
+import { ParentProfileData } from '@/features/parent/services/parentProfileService';
 
 interface NavbarProps {
     showNotifications?: boolean;
@@ -42,46 +43,34 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
     const { role, isAuthenticated, logout } = useRole();
+
+    // Student — manual state (belum pakai React Query)
     const [studentProfile, setStudentProfile] =
         React.useState<StudentProfileData | null>(null);
-    const [advisorProfile, setAdvisorProfile] = React.useState<AdvisorProfileData | null>(null);
-    const [parentProfile, setParentProfile] = React.useState<ParentProfileData | null>(null);
 
     React.useEffect(() => {
-        if (isAuthenticated) {
-             if (role === 'siswa') {
-                const fetchProfile = async () => {
-                    try {
-                        const data = await getStudentProfile();
-                        setStudentProfile(data);
-                    } catch (error) {
-                        console.error('Failed to fetch student profile for navbar', error);
-                    }
-                };
-                fetchProfile();
-            } else if (role === 'tutor_ekskul') {
-                const fetchAdvisor = async () => {
-                    try {
-                        const data = await getAdvisorProfile();
-                        setAdvisorProfile(data);
-                    } catch (error) {
-                        console.error('Failed to fetch advisor profile for navbar', error);
-                    }
-                };
-                fetchAdvisor();
-            } else if (role === 'orang_tua') {
-                const fetchParent = async () => {
-                    try {
-                        const data = await getParentProfile();
-                        setParentProfile(data);
-                    } catch (error) {
-                        console.error('Failed to fetch parent profile', error);
-                    }
-                };
-                fetchParent();
-            }
+        if (isAuthenticated && role === 'siswa') {
+            getStudentProfile()
+                .then(setStudentProfile)
+                .catch((e) => console.error('Failed to fetch student profile for navbar', e));
         }
     }, [isAuthenticated, role]);
+
+    // Advisor — pakai React Query, cache key sama dengan EditProfile page
+    const { data: advisorProfile } = useQuery<AdvisorProfileData>({
+        queryKey: ['advisor-profile'],
+        queryFn: getAdvisorProfile,
+        enabled: isAuthenticated && role === 'tutor_ekskul',
+        staleTime: 5 * 60 * 1000,
+    });
+
+    // Parent — pakai React Query, cache key sama dengan EditProfile page
+    const { data: parentProfile } = useQuery<ParentProfileData>({
+        queryKey: ['parent-profile'],
+        queryFn: getParentProfile,
+        enabled: isAuthenticated && role === 'orang_tua',
+        staleTime: 5 * 60 * 1000,
+    });
 
     const handleLogout = () => {
         logout();
@@ -145,7 +134,7 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
     const getProfilePicture = () => {
         if (role === 'tutor_ekskul') return advisorProfile?.profilePicture;
         if (role === 'siswa') return studentProfile?.profilePicture;
-        // return undefined for orang_tua to force fallback initials
+        if (role === 'orang_tua') return parentProfile?.profilePicture;
         return undefined;
     };
 

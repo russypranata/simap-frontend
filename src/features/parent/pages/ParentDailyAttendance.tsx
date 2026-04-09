@@ -57,7 +57,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParentDailyAttendance } from "../hooks/useParentDailyAttendance";
-import type { AttendanceStatus, DailyAttendanceRecord } from "../services/dailyAttendanceService";
+import type { DailyAttendanceRecord } from "../services/dailyAttendanceService";
 import {
     ErrorState,
     LoadingOverlay,
@@ -232,8 +232,8 @@ export const ParentDailyAttendance: React.FC = () => {
 
 
 
-    // Filtered records count for filter badge
-    const filteredCount = useMemo(() => {
+    // Filtered records count for filter badge — used by summary cards
+    useMemo(() => {
         if (filterStatus === "semua") return records.length;
         return records.filter(r => r.status === filterStatus).length;
     }, [records, filterStatus]);
@@ -345,7 +345,7 @@ export const ParentDailyAttendance: React.FC = () => {
                         </Dialog>
 
                         {/* Child Selector */}
-                        <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                        <ChildSelector childList={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
                     </PageHeader>
 
                 {/* Active Global Filters */}

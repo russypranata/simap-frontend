@@ -11,17 +11,17 @@ interface Child {
 }
 
 interface ChildSelectorProps {
-    children: Child[];
+    childList: Child[];
     selectedChildId: string;
     onSelect: (id: string) => void;
 }
 
 export const ChildSelector: React.FC<ChildSelectorProps> = ({
-    children,
+    childList,
     selectedChildId,
     onSelect,
 }) => {
-    if (children.length <= 1) return null;
+    if (childList.length <= 1) return null;
 
     return (
         <Select value={selectedChildId} onValueChange={onSelect}>
@@ -32,7 +32,7 @@ export const ChildSelector: React.FC<ChildSelectorProps> = ({
                 </div>
             </SelectTrigger>
             <SelectContent>
-                {children.map((child) => (
+                {childList.map((child) => (
                     <SelectItem key={child.id} value={child.id}>
                         {child.name} — {child.class}
                     </SelectItem>

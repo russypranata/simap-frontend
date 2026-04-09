@@ -19,12 +19,14 @@ export const useAdvisorProfile = () => {
 
     const isLoading = profileQuery.isLoading || statsQuery.isLoading;
     const isFetching = profileQuery.isFetching || statsQuery.isFetching;
+    const error = profileQuery.error instanceof Error ? profileQuery.error.message : null;
 
     return {
         profile: profileQuery.data ?? null,
         stats: statsQuery.data ?? null,
         isLoading,
         isFetching,
+        error,
         refetch: () => {
             profileQuery.refetch();
             statsQuery.refetch();

@@ -1,217 +1,122 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import {
-    getExtracurricularData,
-    getParentChildren,
-    type Extracurricular,
-    type ExtracurricularAttendance,
-    type ChildInfo,
-} from "../services/parentExtracurricularAttendanceService";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getExtracurricularData, getParentChildren, type Extracurricular, type ExtracurricularAttendance, type ChildInfo } from "../services/parentExtracurricularAttendanceService";
+
+interface ExtracurricularData {
+    extracurriculars: Extracurricular[];
+    recentAttendance: ExtracurricularAttendance[];
+}
 
 export const useParentExtracurricularAttendance = () => {
-    // Core Data
-    const [children, setChildren] = useState<ChildInfo[]>([]);
     const [selectedChildId, setSelectedChildId] = useState<string>("");
-    const [allExtracurriculars, setAllExtracurriculars] = useState<Extracurricular[]>([]);
-    const [allAttendance, setAllAttendance] = useState<ExtracurricularAttendance[]>([]);
-
-    // Filters
     const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>("all");
     const [filterActivity, setFilterActivity] = useState<string>("all");
-
-    // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
+    const [isFetchingOverlay, setIsFetchingOverlay] = useState(false);
 
-    // UI States
-    const [isLoading, setIsLoading] = useState(true);
-    const [isFetching, setIsFetching] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const childrenQuery = useQuery<ChildInfo[]>({
+        queryKey: ["parent-children"],
+        queryFn: getParentChildren,
+        staleTime: 5 * 60 * 1000,
+    });
 
-    // 1. Initial Fetch for Children
-    useEffect(() => {
-        const init = async () => {
-            try {
-                const childrenData = await getParentChildren();
-                setChildren(childrenData);
-                if (childrenData.length > 0) {
-                    setSelectedChildId(childrenData[0].id);
-                }
-            } catch {
-                setError("Gagal memuat profil anak.");
-                setIsLoading(false);
+    const children = childrenQuery.data ?? [];
+    const effectiveChildId = selectedChildId || children[0]?.id || "";
+
+    const ekskulQuery = useQuery<ExtracurricularData>({
+        queryKey: ["parent-extracurricular", effectiveChildId],
+        queryFn: () => getExtracurricularData(effectiveChildId),
+        enabled: !!effectiveChildId,
+        staleTime: 2 * 60 * 1000,
+        select: (data) => {
+            // Auto-select latest year on first load
+            if (selectedAcademicYear === "all" && data.extracurriculars.length > 0) {
+                const years = [...new Set(data.extracurriculars.map(e => e.academicYearId))].sort((a, b) => b.localeCompare(a));
+                if (years[0]) setSelectedAcademicYear(years[0]);
             }
-        };
-        init();
-    }, []);
+            return data;
+        },
+    });
 
-    // 2. Fetch Records when Child Changes
-    const fetchRecords = useCallback(async () => {
-        if (!selectedChildId) return;
+    const allExtracurriculars = ekskulQuery.data?.extracurriculars ?? [];
+    const allAttendance = ekskulQuery.data?.recentAttendance ?? [];
 
-        const isInitial = allAttendance.length === 0 && isLoading;
-        if (!isInitial) {
-            setIsFetching(true);
-        }
-        setError(null);
-
-        try {
-            const data = await getExtracurricularData(selectedChildId);
-            setAllExtracurriculars(data.extracurriculars);
-            setAllAttendance(data.recentAttendance);
-
-            // Auto-select latest academic year on load
-            if (data.extracurriculars.length > 0) {
-                const years = [...new Set(data.extracurriculars.map(e => e.academicYearId))];
-                const latest = years.sort((a, b) => b.localeCompare(a))[0];
-                if (latest) {
-                    setSelectedAcademicYear(latest);
-                }
-            }
-        } catch (err) {
-            const message = err instanceof Error ? err.message : "Gagal memuat data ekstrakurikuler.";
-            setError(message);
-            setAllExtracurriculars([]);
-            setAllAttendance([]);
-        } finally {
-            setIsLoading(false);
-            setIsFetching(false);
-            setCurrentPage(1);
-        }
-    }, [selectedChildId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    useEffect(() => {
-        if (selectedChildId) {
-            fetchRecords();
-        }
-    }, [fetchRecords]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const refetch = useCallback(() => {
-        fetchRecords();
-    }, [fetchRecords]);
-
-    // 3. Extract academic years for dropdown
     const academicYears = useMemo(() => {
         const unique = new Set(allExtracurriculars.map(e => e.academicYearId));
-        return Array.from(unique).sort((a, b) => b.localeCompare(a)); // newest first
+        return Array.from(unique).sort((a, b) => b.localeCompare(a));
     }, [allExtracurriculars]);
 
-    // 4. Filter extracurriculars by academic year
-    const extracurriculars = useMemo(() => {
-        if (selectedAcademicYear === "all") return allExtracurriculars;
-        return allExtracurriculars.filter(e => e.academicYearId === selectedAcademicYear);
-    }, [allExtracurriculars, selectedAcademicYear]);
+    const extracurriculars = useMemo(() =>
+        selectedAcademicYear === "all" ? allExtracurriculars : allExtracurriculars.filter(e => e.academicYearId === selectedAcademicYear),
+        [allExtracurriculars, selectedAcademicYear]
+    );
 
-    // 5. Derived Stats (based on filtered ekskul for selected year)
-    const stats = useMemo(() => {
-        const uniqueEkskulNames = new Set(extracurriculars.map(e => e.name));
-        const totalEkskul = uniqueEkskulNames.size;
-        const avgAttendance = extracurriculars.length > 0
-            ? Math.round(extracurriculars.reduce((sum, e) => sum + e.attendanceRate, 0) / extracurriculars.length)
-            : 0;
-        const totalAchievements = extracurriculars.reduce((sum, e) => sum + (e.achievements?.length || 0), 0);
+    const stats = useMemo(() => ({
+        totalEkskul: new Set(extracurriculars.map(e => e.name)).size,
+        avgAttendance: extracurriculars.length > 0
+            ? Math.round(extracurriculars.reduce((s, e) => s + e.attendanceRate, 0) / extracurriculars.length)
+            : 0,
+        totalAchievements: extracurriculars.reduce((s, e) => s + (e.achievements?.length ?? 0), 0),
+    }), [extracurriculars]);
 
-        return { totalEkskul, avgAttendance, totalAchievements };
-    }, [extracurriculars]);
+    const uniqueActivitiesList = useMemo(() =>
+        Array.from(new Set(extracurriculars.map(e => e.name))).sort(),
+        [extracurriculars]
+    );
 
-    // 5.5 Unique activities for filter dropdown
-    const uniqueActivitiesList = useMemo(() => {
-        const unique = new Set(extracurriculars.map(e => e.name));
-        return Array.from(unique).sort();
-    }, [extracurriculars]);
-
-    // 6. Filter attendance by academic year + activity
-    const filteredAttendance = useMemo(() => {
-        return allAttendance.filter(record => {
-            const matchesYear = selectedAcademicYear === "all" || record.academicYearId === selectedAcademicYear;
-            
-            let matchesActivity = true;
-            if (filterActivity !== "all") {
-                // record.activity format is "Ekskul Name - Activity Form"
-                // e.g. "Pramuka - Latihan Rutin".
-                // We split by " - " and match exactly the first part to avoid partial match bugs 
-                // between "Basket" and "Mini Basket" or "Pra" and "Pramuka".
-                const ekskulNameRaw = record.activity.split(" - ")[0].trim().toLowerCase();
-                matchesActivity = ekskulNameRaw === filterActivity.toLowerCase();
-            }
-
+    const filteredAttendance = useMemo(() =>
+        allAttendance.filter(r => {
+            const matchesYear = selectedAcademicYear === "all" || r.academicYearId === selectedAcademicYear;
+            const matchesActivity = filterActivity === "all" ||
+                r.activity.split(" - ")[0].trim().toLowerCase() === filterActivity.toLowerCase();
             return matchesYear && matchesActivity;
-        });
-    }, [allAttendance, selectedAcademicYear, filterActivity]);
+        }),
+        [allAttendance, selectedAcademicYear, filterActivity]
+    );
 
-    // 7. Pagination
     const totalPages = Math.ceil(filteredAttendance.length / itemsPerPage) || 1;
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginatedAttendance = filteredAttendance.slice(startIndex, endIndex);
+    const paginatedAttendance = filteredAttendance.slice(startIndex, startIndex + itemsPerPage);
 
-    const goToPage = (page: number) => setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-    const goToNextPage = () => setCurrentPage(prev => Math.min(totalPages, prev + 1));
-    const goToPrevPage = () => setCurrentPage(prev => Math.max(1, prev - 1));
-
-    // Reset pagination when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [selectedAcademicYear, filterActivity]);
-
-    // Reset activity filter when academic year changes (ekskul list changes per year)
-    useEffect(() => {
-        setFilterActivity("all");
-    }, [selectedAcademicYear]);
-
-    // Helper for fetching overlay
     const triggerFetchingOverlay = () => {
-        setIsFetching(true);
-        setTimeout(() => setIsFetching(false), 300);
+        setIsFetchingOverlay(true);
+        setTimeout(() => setIsFetchingOverlay(false), 300);
     };
 
-    const handleFilterChange = (val: string) => {
-        setFilterActivity(val);
-        triggerFetchingOverlay();
-    };
-
-    const handleAcademicYearChange = (val: string) => {
-        setSelectedAcademicYear(val);
-        triggerFetchingOverlay();
-    };
+    const error = childrenQuery.error instanceof Error
+        ? childrenQuery.error.message
+        : ekskulQuery.error instanceof Error
+        ? ekskulQuery.error.message
+        : null;
 
     return {
-        // Data & State
         children,
-        selectedChildId,
+        selectedChildId: effectiveChildId,
         setSelectedChildId,
         extracurriculars,
         paginatedAttendance,
-
-        // Stats
         stats,
-
-        // Filter
         academicYears,
         selectedAcademicYear,
-        handleAcademicYearChange,
+        handleAcademicYearChange: (val: string) => { setSelectedAcademicYear(val); setFilterActivity("all"); setCurrentPage(1); triggerFetchingOverlay(); },
         uniqueActivitiesList,
         filterActivity,
-        handleFilterChange,
-
-        // Pagination
+        handleFilterChange: (val: string) => { setFilterActivity(val); setCurrentPage(1); triggerFetchingOverlay(); },
         currentPage,
         totalPages,
         itemsPerPage,
-        setItemsPerPage,
+        setItemsPerPage: (val: number) => { setItemsPerPage(val); setCurrentPage(1); },
         filteredTotal: filteredAttendance.length,
         startIndexDisplay: filteredAttendance.length === 0 ? 0 : startIndex + 1,
-        endIndexDisplay: Math.min(endIndex, filteredAttendance.length),
-
-        // Actions
-        goToPage,
-        goToNextPage,
-        goToPrevPage,
-        refetch,
+        endIndexDisplay: Math.min(startIndex + itemsPerPage, filteredAttendance.length),
+        goToPage: (page: number) => setCurrentPage(Math.max(1, Math.min(page, totalPages))),
+        goToNextPage: () => setCurrentPage(p => Math.min(totalPages, p + 1)),
+        goToPrevPage: () => setCurrentPage(p => Math.max(1, p - 1)),
+        refetch: () => ekskulQuery.refetch(),
         triggerFetchingOverlay,
-
-        // Status
-        isLoading,
-        isFetching,
+        isLoading: childrenQuery.isLoading || (!!effectiveChildId && ekskulQuery.isLoading),
+        isFetching: childrenQuery.isFetching || ekskulQuery.isFetching || isFetchingOverlay,
         error,
     };
 };

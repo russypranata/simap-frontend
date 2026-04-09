@@ -1,130 +1,80 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import {
-    getMorningTardiness,
-    getParentChildren,
-    getAcademicYears,
-    type LateRecord,
-    type ChildInfo,
-} from "../services/parentMorningAttendanceService";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getMorningTardiness, getParentChildren, getAcademicYears, type LateRecord, type ChildInfo } from "../services/parentMorningAttendanceService";
 import type { AcademicYearItem as AcademicYear } from "../services/parentApiClient";
 
 export const useParentMorningAttendance = () => {
-    const [records, setRecords] = useState<LateRecord[]>([]);
-    const [children, setChildren] = useState<ChildInfo[]>([]);
-    const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
-    
     const [selectedChildId, setSelectedChildId] = useState<string>("");
     const [selectedYearId, setSelectedYearId] = useState<string>("all");
     const [selectedSemesterId, setSelectedSemesterId] = useState<string>("all");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
-    
-    const [isLoading, setIsLoading] = useState(true);
-    const [isFetching, setIsFetching] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
-    // Initial Fetch for Children and Academic Years
-    useEffect(() => {
-        const init = async () => {
-            try {
-                const [childrenData, yearsData] = await Promise.all([
-                    getParentChildren(),
-                    getAcademicYears()
-                ]);
-                
-                setChildren(childrenData);
-                setAcademicYears(yearsData);
-                
-                if (childrenData.length > 0) {
-                    setSelectedChildId(childrenData[0].id);
-                }
-                
-                const activeYear = yearsData.find(y => y.isActive) || yearsData[0];
-                if (activeYear) {
-                    setSelectedYearId(activeYear.id);
-                    // Default to active/latest semester for focused monitoring
-                    const activeSem = activeYear.semesters.find(s => s.isActive) || activeYear.semesters[0];
-                    if (activeSem) {
-                        setSelectedSemesterId(activeSem.id);
-                    } else {
-                        setSelectedSemesterId("all");
-                    }
-                }
-            } catch {
-                setError("Gagal memuat data awal.");
-                setIsLoading(false);
-            }
-        };
-        init();
-    }, []);
+    const childrenQuery = useQuery<ChildInfo[]>({
+        queryKey: ["parent-children"],
+        queryFn: getParentChildren,
+        staleTime: 5 * 60 * 1000,
+    });
 
-    const fetchRecords = useCallback(async () => {
-        if (!selectedChildId) return;
+    const academicYearsQuery = useQuery<AcademicYear[]>({
+        queryKey: ["academic-years"],
+        queryFn: getAcademicYears,
+        staleTime: 10 * 60 * 1000,
+    });
 
-        const isInitial = records.length === 0 && isLoading;
-        if (!isInitial) {
-            setIsFetching(true);
-        }
-        setError(null);
+    const children = childrenQuery.data ?? [];
+    const academicYears = academicYearsQuery.data ?? [];
+    const effectiveChildId = selectedChildId || children[0]?.id || "";
 
-        try {
-            const data = await getMorningTardiness(selectedChildId, selectedYearId, selectedSemesterId);
-            setRecords(data);
-        } catch (err) {
-            const message = err instanceof Error ? err.message : "Gagal memuat riwayat keterlambatan.";
-            setError(message);
-            setRecords([]);
-        } finally {
-            setIsLoading(false);
-            setIsFetching(false);
-        }
-    }, [selectedChildId, selectedYearId, selectedSemesterId]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Auto-select active year on first load
+    const effectiveYearId = useMemo(() => {
+        if (selectedYearId !== "all") return selectedYearId;
+        const active = academicYears.find(y => y.isActive);
+        return active?.id ?? "all";
+    }, [selectedYearId, academicYears]);
 
-    // Pagination Logic
+    const morningQuery = useQuery<LateRecord[]>({
+        queryKey: ["parent-morning", effectiveChildId, effectiveYearId, selectedSemesterId],
+        queryFn: () => getMorningTardiness(effectiveChildId, effectiveYearId, selectedSemesterId),
+        enabled: !!effectiveChildId,
+        staleTime: 2 * 60 * 1000,
+    });
+
+    const records = morningQuery.data ?? [];
     const totalItems = records.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const showPagination = totalItems > 10;
 
     const pagedRecords = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
         return records.slice(start, start + itemsPerPage);
-    }, [records, currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [records, currentPage, itemsPerPage]);
 
-    // Reset pagination when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [selectedChildId, selectedYearId, selectedSemesterId]);
-
-    useEffect(() => {
-        if (selectedChildId) {
-            fetchRecords();
-        }
-    }, [fetchRecords]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const refetch = useCallback(() => {
-        fetchRecords();
-    }, [fetchRecords]);
+    const error = childrenQuery.error instanceof Error
+        ? childrenQuery.error.message
+        : morningQuery.error instanceof Error
+        ? morningQuery.error.message
+        : null;
 
     return {
         records: pagedRecords,
         totalRecords: totalItems,
         children,
         academicYears,
-        selectedChildId,
-        selectedYearId,
+        selectedChildId: effectiveChildId,
+        selectedYearId: effectiveYearId,
         selectedSemesterId,
-        isLoading,
-        isFetching,
+        isLoading: childrenQuery.isLoading || academicYearsQuery.isLoading || (!!effectiveChildId && morningQuery.isLoading),
+        isFetching: childrenQuery.isFetching || morningQuery.isFetching,
         error,
         setSelectedChildId,
-        setSelectedYearId,
-        setSelectedSemesterId,
-        refetch,
+        setSelectedYearId: (id: string) => { setSelectedYearId(id); setCurrentPage(1); },
+        setSelectedSemesterId: (id: string) => { setSelectedSemesterId(id); setCurrentPage(1); },
+        refetch: () => morningQuery.refetch(),
         currentPage,
         setCurrentPage,
         itemsPerPage,
-        setItemsPerPage,
+        setItemsPerPage: (val: number) => { setItemsPerPage(val); setCurrentPage(1); },
         totalPages,
-        showPagination,
+        showPagination: totalItems > 10,
     };
 };

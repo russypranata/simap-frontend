@@ -1,105 +1,49 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
-    User,
-    Mail,
-    Phone,
-    MapPin,
-    Calendar,
-    Edit,
-    CheckCircle2,
-    Users,
-    AtSign,
-    Briefcase,
-} from 'lucide-react';
-
-import { ParentProfileData } from '../data/mockParentData';
-import { getParentProfile } from '../services/parentProfileService';
-import { ProfileSkeleton } from '../components/profile/ProfileSkeleton';
-import { toast } from 'sonner';
+    User, Mail, Phone, MapPin, Calendar, Edit, CheckCircle2,
+    Users, AtSign, Briefcase, Camera, RefreshCw,
+} from "lucide-react";
+import { ProfileSkeleton } from "../components/profile/ProfileSkeleton";
+import { ErrorState } from "@/features/shared/components";
+import { useParentProfile } from "../hooks/useParentProfile";
+import { PageHeader } from "@/features/shared/components";
 
 export const ParentProfile: React.FC = () => {
     const router = useRouter();
-    const [profileData, setProfileData] = useState<ParentProfileData | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const { profile, isLoading, isFetching, error, refetch } = useParentProfile();
+    const [isPhotoOpen, setIsPhotoOpen] = useState(false);
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const data = await getParentProfile();
-                setProfileData(data);
-            } catch (error) {
-                console.error('Failed to fetch profile:', error);
-                toast.error('Gagal memuat data profil');
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    if (isLoading) return <ProfileSkeleton />;
+    if (error) return <ErrorState error={error} onRetry={refetch} />;
+    if (!profile) return null;
 
-        fetchProfile();
-    }, []);
-
-    if (isLoading) {
-        return <ProfileSkeleton />;
-    }
-
-    if (!profileData) {
-        return (
-            <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
-                <div className="p-4 bg-red-50 text-red-600 rounded-full">
-                    <User className="h-8 w-8" />
-                </div>
-                <div className="space-y-2">
-                    <h2 className="text-xl font-semibold text-foreground">Gagal Memuat Profil</h2>
-                    <p className="text-muted-foreground text-sm max-w-sm">
-                        Terjadi kesalahan saat mengambil data profil Anda. Silakan muat ulang halaman atau coba lagi nanti.
-                    </p>
-                </div>
-                <Button variant="outline" onClick={() => window.location.reload()}>
-                    Muat Ulang
-                </Button>
-            </div>
-        );
-    }
-
-    const initials = profileData.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .substring(0, 2);
+    const initials = profile.name.split(" ").map((n) => n[0]).join("").toUpperCase().substring(0, 2);
+    const hasPhoto = Boolean(profile.profilePicture?.trim());
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
-                                Profil{' '}
-                            </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
-                                Saya
-                            </span>
-                        </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <User className="h-5 w-5" />
-                        </div>
+            <PageHeader
+                title="Profil"
+                titleHighlight="Saya"
+                icon={User}
+                description="Kelola informasi profil dan pengaturan akun Anda"
+            >
+                {isFetching && (
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                        Memperbarui...
                     </div>
-                    <p className="text-muted-foreground mt-1">
-                        Informasi data diri dan kontak Anda
-                    </p>
-                </div>
-            </div>
+                )}
+            </PageHeader>
 
-            {/* Profile Card */}
             <Card>
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
@@ -108,160 +52,136 @@ export const ParentProfile: React.FC = () => {
                                 <User className="h-5 w-5" />
                             </div>
                             <div>
-                                <CardTitle className="text-lg">
-                                    Data Diri
-                                </CardTitle>
+                                <CardTitle className="text-lg">Profil Saya</CardTitle>
                                 <p className="text-sm text-muted-foreground mt-0.5 font-normal">
-                                    Informasi akun orang tua
+                                    Kelola informasi pribadi dan akun Anda
                                 </p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Badge
-                                variant="secondary"
-                                className="bg-green-100 text-green-700 border-green-200 pl-2 pr-3 py-1 hidden sm:flex"
-                            >
+                            <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200 pl-2 pr-3 py-1 hidden sm:flex">
                                 <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
                                 Aktif
                             </Badge>
                             <Button
-                                onClick={() =>
-                                    router.push('/parent/profile/edit')
-                                }
+                                onClick={() => router.push("/parent/profile/edit")}
                                 size="sm"
-                                className="flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white"
+                                className="bg-blue-800 hover:bg-blue-900 text-white"
                             >
-                                <Edit className="h-4 w-4" />
-                                <span>Edit Profil</span>
+                                <Edit className="h-4 w-4 mr-1.5" />
+                                <span className="hidden sm:inline">Edit Profil</span>
                             </Button>
                         </div>
                     </div>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-6">
-                        {/* Profile Picture and Basic Info */}
+                        {/* Avatar + Name */}
                         <div className="flex flex-col md:flex-row items-center md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                            <div className="relative">
-                                <Avatar className="w-32 h-32 rounded-full border-4 border-primary/10">
+                            <div
+                                onClick={() => hasPhoto && setIsPhotoOpen(true)}
+                                className={`relative group ${hasPhoto ? "cursor-pointer" : "cursor-default"}`}
+                            >
+                                <Avatar className="w-32 h-32 rounded-full border-4 border-primary/10 transition-transform duration-300 group-hover:scale-105">
+                                    <AvatarImage src={profile.profilePicture} alt={profile.name} className="object-cover" />
                                     <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white rounded-full">
                                         {initials}
                                     </AvatarFallback>
                                 </Avatar>
+                                {hasPhoto && (
+                                    <div className="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                        <div className="bg-white/90 p-2 rounded-full backdrop-blur-sm">
+                                            <Camera className="h-5 w-5 text-gray-800" />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex-1 text-center md:text-left space-y-2">
-                                <h2 className="text-2xl font-bold text-foreground">
-                                    {profileData.name}
-                                </h2>
-                                <div className="space-y-2 mt-1">
-                                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                                        <Badge className="bg-blue-800 text-white pl-2 pr-3 py-1">
-                                            <Users className="h-3.5 w-3.5 mr-1.5" />
-                                            Orang Tua / Wali
-                                        </Badge>
-                                        <Badge
-                                            variant="outline"
-                                            className="border-blue-200 text-blue-800 bg-blue-50 pl-2 pr-3 py-1"
-                                        >
+                                <h2 className="text-2xl font-bold text-foreground">{profile.name}</h2>
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                                    <Badge className="bg-blue-800 text-white pl-2 pr-3 py-1">
+                                        <Users className="h-3.5 w-3.5 mr-1.5" />
+                                        Orang Tua / Wali
+                                    </Badge>
+                                    {profile.occupation && (
+                                        <Badge variant="outline" className="border-blue-200 text-blue-800 bg-blue-50 pl-2 pr-3 py-1">
                                             <Briefcase className="h-3.5 w-3.5 mr-1.5" />
-                                            {profileData.occupation}
+                                            {profile.occupation}
                                         </Badge>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
 
+                        {/* Photo lightbox */}
+                        {hasPhoto && (
+                            <Dialog open={isPhotoOpen} onOpenChange={setIsPhotoOpen}>
+                                <DialogContent className="max-w-sm p-4 gap-3">
+                                    <DialogTitle className="text-sm font-medium text-muted-foreground">Foto Profil</DialogTitle>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={profile.profilePicture} alt={profile.name} className="w-full h-auto object-cover aspect-square rounded-xl" />
+                                </DialogContent>
+                            </Dialog>
+                        )}
+
+                        {/* Informasi Pribadi */}
                         <div className="space-y-4 pt-4 border-t">
                             <h3 className="text-base font-medium text-foreground flex items-center gap-2">
-                                <User className="h-4.5 w-4.5 text-primary" />
+                                <User className="h-4 w-4 text-primary" />
                                 Informasi Pribadi
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                    <div className="p-2 rounded-full bg-primary/10">
-                                        <AtSign className="h-5 w-5 text-primary" />
-                                    </div>
+                                    <div className="p-2 rounded-full bg-primary/10"><AtSign className="h-5 w-5 text-primary" /></div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground">
-                                            Username
-                                        </p>
-                                        <p className="text-sm font-medium">
-                                            {profileData.username}
-                                        </p>
+                                        <p className="text-xs text-muted-foreground">Username</p>
+                                        <p className="text-sm font-medium">{profile.username}</p>
                                     </div>
                                 </div>
-
                                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                    <div className="p-2 rounded-full bg-primary/10">
-                                        <Calendar className="h-5 w-5 text-primary" />
-                                    </div>
+                                    <div className="p-2 rounded-full bg-primary/10"><Calendar className="h-5 w-5 text-primary" /></div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground">
-                                            Bergabung Sejak
-                                        </p>
+                                        <p className="text-xs text-muted-foreground">Bergabung Sejak</p>
                                         <p className="text-sm font-medium">
-                                            {new Date(profileData.joinDate).toLocaleDateString("id-ID", {
-                                                day: "numeric",
-                                                month: "long",
-                                                year: "numeric"
-                                            })}
+                                            {profile.joinDate
+                                                ? new Date(profile.joinDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+                                                : "-"}
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Contact Information */}
+                        {/* Informasi Kontak */}
                         <div className="space-y-4 pt-6 border-t">
                             <h3 className="text-base font-medium text-foreground flex items-center gap-2">
-                                <Phone className="h-4.5 w-4.5 text-primary" />
+                                <Phone className="h-4 w-4 text-primary" />
                                 Informasi Kontak
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                    <div className="p-2 rounded-full bg-primary/10">
-                                        <Mail className="h-5 w-5 text-primary" />
+                                {[
+                                    { icon: Mail, label: "Email", value: profile.email, className: "truncate" },
+                                    { icon: Phone, label: "Telepon", value: profile.phone },
+                                ].map(({ icon: Icon, label, value, className }) => (
+                                    <div key={label} className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
+                                        <div className="p-2 rounded-full bg-primary/10"><Icon className="h-5 w-5 text-primary" /></div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs text-muted-foreground">{label}</p>
+                                            {value ? (
+                                                <p className={`text-sm font-medium ${className ?? ""}`}>{value}</p>
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-xs text-muted-foreground">
-                                            Email
-                                        </p>
-                                        <p className="text-sm font-medium truncate">
-                                            {profileData.email}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                    <div className="p-2 rounded-full bg-primary/10">
-                                        <Phone className="h-5 w-5 text-primary" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground">
-                                            Telepon
-                                        </p>
-                                        {profileData.phone ? (
-                                            <p className="text-sm font-medium font-mono">
-                                                {profileData.phone}
-                                            </p>
-                                        ) : (
-                                            <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
-                                        )}
-                                    </div>
-                                </div>
-
+                                ))}
                                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 md:col-span-2">
-                                    <div className="p-2 rounded-full bg-primary/10">
-                                        <MapPin className="h-5 w-5 text-primary" />
-                                    </div>
+                                    <div className="p-2 rounded-full bg-primary/10"><MapPin className="h-5 w-5 text-primary" /></div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground">
-                                            Alamat
-                                        </p>
-                                        {profileData.address ? (
-                                            <p className="text-sm font-medium">
-                                                {profileData.address}
-                                            </p>
+                                        <p className="text-xs text-muted-foreground">Alamat</p>
+                                        {profile.address ? (
+                                            <p className="text-sm font-medium">{profile.address}</p>
                                         ) : (
                                             <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
                                         )}
@@ -270,31 +190,31 @@ export const ParentProfile: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Children */}
-                         <div className="space-y-4 pt-6 border-t">
-                            <h3 className="text-base font-medium text-foreground flex items-center gap-2">
-                                <Users className="h-4.5 w-4.5 text-primary" />
-                                Data Anak
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {profileData.children.map((child) => (
-                                     <div key={child.id} className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50/50 border border-blue-100">
-                                        <div className="p-2 rounded-full bg-blue-100 text-blue-700">
-                                            <User className="h-5 w-5" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-semibold text-slate-900">{child.name}</p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <Badge className="text-xs bg-white text-blue-800 hover:bg-white border-transparent">
-                                                    {child.class}
-                                                </Badge>
-                                                <span className="text-xs text-muted-foreground">NIS: <span className="font-mono">{child.nis}</span></span>
+                        {/* Data Anak */}
+                        {profile.children.length > 0 && (
+                            <div className="space-y-4 pt-6 border-t">
+                                <h3 className="text-base font-medium text-foreground flex items-center gap-2">
+                                    <Users className="h-4 w-4 text-primary" />
+                                    Data Anak
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {profile.children.map((child) => (
+                                        <div key={child.id} className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50/50 border border-blue-100">
+                                            <div className="p-2 rounded-full bg-blue-100 text-blue-700">
+                                                <User className="h-5 w-5" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-sm font-semibold text-slate-900">{child.name}</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <Badge className="text-xs bg-white text-blue-800 hover:bg-white border-transparent">{child.class}</Badge>
+                                                    <span className="text-xs text-muted-foreground">NIS: <span className="font-mono">{child.nis}</span></span>
+                                                </div>
                                             </div>
                                         </div>
-                                     </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>

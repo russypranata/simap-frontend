@@ -75,6 +75,7 @@ interface UseAdvisorAttendanceReturn {
     attendanceColor: "green" | "amber" | "red";
     handleRefresh: () => Promise<void>;
     getStatusBadgeClass: (status: AttendanceStatus) => string;
+    error: string | null;
 }
 
 const todayStr = () => {
@@ -126,6 +127,9 @@ export const useAdvisorAttendance = (): UseAdvisorAttendanceReturn => {
     const extracurricularName = profileQuery.data?.extracurricular ?? "";
     const isLoading = membersQuery.isLoading || profileQuery.isLoading;
     const isHistoryLoading = historyQuery.isLoading;
+    const error = membersQuery.error instanceof Error ? membersQuery.error.message
+        : profileQuery.error instanceof Error ? profileQuery.error.message
+        : null;
 
     // ── Derived / memoized ─────────────────────────────────────────────────
     const filteredMembers = useMemo(() => members.filter((m) => {
@@ -291,5 +295,6 @@ export const useAdvisorAttendance = (): UseAdvisorAttendanceReturn => {
         setToday, setThisWeek, setThisMonth,
         latestPresent, overallAveragePercentage, attendanceColor,
         handleRefresh, getStatusBadgeClass,
+        error,
     };
 };

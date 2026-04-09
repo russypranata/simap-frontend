@@ -286,7 +286,7 @@ export const ParentAchievements: React.FC = () => {
                     </Dialog>
 
                     {/* Child Selector */}
-                    <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                    <ChildSelector childList={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
                 </PageHeader>
 
             {/* Active Global Filters */}

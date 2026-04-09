@@ -59,14 +59,20 @@ export const useAdvisorDashboard = () => {
         activitiesQuery.isLoading ||
         profileQuery.isLoading;
 
+    const error =
+        statsQuery.error instanceof Error ? statsQuery.error.message :
+        profileQuery.error instanceof Error ? profileQuery.error.message :
+        null;
+
     return {
         stats: statsQuery.data ?? DEFAULT_STATS,
         upcomingSchedules: scheduleQuery.data ?? ([] as UpcomingScheduleItem[]),
         regularSchedules: regularScheduleQuery.data ?? ([] as RegularScheduleItem[]),
         recentActivities: activitiesQuery.data ?? ([] as RecentActivityItem[]),
-        advisorName: profileQuery.data?.name ?? null, // null = belum ada data, bukan fallback string
+        advisorName: profileQuery.data?.name ?? null,
         extracurricularName: profileQuery.data?.extracurricular ?? "",
         isLoading,
+        error,
         refetch: () => {
             statsQuery.refetch();
             scheduleQuery.refetch();

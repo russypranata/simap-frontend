@@ -9,8 +9,6 @@ export interface DashboardChild {
 
 export interface DashboardStats {
     averageScore: number;
-    rank: number;
-    totalStudents: number;
     attendanceRate: number;
     lateCount: number;
     prayerRate: number;
@@ -21,6 +19,7 @@ export interface DashboardStats {
 export interface TodayLesson {
     id: number;
     time: string;
+    endTime: string;
     subject: string;
     teacher: string;
     room: string;
@@ -82,14 +81,21 @@ export const getDashboardData = async (childId: string): Promise<DashboardData> 
     const result = await response.json();
     const d = result.data;
 
-    const todaySchedule: TodayLesson[] = (d.todaySchedule ?? []).map((s: Record<string, unknown>) => ({
-        id: s.id as number,
-        time: (s.startTime ?? s.start_time ?? "") as string,
-        subject: (s.subject ?? "") as string,
-        teacher: (s.teacher ?? "") as string,
-        room: (s.room ?? "") as string,
-        isOngoing: isOngoing((s.startTime ?? s.start_time ?? "") as string, (s.endTime ?? s.end_time ?? "") as string),
-    }));
+    const todaySchedule: TodayLesson[] = (d.todaySchedule ?? []).slice(0, 5).map((s: Record<string, unknown>) => {
+        const rawStart = (s.startTime ?? s.start_time ?? "") as string;
+        const rawEnd = (s.endTime ?? s.end_time ?? "") as string;
+        // Trim seconds: "07:00:00" → "07:00"
+        const trimTime = (t: string) => t.length > 5 ? t.substring(0, 5) : t;
+        return {
+            id: s.id as number,
+            time: trimTime(rawStart),
+            endTime: trimTime(rawEnd),
+            subject: (s.subject ?? "") as string,
+            teacher: (s.teacher ?? "") as string,
+            room: (s.room ?? "") as string,
+            isOngoing: isOngoing(trimTime(rawStart), trimTime(rawEnd)),
+        };
+    });
 
     const stats = d.stats ?? {};
 
@@ -98,8 +104,6 @@ export const getDashboardData = async (childId: string): Promise<DashboardData> 
         child: normalizeChild(d.child ?? {}),
         stats: {
             averageScore: stats.averageScore ?? stats.average_score ?? 0,
-            rank: stats.rank ?? 0,
-            totalStudents: stats.totalStudents ?? stats.total_students ?? 0,
             attendanceRate: stats.attendanceRate ?? stats.attendance_rate ?? 0,
             lateCount: stats.lateCount ?? stats.late_count ?? 0,
             prayerRate: stats.prayerRate ?? stats.prayer_rate ?? 0,

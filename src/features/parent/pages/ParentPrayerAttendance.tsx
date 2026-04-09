@@ -93,7 +93,7 @@ export const ParentPrayerAttendance: React.FC = () => {
                 icon={Moon}
                 description="Monitoring kehadiran sholat wajib berjamaah di masjid/asrama"
             >
-                <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                <ChildSelector childList={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
             </PageHeader>
 
             {/* Controls */}

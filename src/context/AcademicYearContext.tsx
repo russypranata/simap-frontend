@@ -1,13 +1,17 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { getActiveAcademicYear, type ActiveAcademicYear } from "@/features/extracurricular-advisor/services/advisorDashboardService";
 
-// Default fallback
+export interface ActiveAcademicYear {
+    academicYear: string;
+    semester: string;
+    label: string;
+}
+
 const DEFAULT_ACADEMIC_YEAR: ActiveAcademicYear = {
     academicYear: "2025/2026",
     semester: "1",
-    label: "Ganjil"
+    label: "Ganjil",
 };
 
 interface AcademicYearContextType {
@@ -18,13 +22,36 @@ interface AcademicYearContextType {
 
 const AcademicYearContext = createContext<AcademicYearContextType | undefined>(undefined);
 
+const fetchActiveAcademicYear = async (): Promise<ActiveAcademicYear> => {
+    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+
+    const response = await fetch(`${BASE_URL}/academic-years/active`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+        },
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const result = await response.json();
+    const d = result.data;
+
+    return {
+        academicYear: d.academicYear ?? DEFAULT_ACADEMIC_YEAR.academicYear,
+        semester: d.semester ?? DEFAULT_ACADEMIC_YEAR.semester,
+        label: d.label ?? DEFAULT_ACADEMIC_YEAR.label,
+    };
+};
+
 export const AcademicYearProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [academicYear, setAcademicYear] = useState<ActiveAcademicYear>(DEFAULT_ACADEMIC_YEAR);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchAcademicYear = async () => {
         try {
-            const data = await getActiveAcademicYear();
+            const data = await fetchActiveAcademicYear();
             setAcademicYear(data);
         } catch (error) {
             console.error("Failed to fetch academic year context:", error);

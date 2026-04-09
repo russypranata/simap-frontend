@@ -20,11 +20,10 @@ import {
     Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-// Reuse components from student features as they are generic
-import { PhotoRequirementsModal } from '@/features/student/components/profile/PhotoRequirementsModal';
-import { ImageCropper } from '@/features/student/components/profile/ImageCropper';
+import { AdvisorPhotoRequirementsModal } from '@/features/extracurricular-advisor/components/profile/AdvisorPhotoRequirementsModal';
+import { ImageCropper } from '@/components/ui/image-cropper';
 
-import { ParentProfileData } from '../../data/mockParentData';
+import { ParentProfileData } from '../../services/parentProfileService';
 
 interface ParentProfileFormProps {
     initialData: ParentProfileData;
@@ -108,38 +107,15 @@ export const ParentProfileForm: React.FC<ParentProfileFormProps> = ({
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // 1. Validasi Format
         const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!validTypes.includes(file.type)) {
-            toast.error(
-                <span className="font-bold text-red-800">
-                    Format File Tidak Valid
-                </span>,
-                {
-                    description:
-                        'Mohon unggah foto dengan format JPG atau PNG.',
-                },
-            );
+            toast.error('Format File Tidak Valid', {
+                description: 'Mohon unggah foto dengan format JPG atau PNG.',
+            });
             if (fileInputRef.current) fileInputRef.current.value = '';
             return;
         }
 
-        // 2. Validasi Ukuran (Max 2MB)
-        const maxSize = 2 * 1024 * 1024; // 2MB
-        if (file.size > maxSize) {
-            toast.error(
-                <span className="font-bold text-red-800">
-                    File Terlalu Besar
-                </span>,
-                {
-                    description: `Ukuran file ${(file.size / (1024 * 1024)).toFixed(1)}MB melebihi batas maksimal 2MB.`,
-                },
-            );
-            if (fileInputRef.current) fileInputRef.current.value = '';
-            return;
-        }
-
-        // Read file as Data URL for cropping
         const reader = new FileReader();
         reader.addEventListener('load', () => {
             setTempImageSrc(reader.result?.toString() || null);
@@ -150,21 +126,14 @@ export const ParentProfileForm: React.FC<ParentProfileFormProps> = ({
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
-    const handleCropComplete = (croppedFile: File) => {
-        const objectUrl = URL.createObjectURL(croppedFile);
-        
-        // Simple validation, assuming cropper enforces aspect ratio
+    const handleCropComplete = (croppedBlob: Blob) => {
+        const objectUrl = URL.createObjectURL(croppedBlob);
         setFormData((prev) => ({ ...prev, profilePicture: objectUrl }));
-        setSelectedFile(croppedFile);
-        setCropperOpen(false);
-        toast.success(
-            <span className="font-bold text-green-800">
-                Foto Berhasil Diperbarui
-            </span>,
-            {
-                description: 'Jangan lupa simpan perubahan profil Anda.',
-            },
-        );
+        const file = new File([croppedBlob], 'profile_picture.jpg', { type: 'image/jpeg' });
+        setSelectedFile(file);
+        toast.success('Foto Berhasil Diperbarui', {
+            description: 'Jangan lupa simpan perubahan profil Anda.',
+        });
     };
 
     return (
@@ -375,7 +344,7 @@ export const ParentProfileForm: React.FC<ParentProfileFormProps> = ({
             </Card>
 
             {/* Photo Requirements Modal */}
-            <PhotoRequirementsModal
+            <AdvisorPhotoRequirementsModal
                 open={showRequirements}
                 onOpenChange={setShowRequirements}
                 onProceed={handleProceedToUpload}
@@ -384,9 +353,10 @@ export const ParentProfileForm: React.FC<ParentProfileFormProps> = ({
             {/* Image Cropper Modal */}
             <ImageCropper
                 open={cropperOpen}
-                onClose={() => setCropperOpen(false)}
+                onOpenChange={setCropperOpen}
                 imageSrc={tempImageSrc}
                 onCropComplete={handleCropComplete}
+                aspect={1}
             />
         </>
     );

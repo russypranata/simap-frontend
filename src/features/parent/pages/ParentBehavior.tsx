@@ -28,12 +28,8 @@ import {
     Building,
     Home,
     CheckCircle,
-    Users,
-    Loader2,
     RotateCcw,
     Check,
-    ChevronLeft,
-    ChevronRight,
     Filter,
 } from "lucide-react";
 import {
@@ -164,7 +160,7 @@ export const ParentBehavior: React.FC = () => {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
-                <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                <ChildSelector childList={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
             </PageHeader>
 
             <ActiveFilterBadges

@@ -43,6 +43,7 @@ import {
 } from "../components/grades";
 import { getScoreColor, getGradeColor } from "../components/grades/helpers";
 import { useParentGrades } from "../hooks/useParentGrades";
+import { ErrorState } from "@/features/shared/components";
 
 export const ParentGrades: React.FC = () => {
     const {
@@ -55,10 +56,11 @@ export const ParentGrades: React.FC = () => {
         selectedTab, setSelectedTab,
         filterOpen, setFilterOpen,
         selectedGrade, setSelectedGrade,
-        isLoading, handleApplyFilter,
+        isLoading, error, handleApplyFilter,
     } = useParentGrades();
 
     if (isLoading) return <GradesSkeleton />;
+    if (error) return <ErrorState error={error} onRetry={() => window.location.reload()} />;
 
     return (
         <div className="space-y-6">

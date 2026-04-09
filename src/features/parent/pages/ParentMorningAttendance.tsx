@@ -39,9 +39,7 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import { useParentMorningAttendance } from "../hooks/useParentMorningAttendance";
-import type { LateRecord } from "../services/parentMorningAttendanceService";
 import {
     ErrorState,
     LoadingOverlay,
@@ -254,7 +252,7 @@ export const ParentMorningAttendance: React.FC = () => {
                     </Dialog>
 
                     {/* Child Selector */}
-                    <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                    <ChildSelector childList={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
                 </PageHeader>
 
             {/* Active Global Filters */}

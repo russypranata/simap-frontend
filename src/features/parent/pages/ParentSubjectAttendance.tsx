@@ -208,8 +208,6 @@ export const ParentSubjectAttendance: React.FC = () => {
         startIndexDisplay,
         endIndexDisplay,
         goToPage,
-        goToNextPage,
-        goToPrevPage,
         triggerFetchingOverlay,
         isLoading,
         isFetching,
@@ -218,7 +216,6 @@ export const ParentSubjectAttendance: React.FC = () => {
     } = useParentSubjectAttendance();
 
     // Temporary states for the Filter Modal
-    const [tempStatus, setTempStatus] = useState("all");
     const [tempSubject, setTempSubject] = useState("all");
     const [tempAcademicYear, setTempAcademicYear] = useState<string>("all");
     const [tempSemester, setTempSemester] = useState<string>("all");
@@ -355,7 +352,7 @@ export const ParentSubjectAttendance: React.FC = () => {
                     </Dialog>
 
                     {/* Child Selector */}
-                    <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                    <ChildSelector childList={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
                 </PageHeader>
 
             {/* Active Global Filters */}

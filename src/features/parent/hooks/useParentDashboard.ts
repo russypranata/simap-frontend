@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     getDashboardData,
     getParentChildren,
@@ -18,66 +19,50 @@ interface UseParentDashboardReturn {
 }
 
 export const useParentDashboard = (): UseParentDashboardReturn => {
-    const [data, setData] = useState<DashboardData | null>(null);
-    const [children, setChildren] = useState<DashboardChild[]>([]);
+    const queryClient = useQueryClient();
     const [selectedChildId, setSelectedChildId] = useState<string>("");
-    const [isLoading, setIsLoading] = useState(true);
-    const [isFetching, setIsFetching] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
-    // Initial load — fetch children list
-    useEffect(() => {
-        const init = async () => {
-            try {
-                const childrenData = await getParentChildren();
-                setChildren(childrenData);
-                if (childrenData.length > 0) {
-                    setSelectedChildId(childrenData[0].id);
-                }
-            } catch {
-                setError("Gagal memuat data profil.");
-                setIsLoading(false);
-            }
-        };
-        init();
-    }, []);
+    // Fetch children list — stale 5 menit, jarang berubah
+    const childrenQuery = useQuery({
+        queryKey: ["parent-children"],
+        queryFn: getParentChildren,
+        staleTime: 5 * 60 * 1000,
+    });
 
-    // Fetch dashboard data when child changes
-    const fetchData = useCallback(async () => {
-        if (!selectedChildId) return;
+    const children = childrenQuery.data ?? [];
+    const effectiveChildId = selectedChildId || children[0]?.id || "";
 
-        const isInitial = !data;
-        if (isInitial) {
-            setIsLoading(true);
-        } else {
-            setIsFetching(true);
-        }
-        setError(null);
+    // Fetch dashboard data — stale 2 menit
+    const dashboardQuery = useQuery({
+        queryKey: ["parent-dashboard", effectiveChildId],
+        queryFn: () => getDashboardData(effectiveChildId),
+        enabled: !!effectiveChildId,
+        staleTime: 2 * 60 * 1000,
+    });
 
-        try {
-            const result = await getDashboardData(selectedChildId);
-            setData(result);
-        } catch (err) {
-            const message = err instanceof Error ? err.message : "Gagal memuat data dashboard.";
-            setError(message);
-        } finally {
-            setIsLoading(false);
-            setIsFetching(false);
-        }
-    }, [selectedChildId]); // eslint-disable-line react-hooks/exhaustive-deps
+    const isLoading = childrenQuery.isLoading || (!!effectiveChildId && dashboardQuery.isLoading);
+    const isFetching = childrenQuery.isFetching || dashboardQuery.isFetching;
 
-    useEffect(() => {
-        if (selectedChildId) fetchData();
-    }, [fetchData, selectedChildId]);
+    const error =
+        childrenQuery.error instanceof Error
+            ? childrenQuery.error.message
+            : dashboardQuery.error instanceof Error
+            ? dashboardQuery.error.message
+            : null;
+
+    const refetch = () => {
+        queryClient.invalidateQueries({ queryKey: ["parent-dashboard", effectiveChildId] });
+        queryClient.invalidateQueries({ queryKey: ["parent-children"] });
+    };
 
     return {
-        data,
+        data: dashboardQuery.data ?? null,
         children,
-        selectedChildId,
+        selectedChildId: effectiveChildId,
         setSelectedChildId,
         isLoading,
         isFetching,
         error,
-        refetch: fetchData,
+        refetch,
     };
 };

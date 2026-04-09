@@ -8,7 +8,7 @@ import { CheckCircle, Users, RefreshCw, History, TrendingUp, Calendar, Clipboard
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard } from "@/features/shared/components";
+import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard, ErrorState } from "@/features/shared/components";
 import { useAdvisorAttendance } from "../hooks/useAdvisorAttendance";
 import { AttendanceForm, AttendanceTable, AttendanceHistoryTab } from "../components/attendance";
 
@@ -44,9 +44,11 @@ export const ExtracurricularAttendance: React.FC = () => {
         setToday, setThisWeek, setThisMonth,
         latestPresent, overallAveragePercentage, attendanceColor,
         handleRefresh, getStatusBadgeClass,
+        error,
     } = useAdvisorAttendance();
 
     if (isLoading) return <AttendanceSkeleton />;
+    if (error) return <ErrorState error={error} onRetry={handleRefresh} />;
 
     return (
         <div className="space-y-6">

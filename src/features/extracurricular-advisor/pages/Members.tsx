@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Users, CheckCircle, Activity, AlertCircle } from "lucide-react";
-import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard, SkeletonTableRow } from "@/features/shared/components";
+import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard, SkeletonTableRow, ErrorState } from "@/features/shared/components";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useAdvisorMembers } from "../hooks/useAdvisorMembers";
 import { MembersTable, MemberDetailDialog } from "../components/members";
@@ -35,7 +35,7 @@ const MembersSkeleton: React.FC = () => (
 // ==================== MAIN ====================
 export const ExtracurricularMembers: React.FC = () => {
     const {
-        members, stats, isLoading,
+        members, stats, isLoading, error,
         currentPage, setCurrentPage, totalPages, totalItems, itemsPerPage, setItemsPerPage,
         startIndex, endIndex,
         searchQuery, setSearchQuery, classFilter, setClassFilter,
@@ -43,6 +43,7 @@ export const ExtracurricularMembers: React.FC = () => {
     } = useAdvisorMembers();
 
     if (isLoading && members.length === 0) return <MembersSkeleton />;
+    if (error) return <ErrorState error={error} onRetry={() => window.location.reload()} />;
 
     return (
         <div className="space-y-6">

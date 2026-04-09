@@ -36,7 +36,6 @@ interface ScheduleFilterDialogProps {
 
 export const ScheduleFilterDialog: React.FC<ScheduleFilterDialogProps> = ({
     academicYears,
-    activeYear,
     selectedYearId,
     onApply,
 }) => {

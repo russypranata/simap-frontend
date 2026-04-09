@@ -21,6 +21,7 @@ interface UseAdvisorMembersReturn {
     stats: MembersStats;
     isLoading: boolean;
     isStatsLoading: boolean;
+    error: string | null;
     currentPage: number;
     setCurrentPage: (page: number) => void;
     totalPages: number;
@@ -132,6 +133,7 @@ export const useAdvisorMembers = (): UseAdvisorMembersReturn => {
         stats,
         isLoading: membersQuery.isLoading,
         isStatsLoading: statsQuery.isLoading,
+        error: membersQuery.error instanceof Error ? membersQuery.error.message : null,
         currentPage,
         setCurrentPage,
         totalPages,

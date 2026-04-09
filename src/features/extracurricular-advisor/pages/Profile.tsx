@@ -8,12 +8,14 @@ import { ProfileSkeleton } from "../components/profile";
 import { ProfileInfoCard } from "../components/profile/ProfileInfoCard";
 import { ProfileStatsCard } from "../components/profile/ProfileStatsCard";
 import { useAdvisorProfile } from "../hooks/useAdvisorProfile";
+import { ErrorState } from "@/features/shared/components";
 
 export const ExtracurricularAdvisorProfile: React.FC = () => {
     const router = useRouter();
-    const { profile, stats, isLoading, isFetching } = useAdvisorProfile();
+    const { profile, stats, isLoading, isFetching, refetch } = useAdvisorProfile();
 
-    if (isLoading || !profile) return <ProfileSkeleton />;
+    if (isLoading) return <ProfileSkeleton />;
+    if (!profile) return <ErrorState error="Gagal memuat profil." onRetry={refetch} />;
 
     return (
         <div className="space-y-6">

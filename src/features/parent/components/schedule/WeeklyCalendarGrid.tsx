@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, User, Clock, Calendar, Eye, CheckCircle, Minus } from "lucide-react";
+import { BookOpen, User, Calendar, Eye, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ScheduleItem } from "@/features/parent/services/parentScheduleService";
 import { ScheduleDetailDialog } from "./ScheduleDetailDialog";

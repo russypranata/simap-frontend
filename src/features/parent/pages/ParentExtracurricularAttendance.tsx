@@ -43,7 +43,6 @@ import {
     ChevronRight,
     Filter,
     RotateCcw,
-    Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useParentExtracurricularAttendance } from "../hooks/useParentExtracurricularAttendance";
@@ -199,7 +198,6 @@ export const ParentExtracurricularAttendance: React.FC = () => {
         startIndexDisplay,
         endIndexDisplay,
         goToPage,
-        goToPrevPage,
         triggerFetchingOverlay,
         isLoading,
         isFetching,
@@ -294,7 +292,7 @@ export const ParentExtracurricularAttendance: React.FC = () => {
                     </Dialog>
 
                     {/* Child Selector */}
-                    <ChildSelector children={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
+                    <ChildSelector childList={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
                 </PageHeader>
 
             {/* Active Global Filters */}

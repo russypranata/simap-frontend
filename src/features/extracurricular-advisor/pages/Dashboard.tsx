@@ -12,6 +12,7 @@ import {
     StatCard,
     SkeletonPageHeader,
     SkeletonStatCard,
+    ErrorState,
 } from "@/features/shared/components";
 
 // ==================== SKELETON ====================
@@ -60,9 +61,8 @@ const RecentActivitiesSkeleton: React.FC = () => (
 // ==================== MAIN ====================
 export const ExtracurricularDashboard: React.FC = () => {
     const router = useRouter();
-    const { stats, upcomingSchedules, regularSchedules, recentActivities, advisorName, extracurricularName, isLoading } = useAdvisorDashboard();
+    const { stats, upcomingSchedules, regularSchedules, recentActivities, advisorName, extracurricularName, isLoading, error, refetch } = useAdvisorDashboard();
 
-    // Pertama kali buka tanpa cache — tampilkan full skeleton
     if (isLoading) return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <SkeletonPageHeader withAction />
@@ -75,6 +75,8 @@ export const ExtracurricularDashboard: React.FC = () => {
             </div>
         </div>
     );
+
+    if (error) return <ErrorState error={error} onRetry={refetch} />;
 
     const attendanceColor =
         stats.averageAttendance >= 90 ? "green" :

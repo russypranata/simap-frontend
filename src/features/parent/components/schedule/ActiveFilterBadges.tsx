@@ -2,8 +2,7 @@
 
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { SlidersHorizontal, RotateCcw, CalendarIcon, X } from "lucide-react";
+import { SlidersHorizontal, CalendarIcon, X } from "lucide-react";
 
 interface ActiveFilterBadgesProps {
     selectedYearId: string;

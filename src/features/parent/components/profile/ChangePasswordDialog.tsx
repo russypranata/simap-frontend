@@ -24,10 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2, KeyRound, AlertCircle, ChevronDown, ChevronUp, ShieldCheck, Check, X } from "lucide-react";
-
-const mockUpdatePassword = async () => {
-    return new Promise((resolve) => setTimeout(resolve, 1000));
-};
+import { updateParentPassword } from "@/features/parent/services/parentProfileService";
 
 const changePasswordSchema = z.object({
     currentPassword: z.string().min(1, "Kata sandi saat ini harus diisi"),
@@ -93,27 +90,30 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
         hasNumber: /[0-9]/.test(newPassword),
     };
 
-    const onSubmit = async () => {
+    const onSubmit = async (data: ChangePasswordFormValues) => {
         setIsLoading(true);
         setApiError(null);
 
         try {
-            await mockUpdatePassword();
+            await updateParentPassword({
+                currentPassword: data.currentPassword,
+                newPassword: data.newPassword,
+                confirmPassword: data.confirmPassword,
+            });
 
-            toast.success(
-                <div className="flex flex-col">
-                    <span className="font-semibold">Kata sandi berhasil diubah</span>
-                    <span className="text-sm text-muted-foreground">
-                        Gunakan kata sandi baru untuk login berikutnya
-                    </span>
-                </div>
-            );
+            toast.success("Kata sandi berhasil diubah", {
+                description: "Gunakan kata sandi baru untuk login berikutnya",
+            });
 
             form.reset();
             onOpenChange(false);
-        } catch {
-            setApiError("Gagal mengubah kata sandi. Silakan coba lagi.");
-            toast.error("Gagal mengubah kata sandi");
+        } catch (error: unknown) {
+            const err = error as { code?: number; message?: string };
+            if (err.code === 400 || err.message?.includes("salah")) {
+                form.setError("currentPassword", { message: "Kata sandi saat ini salah" });
+            } else {
+                setApiError(err.message ?? "Gagal mengubah kata sandi. Silakan coba lagi.");
+            }
         } finally {
             setIsLoading(false);
         }
