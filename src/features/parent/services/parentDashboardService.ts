@@ -1,8 +1,4 @@
-import { mockParentProfile } from "../data/mockParentData";
-import { mockGradesChild1 } from "../data/mockParentGradesData";
-import { mockScheduleChild1 } from "../data/mockParentScheduleData";
-
-// ==================== TYPES ====================
+import { PARENT_API_URL, getAuthHeaders, handleApiError } from "./parentApiClient";
 
 export interface DashboardChild {
     id: string;
@@ -64,102 +60,85 @@ export interface DashboardData {
     hasWarning: boolean;
 }
 
-// ==================== MOCK HELPERS ====================
-
-const getCurrentDay = (): string => {
-    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-    return days[new Date().getDay()];
-};
-
-const getCurrentTime = (): string => {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-};
-
 const isOngoing = (startTime: string, endTime: string): boolean => {
-    const now = getCurrentTime();
-    return now >= startTime && now <= endTime;
+    const now = new Date();
+    const cur = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    return cur >= startTime && cur <= endTime;
 };
 
-// ==================== SERVICE ====================
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const normalizeChild = (c: Record<string, any>): DashboardChild => ({
+    id: String(c.id),
+    name: c.name ?? "",
+    class: c.class ?? "",
+    nis: c.nis ?? c.admission_number ?? "",
+});
 
-/**
- * Fetch dashboard summary data for a specific child.
- * GET /api/parent/dashboard?childId={childId}
- */
 export const getDashboardData = async (childId: string): Promise<DashboardData> => {
-    await new Promise(resolve => setTimeout(resolve, 700));
+    const response = await fetch(`${PARENT_API_URL}/dashboard?childId=${childId}`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    const d = result.data;
 
-    const child = mockParentProfile.children.find(c => c.id === childId);
-    if (!child) throw new Error("Data anak tidak ditemukan.");
+    const todaySchedule: TodayLesson[] = (d.todaySchedule ?? []).map((s: Record<string, unknown>) => ({
+        id: s.id as number,
+        time: (s.startTime ?? s.start_time ?? "") as string,
+        subject: (s.subject ?? "") as string,
+        teacher: (s.teacher ?? "") as string,
+        room: (s.room ?? "") as string,
+        isOngoing: isOngoing((s.startTime ?? s.start_time ?? "") as string, (s.endTime ?? s.end_time ?? "") as string),
+    }));
 
-    // Get latest completed semester grades (dynamic, not hardcoded)
-    const gradesData = mockGradesChild1;
-    const latestSemester = [...gradesData.semesters]
-        .filter(s => s.averageScore > 0)
-        .sort((a, b) => {
-            const yearDiff = b.academicYear.localeCompare(a.academicYear);
-            if (yearDiff !== 0) return yearDiff;
-            // Genap (2nd semester) is more recent than Ganjil (1st)
-            return a.semester === "Genap" ? -1 : 1;
-        })[0] ?? gradesData.semesters[0];
-
-    const allSubjects = latestSemester?.grades ?? [];
-    const sorted = [...allSubjects].sort((a, b) => b.averageScore - a.averageScore);
-    const topSubjects = sorted.slice(0, 3).map(g => ({ subject: g.subject, score: g.averageScore, grade: g.grade }));
-    const bottomSubjects = sorted.slice(-3).reverse().map(g => ({ subject: g.subject, score: g.averageScore, grade: g.grade }));
-
-    // Today's schedule
-    const today = getCurrentDay();
-    const todayItems = mockScheduleChild1
-        .filter(s => s.day === today)
-        .sort((a, b) => a.startTime.localeCompare(b.startTime))
-        .slice(0, 3)
-        .map(s => ({
-            id: s.id,
-            time: s.startTime,
-            subject: s.subject,
-            teacher: s.teacher,
-            room: s.room,
-            isOngoing: isOngoing(s.startTime, s.endTime),
-        }));
-
-    const stats: DashboardStats = {
-        averageScore: latestSemester?.averageScore ?? 0,
-        rank: latestSemester?.rank ?? 0,
-        totalStudents: latestSemester?.totalStudents ?? 0,
-        attendanceRate: 96,
-        lateCount: 2,
-        prayerRate: 90,
-        achievementsCount: 3,
-        violationCount: 0,
-    };
-
-    const monthlyAttendance: MonthlyAttendanceSummary = {
-        hadir: 19, sakit: 1, izin: 1, alpa: 0,
-        totalSchoolDays: 21,
-        percentage: Math.round((19 / 21) * 100),
-    };
-
-    const ekskulSummary: EkskulSummary[] = [
-        { id: 1, name: "Pramuka", attendanceRate: 92 },
-        { id: 2, name: "Basket", attendanceRate: 88 },
-    ];
+    const stats = d.stats ?? {};
 
     return {
-        parentName: mockParentProfile.name,
-        child,
-        stats,
-        todaySchedule: todayItems,
-        topSubjects,
-        bottomSubjects,
-        monthlyAttendance,
-        ekskulSummary,
-        hasWarning: stats.violationCount >= 3 || stats.averageScore < 70,
+        parentName: d.parentName ?? d.parent_name ?? "",
+        child: normalizeChild(d.child ?? {}),
+        stats: {
+            averageScore: stats.averageScore ?? stats.average_score ?? 0,
+            rank: stats.rank ?? 0,
+            totalStudents: stats.totalStudents ?? stats.total_students ?? 0,
+            attendanceRate: stats.attendanceRate ?? stats.attendance_rate ?? 0,
+            lateCount: stats.lateCount ?? stats.late_count ?? 0,
+            prayerRate: stats.prayerRate ?? stats.prayer_rate ?? 0,
+            achievementsCount: stats.achievementsCount ?? stats.achievement_count ?? 0,
+            violationCount: stats.violationCount ?? stats.violation_count ?? 0,
+        },
+        todaySchedule,
+        topSubjects: (d.topSubjects ?? d.top_subjects ?? []).map((s: Record<string, unknown>) => ({
+            subject: (s.subject ?? "") as string,
+            score: (s.score ?? 0) as number,
+            grade: (s.grade ?? "") as string,
+        })),
+        bottomSubjects: (d.bottomSubjects ?? d.bottom_subjects ?? []).map((s: Record<string, unknown>) => ({
+            subject: (s.subject ?? "") as string,
+            score: (s.score ?? 0) as number,
+            grade: (s.grade ?? "") as string,
+        })),
+        monthlyAttendance: {
+            hadir: d.monthlyAttendance?.hadir ?? 0,
+            sakit: d.monthlyAttendance?.sakit ?? 0,
+            izin: d.monthlyAttendance?.izin ?? 0,
+            alpa: d.monthlyAttendance?.alpa ?? 0,
+            totalSchoolDays: d.monthlyAttendance?.totalSchoolDays ?? d.monthlyAttendance?.total_school_days ?? 0,
+            percentage: d.monthlyAttendance?.percentage ?? 0,
+        },
+        ekskulSummary: (d.ekskulSummary ?? d.ekskul_summary ?? []).map((e: Record<string, unknown>) => ({
+            id: e.id as number,
+            name: (e.name ?? "") as string,
+            attendanceRate: (e.attendanceRate ?? e.attendance_rate ?? 0) as number,
+        })),
+        hasWarning: d.hasWarning ?? d.has_warning ?? false,
     };
 };
 
 export const getParentChildren = async (): Promise<DashboardChild[]> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return mockParentProfile.children;
+    const response = await fetch(`${PARENT_API_URL}/children`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    return (result.data ?? []).map(normalizeChild);
 };

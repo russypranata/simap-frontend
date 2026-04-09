@@ -5,8 +5,8 @@ import {
     getAcademicYears,
     type LateRecord,
     type ChildInfo,
-    type AcademicYear
 } from "../services/parentMorningAttendanceService";
+import type { AcademicYearItem as AcademicYear } from "../services/parentApiClient";
 
 export const useParentMorningAttendance = () => {
     const [records, setRecords] = useState<LateRecord[]>([]);
@@ -78,7 +78,7 @@ export const useParentMorningAttendance = () => {
             setIsLoading(false);
             setIsFetching(false);
         }
-    }, [selectedChildId, selectedYearId, selectedSemesterId]);
+    }, [selectedChildId, selectedYearId, selectedSemesterId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Pagination Logic
     const totalItems = records.length;
@@ -88,7 +88,7 @@ export const useParentMorningAttendance = () => {
     const pagedRecords = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
         return records.slice(start, start + itemsPerPage);
-    }, [records, currentPage]);
+    }, [records, currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Reset pagination when filters change
     useEffect(() => {
@@ -99,7 +99,7 @@ export const useParentMorningAttendance = () => {
         if (selectedChildId) {
             fetchRecords();
         }
-    }, [fetchRecords]);
+    }, [fetchRecords]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const refetch = useCallback(() => {
         fetchRecords();

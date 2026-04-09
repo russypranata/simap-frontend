@@ -51,11 +51,11 @@ export const useParentPrayerAttendance = () => {
             setIsLoading(false);
             setIsFetching(false);
         }
-    }, [selectedChildId, selectedMonth, selectedYear]);
+    }, [selectedChildId, selectedMonth, selectedYear]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (selectedChildId) fetchRecords();
-    }, [fetchRecords]);
+    }, [fetchRecords]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handlePrevMonth = () => {
         if (selectedMonth === 0) { setSelectedMonth(11); setSelectedYear(y => y - 1); }

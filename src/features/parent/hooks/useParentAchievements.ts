@@ -72,13 +72,13 @@ export const useParentAchievements = () => {
             setIsFetching(false);
             setCurrentPage(1); // Reset page on new data
         }
-    }, [selectedChildId]); 
+    }, [selectedChildId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (selectedChildId) {
             fetchRecords();
         }
-    }, [fetchRecords]);
+    }, [fetchRecords]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const refetch = useCallback(() => {
         fetchRecords();

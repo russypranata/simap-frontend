@@ -1,116 +1,83 @@
-import {
-    childScheduleMap,
-    mockAcademicYears,
-    DAYS,
-    getSubjectColor,
-    type ScheduleItem,
-    type ChildScheduleData,
-    type AcademicYearData,
-} from "../data/mockParentScheduleData";
+import { PARENT_API_URL, getAuthHeaders, handleApiError } from "./parentApiClient";
+import { getParentChildren, type DashboardChild as ChildInfo } from "./parentDashboardService";
 
-// Re-export types and constants for convenience
-export type { ScheduleItem, ChildScheduleData, AcademicYearData };
-export { DAYS, getSubjectColor };
+export interface ScheduleItem {
+    id: number;
+    day: string;
+    startTime: string;
+    endTime: string;
+    subject: string;
+    teacher: string;
+    room: string;
+}
 
-/**
- * Fetch schedule data for a specific child and academic year.
- * Simulates API call with delay.
- * Note: Semester filter removed as most Indonesian schools use the same schedule for both semesters.
- */
+export interface ChildScheduleData {
+    childId: string;
+    childName: string;
+    childClass: string;
+    schedule: ScheduleItem[];
+}
+
+export interface AcademicYearData {
+    id: string;
+    year: string;
+    semesters: { id: string; name: string; status: string }[];
+}
+
+export const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+
+export const getSubjectColor = (subject: string): string => {
+    const colors: Record<string, string> = {
+        Matematika: "blue", Fisika: "purple", Kimia: "green", Biologi: "emerald",
+        "Bahasa Indonesia": "orange", "Bahasa Inggris": "sky", Sejarah: "amber",
+        PKn: "red", PJOK: "lime", "Seni Budaya": "pink", BK: "slate",
+        "Pendidikan Agama": "teal", TIK: "indigo", Prakarya: "yellow",
+    };
+    return colors[subject] ?? "gray";
+};
+
+const DAY_MAP: Record<string, string> = {
+    monday: "Senin", tuesday: "Selasa", wednesday: "Rabu",
+    thursday: "Kamis", friday: "Jumat", saturday: "Sabtu", sunday: "Minggu",
+};
+
 export const getChildSchedule = async (
     childId: string,
-    academicYearId: string
+    _academicYearId?: string  // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Promise<ChildScheduleData> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    const response = await fetch(`${PARENT_API_URL}/children/${childId}/schedule`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
 
-    // Simulate occasional API error (5% chance)
-    if (Math.random() < 0.05) {
-        throw new Error("Gagal memuat data jadwal. Silakan coba lagi.");
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const schedule: ScheduleItem[] = (result.data ?? []).map((item: Record<string, any>) => ({
+        id: item.id,
+        day: DAY_MAP[item.dayOfWeek ?? item.day_of_week] ?? item.dayOfWeek ?? "",
+        startTime: item.startTime ?? item.start_time ?? "",
+        endTime: item.endTime ?? item.end_time ?? "",
+        subject: item.subject ?? "",
+        teacher: item.teacher ?? "",
+        room: item.room ?? "",
+    }));
 
-    const childData = childScheduleMap[childId];
-
-    if (!childData) {
-        throw new Error(`Data jadwal untuk anak dengan ID ${childId} tidak ditemukan.`);
-    }
-
-    // In a real API, we would filter by academic year and semester
-    // For mock purposes, we return the full schedule
     return {
-        childId: childData.childId,
-        childName: childData.childName,
-        childClass: childData.childClass,
-        schedule: childData.schedule,
+        childId: String(childId),
+        childName: "",
+        childClass: "",
+        schedule,
     };
 };
 
-/**
- * Get list of children for the current parent.
- * Simulates API call with delay.
- */
-export const getParentChildren = async (): Promise<ChildScheduleData[]> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    return Object.values(childScheduleMap);
-};
-
-/**
- * Get list of all academic years with semesters.
- * Simulates API call with delay.
- */
-export const getAcademicYears = async (): Promise<AcademicYearData[]> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    return mockAcademicYears;
-};
-
-/**
- * Get schedule items for a specific day.
- */
-export const getScheduleByDay = async (
-    childId: string,
-    day: string,
-    academicYearId: string
-): Promise<ScheduleItem[]> => {
-    const childData = await getChildSchedule(childId, academicYearId);
-    return childData.schedule.filter((item) => item.day === day);
-};
-
-/**
- * Check if a schedule item is currently happening (real-time tracking).
- * Compares current day and time with schedule item.
- */
 export const isScheduleCurrentlyHappening = (item: ScheduleItem): boolean => {
     const now = new Date();
     const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-    const currentDay = dayNames[now.getDay()];
-
-    // Check if current day matches
-    if (item.day !== currentDay) {
-        return false;
-    }
-
-    // Parse current time and schedule times
-    const currentTime = now.getHours() * 60 + now.getMinutes();
-    const [startHour, startMinute] = item.startTime.split(":").map(Number);
-    const [endHour, endMinute] = item.endTime.split(":").map(Number);
-    const startTime = startHour * 60 + startMinute;
-    const endTime = endHour * 60 + endMinute;
-
-    // Check if current time is within schedule time
-    return currentTime >= startTime && currentTime <= endTime;
+    if (item.day !== dayNames[now.getDay()]) return false;
+    const cur = now.getHours() * 60 + now.getMinutes();
+    const [sh, sm] = item.startTime.split(":").map(Number);
+    const [eh, em] = item.endTime.split(":").map(Number);
+    return cur >= sh * 60 + sm && cur <= eh * 60 + em;
 };
 
-/**
- * Get the currently active schedule item(s) for a child.
- */
-export const getCurrentSchedule = async (
-    childId: string,
-    academicYearId: string
-): Promise<ScheduleItem[]> => {
-    const childData = await getChildSchedule(childId, academicYearId);
-    return childData.schedule.filter(isScheduleCurrentlyHappening);
-};
+export { getParentChildren, type ChildInfo };

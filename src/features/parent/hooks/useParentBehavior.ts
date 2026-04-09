@@ -72,13 +72,13 @@ export const useParentBehavior = () => {
             setIsLoading(false);
             setIsFetching(false);
         }
-    }, [selectedChildId]);
+    }, [selectedChildId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (selectedChildId) {
             fetchRecords();
         }
-    }, [fetchRecords]);
+    }, [fetchRecords]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const refetch = useCallback(() => {
         fetchRecords();
@@ -120,7 +120,7 @@ export const useParentBehavior = () => {
     const pagedRecords = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
         return filteredRecords.slice(start, start + itemsPerPage);
-    }, [filteredRecords, currentPage]);
+    }, [filteredRecords, currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Reset pagination when filters change
     useEffect(() => {

@@ -2,14 +2,15 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import {
     getChildSchedule,
     getParentChildren,
-    getAcademicYears,
     isScheduleCurrentlyHappening,
     DAYS,
     getSubjectColor,
     type ScheduleItem,
     type ChildScheduleData,
-    type AcademicYearData,
 } from "../services/parentScheduleService";
+import { getAcademicYears, type AcademicYearItem } from "../services/parentApiClient";
+
+type AcademicYearData = AcademicYearItem & { semesters: { id: string; name: string; isActive: boolean }[] };
 
 interface ScheduleStats {
     totalLessons: number;
@@ -96,12 +97,10 @@ export const useParentSchedule = (): UseParentScheduleReturn => {
                 setAcademicYears(yearsData);
 
                 if (childrenData.length > 0) {
-                    setSelectedChildId(childrenData[0].childId);
+                    setSelectedChildId(childrenData[0].id);
                 }
 
-                const activeYear = yearsData.find((y) =>
-                    y.semesters.some((s) => s.isActive)
-                ) || yearsData[0];
+                const activeYear = yearsData.find((y) => y.isActive) || yearsData[0];
 
                 if (activeYear) {
                     setSelectedYearId(activeYear.id);

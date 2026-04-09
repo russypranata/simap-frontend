@@ -1,11 +1,10 @@
-import { mockParentProfile } from "../data/mockParentData";
-import { mockAcademicYears } from "@/features/admin/data/mockAcademicYearData";
-import type { AcademicYear } from "@/features/admin/types/academicYear";
-// Types
+import { PARENT_API_URL, getAuthHeaders, handleApiError, getAcademicYears } from "./parentApiClient";
+import { getParentChildren } from "./parentDashboardService";
+
 export type AttendanceStatus = "hadir" | "sakit" | "izin" | "alpa" | "libur" | "belum_dicatat";
 
 export interface DailyAttendanceRecord {
-    date: string; // YYYY-MM-DD
+    date: string;
     status: AttendanceStatus;
     notes?: string;
     submittedBy?: string;
@@ -25,77 +24,66 @@ export interface ChildInfo {
     nis: string;
 }
 
-// Mock Data Generator
-const generateMockData = (year: number, month: number): DailyAttendanceRecord[] => {
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const records: DailyAttendanceRecord[] = [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (let i = 1; i <= daysInMonth; i++) {
-        const date = new Date(year, month, i);
-        date.setHours(0, 0, 0, 0);
-        const dayOfWeek = date.getDay();
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-            records.push({ date: dateStr, status: "libur", notes: dayOfWeek === 0 ? "Hari Minggu" : "Hari Sabtu" });
-        } else if (date >= today) {
-            // Hari ini dan ke depan → belum dicatat oleh wali kelas
-            records.push({ date: dateStr, status: "belum_dicatat" });
-        } else if (i % 10 === 0) {
-            records.push({ date: dateStr, status: "sakit", notes: "Demam", submittedBy: "Wali Kelas", submittedAt: `${dateStr}T08:00:00` });
-        } else if (i % 7 === 0) {
-            records.push({ date: dateStr, status: "izin", notes: "Acara Keluarga", submittedBy: "Orang Tua", submittedAt: `${dateStr}T07:30:00` });
-        } else if (i === 15) {
-            records.push({ date: dateStr, status: "alpa" });
-        } else {
-            records.push({ date: dateStr, status: "hadir" });
-        }
-    }
-    return records;
+// Status mapping from backend (English) to frontend (Indonesian)
+const statusMap: Record<string, AttendanceStatus> = {
+    present: "hadir",
+    absent: "alpa",
+    late: "izin",
+    excused: "sakit",
+    hadir: "hadir",
+    sakit: "sakit",
+    izin: "izin",
+    alpa: "alpa",
 };
 
-/**
- * Fetch daily attendance records for a specific child and month.
- * Currently uses mock data — replace with real API call later:
- * GET /api/parent/{parentId}/attendance/daily?childId={childId}&semesterId={semesterId}&year={year}&month=YYYY-MM
- */
 export const getDailyAttendance = async (
     childId: string,
     year: number,
     month: number,
-    semesterId: string
+    _semesterId?: string  // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Promise<DailyAttendanceResponse> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    const params = new URLSearchParams({ year: String(year), month: String(month + 1) });
+    const response = await fetch(`${PARENT_API_URL}/children/${childId}/attendance/daily?${params}`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
 
-    // Simulate occasional API error (uncomment to test)
-    // if (Math.random() < 0.3) throw new Error("Gagal memuat data presensi. Silakan coba lagi.");
+    const apiMap: Record<string, DailyAttendanceRecord> = {};
+    for (const item of result.data ?? []) {
+        apiMap[item.date] = {
+            date: item.date,
+            status: statusMap[item.status] ?? "belum_dicatat",
+            notes: item.notes ?? undefined,
+        };
+    }
 
-    const child = mockParentProfile.children.find(c => c.id === childId);
-    const records = generateMockData(year, month);
+    // Fill all days of the month
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const records: DailyAttendanceRecord[] = [];
+
+    for (let i = 1; i <= daysInMonth; i++) {
+        const date = new Date(year, month, i);
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
+        const dow = date.getDay();
+
+        if (dow === 0 || dow === 6) {
+            records.push({ date: dateStr, status: "libur", notes: dow === 0 ? "Hari Minggu" : "Hari Sabtu" });
+        } else if (date > today) {
+            records.push({ date: dateStr, status: "belum_dicatat" });
+        } else {
+            records.push(apiMap[dateStr] ?? { date: dateStr, status: "belum_dicatat" });
+        }
+    }
 
     return {
         records,
-        childName: child?.name || "Siswa",
-        childClass: child?.class || "-",
+        childName: result.childName ?? "",
+        childClass: result.childClass ?? "",
     };
 };
 
-/**
- * Get list of children for the current parent.
- * Currently uses mock data.
- */
-export const getParentChildren = async (): Promise<ChildInfo[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return mockParentProfile.children;
-};
-
-/**
- * Get list of all academic years with semesters.
- */
-export const getAcademicYears = async (): Promise<AcademicYear[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return mockAcademicYears;
-};
+export { getParentChildren, getAcademicYears };
+export type { ChildInfo as default };

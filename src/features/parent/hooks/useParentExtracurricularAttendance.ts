@@ -77,13 +77,13 @@ export const useParentExtracurricularAttendance = () => {
             setIsFetching(false);
             setCurrentPage(1);
         }
-    }, [selectedChildId]);
+    }, [selectedChildId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (selectedChildId) {
             fetchRecords();
         }
-    }, [fetchRecords]);
+    }, [fetchRecords]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const refetch = useCallback(() => {
         fetchRecords();

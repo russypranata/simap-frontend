@@ -68,7 +68,7 @@ export const useParentDashboard = (): UseParentDashboardReturn => {
 
     useEffect(() => {
         if (selectedChildId) fetchData();
-    }, [fetchData]);
+    }, [fetchData, selectedChildId]);
 
     return {
         data,

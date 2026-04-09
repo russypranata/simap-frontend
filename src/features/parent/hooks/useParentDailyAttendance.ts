@@ -4,10 +4,9 @@ import {
     getParentChildren,
     getAcademicYears,
     type DailyAttendanceRecord,
-    type AttendanceStatus,
     type ChildInfo,
 } from "../services/dailyAttendanceService";
-import type { AcademicYear } from "@/features/admin/types/academicYear";
+import type { AcademicYearItem as AcademicYear } from "../services/parentApiClient";
 
 interface AttendanceStats {
     totalDays: number;
