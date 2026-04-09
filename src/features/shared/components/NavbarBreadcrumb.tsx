@@ -163,8 +163,6 @@ const routeConfig: Record<string, RouteItem> = {
     'extracurricular-advisor:members': { label: 'Daftar Anggota', icon: Users },
     'extracurricular-advisor:presensi': { label: 'Presensi Kegiatan', icon: ClipboardList },
     'extracurricular-advisor:attendance': { label: 'Presensi Kegiatan', icon: ClipboardList },
-    'extracurricular-advisor:tutor-recap': { label: 'Rekap Tutor', icon: ClipboardList },
-    'extracurricular-advisor:tutors': { label: 'Tutor', icon: Users },
     'extracurricular-advisor:profile': { label: 'Profil', icon: User },
 
     // ── MUTAMAYIZIN ───────────────────────────────────────────────────────────
