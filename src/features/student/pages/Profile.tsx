@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -14,29 +15,19 @@ import {
     CheckCircle2, Users, AtSign, BookOpen,
 } from 'lucide-react';
 import { ProfileSkeleton } from '@/features/student/components/profile';
-import { StudentProfileData } from '../data/mockStudentData';
+import { ErrorState } from '@/features/shared/components';
 import { getStudentProfile } from '../services/studentProfileService';
 
 export const StudentProfile: React.FC = () => {
     const router = useRouter();
-    const [profileData, setProfileData] = useState<StudentProfileData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [isPhotoOpen, setIsPhotoOpen] = useState(false);
+    const [isPhotoOpen, setIsPhotoOpen] = React.useState(false);
     const barcodeRef = useRef<HTMLCanvasElement>(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const profile = await getStudentProfile();
-                setProfileData(profile);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
+    const { data: profileData, isLoading: loading, error } = useQuery({
+        queryKey: ['student-profile'],
+        queryFn: getStudentProfile,
+        staleTime: 5 * 60 * 1000,
+    });
 
     useEffect(() => {
         if (profileData?.nis && barcodeRef.current) {
@@ -57,6 +48,7 @@ export const StudentProfile: React.FC = () => {
     }, [profileData?.nis]);
 
     if (loading || !profileData) return <ProfileSkeleton />;
+    if (error) return <ErrorState error={error instanceof Error ? error.message : 'Gagal memuat profil'} onRetry={() => window.location.reload()} />;
 
     const initials = profileData.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
 

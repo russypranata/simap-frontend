@@ -1,4 +1,6 @@
-export type PrayerStatus = "hadir_tepat_waktu" | "masbuk" | "haid" | "tanpa_keterangan" | "belum_dicatat";
+import { STUDENT_API_URL, getAuthHeaders, handleApiError } from './studentApiClient';
+
+export type PrayerStatus = 'hadir_tepat_waktu' | 'masbuk' | 'haid' | 'tanpa_keterangan' | 'belum_dicatat';
 
 export interface PrayerRecord {
     id: string;
@@ -13,52 +15,58 @@ export interface PrayerRecord {
     tahajjud: PrayerStatus;
 }
 
-const STUDENT_ID = "student-self";
+const DAYS_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
-const buildRecords = (dates: Date[], today: Date): PrayerRecord[] => {
-    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-    return dates.map(date => {
-        const dayName = days[date.getDay()];
-        const dateString = date.toISOString().split("T")[0];
-        const seedStr = `${dateString}-${STUDENT_ID}`;
-        let seed = 0;
-        for (let j = 0; j < seedStr.length; j++) seed += seedStr.charCodeAt(j);
+const statusMap: Record<string, PrayerStatus> = {
+    hadir: 'hadir_tepat_waktu', alpa: 'tanpa_keterangan',
+    hadir_tepat_waktu: 'hadir_tepat_waktu', masbuk: 'masbuk',
+    haid: 'haid', tanpa_keterangan: 'tanpa_keterangan',
+};
 
-        const getStatus = (offset: number): PrayerStatus => {
-            if (date > today) return "belum_dicatat";
-            const rand = ((seed + offset) % 100) / 100;
-            if (rand > 0.4) return "hadir_tepat_waktu";
-            if (rand > 0.2) return "masbuk";
-            if (rand > 0.1) return "haid";
-            return "tanpa_keterangan";
+export const getStudentPrayerAttendanceByMonth = async (year: number, month: number): Promise<PrayerRecord[]> => {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const startStr = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+    const endStr   = `${year}-${String(month + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+
+    const params = new URLSearchParams({ start_date: startStr, end_date: endStr });
+    const response = await fetch(`${STUDENT_API_URL}/attendance/prayer?${params}`, { headers: getAuthHeaders() });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+
+    // Group by date
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const byDate: Record<string, Record<string, any>[]> = {};
+    for (const item of result.data ?? []) {
+        if (!byDate[item.date]) byDate[item.date] = [];
+        byDate[item.date].push(item);
+    }
+
+    return Array.from({ length: daysInMonth }, (_, i) => {
+        const date    = new Date(year, month, i + 1);
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
+        const dayRecs = byDate[dateStr] ?? [];
+        const isFuture = date > today;
+
+        const getStatus = (prayerTime: string): PrayerStatus => {
+            if (isFuture) return 'belum_dicatat';
+            const rec = dayRecs.find(r => r.prayerTime === prayerTime || r.prayer_time === prayerTime);
+            if (!rec) return 'belum_dicatat';
+            return statusMap[rec.status] ?? 'belum_dicatat';
         };
 
         return {
-            id: `${STUDENT_ID}-${dateString}`,
-            date: dateString,
-            day: dayName,
-            subuh: getStatus(1),
-            dhuha: getStatus(6),
-            dzuhur: getStatus(2),
-            ashar: getStatus(3),
-            maghrib: getStatus(4),
-            isya: getStatus(5),
-            tahajjud: getStatus(7),
+            id: `student-${dateStr}`,
+            date: dateStr,
+            day: DAYS_ID[date.getDay()] ?? '',
+            subuh:    getStatus('subuh'),
+            dhuha:    'belum_dicatat' as PrayerStatus,
+            dzuhur:   getStatus('dzuhur'),
+            ashar:    getStatus('ashar'),
+            maghrib:  getStatus('maghrib'),
+            isya:     getStatus('isya'),
+            tahajjud: 'belum_dicatat' as PrayerStatus,
         };
-    });
-};
-
-export const getStudentPrayerAttendanceByMonth = async (
-    year: number,
-    month: number
-): Promise<PrayerRecord[]> => {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const dates = Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1));
-            resolve(buildRecords(dates, today));
-        }, 800);
     });
 };

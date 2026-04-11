@@ -1,65 +1,58 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { getStudentMorningTardiness, getStudentAcademicYears, type LateRecord, type AcademicYear } from "../services/studentMorningAttendanceService";
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getStudentMorningTardiness, getStudentAcademicYears, type LateRecord } from '../services/studentMorningAttendanceService';
+import type { AcademicYearItem } from '@/features/parent/services/parentApiClient';
 
 export const useStudentMorningAttendance = () => {
-    const [records, setRecords] = useState<LateRecord[]>([]);
-    const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
-    const [selectedYearId, setSelectedYearId] = useState<string>("all");
-    const [selectedSemesterId, setSelectedSemesterId] = useState<string>("all");
+    const [selectedYearId, setSelectedYearId] = useState<string>('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isFetching, setIsFetching] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const init = async () => {
-            try {
-                const years = await getStudentAcademicYears();
-                setAcademicYears(years);
-                const activeYear = years.find(y => y.isActive) || years[0];
-                if (activeYear) {
-                    setSelectedYearId(activeYear.id);
-                    const activeSem = activeYear.semesters.find(s => s.isActive) || activeYear.semesters[0];
-                    if (activeSem) setSelectedSemesterId(activeSem.id);
-                }
-            } catch {
-                setError("Gagal memuat data awal.");
-                setIsLoading(false);
-            }
-        };
-        init();
-    }, []);
+    const academicYearsQuery = useQuery<AcademicYearItem[]>({
+        queryKey: ['academic-years'],
+        queryFn: getStudentAcademicYears,
+        staleTime: 10 * 60 * 1000,
+    });
 
-    const fetchRecords = useCallback(async () => {
-        const isInitial = records.length === 0 && isLoading;
-        if (!isInitial) setIsFetching(true);
-        setError(null);
-        try {
-            const data = await getStudentMorningTardiness(selectedYearId, selectedSemesterId);
-            setRecords(data);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Gagal memuat riwayat keterlambatan.");
-            setRecords([]);
-        } finally {
-            setIsLoading(false);
-            setIsFetching(false);
-        }
-    }, [selectedYearId, selectedSemesterId]);
+    const academicYears = academicYearsQuery.data ?? [];
 
-    useEffect(() => { fetchRecords(); }, [fetchRecords]);
-    useEffect(() => { setCurrentPage(1); }, [selectedYearId, selectedSemesterId]);
+    const effectiveYearId = useMemo(() => {
+        if (selectedYearId !== 'all') return selectedYearId;
+        return academicYears.find(y => y.isActive)?.id ?? 'all';
+    }, [selectedYearId, academicYears]);
 
+    const morningQuery = useQuery<LateRecord[]>({
+        queryKey: ['student-morning', effectiveYearId],
+        queryFn: () => getStudentMorningTardiness(effectiveYearId),
+        staleTime: 2 * 60 * 1000,
+    });
+
+    const records = morningQuery.data ?? [];
     const totalItems = records.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const pagedRecords = useMemo(() => records.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage), [records, currentPage, itemsPerPage]);
+
+    const pagedRecords = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return records.slice(start, start + itemsPerPage);
+    }, [records, currentPage, itemsPerPage]);
+
+    const error = academicYearsQuery.error instanceof Error ? academicYearsQuery.error.message
+        : morningQuery.error instanceof Error ? morningQuery.error.message : null;
 
     return {
-        records: pagedRecords, totalRecords: totalItems, academicYears,
-        selectedYearId, selectedSemesterId, isLoading, isFetching, error,
-        setSelectedYearId, setSelectedSemesterId,
-        currentPage, setCurrentPage, itemsPerPage, setItemsPerPage,
-        totalPages, showPagination: totalItems > 10,
-        refetch: fetchRecords,
+        records: pagedRecords,
+        totalRecords: totalItems,
+        academicYears,
+        selectedYearId: effectiveYearId,
+        isLoading:  academicYearsQuery.isLoading || morningQuery.isLoading,
+        isFetching: morningQuery.isFetching,
+        error,
+        setSelectedYearId: (id: string) => { setSelectedYearId(id); setCurrentPage(1); },
+        refetch: () => morningQuery.refetch(),
+        currentPage, setCurrentPage,
+        itemsPerPage,
+        setItemsPerPage: (v: number) => { setItemsPerPage(v); setCurrentPage(1); },
+        totalPages,
+        showPagination: totalItems > 10,
     };
 };

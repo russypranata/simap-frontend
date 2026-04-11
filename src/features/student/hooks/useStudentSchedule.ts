@@ -1,57 +1,46 @@
-"use client";
+'use client';
 
-import { useState, useMemo, useEffect } from "react";
-import { getStudentSchedule, getSubjectColor, type ScheduleItem } from "../services/studentScheduleService";
-
-const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getStudentSchedule, isScheduleCurrentlyHappening, getSubjectColor, DAYS, type ScheduleItem } from '../services/studentScheduleService';
 
 export const useStudentSchedule = () => {
-    const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
-    const [selectedDay, setSelectedDay] = useState<string>("all");
-    const [viewMode, setViewMode] = useState<"daily" | "weekly">("weekly");
+    const query = useQuery<ScheduleItem[]>({
+        queryKey: ['student-schedule'],
+        queryFn: getStudentSchedule,
+        staleTime: 5 * 60 * 1000,
+    });
 
-    useEffect(() => {
-        getStudentSchedule().then(setSchedule);
+    const schedule = query.data ?? [];
+
+    const currentDay = useMemo(() => {
+        const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        return dayNames[new Date().getDay()];
     }, []);
 
-    const today = new Date();
-    const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-    const currentDay = dayNames[today.getDay()];
+    const todaySchedule = useMemo(() =>
+        currentDay === 'Minggu' ? [] : schedule.filter(s => s.day === currentDay),
+        [schedule, currentDay]
+    );
 
-    const filteredSchedule = useMemo(() => {
-        if (selectedDay === "all") return schedule;
-        return schedule.filter((item) => item.day === selectedDay);
-    }, [schedule, selectedDay]);
-
-    const todaySchedule = useMemo(() => {
-        return schedule.filter((item) => item.day === currentDay);
-    }, [schedule, currentDay]);
-
-    const scheduleByDay = useMemo(() => {
-        const grouped: Record<string, ScheduleItem[]> = {};
-        DAYS.forEach((day) => {
-            grouped[day] = schedule.filter((item) => item.day === day);
-        });
-        return grouped;
-    }, [schedule]);
-
-    const totalLessons = schedule.length;
-    const uniqueSubjects = new Set(schedule.map((s) => s.subject)).size;
+    const stats = useMemo(() => ({
+        totalLessons:    schedule.length,
+        uniqueSubjects:  new Set(schedule.map(s => s.subject)).size,
+        todayLessons:    todaySchedule.length,
+        currentLesson:   todaySchedule.find(isScheduleCurrentlyHappening) ?? null,
+    }), [schedule, todaySchedule]);
 
     return {
         schedule,
-        selectedDay,
-        setSelectedDay,
-        viewMode,
-        setViewMode,
-        today,
-        currentDay,
-        filteredSchedule,
         todaySchedule,
-        scheduleByDay,
-        totalLessons,
-        uniqueSubjects,
+        stats,
+        currentDay,
+        days: DAYS,
         getSubjectColor,
-        DAYS,
+        isLessonHappeningNow: isScheduleCurrentlyHappening,
+        isLoading:  query.isLoading,
+        isFetching: query.isFetching,
+        error:      query.error instanceof Error ? query.error.message : null,
+        refetch:    query.refetch,
     };
 };

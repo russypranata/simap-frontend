@@ -1,50 +1,58 @@
-"use client";
+'use client';
 
-import { useState, useMemo, useEffect } from "react";
-import { getStudentGrades, getStudentSemesterHistory, type SubjectGrade, type SemesterSummary } from "../services/studentGradesService";
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getStudentGrades, type SubjectGrade } from '../services/studentGradesService';
+import { getAcademicYears } from '@/features/parent/services/parentApiClient';
 
 export const useStudentGrades = () => {
-    const [grades, setGrades] = useState<SubjectGrade[]>([]);
-    const [semesterHistory, setSemesterHistory] = useState<SemesterSummary[]>([]);
-    const [selectedSemester, setSelectedSemester] = useState("current");
-    const [activeTab, setActiveTab] = useState("all");
+    const [selectedAcademicYearId, setSelectedAcademicYearId] = useState<string>('');
 
-    useEffect(() => {
-        getStudentGrades().then(setGrades);
-        getStudentSemesterHistory().then(setSemesterHistory);
-    }, []);
+    const academicYearsQuery = useQuery({
+        queryKey: ['academic-years'],
+        queryFn: getAcademicYears,
+        staleTime: 10 * 60 * 1000,
+    });
+
+    const academicYears = academicYearsQuery.data ?? [];
+
+    const effectiveYearId = useMemo(() => {
+        if (selectedAcademicYearId) return selectedAcademicYearId;
+        return academicYears.find(y => y.isActive)?.id ?? academicYears[0]?.id ?? '';
+    }, [selectedAcademicYearId, academicYears]);
+
+    const gradesQuery = useQuery<SubjectGrade[]>({
+        queryKey: ['student-grades', effectiveYearId],
+        queryFn: () => getStudentGrades(effectiveYearId),
+        enabled: !!effectiveYearId,
+        staleTime: 2 * 60 * 1000,
+    });
+
+    const grades = gradesQuery.data ?? [];
 
     const stats = useMemo(() => {
         if (grades.length === 0) return null;
-        const totalAverage = grades.reduce((sum, g) => sum + g.averageScore, 0) / grades.length;
-        const highestSubject = grades.reduce((prev, current) =>
-            prev.averageScore > current.averageScore ? prev : current
-        );
-        const lowestSubject = grades.reduce((prev, current) =>
-            prev.averageScore < current.averageScore ? prev : current
-        );
-        const aboveKKM = grades.filter(g => g.averageScore >= g.kkm).length;
-        return {
-            totalAverage: Math.round(totalAverage * 10) / 10,
-            highestSubject,
-            lowestSubject,
-            aboveKKM,
-            totalSubjects: grades.length,
-        };
+        const withFinal = grades.filter(g => g.finalAverage !== null);
+        if (withFinal.length === 0) return null;
+        const totalAverage = withFinal.reduce((s, g) => s + (g.finalAverage ?? 0), 0) / withFinal.length;
+        const highestSubject = withFinal.reduce((p, c) => (p.finalAverage ?? 0) > (c.finalAverage ?? 0) ? p : c);
+        const lowestSubject  = withFinal.reduce((p, c) => (p.finalAverage ?? 0) < (c.finalAverage ?? 0) ? p : c);
+        const aboveKKM = withFinal.filter(g => (g.finalAverage ?? 0) >= g.kkm).length;
+        return { totalAverage: Math.round(totalAverage * 10) / 10, highestSubject, lowestSubject, aboveKKM, totalSubjects: withFinal.length };
     }, [grades]);
 
-    const currentSemester = semesterHistory[0] ?? null;
-    const previousSemester = semesterHistory[1] ?? null;
+    const error = academicYearsQuery.error instanceof Error ? academicYearsQuery.error.message
+        : gradesQuery.error instanceof Error ? gradesQuery.error.message : null;
 
     return {
         grades,
-        semesterHistory,
-        selectedSemester,
-        setSelectedSemester,
-        activeTab,
-        setActiveTab,
+        academicYears,
+        selectedAcademicYearId: effectiveYearId,
+        setSelectedAcademicYearId,
         stats,
-        currentSemester,
-        previousSemester,
+        isLoading: academicYearsQuery.isLoading || (!!effectiveYearId && gradesQuery.isLoading),
+        isFetching: gradesQuery.isFetching,
+        error,
+        refetch: () => gradesQuery.refetch(),
     };
 };

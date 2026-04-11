@@ -1,54 +1,71 @@
-"use client";
+'use client';
 
-import { useState, useMemo, useEffect } from "react";
-import { getStudentAchievements, type Achievement } from "../services/studentAchievementsService";
-
-const ITEMS_PER_PAGE = 5;
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getStudentAchievements, type Achievement } from '../services/studentAchievementsService';
 
 export const useStudentAchievements = () => {
-    const [achievements, setAchievements] = useState<Achievement[]>([]);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [levelFilter, setLevelFilter] = useState("all");
+    const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('all');
+    const [selectedLevel, setSelectedLevel] = useState<string>('all');
+    const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+    const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
 
-    useEffect(() => {
-        getStudentAchievements().then(setAchievements);
-    }, []);
+    const query = useQuery<Achievement[]>({
+        queryKey: ['student-achievements'],
+        queryFn: () => getStudentAchievements(),
+        staleTime: 2 * 60 * 1000,
+    });
 
-    const filteredAchievements = useMemo(() => {
-        return achievements.filter((achievement) => {
-            const matchesSearch =
-                achievement.competitionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                achievement.eventName.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesLevel = levelFilter === "all" || achievement.level === levelFilter;
-            return matchesSearch && matchesLevel;
-        });
-    }, [achievements, searchQuery, levelFilter]);
+    const allRecords = query.data ?? [];
 
-    const totalPages = Math.ceil(filteredAchievements.length / ITEMS_PER_PAGE);
-    const paginatedAchievements = filteredAchievements.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
+    const academicYears = useMemo(() => {
+        const unique = new Set(allRecords.map(r => r.academicYearId).filter(Boolean));
+        return Array.from(unique).sort((a, b) => b.localeCompare(a));
+    }, [allRecords]);
+
+    const yearFiltered = useMemo(() =>
+        selectedAcademicYear === 'all' ? allRecords : allRecords.filter(r => r.academicYearId === selectedAcademicYear),
+        [allRecords, selectedAcademicYear]
     );
 
-    const totalAchievements = achievements.length;
-    const nationalAchievements = achievements.filter((a) => a.level === "Nasional" || a.level === "Internasional").length;
-    const firstPlaceCount = achievements.filter((a) => a.rank === "Juara 1").length;
+    const filteredRecords = useMemo(() =>
+        yearFiltered.filter(r => {
+            const matchLevel  = selectedLevel === 'all' || r.level === selectedLevel;
+            const matchSearch = !searchQuery ||
+                r.competitionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                r.eventName.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchLevel && matchSearch;
+        }),
+        [yearFiltered, selectedLevel, searchQuery]
+    );
+
+    const stats = useMemo(() => ({
+        totalAchievements:    yearFiltered.length,
+        nationalAchievements: yearFiltered.filter(a => a.level === 'Nasional' || a.level === 'Internasional').length,
+        firstPlaceCount:      yearFiltered.filter(a => a.rank === 'Juara 1').length,
+    }), [yearFiltered]);
+
+    const totalPages  = Math.ceil(filteredRecords.length / itemsPerPage) || 1;
+    const startIndex  = (currentPage - 1) * itemsPerPage;
+    const paginatedRecords = filteredRecords.slice(startIndex, startIndex + itemsPerPage);
 
     return {
-        achievements,
-        searchQuery,
-        setSearchQuery,
-        levelFilter,
-        setLevelFilter,
-        currentPage,
-        setCurrentPage,
-        filteredAchievements,
-        paginatedAchievements,
-        totalPages,
-        totalAchievements,
-        nationalAchievements,
-        firstPlaceCount,
-        ITEMS_PER_PAGE,
+        paginatedRecords, academicYears, stats,
+        selectedAcademicYear,
+        setSelectedAcademicYear: (v: string) => { setSelectedAcademicYear(v); setCurrentPage(1); },
+        selectedLevel, setSelectedLevel,
+        searchQuery, setSearchQuery,
+        selectedAchievement, setSelectedAchievement,
+        currentPage, totalPages, itemsPerPage,
+        setItemsPerPage: (v: number) => { setItemsPerPage(v); setCurrentPage(1); },
+        filteredTotal: filteredRecords.length,
+        startIndexDisplay: filteredRecords.length === 0 ? 0 : startIndex + 1,
+        goToPage: (p: number) => setCurrentPage(Math.max(1, Math.min(p, totalPages))),
+        isLoading:  query.isLoading,
+        isFetching: query.isFetching,
+        error:      query.error instanceof Error ? query.error.message : null,
+        refetch:    query.refetch,
     };
 };

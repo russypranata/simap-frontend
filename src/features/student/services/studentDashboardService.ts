@@ -1,18 +1,19 @@
+import { STUDENT_API_URL, getAuthHeaders, handleApiError } from './studentApiClient';
+
 export interface DashboardStats {
     averageScore: number;
-    rank: number;
     attendanceRate: number;
     lateCount: number;
     prayerRate: number;
     achievementsCount: number;
     violationCount: number;
     ekstrakurikuler: number;
-    unreadAnnouncements: number;
 }
 
 export interface TodayLesson {
     id: number;
     time: string;
+    endTime: string;
     subject: string;
     teacher: string;
     room: string;
@@ -43,42 +44,53 @@ export interface StudentDashboardData {
     hasWarning: boolean;
 }
 
-const getCurrentDay = () => ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][new Date().getDay()];
-const getCurrentTime = () => { const n = new Date(); return `${String(n.getHours()).padStart(2, "0")}:${String(n.getMinutes()).padStart(2, "0")}`; };
-const isOngoing = (start: string, end: string) => { const now = getCurrentTime(); return now >= start && now <= end; };
+const isOngoing = (start: string, end: string): boolean => {
+    const now = new Date();
+    const cur = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    return cur >= start && cur <= end;
+};
 
-const mockSchedule = [
-    { id: 1, day: "Senin", startTime: "07:45", endTime: "08:30", subject: "Matematika", teacher: "Pak Ahmad", room: "XII IPA 1" },
-    { id: 2, day: "Senin", startTime: "08:30", endTime: "09:15", subject: "Matematika", teacher: "Pak Ahmad", room: "XII IPA 1" },
-    { id: 3, day: "Selasa", startTime: "07:00", endTime: "08:30", subject: "Kimia", teacher: "Pak Rudi", room: "Lab Kimia" },
-    { id: 4, day: "Rabu", startTime: "07:00", endTime: "08:30", subject: "Bahasa Inggris", teacher: "Pak Budi", room: "XII IPA 1" },
-    { id: 5, day: "Kamis", startTime: "07:00", endTime: "08:30", subject: "Fisika", teacher: "Bu Sari", room: "Lab Fisika" },
-    { id: 6, day: "Jumat", startTime: "07:00", endTime: "08:30", subject: "Biologi", teacher: "Bu Ani", room: "Lab Biologi" },
-    { id: 7, day: "Sabtu", startTime: "07:00", endTime: "08:30", subject: "TIK", teacher: "Pak Fajar", room: "Lab Komputer" },
-];
+const trimTime = (t: string) => t?.length > 5 ? t.substring(0, 5) : (t ?? '');
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const normalizeScheduleItem = (s: Record<string, any>): TodayLesson => {
+    const start = trimTime(s.startTime ?? s.start_time ?? '');
+    const end   = trimTime(s.endTime   ?? s.end_time   ?? '');
+    return { id: s.id, time: start, endTime: end, subject: s.subject ?? '', teacher: s.teacher ?? '', room: s.room ?? '', isOngoing: isOngoing(start, end) };
+};
 
 export const getStudentDashboardData = async (): Promise<StudentDashboardData> => {
-    await new Promise(resolve => setTimeout(resolve, 700));
-
-    const today = getCurrentDay();
-    const todaySchedule = mockSchedule
-        .filter(s => s.day === today)
-        .slice(0, 3)
-        .map(s => ({ id: s.id, time: s.startTime, subject: s.subject, teacher: s.teacher, room: s.room, isOngoing: isOngoing(s.startTime, s.endTime) }));
-
-    const stats: DashboardStats = {
-        averageScore: 85.2, rank: 5, attendanceRate: 96, lateCount: 2,
-        prayerRate: 90, achievementsCount: 3, violationCount: 0,
-        ekstrakurikuler: 2, unreadAnnouncements: 2,
-    };
+    const response = await fetch(`${STUDENT_API_URL}/dashboard`, { headers: getAuthHeaders() });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    const d = result.data;
+    const stats = d.stats ?? {};
 
     return {
-        studentName: "Ahmad Rizki Maulana",
-        studentClass: "XII IPA 1",
-        stats,
-        todaySchedule,
-        monthlyAttendance: { hadir: 19, sakit: 1, izin: 1, alpa: 0, percentage: Math.round((19 / 21) * 100) },
-        ekskulSummary: [{ id: 1, name: "Pramuka", attendanceRate: 92 }, { id: 2, name: "Basket", attendanceRate: 88 }],
-        hasWarning: stats.violationCount >= 3 || stats.averageScore < 70,
+        studentName:  d.studentName  ?? d.student_name  ?? '',
+        studentClass: d.studentClass ?? d.student_class ?? '',
+        stats: {
+            averageScore:      stats.averageScore      ?? stats.average_score      ?? 0,
+            attendanceRate:    stats.attendanceRate    ?? stats.attendance_rate    ?? 0,
+            lateCount:         stats.lateCount         ?? stats.late_count         ?? 0,
+            prayerRate:        stats.prayerRate        ?? stats.prayer_rate        ?? 0,
+            achievementsCount: stats.achievementsCount ?? stats.achievement_count  ?? 0,
+            violationCount:    stats.violationCount    ?? stats.violation_count    ?? 0,
+            ekstrakurikuler:   stats.ekstrakurikuler   ?? 0,
+        },
+        todaySchedule: (d.todaySchedule ?? d.today_schedule ?? []).slice(0, 5).map(normalizeScheduleItem),
+        monthlyAttendance: {
+            hadir:      d.monthlyAttendance?.hadir      ?? 0,
+            sakit:      d.monthlyAttendance?.sakit      ?? 0,
+            izin:       d.monthlyAttendance?.izin       ?? 0,
+            alpa:       d.monthlyAttendance?.alpa       ?? 0,
+            percentage: d.monthlyAttendance?.percentage ?? 0,
+        },
+        ekskulSummary: (d.ekskulSummary ?? d.ekskul_summary ?? []).map((e: Record<string, unknown>) => ({
+            id:             e.id as number,
+            name:           (e.name ?? '') as string,
+            attendanceRate: (e.attendanceRate ?? e.attendance_rate ?? 0) as number,
+        })),
+        hasWarning: d.hasWarning ?? d.has_warning ?? false,
     };
 };

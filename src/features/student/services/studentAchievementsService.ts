@@ -1,6 +1,4 @@
-// ============================================
-// STUDENT ACHIEVEMENTS SERVICE
-// ============================================
+import { STUDENT_API_URL, getAuthHeaders, handleApiError } from './studentApiClient';
 
 export interface Achievement {
     id: number;
@@ -12,99 +10,28 @@ export interface Achievement {
     level: string;
     date: string;
     photo: string | null;
+    academicYearId: string;
 }
 
-const mockAchievements: Achievement[] = [
-    {
-        id: 1,
-        competitionName: "Olimpiade Matematika",
-        category: "Akademik",
-        rank: "Juara 1",
-        eventName: "OSN Tingkat Provinsi",
-        organizer: "Dinas Pendidikan Provinsi Kalimantan Barat",
-        level: "Provinsi",
-        date: "2024-11-15",
-        photo: null,
-    },
-    {
-        id: 101,
-        competitionName: "Kompetisi Sains Madrasah",
-        category: "Akademik",
-        rank: "Juara 3",
-        eventName: "KSM Kabupaten",
-        organizer: "Kemenag Kabupaten",
-        level: "Kabupaten",
-        date: "2024-08-10",
-        photo: null,
-    },
-    {
-        id: 102,
-        competitionName: "Lomba Cerdas Cermat",
-        category: "Akademik",
-        rank: "Juara 1",
-        eventName: "LCC Sekolah",
-        organizer: "OSIS SMA",
-        level: "Sekolah",
-        date: "2024-05-02",
-        photo: null,
-    },
-    {
-        id: 103,
-        competitionName: "Olimpiade Matematika Nasional",
-        category: "Akademik",
-        rank: "Juara 2",
-        eventName: "OSN Nasional",
-        organizer: "Puspresnas",
-        level: "Nasional",
-        date: "2023-11-15",
-        photo: null,
-    },
-    {
-        id: 104,
-        competitionName: "Lomba Pidato Bahasa Arab",
-        category: "Bahasa",
-        rank: "Juara 1",
-        eventName: "Festival Bahasa Arab",
-        organizer: "MGMP Bahasa Arab",
-        level: "Provinsi",
-        date: "2023-08-20",
-        photo: null,
-    },
-    {
-        id: 105,
-        competitionName: "Musabaqah Tilawatil Quran",
-        category: "Keagamaan",
-        rank: "Harapan 1",
-        eventName: "MTQ Kabupaten",
-        organizer: "LPTQ Kabupaten",
-        level: "Kabupaten",
-        date: "2023-05-10",
-        photo: null,
-    },
-    {
-        id: 106,
-        competitionName: "Lomba Kaligrafi Islam",
-        category: "Seni",
-        rank: "Juara 3",
-        eventName: "Pekan Seni Islami",
-        organizer: "Yayasan Al-Fityan",
-        level: "Sekolah",
-        date: "2023-03-05",
-        photo: null,
-    },
-    {
-        id: 107,
-        competitionName: "Science Fair Project",
-        category: "Sains",
-        rank: "Juara 2",
-        eventName: "Expo Pendidikan",
-        organizer: "Dinas Pendidikan Kota",
-        level: "Kecamatan",
-        date: "2023-01-20",
-        photo: null,
-    },
-];
+export const getStudentAchievements = async (academicYearId?: string): Promise<Achievement[]> => {
+    const params = new URLSearchParams();
+    if (academicYearId && academicYearId !== 'all') params.append('academic_year_id', academicYearId);
 
-export const getStudentAchievements = async (): Promise<Achievement[]> => {
-    return Promise.resolve(mockAchievements);
+    const response = await fetch(`${STUDENT_API_URL}/achievements?${params}`, { headers: getAuthHeaders() });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (result.data ?? []).map((item: Record<string, any>): Achievement => ({
+        id:              item.id,
+        competitionName: item.competitionName ?? item.competition_name ?? '',
+        category:        item.category        ?? '',
+        rank:            item.rank            ?? '',
+        eventName:       item.eventName       ?? item.event_name       ?? '',
+        organizer:       item.organizer       ?? '',
+        level:           item.level           ?? '',
+        date:            item.date            ?? '',
+        photo:           item.photo           ?? null,
+        academicYearId:  item.academicYear?.name ?? academicYearId ?? '',
+    }));
 };

@@ -30,7 +30,6 @@ import { ActiveAcademicYearBadge } from './ActiveAcademicYearBadge';
 import { User, LogOut, Calendar } from 'lucide-react';
 import { formatDate, getDayName } from '@/features/shared/utils/dateFormatter';
 import { getStudentProfile } from '@/features/student/services/studentProfileService';
-import { StudentProfileData } from '@/features/student/data/mockStudentData';
 import { type AdvisorProfileData } from '@/features/extracurricular-advisor/services/advisorProfileService';
 import { getProfile as getAdvisorProfile } from '@/features/extracurricular-advisor/services/advisorProfileService';
 import { getParentProfile } from '@/features/parent/services/parentProfileService';
@@ -44,17 +43,13 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
     const { role, isAuthenticated, logout } = useRole();
 
-    // Student — manual state (belum pakai React Query)
-    const [studentProfile, setStudentProfile] =
-        React.useState<StudentProfileData | null>(null);
-
-    React.useEffect(() => {
-        if (isAuthenticated && role === 'siswa') {
-            getStudentProfile()
-                .then(setStudentProfile)
-                .catch((e) => console.error('Failed to fetch student profile for navbar', e));
-        }
-    }, [isAuthenticated, role]);
+    // Student — pakai React Query, cache key sama dengan Profile page
+    const { data: studentProfile } = useQuery({
+        queryKey: ['student-profile'],
+        queryFn: getStudentProfile,
+        enabled: isAuthenticated && role === 'siswa',
+        staleTime: 5 * 60 * 1000,
+    });
 
     // Advisor — pakai React Query, cache key sama dengan EditProfile page
     const { data: advisorProfile } = useQuery<AdvisorProfileData>({

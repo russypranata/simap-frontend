@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
-import { Calendar, GraduationCap, CheckCircle, Trophy, User, ChevronRight, AlertTriangle, ClipboardList, MapPin, RefreshCw, Timer, Moon, Activity, Megaphone } from "lucide-react";
+import { Calendar, GraduationCap, CheckCircle, Trophy, ChevronRight, AlertTriangle, ClipboardList, Timer, Moon, Activity, Clock } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { getStudentDashboardData, type StudentDashboardData } from "../services/studentDashboardService";
+import { useStudentDashboard } from "../hooks/useStudentDashboard";
 import { ErrorState } from "@/features/shared/components";
 
 const DashboardSkeleton = () => (
@@ -52,24 +52,15 @@ const StatCard: React.FC<{ title: string; value: string | number; subtitle: stri
 );
 
 export const StudentDashboard: React.FC = () => {
-    const [data, setData] = useState<StudentDashboardData | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [currentTime, setCurrentTime] = useState(new Date());
-
-    useEffect(() => {
-        getStudentDashboardData().then(setData).catch(e => setError(e.message)).finally(() => setIsLoading(false));
-        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
-        return () => clearInterval(timer);
-    }, []);
+    const { data, isLoading, error, refetch } = useStudentDashboard();
 
     const greeting = useMemo(() => {
-        const h = currentTime.getHours();
+        const h = new Date().getHours();
         if (h < 11) return "Selamat pagi";
         if (h < 15) return "Selamat siang";
         if (h < 18) return "Selamat sore";
         return "Selamat malam";
-    }, [currentTime]);
+    }, []);
 
     if (isLoading) return <DashboardSkeleton />;
     if (error || !data) return (
@@ -80,7 +71,7 @@ export const StudentDashboard: React.FC = () => {
                     <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Siswa</span>
                 </h1>
             </div>
-            <ErrorState error={error ?? "Terjadi kesalahan"} onRetry={() => window.location.reload()} />
+            <ErrorState error={error ?? "Terjadi kesalahan"} onRetry={refetch} />
         </div>
     );
 

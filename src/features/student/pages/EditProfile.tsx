@@ -1,108 +1,72 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useRole } from '@/app/context/RoleContext';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Pencil, Lock, Key } from 'lucide-react';
+import { User, Pencil, Lock, Key } from 'lucide-react';
 import { toast } from 'sonner';
 import { StudentProfileForm } from '@/features/student/components/profile/StudentProfileForm';
-import {
-    EditProfileSkeleton,
-    ChangePasswordDialog,
-} from '@/features/student/components/profile';
+import { EditProfileSkeleton, ChangePasswordDialog } from '@/features/student/components/profile';
 import { StudentProfileData } from '@/features/student/data/mockStudentData';
-import {
-    getStudentProfile,
-    updateStudentProfile,
-    uploadProfileAvatar,
-} from '@/features/student/services/studentProfileService';
+import { getStudentProfile, updateStudentProfile, uploadProfileAvatar } from '@/features/student/services/studentProfileService';
 
 export const StudentEditProfile: React.FC = () => {
     const router = useRouter();
-    const { updateUser } = useRole(); // Get updateUser
-    const [isLoading, setIsLoading] = useState(false); // For saving state
-    const [isFetching, setIsFetching] = useState(true); // For initial data load
-    const [profileData, setProfileData] = useState<StudentProfileData | null>(
-        null,
-    );
+    const queryClient = useQueryClient();
+    const [isLoading, setIsLoading] = useState(false);
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
-    // Simulate API Fetching for Initial Data
-    useEffect(() => {
-        const fetchProfileData = async () => {
-            try {
-                // Simulated API Call
-                const data = await getStudentProfile();
-                setProfileData(data);
-            } catch (error) {
-                console.error('Failed to fetch profile:', error);
-                toast.error('Gagal memuat data profil');
-            } finally {
-                setIsFetching(false);
-            }
-        };
-
-        fetchProfileData();
-    }, []);
+    // Shared cache dengan Profile page
+    const { data: profileData, isLoading: isFetching } = useQuery({
+        queryKey: ['student-profile'],
+        queryFn: getStudentProfile,
+        staleTime: 5 * 60 * 1000,
+    });
 
     const handleSave = async (data: StudentProfileData, file: File | null) => {
         setIsLoading(true);
         try {
-            // 1. Update Profile Data
-            const payload = {
+            const updated = await updateStudentProfile({
                 name: data.name,
                 username: data.username,
                 email: data.email,
                 phone: data.phone,
-                // Use undefined for empty strings so JSON.stringify omits them
                 address: data.address || undefined,
                 birthPlace: data.birthPlace || undefined,
                 birthDate: data.birthDate || undefined,
-            };
-            await updateStudentProfile(payload);
+            });
 
-            // 2. Upload Avatar if selected
-            let avatarUrl = data.profilePicture;
             if (file) {
                 const uploadResponse = await uploadProfileAvatar(file);
-                // Assuming the upload response returns the new avatar URL structure
-                // If uploadResponse is void or doesn't return URL, we might need to rely on re-fetching
-                // or the local object URL from file (which is temporary)
-                // Ideally uploadProfileAvatar should return the new URL.
-                // Let's assume for now we can't easily get the remote URL without another fetch,
-                // but we can update the context with the local preview for immediate feedback,
-                // OR better: refetch the profile to get everything fresh.
+                queryClient.setQueryData(['student-profile'], {
+                    ...updated,
+                    profilePicture: uploadResponse.profilePicture || uploadResponse.avatar,
+                    avatar: uploadResponse.profilePicture || uploadResponse.avatar,
+                });
+            } else {
+                queryClient.setQueryData(['student-profile'], updated);
             }
 
-            // Refetch to get the definitive server state including new avatar URL
-            const freshProfile = await getStudentProfile();
-
-            // Update Context
-            updateUser({
-                name: freshProfile.name,
-                avatar: freshProfile.profilePicture,
-                // Map other fields if necessary
-            });
+            // Invalidate navbar cache
+            queryClient.invalidateQueries({ queryKey: ['student-profile'] });
 
             toast.success('Profil berhasil diperbarui!');
             router.push('/student/profile');
         } catch (error) {
-            toast.error('Gagal menyimpan perubahan');
-            console.error(error);
+            const err = error as { errors?: Record<string, string[]>; message?: string };
+            if (err.errors) {
+                Object.values(err.errors).flat().forEach(msg => toast.error(msg));
+            } else {
+                toast.error(err.message ?? 'Gagal menyimpan perubahan');
+            }
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleCancel = () => {
-        router.push('/student/profile');
-    };
-
-    if (isFetching || !profileData) {
-        return <EditProfileSkeleton />;
-    }
+    if (isFetching || !profileData) return <EditProfileSkeleton />;
 
     return (
         <div className="space-y-6">
@@ -132,7 +96,7 @@ export const StudentEditProfile: React.FC = () => {
             <StudentProfileForm
                 initialData={profileData}
                 onSave={handleSave}
-                onCancel={handleCancel}
+                onCancel={() => router.push('/student/profile')}
                 isLoading={isLoading}
             />
 

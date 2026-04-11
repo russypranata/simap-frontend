@@ -1,63 +1,78 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { getStudentBehaviorData, type ViolationRecord } from "../services/studentBehaviorService";
+'use client';
+
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getStudentBehaviorData, type ViolationRecord } from '../services/studentBehaviorService';
 
 export const useStudentBehavior = () => {
-    const [allRecords, setAllRecords] = useState<ViolationRecord[]>([]);
-    const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>("all");
-    const [locationFilter, setLocationFilter] = useState<string>("all");
+    const [selectedAcademicYear, setSelectedAcademicYear] = useState<string>('all');
+    const [locationFilter, setLocationFilter] = useState<string>('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isFetching, setIsFetching] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [isFetchingOverlay, setIsFetchingOverlay] = useState(false);
 
-    const fetchRecords = useCallback(async () => {
-        setError(null);
-        try {
+    const query = useQuery<ViolationRecord[]>({
+        queryKey: ['student-behavior'],
+        queryFn: async () => {
             const data = await getStudentBehaviorData();
-            setAllRecords(data.records);
-            if (data.records.length > 0) {
-                const years = [...new Set(data.records.map(r => r.academicYearId))];
-                const latest = years.sort((a, b) => b.localeCompare(a))[0];
-                setSelectedAcademicYear(latest);
+            return data.records;
+        },
+        staleTime: 2 * 60 * 1000,
+        select: (records) => {
+            if (selectedAcademicYear === 'all' && records.length > 0) {
+                const years = [...new Set(records.map(r => r.academicYearId))].sort((a, b) => b.localeCompare(a));
+                if (years[0]) setSelectedAcademicYear(years[0]);
             }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Gagal memuat catatan perilaku.");
-        } finally {
-            setIsLoading(false);
-            setIsFetching(false);
-        }
-    }, []);
+            return records;
+        },
+    });
 
-    useEffect(() => { fetchRecords(); }, [fetchRecords]);
-    useEffect(() => { setCurrentPage(1); }, [selectedAcademicYear, locationFilter]);
-    useEffect(() => { setLocationFilter("all"); }, [selectedAcademicYear]);
+    const allRecords = query.data ?? [];
 
-    const academicYears = useMemo(() => Array.from(new Set(allRecords.map(r => r.academicYearId))).sort((a, b) => b.localeCompare(a)), [allRecords]);
+    const academicYears = useMemo(() => {
+        const unique = new Set(allRecords.map(r => r.academicYearId).filter(Boolean));
+        return Array.from(unique).sort((a, b) => b.localeCompare(a));
+    }, [allRecords]);
 
-    const recordsForYear = useMemo(() => selectedAcademicYear === "all" ? allRecords : allRecords.filter(r => r.academicYearId === selectedAcademicYear), [allRecords, selectedAcademicYear]);
+    const recordsForYear = useMemo(() =>
+        selectedAcademicYear === 'all' ? allRecords : allRecords.filter(r => r.academicYearId === selectedAcademicYear),
+        [allRecords, selectedAcademicYear]
+    );
 
     const stats = useMemo(() => ({
-        totalViolations: recordsForYear.length,
-        schoolViolations: recordsForYear.filter(r => r.location === "sekolah").length,
-        dormViolations: recordsForYear.filter(r => r.location === "asrama").length,
+        totalViolations:  recordsForYear.length,
+        schoolViolations: recordsForYear.filter(r => r.location === 'sekolah').length,
+        dormViolations:   recordsForYear.filter(r => r.location === 'asrama').length,
     }), [recordsForYear]);
 
-    const filteredRecords = useMemo(() => recordsForYear.filter(r => locationFilter === "all" || r.location === locationFilter), [recordsForYear, locationFilter]);
+    const filteredRecords = useMemo(() =>
+        recordsForYear.filter(r => locationFilter === 'all' || r.location === locationFilter),
+        [recordsForYear, locationFilter]
+    );
 
-    const totalPages = Math.ceil(filteredRecords.length / itemsPerPage);
-    const pagedRecords = useMemo(() => filteredRecords.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage), [filteredRecords, currentPage, itemsPerPage]);
+    const totalItems  = filteredRecords.length;
+    const totalPages  = Math.ceil(totalItems / itemsPerPage);
+    const pagedRecords = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredRecords.slice(start, start + itemsPerPage);
+    }, [filteredRecords, currentPage, itemsPerPage]);
 
-    const triggerFetchingOverlay = () => { setIsFetching(true); setTimeout(() => setIsFetching(false), 300); };
+    const triggerFetchingOverlay = () => { setIsFetchingOverlay(true); setTimeout(() => setIsFetchingOverlay(false), 300); };
 
     return {
-        filteredRecords: pagedRecords, allFilteredCount: filteredRecords.length,
-        stats, academicYears, selectedAcademicYear, locationFilter,
-        isLoading, isFetching, error,
+        filteredRecords: pagedRecords,
+        allFilteredCount: totalItems,
+        stats, academicYears,
+        selectedAcademicYear,
+        handleAcademicYearChange: (v: string) => { setSelectedAcademicYear(v); setCurrentPage(1); triggerFetchingOverlay(); },
+        locationFilter,
+        handleLocationChange: (v: string) => { setLocationFilter(v); setCurrentPage(1); triggerFetchingOverlay(); },
         currentPage, setCurrentPage, itemsPerPage, setItemsPerPage,
-        totalPages, showPagination: filteredRecords.length > 10,
-        handleAcademicYearChange: (val: string) => { setSelectedAcademicYear(val); triggerFetchingOverlay(); },
-        handleLocationChange: (val: string) => { setLocationFilter(val); triggerFetchingOverlay(); },
-        refetch: fetchRecords,
+        totalPages, showPagination: totalItems > 10,
+        isLoading:  query.isLoading,
+        isFetching: query.isFetching || isFetchingOverlay,
+        error:      query.error instanceof Error ? query.error.message : null,
+        refetch:    query.refetch,
+        triggerFetchingOverlay,
     };
 };
