@@ -5,6 +5,7 @@ export interface DashboardChild {
     name: string;
     class: string;
     nis: string;
+    enrolledYears?: { id: string; name: string; isActive: boolean }[];
 }
 
 export interface DashboardStats {
@@ -71,6 +72,11 @@ const normalizeChild = (c: Record<string, any>): DashboardChild => ({
     name: c.name ?? "",
     class: c.class ?? "",
     nis: c.nis ?? c.admission_number ?? "",
+    enrolledYears: (c.enrolledYears ?? c.enrolled_years ?? []).map((y: Record<string, unknown>) => ({
+        id: String(y.id),
+        name: (y.name ?? "") as string,
+        isActive: (y.isActive ?? y.is_active ?? false) as boolean,
+    })),
 });
 
 export const getDashboardData = async (childId: string): Promise<DashboardData> => {

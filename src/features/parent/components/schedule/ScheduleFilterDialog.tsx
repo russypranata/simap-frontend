@@ -10,7 +10,6 @@ import {
     DialogTrigger,
     DialogFooter,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Select,
@@ -19,17 +18,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Filter,
-    RotateCcw,
-    Check,
-    CalendarIcon,
-} from "lucide-react";
-import type { AcademicYearData } from "@/features/parent/services/parentScheduleService";
+import { RotateCcw, Check, CalendarIcon, Filter } from "lucide-react";
+import type { AcademicYearItem } from "@/features/parent/services/parentApiClient";
+import { FilterButton } from "@/features/shared/components";
 
 interface ScheduleFilterDialogProps {
-    academicYears: AcademicYearData[];
-    activeYear?: AcademicYearData;
+    academicYears: AcademicYearItem[];
+    activeYear?: AcademicYearItem;
     selectedYearId: string;
     onApply: (yearId: string) => void;
 }
@@ -43,12 +38,8 @@ export const ScheduleFilterDialog: React.FC<ScheduleFilterDialogProps> = ({
     const [tempYearId, setTempYearId] = React.useState(selectedYearId);
 
     React.useEffect(() => {
-        if (open) {
-            setTempYearId(selectedYearId);
-        }
+        if (open) setTempYearId(selectedYearId);
     }, [open, selectedYearId]);
-
-    const activeFilterCount = selectedYearId !== academicYears[0]?.id ? 1 : 0;
 
     const handleApply = () => {
         onApply(tempYearId);
@@ -56,21 +47,14 @@ export const ScheduleFilterDialog: React.FC<ScheduleFilterDialogProps> = ({
     };
 
     const handleReset = () => {
-        setTempYearId(academicYears[0]?.id);
+        setTempYearId(academicYears.find(y => y.isActive)?.id ?? academicYears[0]?.id ?? "");
     };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="h-9 gap-2 bg-white text-slate-700 border-slate-200 shadow-sm font-medium">
-                    <Filter className="h-4 w-4 text-slate-500" />
-                    <span className="hidden sm:inline">Filter</span>
-                    {activeFilterCount > 0 && (
-                        <Badge className="ml-0.5 h-5 w-5 min-w-[20px] px-0 bg-blue-800 text-white text-[10px] flex items-center justify-center border-0 rounded-full">
-                            {activeFilterCount}
-                        </Badge>
-                    )}
-                </Button>
+                {/* Always count 1 — year filter is always active on this page */}
+                <FilterButton activeCount={1} />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] rounded-2xl">
                 <DialogHeader className="flex-row items-center gap-4">
@@ -84,7 +68,7 @@ export const ScheduleFilterDialog: React.FC<ScheduleFilterDialogProps> = ({
                         </DialogDescription>
                     </div>
                 </DialogHeader>
-                
+
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
@@ -98,7 +82,7 @@ export const ScheduleFilterDialog: React.FC<ScheduleFilterDialogProps> = ({
                             <SelectContent>
                                 {academicYears.map(year => (
                                     <SelectItem key={year.id} value={year.id}>
-                                        TA {year.year}
+                                        {year.name}{year.isActive ? " (Aktif)" : ""}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

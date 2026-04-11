@@ -3,6 +3,8 @@ import { getParentChildren, type DashboardChild as ChildInfo } from "./parentDas
 
 export interface ScheduleItem {
     id: number;
+    type: 'lesson' | 'break' | 'ceremony' | 'free';
+    label?: string;
     day: string;
     startTime: string;
     endTime: string;
@@ -16,15 +18,10 @@ export interface ChildScheduleData {
     childName: string;
     childClass: string;
     schedule: ScheduleItem[];
+    enrolledYears: { id: string; name: string; isActive: boolean }[];
 }
 
-export interface AcademicYearData {
-    id: string;
-    year: string;
-    semesters: { id: string; name: string; status: string }[];
-}
-
-export const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+export const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
 
 export const getSubjectColor = (subject: string): string => {
     const colors: Record<string, string> = {
@@ -43,9 +40,12 @@ const DAY_MAP: Record<string, string> = {
 
 export const getChildSchedule = async (
     childId: string,
-    _academicYearId?: string  // eslint-disable-line @typescript-eslint/no-unused-vars
+    academicYearId?: string
 ): Promise<ChildScheduleData> => {
-    const response = await fetch(`${PARENT_API_URL}/children/${childId}/schedule`, {
+    const url = new URL(`${PARENT_API_URL}/children/${childId}/schedule`);
+    if (academicYearId) url.searchParams.set("academicYearId", academicYearId);
+
+    const response = await fetch(url.toString(), {
         headers: getAuthHeaders(),
     });
     if (!response.ok) await handleApiError(response);
@@ -54,6 +54,8 @@ export const getChildSchedule = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const schedule: ScheduleItem[] = (result.data ?? []).map((item: Record<string, any>) => ({
         id: item.id,
+        type: item.type ?? 'lesson',
+        label: item.label ?? undefined,
         day: DAY_MAP[item.dayOfWeek ?? item.day_of_week] ?? item.dayOfWeek ?? "",
         startTime: item.startTime ?? item.start_time ?? "",
         endTime: item.endTime ?? item.end_time ?? "",
@@ -67,7 +69,21 @@ export const getChildSchedule = async (
         childName: "",
         childClass: "",
         schedule,
+        enrolledYears: [],
     };
+};
+
+// Maps start_time → lesson period number (skipping break slots)
+// Slots: 07:00(1), 07:45(2), 08:30(3), [break], 09:30(4), 10:15(5), 11:00(6), [break], 12:30(7), 13:15(8), 14:00(9), 14:45(10)
+const PERIOD_MAP: Record<string, number> = {
+    "07:00": 1, "07:45": 2, "08:30": 3,
+    "09:30": 4, "10:15": 5, "11:00": 6,
+    "12:30": 7, "13:15": 8, "14:00": 9, "14:45": 10,
+};
+
+export const getLessonPeriod = (startTime: string): number | null => {
+    const key = startTime.substring(0, 5);
+    return PERIOD_MAP[key] ?? null;
 };
 
 export const isScheduleCurrentlyHappening = (item: ScheduleItem): boolean => {

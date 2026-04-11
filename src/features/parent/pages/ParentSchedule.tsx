@@ -2,41 +2,53 @@
 
 import React, { useMemo } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users } from "lucide-react";
+import { CalendarIcon, Users, BookOpen, BarChart3, GraduationCap } from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import {
     ScheduleHeader,
     ScheduleFilterDialog,
-    ActiveFilterBadges,
     CurrentlyActiveLessonCard,
     WeeklyCalendarGrid,
 } from "../components/schedule";
+import { ActiveFilterBadges, StatCard } from "@/features/shared/components";
 import { useParentSchedule } from "../hooks/useParentSchedule";
 import type { ScheduleItem } from "../services/parentScheduleService";
 import { ErrorState, EmptyState } from "@/features/shared/components";
 
-// Inline simple components to avoid extra files
 const ParentScheduleSkeleton = () => (
     <div className="space-y-6 animate-in fade-in duration-500">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="space-y-2">
-                <div className="h-10 w-72 bg-slate-200 rounded animate-pulse" />
-                <div className="h-4 w-56 bg-slate-200 rounded animate-pulse" />
+                <div className="h-10 w-64 bg-slate-200 rounded animate-pulse" />
+                <div className="h-4 w-72 bg-slate-200 rounded animate-pulse" />
             </div>
-            <div className="flex gap-2">
-                <div className="h-9 w-20 bg-slate-200 rounded animate-pulse" />
-                <div className="h-9 w-52 bg-slate-200 rounded animate-pulse" />
+            <div className="flex gap-2 justify-end">
+                <div className="h-9 w-24 bg-slate-200 rounded animate-pulse" />
+                <div className="h-9 w-44 bg-slate-200 rounded animate-pulse" />
             </div>
         </div>
 
-        {/* Filter Card */}
-        <div className="border border-slate-200 rounded-lg p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="h-10 bg-slate-200 rounded animate-pulse" />
-                <div className="h-10 bg-slate-200 rounded animate-pulse" />
-                <div className="h-10 bg-slate-200 rounded animate-pulse" />
-            </div>
+        {/* Filter badge */}
+        <div className="flex items-center gap-2">
+            <div className="h-4 w-24 bg-slate-200 rounded animate-pulse" />
+            <div className="h-6 w-32 bg-slate-200 rounded-lg animate-pulse" />
+        </div>
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+                <div key={i} className="rounded-xl bg-white shadow-sm p-5 space-y-3">
+                    <div className="flex items-center gap-3">
+                        <div className="h-11 w-11 bg-slate-200 rounded-xl animate-pulse" />
+                        <div className="space-y-1.5 flex-1">
+                            <div className="h-3 w-24 bg-slate-200 rounded animate-pulse" />
+                            <div className="h-6 w-16 bg-slate-200 rounded animate-pulse" />
+                        </div>
+                    </div>
+                    <div className="h-5 w-32 bg-slate-200 rounded animate-pulse" />
+                </div>
+            ))}
         </div>
 
         {/* Weekly Calendar Grid Skeleton */}
@@ -46,83 +58,57 @@ const ParentScheduleSkeleton = () => (
                     <div className="h-10 w-10 bg-slate-200 rounded-xl animate-pulse" />
                     <div className="space-y-2 flex-1">
                         <div className="h-5 w-48 bg-slate-200 rounded animate-pulse" />
-                        <div className="h-4 w-64 bg-slate-200 rounded animate-pulse" />
+                        <div className="h-4 w-56 bg-slate-200 rounded animate-pulse" />
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="p-0">
-                <div className="overflow-hidden">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200">
-                                <th className="w-[120px] p-4">
-                                    <div className="h-4 w-16 bg-slate-200 rounded animate-pulse" />
-                                </th>
-                                {Array.from({ length: 6 }).map((_, i) => (
-                                    <th key={i} className="p-4">
-                                        <div className="h-4 w-12 bg-slate-200 rounded animate-pulse mx-auto" />
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white">
-                            {Array.from({ length: 8 }).map((_, rowIndex) => (
-                                <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-slate-50/50" : "bg-white"}>
-                                    <td className="p-3 border-t border-slate-200">
-                                        <div className="h-4 w-12 bg-slate-200 rounded animate-pulse" />
-                                    </td>
-                                    {Array.from({ length: 6 }).map((_, colIndex) => (
-                                        <td key={colIndex} className="p-2 border-t border-l border-slate-200">
-                                            <div className="h-[80px] bg-slate-200/50 rounded-lg animate-pulse" />
-                                        </td>
-                                    ))}
-                                </tr>
+            <CardContent className="p-4">
+                <div className="space-y-2 min-w-[640px]">
+                    <div className="grid grid-cols-6 gap-2">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="h-9 bg-slate-200 rounded-lg animate-pulse" />
+                        ))}
+                    </div>
+                    {Array.from({ length: 10 }).map((_, rowIndex) => (
+                        <div key={rowIndex} className="grid grid-cols-6 gap-2">
+                            <div className="h-[80px] bg-slate-200 rounded-lg animate-pulse" />
+                            {Array.from({ length: 5 }).map((_, colIndex) => (
+                                <div key={colIndex} className="h-[80px] bg-slate-200/50 rounded-lg animate-pulse border border-dashed border-slate-200" />
                             ))}
-                        </tbody>
-                    </table>
+                        </div>
+                    ))}
                 </div>
             </CardContent>
         </Card>
-
-        {/* Info Card */}
-        <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
-            <div className="flex items-start gap-3">
-                <div className="h-10 w-10 bg-slate-200 rounded-xl animate-pulse" />
-                <div className="space-y-2 flex-1">
-                    <div className="h-5 w-32 bg-slate-200 rounded animate-pulse" />
-                    <div className="space-y-1">
-                        {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="h-4 w-64 bg-slate-200 rounded animate-pulse" />
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 );
 
 const ScheduleInfoCard = ({ stats, currentDay }: { stats: { totalLessons: number; uniqueSubjects: number; todayLessons: number }; currentDay: string }) => (
-    <div className="bg-blue-50 border-blue-200 rounded-lg border p-4">
-        <div className="flex items-start gap-3">
-            <div className="p-2.5 bg-blue-100 rounded-xl">
-                <svg className="h-5 w-5 text-blue-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                </svg>
-            </div>
-            <div>
-                <h3 className="font-semibold text-blue-900">Informasi Jadwal</h3>
-                <ul className="mt-2 space-y-1 text-sm text-blue-800">
-                    <li>• Total {stats.totalLessons} jam pelajaran per minggu</li>
-                    <li>• {stats.uniqueSubjects} mata pelajaran berbeda</li>
-                    {currentDay !== "Minggu" && (
-                        <li>• Hari ini: {stats.todayLessons} jam pelajaran</li>
-                    )}
-                    <li>• Istirahat: 09:15-09:30 dan 11:45-12:30</li>
-                    <li>• Jadwal dapat berubah sewaktu-waktu, silakan periksa pengumuman terbaru</li>
-                </ul>
-            </div>
-        </div>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard
+            title="Total Jam Pelajaran"
+            value={stats.totalLessons}
+            unit="JP / minggu"
+            subtitle="Seluruh hari Senin–Jumat"
+            icon={BookOpen}
+            color="blue"
+        />
+        <StatCard
+            title="Mata Pelajaran"
+            value={stats.uniqueSubjects}
+            unit="mapel"
+            subtitle="Jumlah mapel unik"
+            icon={GraduationCap}
+            color="amber"
+        />
+        <StatCard
+            title="Hari Ini"
+            value={stats.todayLessons}
+            unit="JP"
+            subtitle={currentDay !== "Minggu" ? `Jadwal ${currentDay}` : "Hari libur"}
+            icon={BarChart3}
+            color="emerald"
+        />
     </div>
 );
 
@@ -137,6 +123,7 @@ export const ParentSchedule: React.FC = () => {
         childName,
         childClass,
         isLoading,
+        isScheduleFetching,
         isError,
         errorMessage,
         currentDay,
@@ -167,10 +154,13 @@ export const ParentSchedule: React.FC = () => {
 
     if (isLoading) return <ParentScheduleSkeleton />;
     if (isError) return <ErrorState error={errorMessage || "Terjadi kesalahan"} onRetry={refetch} />;
-    if (schedule.length === 0) {
+
+    // Jangan render EmptyState saat children sudah ada tapi schedule belum di-fetch
+    const isScheduleReady = !!selectedChildId && !!selectedYearId;
+    if (isScheduleReady && schedule.length === 0) {
         return (
             <div className="space-y-6">
-                <ScheduleHeader childName={childName} childClass={childClass} />
+                <ScheduleHeader childName={childName} childClass={childClass} activeYearName={activeYear?.name} />
                 <EmptyState
                     icon={() => (
                         <svg className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -188,7 +178,7 @@ export const ParentSchedule: React.FC = () => {
         <div className="space-y-6">
             {/* Header with Filter and Child Selector */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <ScheduleHeader childName={childName} childClass={childClass} />
+                <ScheduleHeader childName={childName} childClass={childClass} activeYearName={activeYear?.name} />
 
                 <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 no-print w-full lg:w-auto mt-4 lg:mt-0 flex-wrap lg:flex-nowrap justify-end">
                     <ScheduleFilterDialog
@@ -220,28 +210,79 @@ export const ParentSchedule: React.FC = () => {
 
             {/* Active Filter Badges */}
             <ActiveFilterBadges
-                selectedYearId={selectedYearId}
-                academicYears={academicYears}
-                activeYear={activeYear}
-                onClearYear={() => setSelectedYearId(academicYears[0]?.id)}
+                badges={selectedYearId ? [{
+                    key: "year",
+                    label: `TA ${activeYear?.name || selectedYearId}`,
+                    icon: CalendarIcon,
+                    removable: false,
+                    onRemove: () => {},
+                }] : []}
             />
+
+            {/* Stats Cards */}
+            {isScheduleFetching ? (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="rounded-xl bg-white shadow-sm p-5 space-y-3">
+                            <div className="flex items-center gap-3">
+                                <div className="h-11 w-11 bg-slate-200 rounded-xl animate-pulse" />
+                                <div className="space-y-1.5 flex-1">
+                                    <div className="h-3 w-24 bg-slate-200 rounded animate-pulse" />
+                                    <div className="h-6 w-16 bg-slate-200 rounded animate-pulse" />
+                                </div>
+                            </div>
+                            <div className="h-5 w-32 bg-slate-200 rounded animate-pulse" />
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <ScheduleInfoCard stats={stats} currentDay={currentDay} />
+            )}
 
             {/* Currently Active Lesson */}
             {currentDay !== "Minggu" && currentLesson && (
                 <CurrentlyActiveLessonCard currentLesson={currentLesson} currentDay={currentDay} />
             )}
 
-            {/* Weekly Calendar Grid - Simplified View */}
-            <WeeklyCalendarGrid
-                scheduleByDay={scheduleByDay}
-                currentDay={currentDay}
-                isLessonHappeningNow={isLessonHappeningNow}
-                getSubjectColor={getSubjectColor}
-                childClass={childClass}
-            />
-
-            {/* Info Card */}
-            <ScheduleInfoCard stats={stats} currentDay={currentDay} />
+            {/* Weekly Calendar Grid */}
+            {isScheduleFetching ? (
+                <Card className="overflow-hidden">
+                    <CardHeader className="bg-slate-50">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 bg-slate-200 rounded-xl animate-pulse" />
+                            <div className="space-y-2 flex-1">
+                                <div className="h-5 w-48 bg-slate-200 rounded animate-pulse" />
+                                <div className="h-4 w-56 bg-slate-200 rounded animate-pulse" />
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                        <div className="space-y-2 min-w-[640px]">
+                            <div className="grid grid-cols-6 gap-2">
+                                {Array.from({ length: 6 }).map((_, i) => (
+                                    <div key={i} className="h-9 bg-slate-200 rounded-lg animate-pulse" />
+                                ))}
+                            </div>
+                            {Array.from({ length: 10 }).map((_, rowIndex) => (
+                                <div key={rowIndex} className="grid grid-cols-6 gap-2">
+                                    <div className="h-[80px] bg-slate-200 rounded-lg animate-pulse" />
+                                    {Array.from({ length: 5 }).map((_, colIndex) => (
+                                        <div key={colIndex} className="h-[80px] bg-slate-200/50 rounded-lg animate-pulse border border-dashed border-slate-200" />
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            ) : (
+                <WeeklyCalendarGrid
+                    scheduleByDay={scheduleByDay}
+                    currentDay={currentDay}
+                    isLessonHappeningNow={isLessonHappeningNow}
+                    getSubjectColor={getSubjectColor}
+                    childClass={childClass}
+                />
+            )}
         </div>
     );
 };

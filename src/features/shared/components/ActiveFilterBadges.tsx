@@ -10,6 +10,7 @@ export interface FilterBadge {
     label: string;
     icon?: React.ElementType;
     onRemove: () => void;
+    removable?: boolean; // default true — set false to show badge without X button
 }
 
 interface ActiveFilterBadgesProps {
@@ -42,12 +43,14 @@ export const ActiveFilterBadges: React.FC<ActiveFilterBadgesProps> = ({
                     >
                         {Icon && <Icon className="h-3.5 w-3.5" />}
                         {badge.label}
-                        <button
-                            onClick={badge.onRemove}
-                            className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
-                        >
-                            <X className="h-3.5 w-3.5" />
-                        </button>
+                        {(badge.removable ?? true) && (
+                            <button
+                                onClick={badge.onRemove}
+                                className="inline-flex items-center justify-center h-4 w-4 hover:text-white/70 transition-colors -mr-1"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
+                        )}
                     </Badge>
                 );
             })}

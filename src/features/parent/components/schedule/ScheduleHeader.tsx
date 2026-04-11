@@ -6,9 +6,10 @@ import { Calendar } from "lucide-react";
 interface ScheduleHeaderProps {
     childName: string;
     childClass: string;
+    activeYearName?: string;
 }
 
-export const ScheduleHeader: React.FC<ScheduleHeaderProps> = ({ childName, childClass }) => {
+export const ScheduleHeader: React.FC<ScheduleHeaderProps> = ({ childName, childClass, activeYearName }) => {
     return (
         <div>
             <div className="flex items-center gap-3">
@@ -21,7 +22,7 @@ export const ScheduleHeader: React.FC<ScheduleHeaderProps> = ({ childName, child
                 </div>
             </div>
             <p className="text-muted-foreground mt-1">
-                Jadwal pelajaran mingguan {childClass} (Ananda {childName})
+                Jadwal pelajaran mingguan Ananda {childName} {childClass && `(${childClass})`}
             </p>
         </div>
     );

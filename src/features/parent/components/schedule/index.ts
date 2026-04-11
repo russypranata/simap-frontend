@@ -1,6 +1,5 @@
 export { ScheduleHeader } from "./ScheduleHeader";
 export { ScheduleFilterDialog } from "./ScheduleFilterDialog";
-export { ActiveFilterBadges } from "./ActiveFilterBadges";
 export { CurrentlyActiveLessonCard } from "./CurrentlyActiveLessonCard";
 export { TodayScheduleCard } from "./TodayScheduleCard";
 export { ScheduleDayCard } from "./ScheduleDayCard";
