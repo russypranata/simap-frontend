@@ -216,7 +216,7 @@ export const ParentDashboard: React.FC = () => {
             {/* Row: Schedule + Attendance */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Today's Schedule */}
-                <Card className="border-slate-100 shadow-sm overflow-hidden gap-0">
+                <Card className="border-slate-100 shadow-sm overflow-hidden gap-0 flex flex-col">
                     <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -237,9 +237,9 @@ export const ParentDashboard: React.FC = () => {
                             </Link>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-4">
+                    <CardContent className={cn("p-4 flex-1", todaySchedule.length === 0 && "flex items-center justify-center")}>
                         {todaySchedule.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                            <div className="flex flex-col items-center justify-center text-center">
                                 <Calendar className="h-8 w-8 text-slate-300 mb-2" />
                                 <p className="text-sm text-slate-500">Tidak ada jadwal hari ini</p>
                             </div>
