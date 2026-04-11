@@ -22,7 +22,7 @@ export const useParentDashboard = (): UseParentDashboardReturn => {
     const queryClient = useQueryClient();
     const [selectedChildId, setSelectedChildId] = useState<string>("");
 
-    // Fetch children list — stale 5 menit, jarang berubah
+    // Fetch children list
     const childrenQuery = useQuery({
         queryKey: ["parent-children"],
         queryFn: getParentChildren,
@@ -32,12 +32,12 @@ export const useParentDashboard = (): UseParentDashboardReturn => {
     const children = childrenQuery.data ?? [];
     const effectiveChildId = selectedChildId || children[0]?.id || "";
 
-    // Fetch dashboard data — stale 2 menit
+    // Fetch dashboard data — staleTime: 0, gcTime default 5 menit (konsisten dengan halaman lain)
     const dashboardQuery = useQuery({
         queryKey: ["parent-dashboard", effectiveChildId],
         queryFn: () => getDashboardData(effectiveChildId),
         enabled: !!effectiveChildId,
-        staleTime: 2 * 60 * 1000,
+        staleTime: 0,
     });
 
     const isLoading = childrenQuery.isLoading || (!!effectiveChildId && dashboardQuery.isLoading);

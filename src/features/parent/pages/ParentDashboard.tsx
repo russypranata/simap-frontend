@@ -201,7 +201,7 @@ export const ParentDashboard: React.FC = () => {
             <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
                 <StatCard title="Nilai" value={stats.averageScore} subtitle="Rata-rata Akademik" icon={GraduationCap} color="blue" href="/parent/academic/grades"
                     badgeColor={stats.averageScore >= 75 ? "green" : stats.averageScore >= 70 ? "amber" : "red"} />
-                <StatCard title="Kehadiran" value={`${stats.attendanceRate}%`} subtitle="Kehadiran Harian" icon={CheckCircle} color="green" href="/parent/attendance/daily"
+                <StatCard title="Kehadiran" value={`${stats.attendanceRate}%`} subtitle="Tahun Ajaran Ini" icon={CheckCircle} color="green" href="/parent/attendance/daily"
                     badgeColor={stats.attendanceRate >= 80 ? "green" : stats.attendanceRate >= 75 ? "amber" : "red"} />
                 <StatCard title="Pagi" value={stats.lateCount} subtitle="Keterlambatan Pagi" icon={Timer} color="amber" href="/parent/attendance/morning"
                     badgeColor={stats.lateCount <= 5 ? "green" : stats.lateCount <= 10 ? "amber" : "red"} />
@@ -226,7 +226,7 @@ export const ParentDashboard: React.FC = () => {
                                 <div>
                                     <CardTitle className="text-lg text-slate-800">Jadwal Hari Ini</CardTitle>
                                     <CardDescription>
-                                        {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                        {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                     </CardDescription>
                                 </div>
                             </div>
@@ -282,7 +282,7 @@ export const ParentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg text-slate-800">Performa Nilai</CardTitle>
-                                    <CardDescription>Tertinggi & terendah semester ini</CardDescription>
+                                    <CardDescription>Tertinggi & terendah tahun ajaran ini</CardDescription>
                                 </div>
                             </div>
                             <Link href="/parent/academic/grades">
@@ -340,8 +340,8 @@ export const ParentDashboard: React.FC = () => {
                                     <CheckCircle className="h-5 w-5 text-green-700" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg text-slate-800">Kehadiran Bulan Ini</CardTitle>
-                                    <CardDescription>Rekap presensi harian</CardDescription>
+                                    <CardTitle className="text-lg text-slate-800">Kehadiran Tahun Ini</CardTitle>
+                                    <CardDescription>Rekap presensi harian tahun ajaran aktif</CardDescription>
                                 </div>
                             </div>
                             <Link href="/parent/attendance/daily">
