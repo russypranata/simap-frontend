@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils';
 import { useParentDashboard } from '../hooks/useParentDashboard';
 import { ErrorState, ChildSelector } from "@/features/shared/components";
 import { RefreshCw } from 'lucide-react';
+import { useBreadcrumbAction } from '@/context/BreadcrumbActionContext';
 
 // ==================== SKELETON ====================
 
@@ -125,6 +126,7 @@ const StatCard: React.FC<{
 // ==================== MAIN COMPONENT ====================
 
 export const ParentDashboard: React.FC = () => {
+    const { setAction, clearAction } = useBreadcrumbAction();
     const {
         data,
         children,
@@ -135,6 +137,20 @@ export const ParentDashboard: React.FC = () => {
         error,
         refetch,
     } = useParentDashboard();
+
+    React.useEffect(() => {
+        if (isFetching) {
+            setAction(
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <span className="hidden sm:inline">Memperbarui...</span>
+                </div>
+            );
+        } else {
+            clearAction();
+        }
+        return () => clearAction();
+    }, [isFetching, setAction, clearAction]);
 
     const greeting = useMemo(() => {
         const hour = new Date().getHours();
@@ -174,12 +190,6 @@ export const ParentDashboard: React.FC = () => {
 
                 {/* Child Selector */}
                 <div className="flex items-center gap-2">
-                    {isFetching && (
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                            <span className="hidden sm:inline">Memperbarui...</span>
-                        </div>
-                    )}
                     <ChildSelector childList={children} selectedChildId={selectedChildId} onSelect={setSelectedChildId} />
                 </div>
             </div>

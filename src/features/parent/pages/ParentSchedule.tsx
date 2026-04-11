@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Users, BookOpen, BarChart3, GraduationCap } from "lucide-react";
+import { CalendarIcon, Users, BookOpen, BarChart3, GraduationCap, RefreshCw } from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import {
     ScheduleHeader,
@@ -11,6 +11,7 @@ import {
     WeeklyCalendarGrid,
 } from "../components/schedule";
 import { ActiveFilterBadges, StatCard } from "@/features/shared/components";
+import { useBreadcrumbAction } from "@/context/BreadcrumbActionContext";
 import { useParentSchedule } from "../hooks/useParentSchedule";
 import type { ScheduleItem } from "../services/parentScheduleService";
 import { ErrorState, EmptyState } from "@/features/shared/components";
@@ -113,6 +114,7 @@ const ScheduleInfoCard = ({ stats, currentDay }: { stats: { totalLessons: number
 );
 
 export const ParentSchedule: React.FC = () => {
+    const { setAction, clearAction } = useBreadcrumbAction();
     const {
         schedule,
         stats,
@@ -124,6 +126,7 @@ export const ParentSchedule: React.FC = () => {
         childClass,
         isLoading,
         isScheduleFetching,
+        isFetching,
         isError,
         errorMessage,
         currentDay,
@@ -135,6 +138,21 @@ export const ParentSchedule: React.FC = () => {
         refetch,
         isLessonHappeningNow,
     } = useParentSchedule();
+
+    // Inject "Memperbarui..." ke breadcrumb area kanan atas
+    React.useEffect(() => {
+        if (isFetching && !isScheduleFetching) {
+            setAction(
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <span className="hidden sm:inline">Memperbarui...</span>
+                </div>
+            );
+        } else {
+            clearAction();
+        }
+        return () => clearAction();
+    }, [isFetching, isScheduleFetching, setAction, clearAction]);
 
     const currentLesson = todaySchedule.find(isLessonHappeningNow) || null;
 

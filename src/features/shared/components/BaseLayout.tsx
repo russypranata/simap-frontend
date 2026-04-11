@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { NavbarBreadcrumb } from "./NavbarBreadcrumb";
+import { BreadcrumbActionProvider, useBreadcrumbAction } from "@/context/BreadcrumbActionContext";
 
 interface BaseLayoutProps {
     children: React.ReactNode;
@@ -12,9 +13,18 @@ interface BaseLayoutProps {
     navbar: React.ReactNode;
     footer?: React.ReactNode;
     title?: string;
+    breadcrumbAction?: React.ReactNode;
 }
 
-// Context for sidebar collapse state
+const BreadcrumbRow: React.FC = () => {
+    const { action } = useBreadcrumbAction();
+    return (
+        <div className="mb-4 flex items-center justify-between">
+            <NavbarBreadcrumb />
+            {action && <div className="flex items-center">{action}</div>}
+        </div>
+    );
+};
 const SidebarContext = createContext<{
     collapsed: boolean;
     setCollapsed: (collapsed: boolean) => void;
@@ -30,11 +40,13 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
     sidebar,
     navbar,
     footer,
+    breadcrumbAction,
 }) => {
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     return (
+        <BreadcrumbActionProvider>
         <SidebarContext.Provider value={{ collapsed: sidebarCollapsed, setCollapsed: setSidebarCollapsed }}>
             <div className="flex h-screen overflow-hidden bg-background">
                 {/* Desktop Sidebar - Fixed on the left, hidden on mobile */}
@@ -95,9 +107,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
                     {/* Page content - only this area can scroll */}
                     <main className="flex-1 overflow-y-auto overflow-x-auto pt-16">
                         <div className="min-h-full p-6">
-                            <div className="mb-4">
-                                <NavbarBreadcrumb />
-                            </div>
+                            <BreadcrumbRow />
                             {children}
                         </div>
                         {footer}
@@ -105,5 +115,6 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
                 </div>
             </div>
         </SidebarContext.Provider>
+        </BreadcrumbActionProvider>
     );
 };
