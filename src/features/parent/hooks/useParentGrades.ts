@@ -1,16 +1,14 @@
 import { useState, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { SubjectGrade, AcademicYear, AttitudeScore, AttendanceSummary, Extracurricular, SemesterSummary } from "../components/grades";
-import { getChildGrades, getChildAttendanceSummary, getChildEkskulSummary, getChildGradeTrend, getChildReportCardNotes } from "../services/parentGradesService";
-import { getParentChildren } from "../services/parentDashboardService";
+import { getChildGrades, getChildAttendanceSummary, getChildEkskulSummary, getChildGradeTrend, getChildReportCardNotes, getChildAttitude } from "../services/parentGradesService";import { getParentChildren } from "../services/parentDashboardService";
 
 const defaultAttitude: AttitudeScore = {
-    spiritual: { score: "A", predicate: "Sangat Baik", description: "-" },
-    social: { score: "A", predicate: "Sangat Baik", description: "-" },
+    spiritual: { score: "B", predicate: "Baik", description: "Memuat data sikap..." },
+    social: { score: "B", predicate: "Baik", description: "Memuat data sikap..." },
 };
-const defaultAttendance: AttendanceSummary = { sick: 0, permission: 0, alpha: 0 };
+const defaultAttendance: AttendanceSummary = { sick: 0, permission: 0, alpha: 0, total: 0, attendanceRate: 0 };
 const defaultExtracurriculars: Extracurricular[] = [];
-const defaultSemesterHistory: SemesterSummary[] = [];
 const defaultReportCardNotes: { category: string; note: string; icon: string }[] = [];
 
 const getDefaultYearId = (years: AcademicYear[]): string => {
@@ -36,7 +34,6 @@ export const useParentGrades = () => {
     const [filterOpen, setFilterOpen] = useState(false);
     const [selectedGrade, setSelectedGrade] = useState<SubjectGrade | null>(null);
 
-    // Fetch children list — staleTime 5 menit, jarang berubah
     const childrenQuery = useQuery({
         queryKey: ["parent-children"],
         queryFn: getParentChildren,
@@ -54,7 +51,6 @@ export const useParentGrades = () => {
     const effectiveChildId = selectedChildId || children[0]?.id || "";
     const activeChild = children.find(c => c.id === effectiveChildId);
 
-    // Academic years derived from child's enrolledYears — same pattern as schedule
     const academicYears: AcademicYear[] = useMemo(() => {
         return (activeChild?.enrolledYears ?? []).map(y => ({
             id: y.id,
@@ -76,15 +72,13 @@ export const useParentGrades = () => {
         return getDefaultSemester(academicYears, effectiveYearId);
     }, [selectedYearId, selectedSemester, academicYears, effectiveYearId]);
 
-    // Fetch grades — staleTime 0, gcTime default 5 menit (konsisten dengan halaman lain)
     const gradesQuery = useQuery({
         queryKey: ["parent-grades", effectiveChildId, effectiveYearId, effectiveSemester],
-        queryFn: () => getChildGrades(effectiveChildId, effectiveYearId),
+        queryFn: () => getChildGrades(effectiveChildId),
         enabled: !!effectiveChildId && !!effectiveYearId,
         staleTime: 0,
     });
 
-    // Fetch attendance summary for grades page
     const attendanceQuery = useQuery({
         queryKey: ["parent-grades-attendance", effectiveChildId, effectiveYearId],
         queryFn: () => getChildAttendanceSummary(effectiveChildId, effectiveYearId),
@@ -92,7 +86,6 @@ export const useParentGrades = () => {
         staleTime: 0,
     });
 
-    // Fetch ekskul summary for grades page
     const ekskulQuery = useQuery({
         queryKey: ["parent-grades-ekskul", effectiveChildId, effectiveYearId],
         queryFn: () => getChildEkskulSummary(effectiveChildId, effectiveYearId),
@@ -100,7 +93,6 @@ export const useParentGrades = () => {
         staleTime: 0,
     });
 
-    // Fetch grade trend (all years)
     const trendQuery = useQuery({
         queryKey: ["parent-grades-trend", effectiveChildId],
         queryFn: () => getChildGradeTrend(effectiveChildId),
@@ -108,7 +100,6 @@ export const useParentGrades = () => {
         staleTime: 0,
     });
 
-    // Fetch report card notes
     const reportCardQuery = useQuery({
         queryKey: ["parent-grades-report-card", effectiveChildId, effectiveYearId, effectiveSemester],
         queryFn: () => getChildReportCardNotes(effectiveChildId, effectiveYearId, effectiveSemester),
@@ -116,33 +107,55 @@ export const useParentGrades = () => {
         staleTime: 0,
     });
 
+    const attitudeQuery = useQuery({
+        queryKey: ["parent-grades-attitude", effectiveChildId, effectiveYearId, effectiveSemester],
+        queryFn: () => getChildAttitude(effectiveChildId, effectiveYearId, effectiveSemester),
+        enabled: !!effectiveChildId && !!effectiveYearId,
+        staleTime: 0,
+    });
+
     const selectedChild = children.find(c => c.id === effectiveChildId);
     const activeYear = academicYears.find(y => y.id === effectiveYearId);
     const displaySemester = effectiveSemester === "ganjil" ? "Ganjil" : "Genap";
-    const currentSemesterStatus = activeYear?.semesters.find(s => s.id === effectiveSemester)?.status ?? "completed";
-    // Show report if there are grades — don't block on semester status
-    const isReportAvailable = (gradesQuery.data?.length ?? 0) > 0 || currentSemesterStatus === "completed";
 
-    // Map API grades to SubjectGrade shape
+    // Map API grades to SubjectGrade shape — generate descriptions from scores
     const grades: SubjectGrade[] = useMemo(() => {
-        return (gradesQuery.data ?? []).map(item => ({
-            id: item.id,
-            subject: item.subject,
-            teacher: item.teacher,
-            ki3Scores: item.ki3Scores ?? [],
-            ki3Average: item.ki3Average ?? 0,
-            ki3Predicate: item.ki3Predicate ?? "-",
-            ki3Description: "",
-            ki4Scores: item.ki4Scores ?? [],
-            ki4Average: item.ki4Average ?? 0,
-            ki4Predicate: item.ki4Predicate ?? "-",
-            ki4Description: "",
-            finalAverage: item.finalAverage ?? 0,
-            finalGrade: item.finalGrade ?? "-",
-            kkm: item.kkm,
-            academicYear: effectiveYearId,
-            semester: effectiveSemester as "ganjil" | "genap",
-        }));
+        return (gradesQuery.data?.grades ?? []).map(item => {
+            const ki3Avg = item.ki3Average ?? 0;
+            const ki4Avg = item.ki4Average ?? 0;
+            const ki3Desc = ki3Avg >= 90
+                ? `Siswa menguasai materi ${item.subject} dengan sangat baik pada aspek pengetahuan.`
+                : ki3Avg >= 80
+                ? `Siswa memahami materi ${item.subject} dengan baik pada aspek pengetahuan.`
+                : ki3Avg >= 75
+                ? `Siswa cukup memahami materi ${item.subject} pada aspek pengetahuan.`
+                : `Siswa perlu meningkatkan pemahaman materi ${item.subject} pada aspek pengetahuan.`;
+            const ki4Desc = ki4Avg >= 90
+                ? `Siswa menunjukkan keterampilan yang sangat baik dalam praktik ${item.subject}.`
+                : ki4Avg >= 80
+                ? `Siswa menunjukkan keterampilan yang baik dalam praktik ${item.subject}.`
+                : ki4Avg >= 75
+                ? `Siswa cukup terampil dalam praktik ${item.subject}.`
+                : `Siswa perlu berlatih lebih banyak dalam praktik ${item.subject}.`;
+            return {
+                id: item.id,
+                subject: item.subject,
+                teacher: item.teacher,
+                ki3Scores: item.ki3Scores ?? [],
+                ki3Average: ki3Avg,
+                ki3Predicate: item.ki3Predicate ?? "-",
+                ki3Description: ki3Desc,
+                ki4Scores: item.ki4Scores ?? [],
+                ki4Average: ki4Avg,
+                ki4Predicate: item.ki4Predicate ?? "-",
+                ki4Description: ki4Desc,
+                finalAverage: item.finalAverage ?? 0,
+                finalGrade: item.finalGrade ?? "-",
+                kkm: item.kkm,
+                academicYear: effectiveYearId,
+                semester: effectiveSemester as "ganjil" | "genap",
+            };
+        });
     }, [gradesQuery.data, effectiveYearId, effectiveSemester]);
 
     const stats = useMemo(() => {
@@ -150,7 +163,9 @@ export const useParentGrades = () => {
             totalAverage: 0,
             highestSubject: { subject: "-", finalAverage: 0 },
             lowestSubject: { subject: "-", finalAverage: 0 },
-            aboveKKM: 0, totalSubjects: 0, currentRank: "-", totalStudents: "-",
+            aboveKKM: 0, totalSubjects: 0,
+            currentRank: gradesQuery.data?.rank ?? 0,
+            totalStudents: gradesQuery.data?.totalStudents ?? 0,
         };
         const totalAverage = grades.reduce((sum, g) => sum + g.finalAverage, 0) / grades.length;
         const highestSubject = grades.reduce((prev, cur) => prev.finalAverage > cur.finalAverage ? prev : cur);
@@ -159,11 +174,12 @@ export const useParentGrades = () => {
         return {
             totalAverage: Math.round(totalAverage * 10) / 10,
             highestSubject, lowestSubject, aboveKKM,
-            totalSubjects: grades.length, currentRank: "-", totalStudents: "-",
+            totalSubjects: grades.length,
+            currentRank: gradesQuery.data?.rank ?? 0,
+            totalStudents: gradesQuery.data?.totalStudents ?? 0,
         };
     }, [grades]);
 
-    // Reset year/semester when child changes
     const handleSetSelectedChildId = useCallback((id: string) => {
         setSelectedChildId(id);
         setSelectedYearId("");
@@ -176,7 +192,7 @@ export const useParentGrades = () => {
     }, []);
 
     const isLoading = childrenQuery.isLoading || (!!effectiveChildId && !!effectiveYearId && gradesQuery.isLoading);
-    const isFetching = childrenQuery.isFetching || gradesQuery.isFetching || attendanceQuery.isFetching || ekskulQuery.isFetching || trendQuery.isFetching || reportCardQuery.isFetching;
+    const isFetching = childrenQuery.isFetching || gradesQuery.isFetching || attendanceQuery.isFetching || ekskulQuery.isFetching || trendQuery.isFetching || reportCardQuery.isFetching || attitudeQuery.isFetching;
 
     const error = childrenQuery.error instanceof Error
         ? childrenQuery.error.message
@@ -184,15 +200,31 @@ export const useParentGrades = () => {
         ? gradesQuery.error.message
         : null;
 
+    // Build attitude from API or fallback
+    const attitude: AttitudeScore = attitudeQuery.data
+        ? {
+            spiritual: {
+                score: attitudeQuery.data.spiritual.score as "A" | "B" | "C",
+                predicate: attitudeQuery.data.spiritual.predicate as "Sangat Baik" | "Baik" | "Cukup",
+                description: attitudeQuery.data.spiritual.description,
+            },
+            social: {
+                score: attitudeQuery.data.social.score as "A" | "B" | "C",
+                predicate: attitudeQuery.data.social.predicate as "Sangat Baik" | "Baik" | "Cukup",
+                description: attitudeQuery.data.social.description,
+            },
+        }
+        : defaultAttitude;
+
     return {
         children, selectedChild, academicYears, activeYear,
         grades,
-        attitude: defaultAttitude,
+        attitude,
         extracurriculars: (ekskulQuery.data ?? []) as Extracurricular[],
         attendance: attendanceQuery.data ?? defaultAttendance,
         semesterHistory: (trendQuery.data ?? []) as SemesterSummary[],
         reportCardNotes: reportCardQuery.data ?? defaultReportCardNotes,
-        stats, isReportAvailable, displaySemester, currentSemesterStatus,
+        stats, displaySemester,
         selectedChildId: effectiveChildId, setSelectedChildId: handleSetSelectedChildId,
         selectedYearId: effectiveYearId, selectedSemester: effectiveSemester,
         selectedTab, setSelectedTab,

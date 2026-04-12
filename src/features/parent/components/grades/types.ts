@@ -49,6 +49,8 @@ export interface AttendanceSummary {
     sick: number;
     permission: number;
     alpha: number;
+    total: number;
+    attendanceRate: number;
 }
 
 export interface SemesterSummary {

@@ -31,6 +31,7 @@ interface StatCardProps {
     unit?: string;
     icon: React.ElementType;
     color: ColorVariant;
+    size?: "sm" | "md";
     className?: string;
 }
 
@@ -41,21 +42,24 @@ export const StatCard: React.FC<StatCardProps> = ({
     unit,
     icon: Icon,
     color,
+    size = "md",
     className,
 }) => {
     const cfg = colorMap[color];
+    const isSmall = size === "sm";
     return (
         <div className={cn(
             "group relative overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 flex flex-col",
             className
         )}>
-            <div className="px-5 pt-4 pb-3 pl-6 flex items-center gap-4 flex-1">
+            <div className={cn("flex items-center gap-3 flex-1", isSmall ? "px-3 pt-3 pb-2" : "px-5 pt-4 pb-3 pl-6 gap-4")}>
                 <div className="relative flex-shrink-0">
                     <div className={cn(
-                        "w-11 h-11 rounded-xl flex items-center justify-center ring-2 transition-transform duration-300 group-hover:scale-105",
+                        "flex items-center justify-center ring-2 transition-transform duration-300 group-hover:scale-105",
+                        isSmall ? "w-8 h-8 rounded-lg" : "w-11 h-11 rounded-xl",
                         cfg.bg, cfg.ring
                     )}>
-                        <Icon className={cn("h-5 w-5", cfg.text)} />
+                        <Icon className={cn(isSmall ? "h-3.5 w-3.5" : "h-5 w-5", cfg.text)} />
                     </div>
                 </div>
                 <div className="min-w-0 flex-1">
@@ -72,7 +76,7 @@ export const StatCard: React.FC<StatCardProps> = ({
                         </Tooltip>
                     </TooltipProvider>
                     <div className="flex items-baseline gap-2 mt-0.5">
-                        <p className="text-2xl font-bold text-slate-800 leading-none tabular-nums">{value}</p>
+                        <p className={cn("font-bold text-slate-800 leading-none tabular-nums", isSmall ? "text-lg" : "text-2xl")}>{value}</p>
                         {unit && <p className="text-xs text-muted-foreground font-medium">{unit}</p>}
                     </div>
                 </div>
@@ -81,7 +85,8 @@ export const StatCard: React.FC<StatCardProps> = ({
             {/* Subtitle badge footer */}
             {subtitle && (
                 <div className={cn(
-                    "mx-4 mb-3 px-2.5 py-1 rounded-md border text-[11px] font-medium truncate",
+                    "px-2.5 py-1 rounded-md border text-[11px] font-medium truncate",
+                    isSmall ? "mx-3 mb-3" : "mx-5 mb-3",
                     cfg.badge
                 )}>
                     {subtitle}

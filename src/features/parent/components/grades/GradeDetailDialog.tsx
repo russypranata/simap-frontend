@@ -61,7 +61,7 @@ export const GradeDetailDialog: React.FC<GradeDetailDialogProps> = ({ grade, onC
                                 </span>
                             ))}
                         </div>
-                        <p className="text-xs text-slate-600 leading-relaxed italic">&quot;{grade.ki3Description}&quot;</p>
+                        <p className="text-xs text-slate-600 leading-relaxed italic">{grade.ki3Description || "Siswa menunjukkan pemahaman yang baik pada aspek pengetahuan."}</p>
                     </div>
 
                     {/* KI-4 */}
@@ -85,7 +85,7 @@ export const GradeDetailDialog: React.FC<GradeDetailDialogProps> = ({ grade, onC
                                 </span>
                             ))}
                         </div>
-                        <p className="text-xs text-slate-600 leading-relaxed italic">&quot;{grade.ki4Description}&quot;</p>
+                        <p className="text-xs text-slate-600 leading-relaxed italic">{grade.ki4Description || "Siswa menunjukkan keterampilan yang baik pada aspek praktik."}</p>
                     </div>
 
                     {/* Final */}
