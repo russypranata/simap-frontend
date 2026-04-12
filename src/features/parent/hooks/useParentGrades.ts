@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { SubjectGrade, AcademicYear, AttitudeScore, AttendanceSummary, Extracurricular, SemesterSummary } from "../components/grades";
-import { getChildGrades } from "../services/parentGradesService";
+import { getChildGrades, getChildAttendanceSummary, getChildEkskulSummary } from "../services/parentGradesService";
 import { getParentChildren } from "../services/parentDashboardService";
 
 const defaultAttitude: AttitudeScore = {
@@ -84,6 +84,22 @@ export const useParentGrades = () => {
         staleTime: 0,
     });
 
+    // Fetch attendance summary for grades page
+    const attendanceQuery = useQuery({
+        queryKey: ["parent-grades-attendance", effectiveChildId, effectiveYearId],
+        queryFn: () => getChildAttendanceSummary(effectiveChildId, effectiveYearId),
+        enabled: !!effectiveChildId && !!effectiveYearId,
+        staleTime: 0,
+    });
+
+    // Fetch ekskul summary for grades page
+    const ekskulQuery = useQuery({
+        queryKey: ["parent-grades-ekskul", effectiveChildId, effectiveYearId],
+        queryFn: () => getChildEkskulSummary(effectiveChildId, effectiveYearId),
+        enabled: !!effectiveChildId && !!effectiveYearId,
+        staleTime: 0,
+    });
+
     const selectedChild = children.find(c => c.id === effectiveChildId);
     const activeYear = academicYears.find(y => y.id === effectiveYearId);
     const displaySemester = effectiveSemester === "ganjil" ? "Ganjil" : "Genap";
@@ -144,7 +160,7 @@ export const useParentGrades = () => {
     }, []);
 
     const isLoading = childrenQuery.isLoading || (!!effectiveChildId && !!effectiveYearId && gradesQuery.isLoading);
-    const isFetching = childrenQuery.isFetching || gradesQuery.isFetching;
+    const isFetching = childrenQuery.isFetching || gradesQuery.isFetching || attendanceQuery.isFetching || ekskulQuery.isFetching;
 
     const error = childrenQuery.error instanceof Error
         ? childrenQuery.error.message
@@ -156,8 +172,8 @@ export const useParentGrades = () => {
         children, selectedChild, academicYears, activeYear,
         grades,
         attitude: defaultAttitude,
-        extracurriculars: defaultExtracurriculars,
-        attendance: defaultAttendance,
+        extracurriculars: (ekskulQuery.data ?? []) as Extracurricular[],
+        attendance: attendanceQuery.data ?? defaultAttendance,
         semesterHistory: defaultSemesterHistory,
         reportCardNotes: defaultReportCardNotes,
         stats, isReportAvailable, displaySemester, currentSemesterStatus,

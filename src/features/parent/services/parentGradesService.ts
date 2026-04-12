@@ -15,6 +15,22 @@ export interface GradeItem {
     finalGrade: string | null;
 }
 
+export interface AttendanceSummaryData {
+    sick: number;
+    permission: number;
+    alpha: number;
+}
+
+export interface EkskulSummaryItem {
+    name: string;
+    type: "Wajib" | "Pilihan";
+    score: "A" | "B" | "C";
+    predicate: "Sangat Baik" | "Baik" | "Cukup";
+    description: string;
+    instructor: string;
+    attendanceRate: number;
+}
+
 export const getChildGrades = async (
     childId: string,
     academicYearId?: string
@@ -43,4 +59,67 @@ export const getChildGrades = async (
         finalAverage: item.finalAverage ?? item.final_average ?? null,
         finalGrade: item.finalGrade ?? item.final_grade ?? null,
     }));
+};
+
+export const getChildAttendanceSummary = async (
+    childId: string,
+    academicYearId?: string
+): Promise<AttendanceSummaryData> => {
+    const params = new URLSearchParams();
+    if (academicYearId) params.append("academic_year_id", academicYearId);
+
+    const response = await fetch(`${PARENT_API_URL}/children/${childId}/attendance/subject?${params}`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) return { sick: 0, permission: 0, alpha: 0 };
+    const result = await response.json();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const records: Record<string, any>[] = result.data ?? [];
+    const sick = records.filter(r => r.status === "excused").length;
+    const permission = records.filter(r => r.status === "late").length;
+    const alpha = records.filter(r => r.status === "absent").length;
+
+    return { sick, permission, alpha };
+};
+
+export const getChildEkskulSummary = async (
+    childId: string,
+    academicYearId?: string
+): Promise<EkskulSummaryItem[]> => {
+    const params = new URLSearchParams();
+    if (academicYearId) params.append("academic_year_id", academicYearId);
+
+    const response = await fetch(`${PARENT_API_URL}/children/${childId}/attendance/extracurricular?${params}`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) return [];
+    const result = await response.json();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const records: Record<string, any>[] = result.data ?? [];
+
+    // Group by extracurricular name and compute attendance rate
+    const grouped: Record<string, { total: number; hadir: number }> = {};
+    for (const r of records) {
+        const name = r.extracurricularName ?? "Ekstrakurikuler";
+        if (!grouped[name]) grouped[name] = { total: 0, hadir: 0 };
+        grouped[name].total++;
+        if (r.status === "hadir") grouped[name].hadir++;
+    }
+
+    return Object.entries(grouped).map(([name, stat]) => {
+        const rate = stat.total > 0 ? Math.round((stat.hadir / stat.total) * 100) : 0;
+        const score: "A" | "B" | "C" = rate >= 85 ? "A" : rate >= 75 ? "B" : "C";
+        const predicate: "Sangat Baik" | "Baik" | "Cukup" = rate >= 85 ? "Sangat Baik" : rate >= 75 ? "Baik" : "Cukup";
+        return {
+            name,
+            type: "Wajib" as const,
+            score,
+            predicate,
+            description: `Tingkat kehadiran ${rate}% dari ${stat.total} pertemuan`,
+            instructor: "-",
+            attendanceRate: rate,
+        };
+    });
 };

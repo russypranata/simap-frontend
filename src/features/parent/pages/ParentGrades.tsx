@@ -283,7 +283,15 @@ export const ParentGrades: React.FC = () => {
                                     </div>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
-                                    {reportCardNotes.map((item, index) => (
+                                    {reportCardNotes.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center py-10 text-center">
+                                            <div className="w-14 h-14 rounded-full bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center mb-3">
+                                                <FileText className="h-6 w-6 text-slate-300" />
+                                            </div>
+                                            <p className="text-sm font-medium text-slate-600">Belum ada catatan rapor</p>
+                                            <p className="text-xs text-slate-400 mt-1">Catatan akan tersedia setelah rapor diterbitkan</p>
+                                        </div>
+                                    ) : reportCardNotes.map((item, index) => (
                                         <div key={index} className={cn("p-4 rounded-xl border bg-gradient-to-r from-slate-50/50 to-white", index === 0 ? "border-amber-200" : index === 1 ? "border-blue-200" : index === 2 ? "border-emerald-200" : "border-purple-200")}>
                                             <div className="flex items-start gap-3">
                                                 <span className="text-2xl flex-shrink-0">{item.icon}</span>
@@ -294,8 +302,7 @@ export const ParentGrades: React.FC = () => {
                                             </div>
                                         </div>
                                     ))}
-                                </CardContent>
-                            </Card>
+                                </CardContent>                            </Card>
                         </TabsContent>
                     </Tabs>
 
