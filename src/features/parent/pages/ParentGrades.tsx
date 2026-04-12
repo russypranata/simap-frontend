@@ -44,8 +44,11 @@ import {
 import { getScoreColor, getGradeColor } from "../components/grades/helpers";
 import { useParentGrades } from "../hooks/useParentGrades";
 import { ErrorState } from "@/features/shared/components";
+import { useBreadcrumbAction } from "@/context/BreadcrumbActionContext";
+import { RefreshCw } from "lucide-react";
 
 export const ParentGrades: React.FC = () => {
+    const { setAction, clearAction } = useBreadcrumbAction();
     const {
         children, selectedChild, academicYears, activeYear,
         grades, attitude, extracurriculars, attendance,
@@ -56,8 +59,22 @@ export const ParentGrades: React.FC = () => {
         selectedTab, setSelectedTab,
         filterOpen, setFilterOpen,
         selectedGrade, setSelectedGrade,
-        isLoading, error, handleApplyFilter,
+        isLoading, isFetching, error, handleApplyFilter,
     } = useParentGrades();
+
+    React.useEffect(() => {
+        if (isFetching) {
+            setAction(
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <span className="hidden sm:inline">Memperbarui...</span>
+                </div>
+            );
+        } else {
+            clearAction();
+        }
+        return () => clearAction();
+    }, [isFetching, setAction, clearAction]);
 
     if (isLoading) return <GradesSkeleton />;
     if (error) return <ErrorState error={error} onRetry={() => window.location.reload()} />;
