@@ -14,6 +14,11 @@ const transform = (s: any): Subject => ({
     updatedAt: s.updated_at ?? '',
 });
 
+export interface TeacherOption {
+    id: string;
+    name: string;
+}
+
 export const subjectService = {
     getSubjects: async (): Promise<Subject[]> => {
         const data = await apiClient.get<any[]>('/admin/subjects');
@@ -25,13 +30,26 @@ export const subjectService = {
         return transform(data);
     },
 
+    getTeachers: async (): Promise<TeacherOption[]> => {
+        const data = await apiClient.get<any[]>('/admin/teachers');
+        return Array.isArray(data)
+            ? data.map(t => ({ id: String(t.id), name: t.name }))
+            : [];
+    },
+
     createSubject: async (payload: CreateSubjectRequest): Promise<Subject> => {
-        const data = await apiClient.post<any>('/admin/subjects', payload);
+        const data = await apiClient.post<any>('/admin/subjects', {
+            ...payload,
+            grade_level: payload.grade_level ?? [],
+        });
         return transform(data);
     },
 
     updateSubject: async (id: string | number, payload: UpdateSubjectRequest): Promise<Subject> => {
-        const data = await apiClient.put<any>(`/admin/subjects/${id}`, payload);
+        const data = await apiClient.put<any>(`/admin/subjects/${id}`, {
+            ...payload,
+            ...(payload.grade_level !== undefined && { grade_level: payload.grade_level }),
+        });
         return transform(data);
     },
 

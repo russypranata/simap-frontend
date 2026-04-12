@@ -62,8 +62,8 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 
-import { Subject, TeacherRef, SubjectCategory } from '../types/subject';
-import { subjectService } from '../services/subjectService';
+import { Subject, SubjectCategory } from '../types/subject';
+import { subjectService, TeacherOption } from '../services/subjectService';
 import { SubjectFormSkeleton } from '../components/subject';
 
 // Schema with comprehensive validation
@@ -89,7 +89,7 @@ const formSchema = z.object({
     
     forGender: z.enum(['PUTRA', 'PUTRI', 'CAMPURAN'], {
         message: 'Jenis kelamin wajib dipilih',
-    }),
+    }).optional(),
     
     gradeLevel: z.array(z.string())
         .min(1, 'Pilih minimal satu tingkat kelas')
@@ -113,8 +113,8 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({ id }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [teachers, setTeachers] = useState<TeacherRef[]>([]);
-    const [selectedTeachers, setSelectedTeachers] = useState<TeacherRef[]>([]);
+    const [teachers, setTeachers] = useState<TeacherOption[]>([]);
+    const [selectedTeachers, setSelectedTeachers] = useState<TeacherOption[]>([]);
     const [teacherPopoverOpen, setTeacherPopoverOpen] = useState(false);
 
     const form = useForm<FormValues>({
@@ -124,7 +124,6 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({ id }) => {
             name: '',
             category: 'UMUM',
             type: 'WAJIB',
-            forGender: 'CAMPURAN',
             gradeLevel: [],
             description: '',
             teacherIds: [],
@@ -163,10 +162,9 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({ id }) => {
                     name: subjectData.name,
                     category: subjectData.category,
                     type: subjectData.type || 'WAJIB',
-                    forGender: subjectData.forGender || 'CAMPURAN',
                     gradeLevel: subjectData.gradeLevel || [],
                     description: subjectData.description || '',
-                    teacherIds: subjectData.teacherIds,
+                    teacherIds: [],
                 });
                 
                 // Set selected teachers for display
@@ -198,10 +196,8 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({ id }) => {
                 name: values.name.trim(),
                 category: values.category as SubjectCategory,
                 type: values.type,
-                forGender: values.forGender,
-                gradeLevel: values.gradeLevel,
+                grade_level: values.gradeLevel,
                 description: values.description?.trim() || '',
-                teacherIds: selectedTeachers.map(t => t.id),
             };
 
             if (isEditMode && id) {
