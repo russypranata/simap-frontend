@@ -88,7 +88,8 @@ export const useParentGrades = () => {
     const activeYear = academicYears.find(y => y.id === effectiveYearId);
     const displaySemester = effectiveSemester === "ganjil" ? "Ganjil" : "Genap";
     const currentSemesterStatus = activeYear?.semesters.find(s => s.id === effectiveSemester)?.status ?? "completed";
-    const isReportAvailable = currentSemesterStatus === "completed";
+    // Show report if there are grades — don't block on semester status
+    const isReportAvailable = (gradesQuery.data?.length ?? 0) > 0 || currentSemesterStatus === "completed";
 
     // Map API grades to SubjectGrade shape
     const grades: SubjectGrade[] = useMemo(() => {

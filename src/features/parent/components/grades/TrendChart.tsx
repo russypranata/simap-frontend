@@ -11,6 +11,7 @@ import {
     ResponsiveContainer,
     ReferenceLine,
 } from "recharts";
+import { TrendingUp } from "lucide-react";
 import type { SemesterSummary } from "./types";
 
 interface TrendChartProps {
@@ -18,6 +19,16 @@ interface TrendChartProps {
 }
 
 export const TrendChart: React.FC<TrendChartProps> = ({ history }) => {
+    if (history.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+                <TrendingUp className="h-10 w-10 text-slate-200 mb-3" />
+                <p className="text-sm text-slate-400">Belum ada data tren nilai</p>
+                <p className="text-xs text-slate-300 mt-1">Data akan muncul setelah minimal 2 semester selesai</p>
+            </div>
+        );
+    }
+
     // Reverse so oldest is on the left
     const chartData = [...history].reverse().map(h => ({
         name: `${h.semester.slice(0, 3)} ${h.academicYear.slice(-4)}`,
