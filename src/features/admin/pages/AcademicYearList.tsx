@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Card,
@@ -29,67 +29,53 @@ import {
     CalendarDays,
     CalendarCheck,
     Loader2,
+    RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
+import { StatCard } from '@/features/shared/components';
 
-import { AcademicYear, AcademicYearStats } from '../types/academicYear';
-import { academicYearService } from '../services/academicYearService';
+import { AcademicYear } from '../types/academicYear';
 import { AcademicYearListSkeleton } from '../components/academic-year';
 import { SemesterBadge, StatusBadge } from '../components/academic-year';
+import { useAcademicYearList } from '../hooks/useAcademicYearList';
+import { useBreadcrumbAction } from '@/context/BreadcrumbActionContext';
 
 export const AcademicYearList: React.FC = () => {
     const router = useRouter();
-    const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
-    const [stats, setStats] = useState<AcademicYearStats | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isStatsLoading, setIsStatsLoading] = useState(true);
+    const { setAction, clearAction } = useBreadcrumbAction();
 
-    // Dialog states
+    const {
+        academicYears,
+        stats,
+        isLoading,
+        isFetching,
+        isActionLoading,
+        activateYear,
+    } = useAcademicYearList();
+
     const [isActivateDialogOpen, setIsActivateDialogOpen] = useState(false);
     const [selectedYear, setSelectedYear] = useState<AcademicYear | null>(null);
-    const [isActionLoading, setIsActionLoading] = useState(false);
 
-    // Fetch data
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = async () => {
-        try {
-            setIsLoading(true);
-            setIsStatsLoading(true);
-
-            const [yearsData, statsData] = await Promise.all([
-                academicYearService.getAcademicYears(),
-                academicYearService.getAcademicYearStats(),
-            ]);
-
-            setAcademicYears(yearsData);
-            setStats(statsData);
-        } catch (error) {
-            console.error('Failed to fetch academic years:', error);
-        } finally {
-            setIsLoading(false);
-            setIsStatsLoading(false);
+    React.useEffect(() => {
+        if (isFetching) {
+            setAction(
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <span className="hidden sm:inline">Memperbarui...</span>
+                </div>
+            );
+        } else {
+            clearAction();
         }
-    };
+        return () => clearAction();
+    }, [isFetching, setAction, clearAction]);
 
-    // Handlers
     const handleActivate = async () => {
         if (!selectedYear) return;
-
-        try {
-            setIsActionLoading(true);
-            await academicYearService.activateAcademicYear(selectedYear.id);
-            await fetchData();
-            setIsActivateDialogOpen(false);
-        } catch (error) {
-            console.error('Failed to activate academic year:', error);
-        } finally {
-            setIsActionLoading(false);
-            setSelectedYear(null);
-        }
+        await activateYear(selectedYear.id);
+        setIsActivateDialogOpen(false);
+        setSelectedYear(null);
     };
 
     const openActivateDialog = (year: AcademicYear) => {
@@ -97,15 +83,10 @@ export const AcademicYearList: React.FC = () => {
         setIsActivateDialogOpen(true);
     };
 
-    // Get active semester name from year
-    const getActiveSemesterName = (year: AcademicYear): string | null => {
-        const activeSem = year.semesters.find(s => s.isActive);
-        return activeSem?.name || null;
-    };
+    const getActiveSemesterName = (year: AcademicYear): string | null =>
+        year.semesters.find(s => s.isActive)?.name || null;
 
-    if (isLoading) {
-        return <AcademicYearListSkeleton />;
-    }
+    if (isLoading) return <AcademicYearListSkeleton />;
 
     return (
         <div className="space-y-6">
@@ -128,7 +109,6 @@ export const AcademicYearList: React.FC = () => {
                     <p className="text-muted-foreground mt-1">
                         Kelola tahun ajaran dan semester aktif untuk sistem akademik
                     </p>
-                    
                 </div>
                 <Button
                     onClick={() => router.push('/admin/academic-year/new')}
@@ -139,80 +119,46 @@ export const AcademicYearList: React.FC = () => {
                 </Button>
             </div>
 
-            {/* Stats - Borderless with Dividers Only */}
-            <div className="bg-white border-x border-slate-200 border-t-0 border-b-0">
-                <div className="flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-slate-200">
-                    {/* Total Tahun Ajaran */}
-                    <div className="flex-1 w-full px-5 py-6">
-                        <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                                <p className="text-xs font-medium text-blue-600 mb-2">Total Tahun Ajaran</p>
-                                {isStatsLoading ? (
-                                    <p className="text-xl font-bold text-blue-600 animate-pulse">...</p>
-                                ) : (
-                                    <p className="text-xl font-bold text-blue-600">{stats?.totalAcademicYears || 0}</p>
-                                )}
-                                <p className="text-xs text-slate-400 mt-1">Data terdaftar</p>
-                            </div>
-                            <div className="p-2.5 bg-blue-50 rounded-lg">
-                                <CalendarDays className="h-5 w-5 text-blue-600" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Tahun Ajaran Aktif */}
-                    <div className="flex-1 w-full px-5 py-6">
-                        <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                                <p className="text-xs font-medium text-emerald-600 mb-2">Tahun Ajaran Aktif</p>
-                                {isStatsLoading ? (
-                                    <p className="text-xl font-bold text-emerald-600 animate-pulse">...</p>
-                                ) : (
-                                    <p className="text-xl font-bold text-emerald-600">
-                                        {stats?.activeAcademicYear || '-'}
-                                    </p>
-                                )}
-                                <p className="text-xs text-slate-400 mt-1">Periode berjalan</p>
-                            </div>
-                            <div className="p-2.5 bg-emerald-50 rounded-lg">
-                                <CalendarCheck className="h-5 w-5 text-emerald-600" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Semester Aktif */}
-                    <div className="flex-1 w-full px-5 py-6">
-                        <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                                <p className="text-xs font-medium text-indigo-600 mb-2">Semester Aktif</p>
-                                {isStatsLoading ? (
-                                    <p className="text-xl font-bold text-indigo-600 animate-pulse">...</p>
-                                ) : (
-                                    <p className="text-xl font-bold text-indigo-600">
-                                        {stats?.activeSemester || '-'}
-                                    </p>
-                                )}
-                                <p className="text-xs text-slate-400 mt-1">Semester berjalan</p>
-                            </div>
-                            <div className="p-2.5 bg-indigo-50 rounded-lg">
-                                <CheckCircle2 className="h-5 w-5 text-indigo-600" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <StatCard
+                    title="Total Tahun Ajaran"
+                    value={stats.totalAcademicYears}
+                    subtitle="Data terdaftar"
+                    icon={CalendarDays}
+                    color="blue"
+                />
+                <StatCard
+                    title="Tahun Ajaran Aktif"
+                    value={stats.activeAcademicYear ?? '-'}
+                    subtitle="Periode berjalan"
+                    icon={CalendarCheck}
+                    color="emerald"
+                    size="sm"
+                />
+                <StatCard
+                    title="Semester Aktif"
+                    value={stats.activeSemester ?? '-'}
+                    subtitle="Semester berjalan"
+                    icon={CheckCircle2}
+                    color="indigo"
+                    size="sm"
+                />
             </div>
 
-            {/* Academic Years Table */}
-            <Card>
-                <CardHeader>
+            {/* Table Card */}
+            <Card className="border-slate-200 shadow-sm">
+                <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                                <Calendar className="h-5 w-5" />
+                            <div className="p-2.5 bg-blue-100 rounded-xl">
+                                <Calendar className="h-5 w-5 text-blue-700" />
                             </div>
                             <div>
-                                <CardTitle className="text-lg font-semibold text-gray-900">Daftar Tahun Ajaran</CardTitle>
-                                <CardDescription className="text-sm text-muted-foreground">Semua tahun ajaran yang terdaftar dalam sistem</CardDescription>
+                                <CardTitle className="text-lg font-semibold text-slate-800">Daftar Tahun Ajaran</CardTitle>
+                                <CardDescription className="text-sm text-slate-600">
+                                    Semua tahun ajaran yang terdaftar dalam sistem
+                                </CardDescription>
                             </div>
                         </div>
                         <Badge className="bg-blue-100 text-blue-800 border-blue-200">
@@ -221,17 +167,16 @@ export const AcademicYearList: React.FC = () => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    {/* Table */}
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
-                                <tr>
-                                    <th className="text-center p-4 font-medium text-sm w-12">No</th>
-                                    <th className="text-left p-4 font-medium text-sm">Tahun Ajaran</th>
-                                    <th className="text-left p-4 font-medium text-sm">Periode</th>
-                                    <th className="text-center p-4 font-medium text-sm">Semester Aktif</th>
-                                    <th className="text-center p-4 font-medium text-sm">Status</th>
-                                    <th className="text-center p-4 font-medium text-sm">Aksi</th>
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200">
+                                    <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider w-12">No</th>
+                                    <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider min-w-[180px]">Tahun Ajaran</th>
+                                    <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Periode</th>
+                                    <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Semester Aktif</th>
+                                    <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Status</th>
+                                    <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -239,12 +184,12 @@ export const AcademicYearList: React.FC = () => {
                                     <tr>
                                         <td colSpan={6} className="p-12">
                                             <div className="flex flex-col items-center justify-center text-center space-y-4">
-                                                <div className="p-4 bg-muted rounded-full">
-                                                    <Calendar className="h-8 w-8 text-muted-foreground" />
+                                                <div className="w-14 h-14 rounded-full bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center">
+                                                    <Calendar className="h-7 w-7 text-slate-400" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-semibold text-lg">Belum ada tahun ajaran</h3>
-                                                    <p className="text-muted-foreground">
+                                                    <h3 className="font-semibold text-slate-800">Belum ada tahun ajaran</h3>
+                                                    <p className="text-sm text-slate-500 mt-1">
                                                         Tambahkan tahun ajaran pertama untuk memulai
                                                     </p>
                                                 </div>
@@ -260,37 +205,34 @@ export const AcademicYearList: React.FC = () => {
                                     </tr>
                                 ) : (
                                     academicYears.map((year, index) => (
-                                        <tr key={year.id} className="border-b hover:bg-muted/30 transition-colors">
-                                            <td className="p-4 text-sm text-center">{index + 1}</td>
+                                        <tr
+                                            key={year.id}
+                                            className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
+                                        >
+                                            <td className="p-4 text-sm text-center text-slate-600 font-medium">{index + 1}</td>
                                             <td className="p-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className={cn(
-                                                        "h-10 w-10 rounded-lg flex items-center justify-center",
-                                                        year.isActive
-                                                            ? "bg-green-100"
-                                                            : "bg-slate-100"
+                                                        "h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0",
+                                                        year.isActive ? "bg-emerald-100" : "bg-slate-100"
                                                     )}>
                                                         <Calendar className={cn(
                                                             "h-5 w-5",
-                                                            year.isActive
-                                                                ? "text-green-600"
-                                                                : "text-slate-500"
+                                                            year.isActive ? "text-emerald-600" : "text-slate-500"
                                                         )} />
                                                     </div>
                                                     <div>
-                                                        <p className="font-semibold">{year.name}</p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            ID: {year.id}
-                                                        </p>
+                                                        <p className="text-sm font-semibold text-slate-800">{year.name}</p>
+                                                        <p className="text-xs text-slate-400">ID: {year.id}</p>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="p-4">
                                                 <div className="text-sm">
-                                                    <p className="font-medium">
+                                                    <p className="font-medium text-slate-800">
                                                         {formatDate(new Date(year.startDate), 'dd MMM yyyy')}
                                                     </p>
-                                                    <p className="text-muted-foreground">
+                                                    <p className="text-slate-500">
                                                         s/d {formatDate(new Date(year.endDate), 'dd MMM yyyy')}
                                                     </p>
                                                 </div>
@@ -302,7 +244,7 @@ export const AcademicYearList: React.FC = () => {
                                                         isActive={true}
                                                     />
                                                 ) : (
-                                                    <span className="text-sm text-muted-foreground">-</span>
+                                                    <span className="text-sm text-slate-400">-</span>
                                                 )}
                                             </td>
                                             <td className="p-4 text-center">
@@ -313,7 +255,7 @@ export const AcademicYearList: React.FC = () => {
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="h-8 w-8 p-0 text-blue-800 border-blue-300 bg-blue-100 hover:bg-blue-200 hover:text-blue-900 rounded-lg transition-colors"
+                                                        className="h-8 w-8 p-0 text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 rounded-lg transition-colors"
                                                         onClick={() => router.push(`/admin/academic-year/${year.id}`)}
                                                         title="Detail"
                                                     >
@@ -332,7 +274,7 @@ export const AcademicYearList: React.FC = () => {
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
-                                                            className="h-8 w-8 p-0 text-green-600 border-green-200 bg-green-50 hover:bg-green-100 hover:text-green-700 rounded-lg transition-colors"
+                                                            className="h-8 w-8 p-0 text-emerald-600 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-700 rounded-lg transition-colors"
                                                             onClick={() => openActivateDialog(year)}
                                                             title="Aktifkan"
                                                         >
@@ -366,7 +308,6 @@ export const AcademicYearList: React.FC = () => {
                             </div>
                         </div>
                     </DialogHeader>
-
                     <div className="py-4">
                         <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                             <p className="text-sm text-amber-800">
@@ -380,7 +321,6 @@ export const AcademicYearList: React.FC = () => {
                             </ul>
                         </div>
                     </div>
-
                     <DialogFooter>
                         <Button
                             variant="outline"
@@ -392,7 +332,7 @@ export const AcademicYearList: React.FC = () => {
                         <Button
                             onClick={handleActivate}
                             disabled={isActionLoading}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-emerald-600 hover:bg-emerald-700"
                         >
                             {isActionLoading ? (
                                 <>

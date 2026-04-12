@@ -4,7 +4,6 @@ import {
     Semester,
     CreateAcademicYearRequest,
     UpdateAcademicYearRequest,
-    AcademicYearStats,
 } from '../types/academicYear';
 
 // Transform backend snake_case → frontend camelCase
@@ -88,17 +87,6 @@ export const getActiveAcademicYear = async (): Promise<AcademicYear | null> => {
     }
 };
 
-export const getAcademicYearStats = async (): Promise<AcademicYearStats> => {
-    const years = await getAcademicYears();
-    const activeYear = years.find(y => y.isActive);
-    const activeSemester = activeYear?.semesters?.find(s => s.isActive);
-    return {
-        totalAcademicYears: years.length,
-        activeAcademicYear: activeYear?.name || null,
-        activeSemester: activeSemester?.name || null,
-    };
-};
-
 export const academicYearService = {
     getAcademicYears,
     getAcademicYearById,
@@ -108,7 +96,6 @@ export const academicYearService = {
     activateAcademicYear,
     activateSemester,
     updateSemester,
-    getAcademicYearStats,
     getActiveAcademicYear,
 };
 
