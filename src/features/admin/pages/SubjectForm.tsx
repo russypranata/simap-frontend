@@ -92,8 +92,9 @@ const formSchema = z.object({
     }).optional(),
     
     gradeLevel: z.array(z.string())
-        .min(1, 'Pilih minimal satu tingkat kelas')
-        .max(3, 'Maksimal 3 tingkat kelas'),
+        .max(3, 'Maksimal 3 tingkat kelas')
+        .optional()
+        .default([]),
     
     description: z.string().max(500, 'Deskripsi maksimal 500 karakter').optional(),
     
