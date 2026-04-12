@@ -1,19 +1,36 @@
-export type DayOfWeek = 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat' | 'Sabtu';
-
 export interface Schedule {
-    id: string;
-    day: DayOfWeek;
-    startTime: string; // "07:00"
-    endTime: string;   // "08:20"
-    subjectName: string;
-    className: string;
-    teacherName: string;
-    room: string;
-    academicYear: string;
-    semester: string;
-    
-    // Relations (IDs)
-    subjectId?: string;
-    classId?: string;
-    teacherId?: string;
+    id: number;
+    class_subject_id: number;
+    class_id: number;
+    class_name?: string;
+    subject_name?: string;
+    teacher_name?: string;
+    type: string;
+    label?: string;
+    day_of_week: string;
+    start_time: string;
+    end_time: string;
+    room?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CreateScheduleRequest {
+    class_subject_id: number;
+    type: string;
+    label?: string;
+    day_of_week: string;
+    start_time: string;
+    end_time: string;
+    room?: string;
+}
+
+export interface UpdateScheduleRequest {
+    class_subject_id?: number;
+    type?: string;
+    label?: string;
+    day_of_week?: string;
+    start_time?: string;
+    end_time?: string;
+    room?: string;
 }

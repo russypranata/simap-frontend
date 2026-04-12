@@ -1,6 +1,6 @@
-import { Extracurricular } from '../types/extracurricular';
+import { ExtracurricularLegacy } from '../types/extracurricular';
 
-export const MOCK_EXTRACURRICULARS: Extracurricular[] = [
+export const MOCK_EXTRACURRICULARS: ExtracurricularLegacy[] = [
     {
         id: '1',
         name: 'Pramuka',

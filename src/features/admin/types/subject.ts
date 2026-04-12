@@ -1,53 +1,30 @@
-'use client';
-
-// Subject Types
-export type SubjectCategory = 'UMUM' | 'AGAMA' | 'KEJURUAN' | 'EKSKUL';
-
 export interface Subject {
-    id: string;
-    code: string;
+    id: number;
     name: string;
-    category: SubjectCategory;
-    type: 'WAJIB' | 'PEMINATAN';
-    forGender: 'PUTRA' | 'PUTRI' | 'CAMPURAN';
-    hoursPerWeek?: number; // Deprecated, moved to gradeSpecificJp
-    gradeSpecificJp?: Record<string, number>; // e.g. { "10": 4, "11": 6 }
-    gradeLevel?: string[]; // e.g., ["10", "11"]
+    code: string;
     description?: string;
-    teacherIds: string[];
-    teacherNames?: string[]; // For display purposes
-    teachers?: TeacherRef[]; // Full teacher details
-    createdAt: string;
-    updatedAt: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface CreateSubjectRequest {
-    code: string;
     name: string;
-    category: SubjectCategory;
-    type: 'WAJIB' | 'PEMINATAN';
-    forGender: 'PUTRA' | 'PUTRI' | 'CAMPURAN';
-    hoursPerWeek?: number; // Optional/Deprecated
-    gradeSpecificJp?: Record<string, number>;
-    gradeLevel?: string[];
+    code: string;
     description?: string;
-    teacherIds?: string[];
 }
 
 export interface UpdateSubjectRequest {
-    code?: string;
     name?: string;
-    category?: SubjectCategory;
-    type?: 'WAJIB' | 'PEMINATAN';
-    forGender?: 'PUTRA' | 'PUTRI' | 'CAMPURAN';
-    hoursPerWeek?: number;
-    gradeSpecificJp?: Record<string, number>;
-    gradeLevel?: string[];
+    code?: string;
     description?: string;
-    teacherIds?: string[];
 }
 
-// Teacher reference for assignment
+// Legacy types — dipertahankan untuk backward compatibility dengan halaman yang sudah ada
+
+/** @deprecated */
+export type SubjectCategory = 'UMUM' | 'AGAMA' | 'KEJURUAN' | 'EKSKUL';
+
+/** @deprecated */
 export interface TeacherRef {
     id: string;
     name: string;

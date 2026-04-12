@@ -49,7 +49,7 @@ export const getAdminProfile = async (): Promise<AdminProfileData> => {
     }
 
     // ===== REAL API IMPLEMENTATION =====
-    return apiClient.get<AdminProfileData>('/admin/profile');
+    return apiClient.get<AdminProfileData>('/auth/user');
 };
 
 /**

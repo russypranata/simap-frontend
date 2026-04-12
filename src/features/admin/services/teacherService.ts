@@ -1,22 +1,13 @@
-import { Teacher } from '../types/teacher';
-import { MOCK_TEACHERS } from '../data/mockTeacherData';
-
-const SIMULATED_DELAY = 500;
+import { apiClient } from '@/lib/api-client';
+import { AdminUser } from '../types/user';
+import { TeacherDropdown } from '../types/class';
 
 export const teacherService = {
-    getTeachers: async (): Promise<Teacher[]> => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(MOCK_TEACHERS);
-            }, SIMULATED_DELAY);
-        });
-    },
+    getTeachers: (): Promise<TeacherDropdown[]> =>
+        apiClient.get<TeacherDropdown[]>('/admin/teachers'),
 
-    getTeacherById: async (id: string): Promise<Teacher | undefined> => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(MOCK_TEACHERS.find(t => t.id === id));
-            }, SIMULATED_DELAY);
-        });
-    }
+    getTeacherById: (id: string | number): Promise<AdminUser> =>
+        apiClient.get<AdminUser>(`/admin/users/${id}`),
 };
+
+export default teacherService;
