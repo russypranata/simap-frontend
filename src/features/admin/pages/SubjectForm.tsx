@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import {
     ArrowLeft,
@@ -416,47 +416,35 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({ id }) => {
                             <FormField
                                 control={form.control}
                                 name="gradeLevel"
-                                render={() => (
+                                render={({ field }) => (
                                     <FormItem>
                                         <FormLabel className="text-base">Tingkat Kelas</FormLabel>
                                         <div className="flex flex-wrap gap-3">
-                                            {['10', '11', '12'].map((level) => (
-                                                <FormField
-                                                    key={level}
-                                                    control={form.control}
-                                                    name="gradeLevel"
-                                                    render={({ field }) => {
-                                                        const isChecked = field.value?.includes(level);
-                                                        return (
-                                                            <FormItem
-                                                                key={level}
-                                                                className="space-y-0"
-                                                            >
-                                                                <FormControl>
-                                                                    <div
-                                                                        onClick={() => {
-                                                                            if (isChecked) {
-                                                                                field.onChange(field.value?.filter((value) => value !== level));
-                                                                            } else {
-                                                                                field.onChange([...(field.value || []), level]);
-                                                                            }
-                                                                        }}
-                                                                        className={cn(
-                                                                            "cursor-pointer flex items-center justify-center rounded-lg border text-sm font-semibold transition-all duration-200 h-9 px-4 min-w-[90px] shadow-sm select-none",
-                                                                            isChecked
-                                                                                ? "bg-blue-800 text-white border-blue-800 shadow-blue-100 ring-2 ring-blue-100 ring-offset-1"
-                                                                                : "bg-white text-slate-600 border-slate-200 hover:border-blue-800 hover:bg-blue-50/50 hover:text-blue-800"
-                                                                        )}
-                                                                    >
-                                                                        Kelas {level}
-                                                                        {isChecked && <Check className="ml-2 h-4 w-4 stroke-[3]" />}
-                                                                    </div>
-                                                                </FormControl>
-                                                            </FormItem>
-                                                        )
-                                                    }}
-                                                />
-                                            ))}
+                                            {['10', '11', '12'].map((level) => {
+                                                const isChecked = (field.value ?? []).includes(level);
+                                                return (
+                                                    <div
+                                                        key={level}
+                                                        onClick={() => {
+                                                            const current = field.value ?? [];
+                                                            field.onChange(
+                                                                isChecked
+                                                                    ? current.filter((v) => v !== level)
+                                                                    : [...current, level]
+                                                            );
+                                                        }}
+                                                        className={cn(
+                                                            "cursor-pointer flex items-center justify-center rounded-lg border text-sm font-semibold transition-all duration-200 h-9 px-4 min-w-[90px] shadow-sm select-none",
+                                                            isChecked
+                                                                ? "bg-blue-800 text-white border-blue-800 ring-2 ring-blue-100 ring-offset-1"
+                                                                : "bg-white text-slate-600 border-slate-200 hover:border-blue-800 hover:bg-blue-50/50 hover:text-blue-800"
+                                                        )}
+                                                    >
+                                                        Kelas {level}
+                                                        {isChecked && <Check className="ml-2 h-4 w-4 stroke-[3]" />}
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                         <FormMessage />
                                     </FormItem>
