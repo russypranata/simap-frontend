@@ -284,12 +284,12 @@ export const ParentGrades: React.FC = () => {
                                 </CardHeader>
                                 <CardContent className="space-y-3">
                                     {reportCardNotes.length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center py-10 text-center">
-                                            <div className="w-14 h-14 rounded-full bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center mb-3">
-                                                <FileText className="h-6 w-6 text-slate-300" />
+                                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                                            <div className="w-16 h-16 rounded-full bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center mb-4">
+                                                <FileText className="h-8 w-8 text-slate-400" />
                                             </div>
-                                            <p className="text-sm font-medium text-slate-600">Belum ada catatan rapor</p>
-                                            <p className="text-xs text-slate-400 mt-1">Catatan akan tersedia setelah rapor diterbitkan</p>
+                                            <h3 className="text-lg font-semibold text-slate-800">Belum Ada Catatan Rapor</h3>
+                                            <p className="text-sm text-slate-500 max-w-md mt-1">Catatan akan tersedia setelah rapor semester diterbitkan oleh wali kelas</p>
                                         </div>
                                     ) : reportCardNotes.map((item, index) => (
                                         <div key={index} className={cn("p-4 rounded-xl border bg-gradient-to-r from-slate-50/50 to-white", index === 0 ? "border-amber-200" : index === 1 ? "border-blue-200" : index === 2 ? "border-emerald-200" : "border-purple-200")}>

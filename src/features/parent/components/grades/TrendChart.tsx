@@ -21,10 +21,12 @@ interface TrendChartProps {
 export const TrendChart: React.FC<TrendChartProps> = ({ history }) => {
     if (history.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-                <TrendingUp className="h-10 w-10 text-slate-200 mb-3" />
-                <p className="text-sm text-slate-400">Belum ada data tren nilai</p>
-                <p className="text-xs text-slate-300 mt-1">Data akan muncul setelah minimal 2 semester selesai</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center mb-4">
+                    <TrendingUp className="h-8 w-8 text-slate-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800">Belum Ada Data Tren</h3>
+                <p className="text-sm text-slate-500 max-w-md mt-1">Data tren nilai akan muncul setelah minimal 2 semester selesai dan nilai difinalisasi</p>
             </div>
         );
     }

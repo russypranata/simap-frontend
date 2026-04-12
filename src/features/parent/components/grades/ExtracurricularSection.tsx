@@ -27,12 +27,12 @@ export const ExtracurricularSection: React.FC<ExtracurricularSectionProps> = ({ 
         </CardHeader>
         <CardContent>
             {extracurriculars.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                    <div className="w-14 h-14 rounded-full bg-purple-50 border border-dashed border-purple-200 flex items-center justify-center mb-3">
-                        <Medal className="h-6 w-6 text-purple-300" />
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="w-16 h-16 rounded-full bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center mb-4">
+                        <Medal className="h-8 w-8 text-slate-400" />
                     </div>
-                    <p className="text-sm font-medium text-slate-600">Belum ada data ekstrakurikuler</p>
-                    <p className="text-xs text-slate-400 mt-1">Data akan muncul setelah ada presensi ekskul yang tercatat</p>
+                    <h3 className="text-lg font-semibold text-slate-800">Belum Ada Data Ekstrakurikuler</h3>
+                    <p className="text-sm text-slate-500 max-w-md mt-1">Data akan muncul setelah ada presensi ekskul yang tercatat</p>
                 </div>
             ) : (
                 <div className="space-y-3">
