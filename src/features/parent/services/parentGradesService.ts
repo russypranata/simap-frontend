@@ -31,6 +31,20 @@ export interface EkskulSummaryItem {
     attendanceRate: number;
 }
 
+export interface TrendItem {
+    academicYear: string;
+    semester: string;
+    averageScore: number;
+    rank: number;
+    totalStudents: number;
+}
+
+export interface ReportCardNoteItem {
+    category: string;
+    note: string;
+    icon: string;
+}
+
 export const getChildGrades = async (
     childId: string,
     academicYearId?: string
@@ -99,7 +113,6 @@ export const getChildEkskulSummary = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const records: Record<string, any>[] = result.data ?? [];
 
-    // Group by extracurricular name and compute attendance rate
     const grouped: Record<string, { total: number; hadir: number }> = {};
     for (const r of records) {
         const name = r.extracurricularName ?? "Ekstrakurikuler";
@@ -122,4 +135,42 @@ export const getChildEkskulSummary = async (
             attendanceRate: rate,
         };
     });
+};
+
+export const getChildGradeTrend = async (childId: string): Promise<TrendItem[]> => {
+    const response = await fetch(`${PARENT_API_URL}/children/${childId}/grades/trend`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) return [];
+    const result = await response.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (result.data ?? []).map((item: Record<string, any>): TrendItem => ({
+        academicYear: item.academicYear ?? item.academic_year ?? "",
+        semester: item.semester ?? "",
+        averageScore: item.averageScore ?? item.average_score ?? 0,
+        rank: item.rank ?? 0,
+        totalStudents: item.totalStudents ?? item.total_students ?? 0,
+    }));
+};
+
+export const getChildReportCardNotes = async (
+    childId: string,
+    academicYearId?: string,
+    semester?: string
+): Promise<ReportCardNoteItem[]> => {
+    const params = new URLSearchParams();
+    if (academicYearId) params.append("academic_year_id", academicYearId);
+    if (semester) params.append("semester", semester);
+
+    const response = await fetch(`${PARENT_API_URL}/children/${childId}/grades/report-card-notes?${params}`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) return [];
+    const result = await response.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (result.data ?? []).map((item: Record<string, any>): ReportCardNoteItem => ({
+        category: item.category ?? "",
+        note: item.note ?? "",
+        icon: item.icon ?? "📝",
+    }));
 };

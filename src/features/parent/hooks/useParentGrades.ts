@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { SubjectGrade, AcademicYear, AttitudeScore, AttendanceSummary, Extracurricular, SemesterSummary } from "../components/grades";
-import { getChildGrades, getChildAttendanceSummary, getChildEkskulSummary } from "../services/parentGradesService";
+import { getChildGrades, getChildAttendanceSummary, getChildEkskulSummary, getChildGradeTrend, getChildReportCardNotes } from "../services/parentGradesService";
 import { getParentChildren } from "../services/parentDashboardService";
 
 const defaultAttitude: AttitudeScore = {
@@ -100,6 +100,22 @@ export const useParentGrades = () => {
         staleTime: 0,
     });
 
+    // Fetch grade trend (all years)
+    const trendQuery = useQuery({
+        queryKey: ["parent-grades-trend", effectiveChildId],
+        queryFn: () => getChildGradeTrend(effectiveChildId),
+        enabled: !!effectiveChildId,
+        staleTime: 0,
+    });
+
+    // Fetch report card notes
+    const reportCardQuery = useQuery({
+        queryKey: ["parent-grades-report-card", effectiveChildId, effectiveYearId, effectiveSemester],
+        queryFn: () => getChildReportCardNotes(effectiveChildId, effectiveYearId, effectiveSemester),
+        enabled: !!effectiveChildId && !!effectiveYearId,
+        staleTime: 0,
+    });
+
     const selectedChild = children.find(c => c.id === effectiveChildId);
     const activeYear = academicYears.find(y => y.id === effectiveYearId);
     const displaySemester = effectiveSemester === "ganjil" ? "Ganjil" : "Genap";
@@ -160,7 +176,7 @@ export const useParentGrades = () => {
     }, []);
 
     const isLoading = childrenQuery.isLoading || (!!effectiveChildId && !!effectiveYearId && gradesQuery.isLoading);
-    const isFetching = childrenQuery.isFetching || gradesQuery.isFetching || attendanceQuery.isFetching || ekskulQuery.isFetching;
+    const isFetching = childrenQuery.isFetching || gradesQuery.isFetching || attendanceQuery.isFetching || ekskulQuery.isFetching || trendQuery.isFetching || reportCardQuery.isFetching;
 
     const error = childrenQuery.error instanceof Error
         ? childrenQuery.error.message
@@ -174,8 +190,8 @@ export const useParentGrades = () => {
         attitude: defaultAttitude,
         extracurriculars: (ekskulQuery.data ?? []) as Extracurricular[],
         attendance: attendanceQuery.data ?? defaultAttendance,
-        semesterHistory: defaultSemesterHistory,
-        reportCardNotes: defaultReportCardNotes,
+        semesterHistory: (trendQuery.data ?? []) as SemesterSummary[],
+        reportCardNotes: reportCardQuery.data ?? defaultReportCardNotes,
         stats, isReportAvailable, displaySemester, currentSemesterStatus,
         selectedChildId: effectiveChildId, setSelectedChildId: handleSetSelectedChildId,
         selectedYearId: effectiveYearId, selectedSemester: effectiveSemester,
