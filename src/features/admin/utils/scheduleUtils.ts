@@ -1,8 +1,8 @@
 import { Schedule } from '../types/schedule';
-import { MOCK_TIME_SLOTS, MOCK_FRIDAY_SLOTS, MOCK_MONDAY_SLOTS, MOCK_TUESDAY_SLOTS, MOCK_WEDNESDAY_SLOTS } from '../data/mockTimeSlots';
 import { SubjectCategory } from '../types/subject';
+import { TimeSlot, DayKey } from '../services/timeSlotService';
 
-// Palette for dynamic coloring (Tailwind classes)
+// Palette for dynamic coloring
 const COLOR_PALETTE = [
     { bg: 'from-violet-50 to-violet-100', border: 'border-violet-200', text: 'text-violet-900', subtext: 'text-violet-600' },
     { bg: 'from-emerald-50 to-emerald-100', border: 'border-emerald-200', text: 'text-emerald-900', subtext: 'text-emerald-600' },
@@ -18,26 +18,18 @@ const COLOR_PALETTE = [
     { bg: 'from-fuchsia-50 to-fuchsia-100', border: 'border-fuchsia-200', text: 'text-fuchsia-900', subtext: 'text-fuchsia-600' },
 ];
 
-/**
- * Simple hash function to generate a consistent index from a string
- */
 const getStringHash = (str: string): number => {
     let hash = 0;
-    if (str.length === 0) return hash;
     for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
+        hash = hash & hash;
     }
     return Math.abs(hash);
 };
 
-// Helper to get color based on Subject Name (Priority) or Category (Fallback)
-export const getSubjectColor = (subjectName: string, category?: SubjectCategory | string) => {
-    // If we have a category, we might want to group colors by category logic 
-    // But for now, let's use the subject name to ensure variety even within same category
-    const index = getStringHash(subjectName) % COLOR_PALETTE.length;
-    return COLOR_PALETTE[index];
+export const getSubjectColor = (subjectName: string, _category?: SubjectCategory | string) => {
+    return COLOR_PALETTE[getStringHash(subjectName) % COLOR_PALETTE.length];
 };
 
 export interface ConflictResult {
@@ -47,12 +39,6 @@ export interface ConflictResult {
     conflictingSchedule?: Schedule;
 }
 
-/**
- * Checks for scheduling conflicts based on Teacher, Class, and Time.
- * @param newSchedule The schedule being created or updated
- * @param existingSchedules List of all existing schedules
- * @param excludeId ID to exclude (for update operations)
- */
 export const checkScheduleConflict = (
     newSchedule: Partial<Schedule>,
     existingSchedules: Schedule[],
@@ -62,34 +48,27 @@ export const checkScheduleConflict = (
         return { hasConflict: false };
     }
 
-    // Filter relevant schedules (same day, overlapping time)
-    const overlappingSchedules = existingSchedules.filter(s => {
+    const overlapping = existingSchedules.filter(s => {
         if (s.id === excludeId) return false;
         if (s.day !== newSchedule.day) return false;
-
-        // Check time overlap: (StartA < EndB) and (EndA > StartB)
-        // String comparison works for "HH:MM" format
         return s.startTime < newSchedule.endTime! && s.endTime > newSchedule.startTime!;
     });
 
-    for (const existing of overlappingSchedules) {
-        // Check Teacher Conflict
+    for (const existing of overlapping) {
         if (newSchedule.teacherId && existing.teacherId === newSchedule.teacherId) {
             return {
                 hasConflict: true,
                 type: 'teacher',
                 message: `Guru ${existing.teacherName} sudah mengajar di kelas ${existing.className} pada jam ini.`,
-                conflictingSchedule: existing
+                conflictingSchedule: existing,
             };
         }
-
-        // Check Class Conflict
         if (newSchedule.classId && existing.classId === newSchedule.classId) {
             return {
                 hasConflict: true,
                 type: 'class',
                 message: `Kelas ${existing.className} sudah ada pelajaran ${existing.subjectName} pada jam ini.`,
-                conflictingSchedule: existing
+                conflictingSchedule: existing,
             };
         }
     }
@@ -97,22 +76,17 @@ export const checkScheduleConflict = (
     return { hasConflict: false };
 };
 
-export const getTimeSlotOptions = (day: string = 'Senin') => {
-    let slots = MOCK_MONDAY_SLOTS;
-
-    if (day === 'Jumat') {
-        slots = MOCK_FRIDAY_SLOTS;
-    } else if (day === 'Rabu') {
-        slots = MOCK_WEDNESDAY_SLOTS;
-    } else if (['Selasa', 'Kamis', 'Sabtu'].includes(day)) {
-        slots = MOCK_TUESDAY_SLOTS;
-    }
-    
-    return slots.filter(s => s.type === 'lesson').map(slot => ({
-        label: `${slot.label} (${slot.startTime} - ${slot.endTime})`,
-        value: slot.startTime, // Changed: Use startTime as value directly for simpler matching
-        startTime: slot.startTime,
-        endTime: slot.endTime,
-        originalLabel: slot.label
-    }));
+/**
+ * Build time slot options dari data API (bukan mock).
+ */
+export const getTimeSlotOptionsFromSlots = (slots: TimeSlot[]) => {
+    return slots
+        .filter(s => s.type === 'lesson')
+        .map(slot => ({
+            label: `${slot.label} (${slot.startTime} – ${slot.endTime})`,
+            value: slot.startTime,
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            originalLabel: slot.label,
+        }));
 };

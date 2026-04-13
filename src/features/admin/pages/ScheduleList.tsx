@@ -76,19 +76,16 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 // Types & Services
-import { DayOfWeek, Schedule } from '../types/schedule';
+import { DayOfWeek, Schedule, DAY_MAP } from '../types/schedule';
 import { Class } from '../types/class';
 import { scheduleService } from '../services/scheduleService';
 import { classService } from '../services/classService';
-import { academicYearService } from '../services/academicYearService';
-import { AcademicYear } from '../types/academicYear';
 
 // Components
 import { ScheduleForm } from '../components/forms/ScheduleForm';
 import { ScheduleFormValues } from '../schemas/scheduleSchema';
 import { ScheduleListSkeleton } from '../components/schedule/ScheduleListSkeleton';
-import { getLessonSlots, getSlotsByDay, MOCK_TIME_SLOTS, TimeSlot } from '../data/mockTimeSlots';
-import { getScheduleGrid } from '../utils/scheduleHelpers';
+import { timeSlotService } from '../services/timeSlotService';
 import { Subject } from '../types/subject';
 import { subjectService } from '../services/subjectService';
 import { getSubjectColor } from '../utils/scheduleUtils';
@@ -101,8 +98,6 @@ export const ScheduleList: React.FC = () => {
     const [classes, setClasses] = useState<Class[]>([]);
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeYear, setActiveYear] = useState<string | null>(null);
-    const [activeSemester, setActiveSemester] = useState<string | null>(null);
 
     // View Mode State
     const [viewMode, setViewMode] = useState<ViewMode>('timetable');
@@ -129,6 +124,9 @@ export const ScheduleList: React.FC = () => {
     const [copySource, setCopySource] = useState<DayOfWeek>('Senin');
     const [copyTarget, setCopyTarget] = useState<DayOfWeek>('Selasa');
 
+    // Time slots per day (dari API)
+    const [dayTimeSlots, setDayTimeSlots] = useState<any[]>([]);
+
     const days: DayOfWeek[] = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
     // Fetch Data
@@ -136,31 +134,18 @@ export const ScheduleList: React.FC = () => {
         const fetchInitialData = async () => {
             try {
                 setIsLoading(true);
-                const [schedulesData, yearsData, classesData, subjectsData] = await Promise.all([
+                const [schedulesData, classesData, subjectsData] = await Promise.all([
                     scheduleService.getSchedules(),
-                    academicYearService.getAcademicYears(),
                     classService.getClasses(),
-                    subjectService.getSubjects()
+                    subjectService.getSubjects(),
                 ]);
 
                 setData(schedulesData);
                 setSubjects(subjectsData);
-                // Filter only REGULER classes for timetable grid
-                setClasses(classesData.filter(c => c.type === 'REGULER').sort((a, b) => {
-                    // Sort by grade then by name
+                setClasses(classesData.filter((c: any) => c.type === 'REGULER').sort((a: any, b: any) => {
                     if (a.grade !== b.grade) return a.grade - b.grade;
                     return a.name.localeCompare(b.name);
                 }));
-
-                // Set Active Year Badge
-                const activeData = yearsData.find((y: AcademicYear) => y.isActive);
-                if (activeData) {
-                    setActiveYear(activeData.name);
-                    const activeSem = activeData.semesters.find((s: any) => s.isActive);
-                    if (activeSem) {
-                        setActiveSemester(activeSem.name);
-                    }
-                }
             } catch (error) {
                 console.error('Failed to fetch data:', error);
                 toast.error('Gagal memuat data jadwal');
@@ -172,13 +157,21 @@ export const ScheduleList: React.FC = () => {
         fetchInitialData();
     }, []);
 
+    // Fetch time slots when day changes
+    useEffect(() => {
+        const dayKey = DAY_MAP[selectedDay];
+        timeSlotService.getByDay(dayKey as any).then(slots => {
+            setDayTimeSlots(slots);
+        });
+    }, [selectedDay]);
+
     // Filter Logic - now based on selected day tab
     const filteredData = data.filter((item) => {
         const matchesDay = item.day === selectedDay;
-        const matchesSearch =
+        const matchesSearch = !searchTerm ||
             item.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.className.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.teacherName.toLowerCase().includes(searchTerm.toLowerCase());
+            (item.teacherName ?? '').toLowerCase().includes(searchTerm.toLowerCase());
         return matchesDay && matchesSearch;
     });
 
@@ -205,25 +198,39 @@ export const ScheduleList: React.FC = () => {
     // CRUD Handlers
     const handleCreate = async (values: ScheduleFormValues) => {
         try {
-            // Optimistic Update can be done here, but let's re-fetch or append
-            const createPayload = { ...values }; 
-            const newItem = await scheduleService.createSchedule(createPayload as any);
+            const newItem = await scheduleService.createSchedule({
+                subject_id: values.subjectId,
+                class_id: values.classId,
+                teacher_id: values.teacherId || undefined,
+                day_of_week: DAY_MAP[values.day],
+                start_time: values.startTime,
+                end_time: values.endTime,
+                room: values.room || undefined,
+            });
             setData(prev => [newItem, ...prev]);
             toast.success('Jadwal berhasil ditambahkan');
-        } catch (error) {
-            toast.error('Gagal membuat jadwal');
+        } catch (error: any) {
+            toast.error(error?.message ?? 'Gagal membuat jadwal');
         }
     };
 
     const handleUpdate = async (values: ScheduleFormValues) => {
         if (!editingId) return;
         try {
-            const updatedItem = await scheduleService.updateSchedule(editingId, values);
+            const updatedItem = await scheduleService.updateSchedule(editingId, {
+                subject_id: values.subjectId,
+                class_id: values.classId,
+                teacher_id: values.teacherId || undefined,
+                day_of_week: DAY_MAP[values.day],
+                start_time: values.startTime,
+                end_time: values.endTime,
+                room: values.room || undefined,
+            });
             setData(prev => prev.map(item => item.id === editingId ? updatedItem : item));
             toast.success('Jadwal berhasil diperbarui');
             setEditingId(null);
-        } catch (error) {
-            toast.error('Gagal memperbarui jadwal');
+        } catch (error: any) {
+            toast.error(error?.message ?? 'Gagal memperbarui jadwal');
         }
     };
 
@@ -257,15 +264,17 @@ export const ScheduleList: React.FC = () => {
             toast.error('Hari asal dan tujuan tidak boleh sama');
             return;
         }
-
         try {
             setIsCopying(true);
-            const newSchedules = await scheduleService.copyDaySchedule(copySource, copyTarget);
+            const newSchedules = await scheduleService.copyDaySchedule(
+                DAY_MAP[copySource],
+                DAY_MAP[copyTarget]
+            );
             setData(prev => [...newSchedules, ...prev]);
             toast.success(`Jadwal ${copySource} berhasil disalin ke ${copyTarget}`);
             setIsCopyDialogOpen(false);
-        } catch (error) {
-            toast.error('Gagal menyalin jadwal');
+        } catch (error: any) {
+            toast.error(error?.message ?? 'Gagal menyalin jadwal');
         } finally {
             setIsCopying(false);
         }
@@ -432,9 +441,9 @@ export const ScheduleList: React.FC = () => {
                                         item.teacherName.toLowerCase().includes(searchTerm.toLowerCase())
                                     );
 
-                                    const lessonSlots = getLessonSlots();
+                                    const lessonSlots = dayTimeSlots.filter((s: any) => s.type === 'lesson');
                                     // Get all slots for timetable view (including breaks)
-                                    const allSlots = getSlotsByDay(day);
+                                    const allSlots = dayTimeSlots;
 
                                     // ========== TIMETABLE VIEW ==========
                                     if (viewMode === 'timetable') {
@@ -482,7 +491,7 @@ export const ScheduleList: React.FC = () => {
                                                         </tr>
                                                     </thead>
                                                     <tbody className="divide-y divide-slate-100">
-                                                        {allSlots.map((slot, slotIdx) => {
+                                                        {allSlots.map((slot: any, slotIdx: number) => {
                                                             // Subject color helper
                                                             const getSubjectColors = (schedule: Schedule) => {
                                                                 const subject = subjects.find(s => s.id === schedule.subjectId);
@@ -540,8 +549,7 @@ export const ScheduleList: React.FC = () => {
                                                                         s => s.classId === cls.id &&
                                                                             s.startTime === slot.startTime &&
                                                                             s.endTime === slot.endTime
-                                                                    );
-                                                                    const colors = schedule ? getSubjectColors(schedule) : null;
+                                                                    );                                                                    const colors = schedule ? getSubjectColors(schedule) : null;
 
                                                                     return (
                                                                         <td 
@@ -659,7 +667,7 @@ export const ScheduleList: React.FC = () => {
                                                                     >
                                                                         <div className="flex flex-col items-center gap-0.5">
                                                                             <span className="inline-flex items-center justify-center h-5 w-14 rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 uppercase">
-                                                                                Jam {lessonSlots.findIndex(s => s.startTime === group.startTime) + 1 || '?'}
+                                                                                Jam {dayTimeSlots.filter((s: any) => s.type === 'lesson').findIndex((s: any) => s.startTime === group.startTime) + 1 || '?'}
                                                                             </span>
                                                                             <span className="text-xs font-bold text-slate-800 font-mono mt-1">
                                                                                 {group.startTime}

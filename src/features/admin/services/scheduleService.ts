@@ -1,26 +1,66 @@
 import { apiClient } from '@/lib/api-client';
-import { Schedule, CreateScheduleRequest, UpdateScheduleRequest } from '../types/schedule';
+import {
+    Schedule,
+    CreateScheduleRequest,
+    UpdateScheduleRequest,
+    DayOfWeekEn,
+    DAY_MAP_REVERSE,
+} from '../types/schedule';
+
+const transform = (s: any): Schedule => ({
+    id: String(s.id),
+    classSubjectId: String(s.class_subject_id ?? ''),
+    subjectId: String(s.subject_id ?? ''),
+    classId: String(s.class_id ?? ''),
+    teacherId: String(s.teacher_id ?? ''),
+    subjectName: s.subject_name ?? '',
+    className: s.class_name ?? '',
+    teacherName: s.teacher_name ?? '',
+    type: s.type ?? 'lesson',
+    label: s.label ?? undefined,
+    dayOfWeek: s.day_of_week as DayOfWeekEn,
+    day: DAY_MAP_REVERSE[s.day_of_week as DayOfWeekEn] ?? 'Senin',
+    startTime: s.start_time,
+    endTime: s.end_time,
+    room: s.room ?? undefined,
+    createdAt: s.created_at ?? '',
+    updatedAt: s.updated_at ?? '',
+});
 
 export const scheduleService = {
-    getSchedules: (params?: { class_id?: string | number; day_of_week?: string }): Promise<Schedule[]> => {
-        const query = new URLSearchParams();
-        if (params?.class_id) query.set('class_id', String(params.class_id));
-        if (params?.day_of_week) query.set('day_of_week', params.day_of_week);
-        const qs = query.toString();
-        return apiClient.get<Schedule[]>(`/admin/schedules${qs ? `?${qs}` : ''}`);
+    getSchedules: async (params?: { class_id?: string; day_of_week?: DayOfWeekEn }): Promise<Schedule[]> => {
+        const qs = new URLSearchParams();
+        if (params?.class_id) qs.set('class_id', params.class_id);
+        if (params?.day_of_week) qs.set('day_of_week', params.day_of_week);
+        const data = await apiClient.get<any[]>(`/admin/schedules${qs.toString() ? `?${qs}` : ''}`);
+        return Array.isArray(data) ? data.map(transform) : [];
     },
 
-    getScheduleById: (id: string | number): Promise<Schedule> =>
-        apiClient.get<Schedule>(`/admin/schedules/${id}`),
+    getScheduleById: async (id: string): Promise<Schedule> => {
+        const data = await apiClient.get<any>(`/admin/schedules/${id}`);
+        return transform(data);
+    },
 
-    createSchedule: (data: CreateScheduleRequest): Promise<Schedule> =>
-        apiClient.post<Schedule>('/admin/schedules', data),
+    createSchedule: async (payload: CreateScheduleRequest): Promise<Schedule> => {
+        const data = await apiClient.post<any>('/admin/schedules', payload);
+        return transform(data);
+    },
 
-    updateSchedule: (id: string | number, data: UpdateScheduleRequest): Promise<Schedule> =>
-        apiClient.put<Schedule>(`/admin/schedules/${id}`, data),
+    updateSchedule: async (id: string, payload: UpdateScheduleRequest): Promise<Schedule> => {
+        const data = await apiClient.put<any>(`/admin/schedules/${id}`, payload);
+        return transform(data);
+    },
 
-    deleteSchedule: (id: string | number): Promise<void> =>
+    deleteSchedule: (id: string): Promise<void> =>
         apiClient.delete(`/admin/schedules/${id}`),
+
+    copyDaySchedule: async (sourceDay: string, targetDay: string): Promise<Schedule[]> => {
+        const data = await apiClient.post<any[]>('/admin/schedules/copy-day', {
+            source_day: sourceDay,
+            target_day: targetDay,
+        });
+        return Array.isArray(data) ? data.map(transform) : [];
+    },
 };
 
 export default scheduleService;

@@ -27,11 +27,16 @@ export const TimeSlotList: React.FC<TimeSlotListProps> = ({ day, dayLabel }) => 
     const [slots, setSlots] = useState<TimeSlot[]>([]);
     const [isDirty, setIsDirty] = useState(false);
 
-    // Sync dari server ke local state
+    // Sync dari server ke local state — gunakan JSON string sebagai stable key
+    const serverKey = React.useMemo(
+        () => serverSlots.map(s => s.id).join(','),
+        [serverSlots]
+    );
     useEffect(() => {
         setSlots(serverSlots);
         setIsDirty(false);
-    }, [serverSlots]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [serverKey]);
 
     const handleChange = (id: string, field: keyof TimeSlot, value: any) => {
         setSlots(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
@@ -71,6 +76,18 @@ export const TimeSlotList: React.FC<TimeSlotListProps> = ({ day, dayLabel }) => 
                 return;
             }
         }
+
+        // Cek overlap antar slot
+        const sorted = [...slots].sort((a, b) => a.startTime.localeCompare(b.startTime));
+        for (let i = 0; i < sorted.length - 1; i++) {
+            if (sorted[i].endTime > sorted[i + 1].startTime) {
+                toast.error(
+                    `Bentrok: "${sorted[i].label}" (${sorted[i].startTime}–${sorted[i].endTime}) overlap dengan "${sorted[i + 1].label}" (${sorted[i + 1].startTime}–${sorted[i + 1].endTime})`
+                );
+                return;
+            }
+        }
+
         await save(slots);
         setIsDirty(false);
     };
