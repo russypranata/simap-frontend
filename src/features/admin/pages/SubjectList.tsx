@@ -381,9 +381,9 @@ export const SubjectList: React.FC = () => {
                                                         item.gradeLevel.sort().map(level => (
                                                             <span
                                                                 key={level}
-                                                                className="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 border-blue-200"
+                                                                className="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-[11px] font-semibold bg-blue-100 text-blue-800 border-blue-200"
                                                             >
-                                                                Kelas {level}
+                                                                {level}
                                                             </span>
                                                         ))
                                                     ) : (

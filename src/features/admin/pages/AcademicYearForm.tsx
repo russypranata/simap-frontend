@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useQueryClient } from '@tanstack/react-query';
 import {
     Card,
     CardContent,
@@ -33,22 +34,18 @@ import {
     Info,
 } from 'lucide-react';
 
-import { AcademicYear, CreateAcademicYearRequest, UpdateAcademicYearRequest } from '../types/academicYear';
+import { CreateAcademicYearRequest, UpdateAcademicYearRequest } from '../types/academicYear';
 import { academicYearService } from '../services/academicYearService';
 import { AcademicYearFormSkeleton } from '../components/academic-year';
+import { ACADEMIC_YEAR_KEYS } from '../hooks/useAcademicYearList';
 
-// Validation schema
 const formSchema = z.object({
     name: z
         .string()
         .min(1, 'Nama tahun ajaran wajib diisi')
         .regex(/^\d{4}\/\d{4}$/, 'Format harus YYYY/YYYY (contoh: 2025/2026)'),
-    startDate: z
-        .string()
-        .min(1, 'Tanggal mulai wajib diisi'),
-    endDate: z
-        .string()
-        .min(1, 'Tanggal selesai wajib diisi'),
+    startDate: z.string().min(1, 'Tanggal mulai wajib diisi'),
+    endDate: z.string().min(1, 'Tanggal selesai wajib diisi'),
 }).refine((data) => {
     if (data.startDate && data.endDate) {
         return new Date(data.startDate) < new Date(data.endDate);
@@ -62,11 +59,12 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface AcademicYearFormProps {
-    id?: string; // If provided, it's edit mode
+    id?: string;
 }
 
 export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const isEditMode = Boolean(id);
     const [isLoading, setIsLoading] = useState(isEditMode);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,39 +73,24 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: '',
-            startDate: '',
-            endDate: '',
-        },
+        defaultValues: { name: '', startDate: '', endDate: '' },
     });
 
-    // Fetch existing data for edit mode
     useEffect(() => {
         if (isEditMode && id) {
-            fetchAcademicYear(id);
+            academicYearService.getAcademicYearById(id)
+                .then(data => {
+                    form.reset({
+                        name: data.name,
+                        startDate: data.startDate,
+                        endDate: data.endDate,
+                    });
+                    setAcademicYearName(data.name);
+                })
+                .catch(() => setError('Gagal memuat data tahun ajaran'))
+                .finally(() => setIsLoading(false));
         }
     }, [id, isEditMode]);
-
-    const fetchAcademicYear = async (yearId: string) => {
-        try {
-            setIsLoading(true);
-            const data = await academicYearService.getAcademicYearById(yearId);
-            if (data) {
-                form.reset({
-                    name: data.name,
-                    startDate: data.startDate,
-                    endDate: data.endDate,
-                });
-                setAcademicYearName(data.name);
-            }
-        } catch (err) {
-            console.error('Failed to fetch academic year:', err);
-            setError('Gagal memuat data tahun ajaran');
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const onSubmit = async (values: FormValues) => {
         try {
@@ -115,71 +98,51 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
             setError(null);
 
             if (isEditMode && id) {
-                const updateData: UpdateAcademicYearRequest = {
+                const payload: UpdateAcademicYearRequest = {
                     name: values.name,
                     startDate: values.startDate,
                     endDate: values.endDate,
                 };
-                await academicYearService.updateAcademicYear(id, updateData);
+                await academicYearService.updateAcademicYear(id, payload);
+                toast.success('Tahun ajaran berhasil diperbarui');
             } else {
-                const createData: CreateAcademicYearRequest = {
+                const payload: CreateAcademicYearRequest = {
                     name: values.name,
                     startDate: values.startDate,
                     endDate: values.endDate,
                 };
-                await academicYearService.createAcademicYear(createData);
+                await academicYearService.createAcademicYear(payload);
+                toast.success('Tahun ajaran berhasil dibuat');
             }
 
-            toast.success(isEditMode ? 'Tahun ajaran berhasil diperbarui' : 'Tahun ajaran berhasil dibuat');
+            // Invalidate list cache agar halaman list langsung fresh
+            queryClient.invalidateQueries({ queryKey: ACADEMIC_YEAR_KEYS.all });
             router.push('/admin/academic-year');
-        } catch (err) {
-            console.error('Failed to save academic year:', err);
-            const errorMessage = 'Gagal menyimpan data tahun ajaran';
-            setError(errorMessage);
-            toast.error(errorMessage);
+        } catch (err: any) {
+            const msg = err?.errors?.name?.[0]
+                ?? err?.message
+                ?? 'Gagal menyimpan data tahun ajaran';
+            setError(msg);
+            toast.error(msg);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // Auto-generate name from dates
-    const handleStartDateChange = (value: string) => {
-        form.setValue('startDate', value);
-        
-        const currentName = form.getValues('name');
-        const endDate = form.getValues('endDate');
-        
-        if (!currentName && value && endDate) {
-            const startYear = new Date(value).getFullYear();
-            const endYear = new Date(endDate).getFullYear();
-            if (startYear !== endYear) {
-                form.setValue('name', `${startYear}/${endYear}`);
-            }
-        }
+    // Auto-generate nama dari tanggal jika nama belum diisi
+    const tryAutoName = (startDate: string, endDate: string) => {
+        if (form.getValues('name')) return;
+        if (!startDate || !endDate) return;
+        const sy = new Date(startDate).getFullYear();
+        const ey = new Date(endDate).getFullYear();
+        if (sy !== ey) form.setValue('name', `${sy}/${ey}`, { shouldValidate: true });
     };
 
-    const handleEndDateChange = (value: string) => {
-        form.setValue('endDate', value);
-        
-        const currentName = form.getValues('name');
-        const startDate = form.getValues('startDate');
-        
-        if (!currentName && startDate && value) {
-            const startYear = new Date(startDate).getFullYear();
-            const endYear = new Date(value).getFullYear();
-            if (startYear !== endYear) {
-                form.setValue('name', `${startYear}/${endYear}`);
-            }
-        }
-    };
-
-    if (isLoading) {
-        return <AcademicYearFormSkeleton />;
-    }
+    if (isLoading) return <AcademicYearFormSkeleton />;
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             {/* Header */}
             <div>
                 <div className="flex items-center gap-3">
@@ -205,21 +168,21 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
             {/* Error Alert */}
             {error && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-                    <AlertCircle className="h-5 w-5 text-red-600" />
+                    <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
                     <p className="text-sm text-red-800">{error}</p>
                 </div>
             )}
 
             {/* Form Card */}
-            <Card className="border-slate-200">
+            <Card className="border-slate-200 shadow-sm">
                 <CardHeader className="pb-2">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
-                            <CalendarDays className="h-5 w-5" />
+                        <div className="p-2.5 bg-blue-100 rounded-xl">
+                            <CalendarDays className="h-5 w-5 text-blue-700" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg font-semibold text-gray-900">Data Tahun Ajaran</CardTitle>
-                            <CardDescription className="text-sm text-muted-foreground">
+                            <CardTitle className="text-lg font-semibold text-slate-800">Data Tahun Ajaran</CardTitle>
+                            <CardDescription className="text-sm text-slate-600">
                                 Isi informasi tahun ajaran beserta periode waktu mulai dan selesai
                             </CardDescription>
                         </div>
@@ -236,14 +199,11 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
                                     <FormItem>
                                         <FormLabel>Nama Tahun Ajaran</FormLabel>
                                         <FormControl>
-                                            <Input
-                                                placeholder="2025/2026"
-                                                {...field}
-                                            />
+                                            <Input placeholder="2025/2026" {...field} />
                                         </FormControl>
                                         <FormDescription className="text-[11px] flex items-center gap-1.5 text-slate-500 mt-1">
                                             <Info className="h-3 w-3 text-blue-500 shrink-0" />
-                                            Format: YYYY/YYYY (contoh: 2025/2026)
+                                            Format: YYYY/YYYY (contoh: 2025/2026). Otomatis terisi dari tanggal.
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
@@ -262,7 +222,10 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
                                                 <Input
                                                     type="date"
                                                     {...field}
-                                                    onChange={(e) => handleStartDateChange(e.target.value)}
+                                                    onChange={(e) => {
+                                                        field.onChange(e.target.value);
+                                                        tryAutoName(e.target.value, form.getValues('endDate'));
+                                                    }}
                                                 />
                                             </FormControl>
                                             <FormDescription className="text-[11px] flex items-center gap-1.5 text-slate-500 mt-1">
@@ -273,7 +236,6 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
                                         </FormItem>
                                     )}
                                 />
-
                                 <FormField
                                     control={form.control}
                                     name="endDate"
@@ -284,7 +246,10 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
                                                 <Input
                                                     type="date"
                                                     {...field}
-                                                    onChange={(e) => handleEndDateChange(e.target.value)}
+                                                    onChange={(e) => {
+                                                        field.onChange(e.target.value);
+                                                        tryAutoName(form.getValues('startDate'), e.target.value);
+                                                    }}
                                                 />
                                             </FormControl>
                                             <FormDescription className="text-[11px] flex items-center gap-1.5 text-slate-500 mt-1">
@@ -298,35 +263,22 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
                             </div>
 
                             {/* Info Box */}
-                            {/* Info Box */}
-                            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                                 <div className="flex items-start gap-3">
                                     <div className="p-1.5 bg-blue-100 rounded-md shrink-0 mt-0.5">
                                         <Calendar className="h-4 w-4 text-blue-700" />
                                     </div>
-                                    <div className="text-sm text-blue-900 space-y-3">
-                                        <div>
-                                            <p className="font-semibold text-blue-800">Pembagian Semester Otomatis & Cerdas</p>
-                                            <p className="mt-1 text-blue-700/90 leading-relaxed">
-                                                Sistem akan otomatis membuat 2 semester (Ganjil dan Genap) dengan algoritma pembagian yang realistis:
-                                            </p>
-                                        </div>
-                                        
-                                        <ul className="space-y-1.5 text-xs text-blue-700 list-disc list-outside ml-4 marker:text-blue-500">
-                                            <li>Semester Ganjil berakhir di hari Jumat (~48% periode)</li>
-                                            <li>Libur semester 2-3 minggu (mid-term break)</li>
-                                            <li>Semester Genap dimulai di hari Senin (~52% periode)</li>
-                                        </ul>
-
-                                        <p className="text-xs text-blue-800 pt-1 leading-snug">
-                                            <strong>Tip:</strong> Anda dapat menyesuaikan tanggal masing-masing semester secara manual setelah tahun ajaran berhasil dibuat.
+                                    <div className="text-sm text-blue-900 space-y-2">
+                                        <p className="font-semibold text-blue-800">Pembagian Semester Otomatis</p>
+                                        <p className="text-blue-700/90 leading-relaxed text-xs">
+                                            Sistem akan otomatis membuat 2 semester (Ganjil dan Genap). Tanggal masing-masing semester dapat disesuaikan setelah tahun ajaran dibuat.
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Actions */}
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex gap-3 pt-2">
                                 <Button
                                     type="button"
                                     variant="outline"
