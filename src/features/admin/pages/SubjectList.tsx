@@ -362,24 +362,14 @@ export const SubjectList: React.FC = () => {
                                             <td className="px-4 py-4">
                                                 <div className="flex gap-1.5 flex-wrap">
                                                     {item.gradeLevel && item.gradeLevel.length > 0 ? (
-                                                        item.gradeLevel.sort().map(level => {
-                                                            const colorMap: Record<string, string> = {
-                                                                '10': 'bg-blue-100 text-blue-700 border-blue-200',
-                                                                '11': 'bg-violet-100 text-violet-700 border-violet-200',
-                                                                '12': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                                                            };
-                                                            return (
-                                                                <span
-                                                                    key={level}
-                                                                    className={cn(
-                                                                        "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-semibold",
-                                                                        colorMap[level] ?? 'bg-slate-100 text-slate-600 border-slate-200'
-                                                                    )}
-                                                                >
-                                                                    X{level}
-                                                                </span>
-                                                            );
-                                                        })
+                                                        item.gradeLevel.sort().map(level => (
+                                                            <span
+                                                                key={level}
+                                                                className="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 border-blue-200"
+                                                            >
+                                                                Kelas {level}
+                                                            </span>
+                                                        ))
                                                     ) : (
                                                         <span className="text-xs text-slate-400">-</span>
                                                     )}
