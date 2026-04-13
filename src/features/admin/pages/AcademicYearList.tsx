@@ -30,6 +30,7 @@ import {
     CalendarCheck,
     Loader2,
     RefreshCw,
+    CalendarClock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
@@ -114,7 +115,7 @@ export const AcademicYearList: React.FC = () => {
                     onClick={() => router.push('/admin/academic-year/new')}
                     className="bg-blue-800 hover:bg-blue-900 text-white"
                 >
-                    <CalendarPlus className="h-4 w-4 mr-2" />
+                    <CalendarClock className="h-4 w-4 mr-2" />
                     Tambah Tahun Ajaran
                 </Button>
             </div>
@@ -197,7 +198,7 @@ export const AcademicYearList: React.FC = () => {
                                                     onClick={() => router.push('/admin/academic-year/new')}
                                                     className="mt-2"
                                                 >
-                                                    <CalendarPlus className="h-4 w-4 mr-2" />
+                                                    <CalendarClock className="h-4 w-4 mr-2" />
                                                     Tambah Tahun Ajaran
                                                 </Button>
                                             </div>

@@ -17,6 +17,7 @@ import {
     BookMarked,
     GraduationCap,
     Layers,
+    BookOpenCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -173,7 +174,7 @@ export const SubjectList: React.FC = () => {
                     onClick={() => router.push('/admin/subject/new')}
                     className="bg-blue-800 hover:bg-blue-900 text-white"
                 >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <BookOpenCheck className="h-4 w-4 mr-2" />
                     Tambah Mapel
                 </Button>
             </div>
