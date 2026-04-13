@@ -7,21 +7,16 @@ import {
     Plus,
     Clock,
     User,
-    MapPin,
-    MoreHorizontal,
     Trash2,
-    CalendarDays,
-    FilterX,
     FileX,
-    Settings,
-    CalendarPlus,
-
+    FilterX,
     Edit,
     BookOpen,
     Grid3X3,
     List,
     Copy,
     ArrowRight,
+    CalendarPlus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,14 +43,7 @@ import {
     DialogDescription,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -338,14 +326,14 @@ export const ScheduleList: React.FC = () => {
                 <CardHeader className="pb-4 space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
-                                <Clock className="h-5 w-5" />
+                            <div className="p-2.5 bg-blue-100 rounded-xl">
+                                <Clock className="h-5 w-5 text-blue-700" />
                             </div>
                             <div>
-                                <CardTitle className="text-lg font-semibold text-gray-900">
+                                <CardTitle className="text-lg font-semibold text-slate-800">
                                     Daftar Jadwal
                                 </CardTitle>
-                                <CardDescription>
+                                <CardDescription className="text-sm text-slate-600">
                                     Pantau distribusi mata pelajaran di seluruh kelas.
                                 </CardDescription>
                             </div>
@@ -447,7 +435,6 @@ export const ScheduleList: React.FC = () => {
 
                                     // ========== TIMETABLE VIEW ==========
                                     if (viewMode === 'timetable') {
-                                        // Extract unique classes from schedule data for this day
                                         const uniqueClasses = Array.from(
                                             new Map(
                                                 daySchedules
@@ -458,140 +445,121 @@ export const ScheduleList: React.FC = () => {
 
                                         if (uniqueClasses.length === 0) {
                                             return (
-                                                <div className="py-12 text-center">
-                                                    <div className="flex flex-col items-center justify-center">
-                                                        <div className="h-14 w-14 rounded-full bg-slate-50 flex items-center justify-center mb-3">
-                                                            <FileX className="h-6 w-6 text-slate-300" />
-                                                        </div>
-                                                        <p className="text-slate-500 font-medium text-sm">Belum ada jadwal untuk {day}</p>
-                                                        <p className="text-slate-400 text-xs mt-1">Klik "Buat Jadwal" untuk menambahkan</p>
+                                                <div className="py-12 flex flex-col items-center justify-center">
+                                                    <div className="w-14 h-14 rounded-full bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center mb-3">
+                                                        <FileX className="h-6 w-6 text-slate-400" />
                                                     </div>
+                                                    <p className="text-slate-500 font-medium text-sm">Belum ada jadwal untuk {day}</p>
+                                                    <p className="text-slate-400 text-xs mt-1">Klik "Buat Jadwal" untuk menambahkan</p>
                                                 </div>
                                             );
                                         }
 
+                                        const colCount = uniqueClasses.length + 1;
+
                                         return (
-                                            <div className="overflow-x-auto">
-                                                <table className="w-full border-collapse">
-                                                    <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
-                                                        <tr>
-                                                            <th className="px-3 py-3 font-semibold text-xs uppercase tracking-wider text-center w-[100px] border-r border-slate-200 sticky left-0 bg-slate-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
-                                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Waktu</span>
-                                                            </th>
-                                                            {uniqueClasses.map((cls) => (
-                                                                <th 
-                                                                    key={cls.id} 
-                                                                    className="px-3 py-3 text-xs text-center min-w-[120px] border-r border-slate-100"
-                                                                >
-                                                                    <span className="font-semibold text-slate-700">
-                                                                        {cls.name}
-                                                                    </span>
-                                                                </th>
-                                                            ))}
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-slate-100">
-                                                        {allSlots.map((slot: any, slotIdx: number) => {
-                                                            // Subject color helper
-                                                            const getSubjectColors = (schedule: Schedule) => {
-                                                                const subject = subjects.find(s => s.id === schedule.subjectId);
-                                                                const category = subject ? subject.category : undefined;
-                                                                // Use subject name from schedule (which might be denormalized) or linked subject
-                                                                const name = subject ? subject.name : schedule.subjectName;
-                                                                return getSubjectColor(name, category);
-                                                            };
+                                            <div className="overflow-x-auto p-4">
+                                                <div className="space-y-2" style={{ minWidth: `${colCount * 130}px` }}>
+                                                    {/* Header row */}
+                                                    <div className="grid gap-2" style={{ gridTemplateColumns: `100px repeat(${uniqueClasses.length}, 1fr)` }}>
+                                                        <div className="text-xs font-semibold p-2.5 bg-muted rounded-lg text-center text-muted-foreground uppercase tracking-wider">
+                                                            Waktu
+                                                        </div>
+                                                        {uniqueClasses.map(cls => (
+                                                            <div key={cls.id} className="text-xs font-semibold p-2.5 bg-muted rounded-lg text-center text-muted-foreground uppercase tracking-wider truncate">
+                                                                {cls.name}
+                                                            </div>
+                                                        ))}
+                                                    </div>
 
-                                                            // Render break/ishoma separator row
-                                                            if (slot.type === 'break' || slot.type === 'ishoma') {
-                                                                const isIshoma = slot.type === 'ishoma';
-                                                                return (
-                                                                    <tr key={slot.id} className={isIshoma ? "bg-green-50" : "bg-amber-50"}>
-                                                                        <td 
-                                                                            colSpan={uniqueClasses.length + 1}
-                                                                            className="py-2 px-4 text-center"
-                                                                        >
-                                                                            <span className={cn(
-                                                                                "text-xs font-medium",
-                                                                                isIshoma ? "text-green-600" : "text-amber-600"
-                                                                            )}>
-                                                                                {isIshoma ? '🍽️' : '☕'} {slot.label} • {slot.startTime} - {slot.endTime}
-                                                                            </span>
-                                                                        </td>
-                                                                    </tr>
-                                                                );
-                                                            }
-
-                                                            // Skip ceremony for now (only show on Monday)
-                                                            if (slot.type === 'ceremony') {
-                                                                return null;
-                                                            }
+                                                    {/* Slot rows */}
+                                                    {allSlots.map((slot: any) => {
+                                                        // Non-lesson row (break/ishoma/ceremony) — span full
+                                                        if (slot.type !== 'lesson') {
+                                                            const cfg = {
+                                                                break:    { bg: 'bg-amber-50/60 border-amber-200 text-amber-700', emoji: '☕' },
+                                                                ishoma:   { bg: 'bg-green-50/60 border-green-200 text-green-700', emoji: '🍽️' },
+                                                                ceremony: { bg: 'bg-blue-50/60 border-blue-200 text-blue-700', emoji: '🚩' },
+                                                            }[slot.type as string] ?? { bg: 'bg-slate-50 border-slate-200 text-slate-500', emoji: '⏸' };
 
                                                             return (
-                                                            <tr key={slot.label} className="hover:bg-slate-50/50">
-                                                                {/* Time Cell - solid background to prevent see-through on scroll */}
-                                                                <td className="px-2 py-3 text-center border-r border-slate-200 sticky left-0 z-20 bg-white shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
-                                                                    <div className="flex flex-col items-center gap-0.5">
-                                                                        <span className="inline-flex items-center justify-center h-5 w-14 rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 uppercase">
-                                                                            {slot.label.replace('Jam ke-', 'Jam ')}
-                                                                        </span>
-                                                                        <span className="text-xs font-bold text-slate-800 font-mono mt-1">
-                                                                            {slot.startTime}
-                                                                        </span>
-                                                                        <span className="text-xs font-mono">
-                                                                            <span className="text-slate-400">s/d </span>
-                                                                            <span className="font-bold text-slate-800">{slot.endTime}</span>
-                                                                        </span>
+                                                                <div key={slot.id} className="grid gap-2" style={{ gridTemplateColumns: `100px repeat(${uniqueClasses.length}, 1fr)` }}>
+                                                                    <div className={cn("text-xs p-2 rounded-lg flex items-center justify-center font-medium border whitespace-nowrap", cfg.bg)}>
+                                                                        {slot.startTime}
                                                                     </div>
-                                                                </td>
-                                                                {/* Schedule Cells */}
-                                                                {uniqueClasses.map((cls) => {
+                                                                    <div className={cn("rounded-lg border flex items-center justify-center gap-2 py-2 text-xs font-medium", cfg.bg)}
+                                                                        style={{ gridColumn: `2 / span ${uniqueClasses.length}` }}>
+                                                                        {cfg.emoji} {slot.label} • {slot.startTime} – {slot.endTime}
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        }
+
+                                                        // Lesson row
+                                                        return (
+                                                            <div key={slot.id} className="grid gap-2" style={{ gridTemplateColumns: `100px repeat(${uniqueClasses.length}, 1fr)` }}>
+                                                                {/* Waktu */}
+                                                                <div className="text-xs p-2 bg-muted rounded-lg flex flex-col items-center justify-center font-medium text-muted-foreground gap-0.5">
+                                                                    <span className="text-[10px] text-slate-600 font-semibold">{slot.label}</span>
+                                                                    <span className="text-slate-500 whitespace-nowrap">{slot.startTime}</span>
+                                                                    <span className="text-slate-400 text-[10px]">– {slot.endTime}</span>
+                                                                </div>
+
+                                                                {/* Per kelas */}
+                                                                {uniqueClasses.map(cls => {
                                                                     const schedule = filteredSchedules.find(
                                                                         s => s.classId === cls.id &&
                                                                             s.startTime === slot.startTime &&
                                                                             s.endTime === slot.endTime
-                                                                    );                                                                    const colors = schedule ? getSubjectColors(schedule) : null;
+                                                                    );
+
+                                                                    if (!schedule) {
+                                                                        return (
+                                                                            <button
+                                                                                key={cls.id}
+                                                                                type="button"
+                                                                                onClick={() => { setEditingId(null); setIsFormOpen(true); }}
+                                                                                className="border border-dashed border-muted rounded-lg bg-muted/20 min-h-[80px] flex items-center justify-center hover:border-blue-300 hover:bg-blue-50/30 transition-colors group"
+                                                                            >
+                                                                                <Plus className="h-4 w-4 text-slate-300 group-hover:text-blue-400" />
+                                                                            </button>
+                                                                        );
+                                                                    }
+
+                                                                    const colors = getSubjectColor(schedule.subjectName);
 
                                                                     return (
-                                                                        <td 
-                                                                            key={cls.id} 
-                                                                            className="px-2 py-2 text-center border-r border-slate-100 relative group bg-white"
-                                                                        >
-                                                                            {schedule ? (
-                                                                                <div 
-                                                                                    className={cn(
-                                                                                        "p-3 rounded-md bg-gradient-to-br border hover:shadow-md transition-shadow cursor-pointer relative overflow-hidden min-h-[56px]",
-                                                                                        colors?.bg,
-                                                                                        colors?.border
-                                                                                    )}
-                                                                                    onClick={() => openEdit(schedule)}
-                                                                                >
-                                                                                    {/* Background book icon */}
-                                                                                    <BookOpen className={cn("absolute -right-1 -bottom-1 h-10 w-10 opacity-[0.04]", colors?.text)} />
-                                                                                    <p className={cn("text-xs font-semibold truncate relative z-10", colors?.text)}>
-                                                                                        {schedule.subjectName}
-                                                                                    </p>
-                                                                                    <p className={cn("text-[10px] truncate mt-1 relative z-10", colors?.subtext)}>
-                                                                                        {schedule.teacherName}
-                                                                                    </p>
-                                                                                </div>
-                                                                            ) : (
-                                                                                <div className="p-3 min-h-[56px] rounded-md border border-dashed border-slate-200 text-slate-300 hover:border-blue-300 hover:bg-blue-50/50 transition-colors cursor-pointer group flex items-center justify-center"
-                                                                                    onClick={() => {
-                                                                                        setEditingId(null);
-                                                                                        setIsFormOpen(true);
-                                                                                    }}
-                                                                                >
-                                                                                    <Plus className="h-4 w-4 opacity-0 group-hover:opacity-100 text-blue-400" />
-                                                                                </div>
+                                                                        <button
+                                                                            key={cls.id}
+                                                                            type="button"
+                                                                            onClick={() => openEdit(schedule)}
+                                                                            className={cn(
+                                                                                "p-2.5 rounded-lg transition-all min-h-[80px] w-full text-left hover:shadow-md hover:scale-[1.01]",
+                                                                                `bg-gradient-to-br ${colors.bg} border ${colors.border}`
                                                                             )}
-                                                                        </td>
+                                                                        >
+                                                                            <div className="space-y-1.5">
+                                                                                <div className="flex items-start gap-1">
+                                                                                    <BookOpen className={cn("h-3 w-3 mt-0.5 flex-shrink-0 opacity-70", colors.text)} />
+                                                                                    <span className={cn("text-xs font-semibold line-clamp-2 leading-tight", colors.text)}>
+                                                                                        {schedule.subjectName}
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div className={cn("flex items-center gap-1 opacity-75", colors.subtext)}>
+                                                                                    <User className="h-3 w-3 flex-shrink-0" />
+                                                                                    <span className="text-xs truncate">{schedule.teacherName || '—'}</span>
+                                                                                </div>
+                                                                                {schedule.room && (
+                                                                                    <span className={cn("text-[10px] opacity-60", colors.subtext)}>{schedule.room}</span>
+                                                                                )}
+                                                                            </div>
+                                                                        </button>
                                                                     );
                                                                 })}
-                                                            </tr>
-                                                            );
-                                                        })}
-                                                    </tbody>
-                                                </table>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
                                         );
                                     }
