@@ -114,6 +114,19 @@ export const SubjectList: React.FC = () => {
         [subjects, searchTerm, selectedCategory, selectedType, selectedGrade]
     );
 
+    // Pagination
+    const PAGE_SIZE = 10;
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // Reset ke halaman 1 saat filter berubah
+    React.useEffect(() => { setCurrentPage(1); }, [searchTerm, selectedCategory, selectedType, selectedGrade]);
+
+    const totalPages = Math.ceil(filteredSubjects.length / PAGE_SIZE);
+    const paginatedSubjects = useMemo(() =>
+        filteredSubjects.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+        [filteredSubjects, currentPage]
+    );
+
     const stats = useMemo(() => ({
         total: subjects.length,
         wajib: subjects.filter(s => s.type === 'WAJIB').length,
@@ -321,7 +334,7 @@ export const SubjectList: React.FC = () => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredSubjects.map((item) => (
+                                    paginatedSubjects.map((item) => (
                                         <tr
                                             key={item.id}
                                             className={cn(
@@ -436,6 +449,58 @@ export const SubjectList: React.FC = () => {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Pagination Footer */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50/50">
+                            <p className="text-xs text-slate-500">
+                                Menampilkan {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredSubjects.length)} dari {filteredSubjects.length} data
+                            </p>
+                            <div className="flex items-center gap-1">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 px-2 text-xs"
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    ‹ Prev
+                                </Button>
+                                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                    .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                                    .reduce<(number | '...')[]>((acc, p, idx, arr) => {
+                                        if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('...');
+                                        acc.push(p);
+                                        return acc;
+                                    }, [])
+                                    .map((p, i) =>
+                                        p === '...' ? (
+                                            <span key={`ellipsis-${i}`} className="px-1 text-xs text-slate-400">…</span>
+                                        ) : (
+                                            <Button
+                                                key={p}
+                                                variant={currentPage === p ? 'default' : 'outline'}
+                                                size="sm"
+                                                className={cn("h-7 w-7 p-0 text-xs", currentPage === p && "bg-blue-800 hover:bg-blue-900")}
+                                                onClick={() => setCurrentPage(p as number)}
+                                            >
+                                                {p}
+                                            </Button>
+                                        )
+                                    )
+                                }
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 px-2 text-xs"
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next ›
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
