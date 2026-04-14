@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useMutamayizinDashboard } from "../hooks/useMutamayizinDashboard";
-import { SkeletonPageHeader, SkeletonStatCard } from "@/features/shared/components";
+import { SkeletonPageHeader, SkeletonStatCard, ErrorState } from "@/features/shared/components";
 
 const CardSkeleton: React.FC = () => (
     <Card>
@@ -39,7 +39,7 @@ const CardSkeleton: React.FC = () => (
 
 export const MutamayizinDashboard: React.FC = () => {
     const router = useRouter();
-    const { userName, stats, recentAchievements, ekskulSummary, isLoading } = useMutamayizinDashboard();
+    const { stats, recentAchievements, ekskulSummary, isLoading, error, refetch } = useMutamayizinDashboard();
 
     if (isLoading) return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -53,6 +53,8 @@ export const MutamayizinDashboard: React.FC = () => {
             </div>
         </div>
     );
+
+    if (error) return <ErrorState error={error instanceof Error ? error.message : "Terjadi kesalahan saat memuat data."} onRetry={refetch} />;
 
     const getRankColor = (rank: string) => {
         if (rank === "Juara 1") return "bg-emerald-100 text-emerald-700 border-emerald-200";
@@ -82,7 +84,7 @@ export const MutamayizinDashboard: React.FC = () => {
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Selamat datang, <span className="font-medium text-foreground">{userName ?? "Koordinator"}</span>
+                        Selamat datang, <span className="font-medium text-foreground">Koordinator</span>
                     </p>
 
                 </div>
@@ -264,7 +266,7 @@ export const MutamayizinDashboard: React.FC = () => {
                         <div className="space-y-2">
                             {ekskulSummary.slice(0, 5).map((ekskul) => (
                                 <div
-                                    key={ekskul.name}
+                            key={ekskul.id}
                                     className="flex items-center gap-3 p-3 rounded-lg border hover:bg-purple-50/50 hover:border-purple-200 transition-all"
                                 >
                                     {/* Icon */}

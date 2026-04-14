@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
 import {
     Card,
     CardContent,
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
@@ -19,31 +19,13 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
-    Award,
-    Calendar,
-    Plus,
-    Search,
-    MapPin,
-    Star,
-    Filter,
-    TrendingUp,
-    Trophy,
-    ChevronLeft,
-    ChevronRight,
-    MoreVertical,
-    Eye,
-    Edit,
-    Trash2,
-    User,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -54,371 +36,410 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+    Award,
+    Plus,
+    Search,
+    MapPin,
+    Star,
+    Filter,
+    TrendingUp,
+    Trophy,
+    Edit,
+    Trash2,
+    User,
+    Loader2,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+    useMutamayizinAchievements,
+    useCreateAchievement,
+    useUpdateAchievement,
+    useDeleteAchievement,
+} from "../hooks/useMutamayizinAchievements";
+import { getStudents, getAcademicYears, getAchievement } from "../services/mutamayizinService";
+import type {
+    Achievement,
+    AchievementDetail,
+    StudentOption,
+    AcademicYear,
+    CreateAchievementData,
+} from "../services/mutamayizinService";
+import { PaginationControls } from "@/features/shared/components/PaginationControls";
+import { EmptyState } from "@/features/shared/components/EmptyState";
+import { ErrorState } from "@/features/shared/components/ErrorState";
+import { SkeletonTableRow } from "@/features/shared/components/SkeletonBlocks";
 
-// Achievement interface
-interface Achievement {
-    id: number;
-    studentName: string;
-    competitionName: string;
-    category: string;
-    rank: string;
-    eventName: string;
-    organizer: string;
-    level: string;
-    date: string;
-    photo: string | null;
-}
+// ==================== HELPERS ====================
 
-// Mock data untuk prestasi (15 items for pagination testing)
-const mockAchievements: Achievement[] = [
-    {
-        id: 1,
-        studentName: "Ahmad Rizki",
-        competitionName: "Olimpiade Matematika",
-        category: "Akademik",
-        rank: "Juara 1",
-        eventName: "OSN Tingkat Provinsi",
-        organizer: "Dinas Pendidikan Provinsi Kalimantan Barat",
-        level: "Provinsi",
-        date: "2024-11-15",
-        photo: null,
-    },
-    {
-        id: 101,
-        studentName: "Ahmad Rizki",
-        competitionName: "Kompetisi Sains Madrasah",
-        category: "Akademik",
-        rank: "Juara 3",
-        eventName: "KSM Kabupaten",
-        organizer: "Kemenag Kabupaten",
-        level: "Kabupaten",
-        date: "2024-08-10",
-        photo: null,
-    },
-    {
-        id: 102,
-        studentName: "Ahmad Rizki",
-        competitionName: "Lomba Cerdas Cermat",
-        category: "Akademik",
-        rank: "Juara 1",
-        eventName: "LCC Sekolah",
-        organizer: "OSIS SMA",
-        level: "Sekolah",
-        date: "2024-05-02",
-        photo: null,
-    },
-    {
-        id: 103,
-        studentName: "Ahmad Rizki",
-        competitionName: "Olimpiade Matematika Nasional",
-        category: "Akademik",
-        rank: "Juara 2",
-        eventName: "OSN Nasional",
-        organizer: "Puspresnas",
-        level: "Nasional",
-        date: "2023-11-15",
-        photo: null,
-    },
-    {
-        id: 104,
-        studentName: "Ahmad Rizki",
-        competitionName: "Lomba Pidato Bahasa Arab",
-        category: "Bahasa",
-        rank: "Juara 1",
-        eventName: "Festival Bahasa Arab",
-        organizer: "MGMP Bahasa Arab",
-        level: "Provinsi",
-        date: "2023-08-20",
-        photo: null,
-    },
-    {
-        id: 105,
-        studentName: "Ahmad Rizki",
-        competitionName: "Musabaqah Tilawatil Quran",
-        category: "Keagamaan",
-        rank: "Harapan 1",
-        eventName: "MTQ Kabupaten",
-        organizer: "LPTQ Kabupaten",
-        level: "Kabupaten",
-        date: "2023-05-10",
-        photo: null,
-    },
-    {
-        id: 106,
-        studentName: "Ahmad Rizki",
-        competitionName: "Lomba Kaligrafi Islam",
-        category: "Seni",
-        rank: "Juara 3",
-        eventName: "Pekan Seni Islami",
-        organizer: "Yayasan Al-Fityan",
-        level: "Sekolah",
-        date: "2023-03-05",
-        photo: null,
-    },
-    {
-        id: 107,
-        studentName: "Ahmad Rizki",
-        competitionName: "Science Fair Project",
-        category: "Sains",
-        rank: "Juara 2",
-        eventName: "Expo Pendidikan",
-        organizer: "Dinas Pendidikan Kota",
-        level: "Kecamatan",
-        date: "2023-01-20",
-        photo: null,
-    },
-    {
-        id: 2,
-        studentName: "Siti Nabila",
-        competitionName: "Lomba Pidato Bahasa Inggris",
-        category: "Non-Akademik",
-        rank: "Juara 2",
-        eventName: "English Speech Competition",
-        organizer: "Dinas Pendidikan Kabupaten Kubu Raya",
-        level: "Kabupaten",
-        date: "2024-10-20",
-        photo: null,
-    },
-    {
-        id: 3,
-        studentName: "Muhammad Fajar",
-        competitionName: "Kompetisi Robotika",
-        category: "Teknologi",
-        rank: "Juara 1",
-        eventName: "National Robotics Competition",
-        organizer: "Kementerian Pendidikan dan Kebudayaan RI",
-        level: "Nasional",
-        date: "2024-09-10",
-        photo: null,
-    },
-    {
-        id: 4,
-        studentName: "Rina Amelia",
-        competitionName: "Lomba Karya Tulis Ilmiah",
-        category: "Akademik",
-        rank: "Juara 3",
-        eventName: "LKTI Nasional",
-        organizer: "Universitas Tanjungpura",
-        level: "Nasional",
-        date: "2024-08-25",
-        photo: null,
-    },
-    {
-        id: 5,
-        studentName: "Budi Santoso",
-        competitionName: "Lomba Futsal",
-        category: "Olahraga",
-        rank: "Juara 1",
-        eventName: "Turnamen Futsal Pelajar",
-        organizer: "KONI Kalimantan Barat",
-        level: "Provinsi",
-        date: "2024-07-18",
-        photo: null,
-    },
-    {
-        id: 6,
-        studentName: "Dewi Lestari",
-        competitionName: "Lomba Menyanyi",
-        category: "Seni",
-        rank: "Juara 2",
-        eventName: "Festival Seni Pelajar",
-        organizer: "Dinas Kebudayaan Kalbar",
-        level: "Provinsi",
-        date: "2024-06-30",
-        photo: null,
-    },
-    {
-        id: 7,
-        studentName: "Arif Hidayat",
-        competitionName: "Olimpiade Fisika",
-        category: "Akademik",
-        rank: "Juara 3",
-        eventName: "OSN Kabupaten",
-        organizer: "Dinas Pendidikan Kabupaten Kubu Raya",
-        level: "Kabupaten",
-        date: "2024-05-12",
-        photo: null,
-    },
-    {
-        id: 8,
-        studentName: "Indah Permata",
-        competitionName: "Lomba Desain Grafis",
-        category: "Teknologi",
-        rank: "Juara 1",
-        eventName: "Creative Design Competition",
-        organizer: "Politeknik Negeri Pontianak",
-        level: "Provinsi",
-        date: "2024-04-22",
-        photo: null,
-    },
-    {
-        id: 9,
-        studentName: "Dimas Pratama",
-        competitionName: "Olimpiade Kimia",
-        category: "Akademik",
-        rank: "Juara 2",
-        eventName: "OSN Tingkat Nasional",
-        organizer: "Kemendikbud RI",
-        level: "Nasional",
-        date: "2024-03-15",
-        photo: null,
-    },
-    {
-        id: 10,
-        studentName: "Ayu Kartika",
-        competitionName: "Lomba Tari Tradisional",
-        category: "Seni",
-        rank: "Juara 1",
-        eventName: "Festival Budaya Nusantara",
-        organizer: "Kemendikbud RI",
-        level: "Nasional",
-        date: "2024-02-28",
-        photo: null,
-    },
-    {
-        id: 11,
-        studentName: "Reza Maulana",
-        competitionName: "Lomba Catur",
-        category: "Olahraga",
-        rank: "Juara 3",
-        eventName: "Championship Catur Pelajar",
-        organizer: "Percasi Kalbar",
-        level: "Provinsi",
-        date: "2024-01-20",
-        photo: null,
-    },
-    {
-        id: 12,
-        studentName: "Fitri Handayani",
-        competitionName: "Olimpiade Biologi",
-        category: "Akademik",
-        rank: "Juara 1",
-        eventName: "OSN Provinsi",
-        organizer: "Dinas Pendidikan Provinsi Kalbar",
-        level: "Provinsi",
-        date: "2023-12-10",
-        photo: null,
-    },
-    {
-        id: 13,
-        studentName: "Hendra Gunawan",
-        competitionName: "Lomba Fotografi",
-        category: "Seni",
-        rank: "Juara 2",
-        eventName: "Photography Contest",
-        organizer: "Komunitas Fotografer Pontianak",
-        level: "Kabupaten",
-        date: "2023-11-25",
-        photo: null,
-    },
-    {
-        id: 14,
-        studentName: "Lina Marlina",
-        competitionName: "Lomba Debat Bahasa Indonesia",
-        category: "Non-Akademik",
-        rank: "Juara 1",
-        eventName: "National Debate Championship",
-        organizer: "Kemendikbud RI",
-        level: "Nasional",
-        date: "2023-10-15",
-        photo: null,
-    },
-    {
-        id: 15,
-        studentName: "Yoga Pratama",
-        competitionName: "Lomba Robotik",
-        category: "Teknologi",
-        rank: "Juara 3",
-        eventName: "World Robot Olympiad",
-        organizer: "WRO Indonesia",
-        level: "Internasional",
-        date: "2023-09-05",
-        photo: null,
-    },
+const getRankBadgeColor = (rank: string) => {
+    switch (rank) {
+        case "Juara 1":
+            return "bg-emerald-100 text-emerald-700 border-emerald-300";
+        case "Juara 2":
+            return "bg-sky-100 text-sky-700 border-sky-300";
+        case "Juara 3":
+            return "bg-orange-100 text-orange-700 border-orange-300";
+        default:
+            return "bg-zinc-100 text-zinc-600 border-zinc-300";
+    }
+};
+
+const getLevelBadgeColor = () => "bg-amber-100 text-amber-800 border-amber-300";
+
+const LEVEL_OPTIONS = ["kabupaten", "provinsi", "nasional", "internasional"];
+const SEMESTER_OPTIONS = [
+    { value: "1", label: "Semester 1" },
+    { value: "2", label: "Semester 2" },
 ];
 
-export const MutamayizinAchievements: React.FC = () => {
-    const router = useRouter();
-    const [achievements] = useState<Achievement[]>(mockAchievements);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [levelFilter, setLevelFilter] = useState("all");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+// ==================== FORM MODAL ====================
 
-    // Filter achievements
-    const filteredAchievements = useMemo(() => {
-        return achievements.filter((achievement) => {
-            const matchesSearch =
-                achievement.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                achievement.competitionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                achievement.eventName.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesLevel = levelFilter === "all" || achievement.level === levelFilter;
-            return matchesSearch && matchesLevel;
-        });
-    }, [achievements, searchQuery, levelFilter]);
+interface AchievementFormData {
+    student_profile_id: string;
+    academic_year_id: string;
+    competition_name: string;
+    category: string;
+    rank: string;
+    level: string;
+    date: string;
+    semester: string;
+}
 
-    // Pagination
-    const totalPages = Math.ceil(filteredAchievements.length / itemsPerPage);
-    const paginatedAchievements = filteredAchievements.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+const EMPTY_FORM: AchievementFormData = {
+    student_profile_id: "",
+    academic_year_id: "",
+    competition_name: "",
+    category: "",
+    rank: "",
+    level: "",
+    date: "",
+    semester: "",
+};
 
-    // Reset to page 1 when filters change
-    useMemo(() => {
-        setCurrentPage(1);
-    }, [searchQuery, levelFilter]);
+interface AchievementFormModalProps {
+    open: boolean;
+    onClose: () => void;
+    editData?: AchievementDetail | null;
+    students: StudentOption[];
+    academicYears: AcademicYear[];
+    onSubmit: (data: CreateAchievementData) => void;
+    isSubmitting: boolean;
+}
 
-    // Stats
-    const totalAchievements = achievements.length;
-    const nationalAchievements = achievements.filter((a) => a.level === "Nasional" || a.level === "Internasional").length;
-    const firstPlaceCount = achievements.filter((a) => a.rank === "Juara 1").length;
+const AchievementFormModal: React.FC<AchievementFormModalProps> = ({
+    open,
+    onClose,
+    editData,
+    students,
+    academicYears,
+    onSubmit,
+    isSubmitting,
+}) => {
+    const [form, setForm] = useState<AchievementFormData>(EMPTY_FORM);
 
-    const handleAddNew = () => {
-        router.push("/mutamayizin-coordinator/achievements/add");
+    useEffect(() => {
+        if (editData) {
+            setForm({
+                student_profile_id: String(editData.studentProfileId ?? ""),
+                academic_year_id: String(editData.academicYearId ?? ""),
+                competition_name: editData.competitionName,
+                category: editData.category ?? "",
+                rank: editData.rank,
+                level: editData.level,
+                date: editData.date,
+                semester: String(editData.semester ?? ""),
+            });
+        } else {
+            setForm(EMPTY_FORM);
+        }
+    }, [editData, open]);
+
+    const handleChange = (field: keyof AchievementFormData, value: string) => {
+        setForm((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleViewDetail = (achievement: Achievement) => {
-        router.push(`/mutamayizin-coordinator/achievements/${achievement.id}`);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit({
+            student_profile_id: Number(form.student_profile_id),
+            academic_year_id: Number(form.academic_year_id),
+            competition_name: form.competition_name,
+            category: form.category || undefined,
+            rank: form.rank,
+            level: form.level,
+            date: form.date,
+            semester: form.semester ? Number(form.semester) : undefined,
+        });
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+            <DialogContent className="max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>{editData ? "Edit Prestasi" : "Tambah Prestasi"}</DialogTitle>
+                    <DialogDescription>
+                        {editData ? "Perbarui data prestasi siswa." : "Isi data prestasi siswa baru."}
+                    </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Siswa */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="student">Siswa <span className="text-red-500">*</span></Label>
+                        <Select
+                            value={form.student_profile_id}
+                            onValueChange={(v) => handleChange("student_profile_id", v)}
+                            required
+                        >
+                            <SelectTrigger id="student">
+                                <SelectValue placeholder="Pilih siswa..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {students.map((s) => (
+                                    <SelectItem key={s.id} value={String(s.id)}>
+                                        {s.name} — {s.class}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Tahun Ajaran */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="academic_year">Tahun Ajaran <span className="text-red-500">*</span></Label>
+                        <Select
+                            value={form.academic_year_id}
+                            onValueChange={(v) => handleChange("academic_year_id", v)}
+                            required
+                        >
+                            <SelectTrigger id="academic_year">
+                                <SelectValue placeholder="Pilih tahun ajaran..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {academicYears.map((ay) => (
+                                    <SelectItem key={ay.id} value={String(ay.id)}>
+                                        {ay.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Semester */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="semester">Semester</Label>
+                        <Select
+                            value={form.semester}
+                            onValueChange={(v) => handleChange("semester", v)}
+                        >
+                            <SelectTrigger id="semester">
+                                <SelectValue placeholder="Pilih semester..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {SEMESTER_OPTIONS.map((s) => (
+                                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Nama Kompetisi */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="competition_name">Nama Kompetisi <span className="text-red-500">*</span></Label>
+                        <Input
+                            id="competition_name"
+                            value={form.competition_name}
+                            onChange={(e) => handleChange("competition_name", e.target.value)}
+                            placeholder="Contoh: Olimpiade Matematika"
+                            required
+                        />
+                    </div>
+
+                    {/* Kategori */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="category">Kategori</Label>
+                        <Input
+                            id="category"
+                            value={form.category}
+                            onChange={(e) => handleChange("category", e.target.value)}
+                            placeholder="Contoh: Akademik, Olahraga, Seni"
+                        />
+                    </div>
+
+                    {/* Peringkat */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="rank">Peringkat <span className="text-red-500">*</span></Label>
+                        <Input
+                            id="rank"
+                            value={form.rank}
+                            onChange={(e) => handleChange("rank", e.target.value)}
+                            placeholder="Contoh: Juara 1, Juara 2, Harapan 1"
+                            required
+                        />
+                    </div>
+
+                    {/* Level */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="level">Level <span className="text-red-500">*</span></Label>
+                        <Select
+                            value={form.level}
+                            onValueChange={(v) => handleChange("level", v)}
+                            required
+                        >
+                            <SelectTrigger id="level">
+                                <SelectValue placeholder="Pilih level..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {LEVEL_OPTIONS.map((l) => (
+                                    <SelectItem key={l} value={l}>
+                                        {l.charAt(0).toUpperCase() + l.slice(1)}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Tanggal */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="date">Tanggal <span className="text-red-500">*</span></Label>
+                        <Input
+                            id="date"
+                            type="date"
+                            value={form.date}
+                            onChange={(e) => handleChange("date", e.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+                            Batal
+                        </Button>
+                        <Button
+                            type="submit"
+                            className="bg-blue-800 hover:bg-blue-900 text-white"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                            {editData ? "Simpan Perubahan" : "Tambah Prestasi"}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+// ==================== MAIN PAGE ====================
+
+export const MutamayizinAchievements: React.FC = () => {
+    // Pagination state
+    const [page, setPage] = useState(1);
+    const [perPage, setPerPage] = useState(15);
+
+    // Filter state
+    const [search, setSearch] = useState("");
+    const [academicYearId, setAcademicYearId] = useState<string>("");
+    const [semester, setSemester] = useState<string>("");
+    const [levelFilter, setLevelFilter] = useState<string>("");
+
+    // Debounced search
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    useEffect(() => {
+        const t = setTimeout(() => setDebouncedSearch(search), 400);
+        return () => clearTimeout(t);
+    }, [search]);
+
+    // Reset page when filters change
+    useEffect(() => { setPage(1); }, [debouncedSearch, academicYearId, semester, levelFilter]);
+
+    // Hooks
+    const { achievements, isLoading, error, meta, refetch } = useMutamayizinAchievements({
+        page,
+        per_page: perPage,
+        search: debouncedSearch || undefined,
+        academic_year_id: academicYearId || undefined,
+        semester: semester || undefined,
+        level: levelFilter || undefined,
+    });
+
+    const createMutation = useCreateAchievement();
+    const updateMutation = useUpdateAchievement();
+    const deleteMutation = useDeleteAchievement();
+
+    // Dropdown data
+    const [students, setStudents] = useState<StudentOption[]>([]);
+    const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
+    useEffect(() => {
+        getStudents().then(setStudents).catch(() => {});
+        getAcademicYears().then(setAcademicYears).catch(() => {});
+    }, []);
+
+    // Modal state
+    const [formOpen, setFormOpen] = useState(false);
+    const [editTarget, setEditTarget] = useState<AchievementDetail | null>(null);
+    const [editLoading, setEditLoading] = useState(false);
+
+    // Delete dialog state
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<Achievement | null>(null);
+
+    // Handlers
+    const handleAddNew = () => {
+        setEditTarget(null);
+        setFormOpen(true);
     };
 
     const handleEdit = (achievement: Achievement) => {
-        router.push(`/mutamayizin-coordinator/achievements/${achievement.id}/edit`);
+        setEditLoading(true);
+        getAchievement(achievement.id)
+            .then((detail) => {
+                setEditTarget(detail);
+                setFormOpen(true);
+            })
+            .catch(() => {
+                // fallback: open with partial data
+                setEditTarget(null);
+                setFormOpen(true);
+            })
+            .finally(() => setEditLoading(false));
     };
 
     const handleDeleteClick = (achievement: Achievement) => {
-        setSelectedAchievement(achievement);
+        setDeleteTarget(achievement);
         setDeleteDialogOpen(true);
     };
 
     const handleDeleteConfirm = () => {
-        if (selectedAchievement) {
-            // TODO: API call to delete
-            console.log("Deleting achievement:", selectedAchievement.id);
-            // Show success toast
-            setDeleteDialogOpen(false);
-            setSelectedAchievement(null);
+        if (!deleteTarget) return;
+        deleteMutation.mutate(deleteTarget.id, {
+            onSuccess: () => {
+                setDeleteDialogOpen(false);
+                setDeleteTarget(null);
+            },
+        });
+    };
+
+    const handleFormSubmit = (data: CreateAchievementData) => {
+        if (editTarget) {
+            updateMutation.mutate(
+                { id: editTarget.id, data },
+                { onSuccess: () => setFormOpen(false) }
+            );
+        } else {
+            createMutation.mutate(data, {
+                onSuccess: () => setFormOpen(false),
+            });
         }
     };
 
-    const getLevelBadgeColor = () => {
-        return "bg-amber-100 text-amber-800 border-amber-300";
-    };
+    const isSubmitting = createMutation.isPending || updateMutation.isPending || editLoading;
 
-    const getRankBadgeColor = (rank: string) => {
-        switch (rank) {
-            case "Juara 1":
-                return "bg-emerald-100 text-emerald-700 border-emerald-300";
-            case "Juara 2":
-                return "bg-sky-100 text-sky-700 border-sky-300";
-            case "Juara 3":
-                return "bg-orange-100 text-orange-700 border-orange-300";
-            default:
-                return "bg-zinc-100 text-zinc-600 border-zinc-300";
-        }
-    };
+    // Pagination values
+    const totalItems = meta?.total ?? 0;
+    const totalPages = meta?.last_page ?? 1;
+    const startIndex = totalItems === 0 ? 0 : (page - 1) * perPage + 1;
+    const endIndex = Math.min(page * perPage, totalItems);
 
     return (
         <div className="space-y-6">
@@ -437,7 +458,6 @@ export const MutamayizinAchievements: React.FC = () => {
                     <p className="text-muted-foreground mt-1">
                         Kelola data dan riwayat prestasi siswa Program Mutamayizin
                     </p>
-
                 </div>
                 <div className="flex items-center gap-3">
                     <Button
@@ -450,16 +470,13 @@ export const MutamayizinAchievements: React.FC = () => {
                 </div>
             </div>
 
-            {/* Stats Card with Decorative Header */}
+            {/* Stats Card */}
             <Card className="overflow-hidden p-0">
-                {/* Decorative Header Section */}
                 <div className="bg-blue-800 p-4 relative overflow-hidden">
-                    {/* Decorative Geometric Pattern */}
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
                         <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
                     </div>
-
                     <div className="flex items-center gap-3 relative z-10">
                         <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
                             <Award className="h-6 w-6 text-white" />
@@ -470,41 +487,40 @@ export const MutamayizinAchievements: React.FC = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* Stats Section */}
                 <CardContent className="p-0">
                     <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x">
-                        {/* Total Prestasi */}
                         <div className="p-2.5 text-center">
                             <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
                                 <Trophy className="h-4 w-4 text-blue-800" />
                             </div>
-                            <p className="text-2xl font-bold text-slate-900">{totalAchievements}</p>
+                            <p className="text-2xl font-bold text-slate-900">{totalItems}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Prestasi</p>
                         </div>
-
-                        {/* Tingkat Nasional+ */}
                         <div className="p-2.5 text-center">
                             <div className="inline-flex p-2 bg-red-100 rounded-full mb-1.5">
                                 <Star className="h-4 w-4 text-red-600" />
                             </div>
-                            <p className="text-2xl font-bold text-slate-900">{nationalAchievements}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Nasional & Internasional</p>
+                            <p className="text-2xl font-bold text-slate-900">
+                                {achievements.filter((a) =>
+                                    ["nasional", "internasional"].includes(a.level?.toLowerCase() ?? "")
+                                ).length}
+                            </p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Nasional &amp; Internasional</p>
                         </div>
-
-                        {/* Juara 1 */}
                         <div className="p-2.5 text-center">
                             <div className="inline-flex p-2 bg-emerald-100 rounded-full mb-1.5">
                                 <TrendingUp className="h-4 w-4 text-emerald-600" />
                             </div>
-                            <p className="text-2xl font-bold text-emerald-600">{firstPlaceCount}</p>
+                            <p className="text-2xl font-bold text-emerald-600">
+                                {achievements.filter((a) => a.rank === "Juara 1").length}
+                            </p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Juara 1</p>
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Achievements Table */}
+            {/* Table Card */}
             <Card>
                 <CardHeader className="pb-0">
                     <div className="flex items-center justify-between">
@@ -518,256 +534,257 @@ export const MutamayizinAchievements: React.FC = () => {
                             </div>
                         </div>
                         <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                            {filteredAchievements.length} Prestasi
+                            {totalItems} Prestasi
                         </Badge>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
                     {/* Toolbar */}
                     <div className="px-4 pb-4 pt-2 border-b">
-                        <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex flex-col md:flex-row gap-3">
+                            {/* Search */}
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                 <Input
-                                    placeholder="Cari berdasarkan nama siswa, lomba, atau event..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Cari nama siswa atau kompetisi..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
                                     className="pl-10 h-11"
                                 />
                             </div>
-                            <Select value={levelFilter} onValueChange={setLevelFilter}>
+
+                            {/* Tahun Ajaran */}
+                            <Select value={academicYearId} onValueChange={setAcademicYearId}>
                                 <SelectTrigger className="w-[180px] h-11">
-                                    <Filter className="h-5 w-5 mr-2" />
-                                    <SelectValue placeholder="Tingkat" />
+                                    <SelectValue placeholder="Tahun Ajaran" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Semua Tingkat</SelectItem>
-                                    <SelectItem value="Sekolah">Sekolah</SelectItem>
-                                    <SelectItem value="Kecamatan">Kecamatan</SelectItem>
-                                    <SelectItem value="Kabupaten">Kabupaten</SelectItem>
-                                    <SelectItem value="Provinsi">Provinsi</SelectItem>
-                                    <SelectItem value="Nasional">Nasional</SelectItem>
-                                    <SelectItem value="Internasional">Internasional</SelectItem>
+                                    <SelectItem value="">Semua Tahun</SelectItem>
+                                    {academicYears.map((ay) => (
+                                        <SelectItem key={ay.id} value={String(ay.id)}>{ay.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            {/* Semester */}
+                            <Select value={semester} onValueChange={setSemester}>
+                                <SelectTrigger className="w-[160px] h-11">
+                                    <SelectValue placeholder="Semester" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="">Semua Semester</SelectItem>
+                                    {SEMESTER_OPTIONS.map((s) => (
+                                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            {/* Level */}
+                            <Select value={levelFilter} onValueChange={setLevelFilter}>
+                                <SelectTrigger className="w-[160px] h-11">
+                                    <Filter className="h-4 w-4 mr-2" />
+                                    <SelectValue placeholder="Level" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="">Semua Level</SelectItem>
+                                    {LEVEL_OPTIONS.map((l) => (
+                                        <SelectItem key={l} value={l}>
+                                            {l.charAt(0).toUpperCase() + l.slice(1)}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
 
+                    {/* Error State */}
+                    {error && !isLoading && (
+                        <div className="p-4">
+                            <ErrorState
+                                error={(error as Error).message ?? "Gagal memuat data prestasi."}
+                                onRetry={refetch}
+                            />
+                        </div>
+                    )}
+
                     {/* Table */}
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-muted/50">
-                                <tr>
-                                    <th className="text-left p-4 font-medium text-sm w-12">No</th>
-                                    <th className="text-left p-4 font-medium text-sm min-w-[180px]">Nama Siswa</th>
-                                    <th className="text-left p-4 font-medium text-sm min-w-[200px]">Nama Lomba</th>
-                                    <th className="text-left p-4 font-medium text-sm w-32">Peringkat</th>
-                                    <th className="text-left p-4 font-medium text-sm w-32">Tingkat</th>
-                                    <th className="text-left p-4 font-medium text-sm w-32">Tanggal</th>
-                                    <th className="text-center p-4 font-medium text-sm w-24">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredAchievements.length === 0 ? (
+                    {!error && (
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-muted/50">
                                     <tr>
-                                        <td colSpan={7} className="p-12">
-                                            <div className="flex flex-col items-center justify-center text-center space-y-4">
-                                                <div className="rounded-full bg-muted p-6">
-                                                    <Search className="h-12 w-12 text-muted-foreground" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <h3 className="text-lg font-semibold">Tidak Ada Data</h3>
-                                                    <p className="text-sm text-muted-foreground max-w-md">
-                                                        {searchQuery
-                                                            ? `Tidak ada prestasi yang cocok dengan pencarian "${searchQuery}"`
-                                                            : "Tidak ada data prestasi."}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </td>
+                                        <th className="text-left p-4 font-medium text-sm w-12">No</th>
+                                        <th className="text-left p-4 font-medium text-sm min-w-[160px]">Nama Siswa</th>
+                                        <th className="text-left p-4 font-medium text-sm w-28">Kelas</th>
+                                        <th className="text-left p-4 font-medium text-sm min-w-[200px]">Nama Kompetisi</th>
+                                        <th className="text-left p-4 font-medium text-sm w-32">Kategori</th>
+                                        <th className="text-left p-4 font-medium text-sm w-32">Peringkat</th>
+                                        <th className="text-left p-4 font-medium text-sm w-32">Level</th>
+                                        <th className="text-left p-4 font-medium text-sm w-32">Tanggal</th>
+                                        <th className="text-center p-4 font-medium text-sm w-24">Aksi</th>
                                     </tr>
-                                ) : (
-                                    paginatedAchievements.map((achievement, index) => (
-                                        <tr key={achievement.id} className="border-b hover:bg-muted/50 transition-all duration-150 group">
-                                            <td className="p-4">
-                                                <div className="text-sm font-medium text-muted-foreground">{(currentPage - 1) * itemsPerPage + index + 1}</div>
+                                </thead>
+                                <tbody>
+                                    {isLoading ? (
+                                        Array.from({ length: perPage > 10 ? 10 : perPage }).map((_, i) => (
+                                            <SkeletonTableRow key={i} cols={9} />
+                                        ))
+                                    ) : achievements.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={9} className="p-0">
+                                                <EmptyState
+                                                    icon={Award}
+                                                    title="Belum Ada Prestasi"
+                                                    description={
+                                                        debouncedSearch
+                                                            ? `Tidak ada prestasi yang cocok dengan pencarian "${debouncedSearch}"`
+                                                            : "Belum ada data prestasi untuk filter yang dipilih."
+                                                    }
+                                                />
                                             </td>
-                                            <td className="p-4">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                                                        <User className="h-4 w-4 text-blue-800" />
+                                        </tr>
+                                    ) : (
+                                        achievements.map((achievement, index) => (
+                                            <tr
+                                                key={achievement.id}
+                                                className="border-b hover:bg-muted/50 transition-all duration-150"
+                                            >
+                                                <td className="p-4">
+                                                    <span className="text-sm font-medium text-muted-foreground">
+                                                        {(page - 1) * perPage + index + 1}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                                            <User className="h-4 w-4 text-blue-800" />
+                                                        </div>
+                                                        <span className="text-foreground text-sm">{achievement.studentName}</span>
                                                     </div>
-                                                    <div className="text-foreground">{achievement.studentName}</div>
-                                                </div>
-                                            </td>
-                                            <td className="p-4">
-                                                <div className="space-y-1">
-                                                    <div className="text-foreground leading-tight">{achievement.competitionName}</div>
-                                                    {achievement.category && (
-                                                        <div className="text-xs text-muted-foreground">{achievement.category}</div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="p-4">
-                                                <Badge variant="outline" className={`${getRankBadgeColor(achievement.rank)} font-medium px-2.5 py-1 text-xs`}>
-                                                    <Star className="h-3.5 w-3.5 mr-1.5" />
-                                                    {achievement.rank}
-                                                </Badge>
-                                            </td>
-                                            <td className="p-4">
-                                                <Badge variant="outline" className={`${getLevelBadgeColor()} font-medium px-2.5 py-1 text-xs`}>
-                                                    <MapPin className="h-3.5 w-3.5 mr-1.5" />
-                                                    {achievement.level}
-                                                </Badge>
-                                            </td>
-                                            <td className="p-4">
-                                                <div className="text-sm text-muted-foreground">
-                                                    {new Date(achievement.date).toLocaleDateString("id-ID", {
-                                                        day: "numeric",
-                                                        month: "short",
-                                                        year: "numeric"
-                                                    })}
-                                                </div>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
+                                                </td>
+                                                <td className="p-4">
+                                                    <span className="text-sm text-muted-foreground">{achievement.className}</span>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="space-y-0.5">
+                                                        <div className="text-sm text-foreground leading-tight">{achievement.competitionName}</div>
+                                                    </div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <span className="text-sm text-muted-foreground">{achievement.category}</span>
+                                                </td>
+                                                <td className="p-4">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className={`${getRankBadgeColor(achievement.rank)} font-medium px-2.5 py-1 text-xs`}
+                                                    >
+                                                        <Star className="h-3.5 w-3.5 mr-1.5" />
+                                                        {achievement.rank}
+                                                    </Badge>
+                                                </td>
+                                                <td className="p-4">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className={`${getLevelBadgeColor()} font-medium px-2.5 py-1 text-xs`}
+                                                    >
+                                                        <MapPin className="h-3.5 w-3.5 mr-1.5" />
+                                                        {achievement.level
+                                                            ? achievement.level.charAt(0).toUpperCase() + achievement.level.slice(1)
+                                                            : "-"}
+                                                    </Badge>
+                                                </td>
+                                                <td className="p-4">
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {new Date(achievement.date).toLocaleDateString("id-ID", {
+                                                            day: "numeric",
+                                                            month: "short",
+                                                            year: "numeric",
+                                                        })}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="flex items-center justify-center gap-1.5">
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
-                                                            className="h-8 px-3 bg-blue-100 hover:bg-blue-200 text-blue-800 hover:text-blue-900 border-blue-200"
+                                                            className="h-8 w-8 p-0 bg-amber-50 hover:bg-amber-100 text-amber-600 border-amber-200"
+                                                            onClick={() => handleEdit(achievement)}
+                                                            title="Edit"
                                                         >
-                                                            <MoreVertical className="h-4 w-4" />
+                                                            <Edit className="h-3.5 w-3.5" />
                                                         </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-48">
-                                                        <DropdownMenuItem onClick={() => handleViewDetail(achievement)} className="focus:bg-blue-50">
-                                                            <div className="p-1.5 bg-blue-100 rounded-md mr-2">
-                                                                <Eye className="h-3.5 w-3.5 text-blue-800" />
-                                                            </div>
-                                                            <span className="text-blue-800">Lihat Detail</span>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleEdit(achievement)} className="focus:bg-amber-50">
-                                                            <div className="p-1.5 bg-amber-100 rounded-md mr-2">
-                                                                <Edit className="h-3.5 w-3.5 text-amber-600" />
-                                                            </div>
-                                                            <span className="text-foreground">Edit</span>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-8 w-8 p-0 bg-red-50 hover:bg-red-100 text-red-600 border-red-200"
                                                             onClick={() => handleDeleteClick(achievement)}
-                                                            className="focus:bg-red-50"
+                                                            title="Hapus"
                                                         >
-                                                            <div className="p-1.5 bg-red-100 rounded-md mr-2">
-                                                                <Trash2 className="h-3.5 w-3.5 text-red-600" />
-                                                            </div>
-                                                            <span className="text-red-600">Hapus</span>
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Footer with Pagination */}
-                    <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 bg-muted/20">
-                        {/* Left: Pagination Info */}
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>Menampilkan</span>
-                            <span className="font-medium text-foreground">
-                                {filteredAchievements.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
-                            </span>
-                            <span>-</span>
-                            <span className="font-medium text-foreground">
-                                {Math.min(currentPage * itemsPerPage, filteredAchievements.length)}
-                            </span>
-                            <span>dari</span>
-                            <span className="font-medium text-foreground">{filteredAchievements.length}</span>
-                            <span>prestasi</span>
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
+                    )}
 
-                        {/* Right: Pagination */}
-                        <div className="flex items-center gap-3">
-                            {/* Items per page */}
-                            <Select value={itemsPerPage.toString()} onValueChange={(val) => setItemsPerPage(Number(val))}>
-                                <SelectTrigger className="w-[100px] h-8">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="5">5 / hal</SelectItem>
-                                    <SelectItem value="10">10 / hal</SelectItem>
-                                    <SelectItem value="25">25 / hal</SelectItem>
-                                </SelectContent>
-                            </Select>
-
-                            {/* Pagination buttons */}
-                            {totalPages > 1 && (
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground">
-                                        Hal {currentPage}/{totalPages}
-                                    </span>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                                        disabled={currentPage === 1}
-                                        className="h-8 w-8 p-0"
-                                    >
-                                        <ChevronLeft className="h-4 w-4" />
-                                    </Button>
-                                    <div className="flex items-center space-x-1">
-                                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                            const pageNumber = i + 1;
-                                            return (
-                                                <Button
-                                                    key={pageNumber}
-                                                    variant={currentPage === pageNumber ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => setCurrentPage(pageNumber)}
-                                                    className={cn(
-                                                        "w-8 h-8 p-0",
-                                                        currentPage === pageNumber && "bg-blue-800 hover:bg-blue-900 text-white"
-                                                    )}
-                                                >
-                                                    {pageNumber}
-                                                </Button>
-                                            );
-                                        })}
-                                        {totalPages > 5 && (
-                                            <>
-                                                <span className="text-sm text-muted-foreground">...</span>
-                                                <Button
-                                                    variant={currentPage === totalPages ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => setCurrentPage(totalPages)}
-                                                    className={cn(
-                                                        "w-8 h-8 p-0",
-                                                        currentPage === totalPages && "bg-blue-800 hover:bg-blue-900 text-white"
-                                                    )}
-                                                >
-                                                    {totalPages}
-                                                </Button>
-                                            </>
-                                        )}
-                                    </div>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                                        disabled={currentPage === totalPages}
-                                        className="h-8 w-8 p-0"
-                                    >
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    {/* Pagination */}
+                    {!error && !isLoading && totalItems > 0 && (
+                        <PaginationControls
+                            currentPage={page}
+                            totalPages={totalPages}
+                            totalItems={totalItems}
+                            startIndex={startIndex}
+                            endIndex={endIndex}
+                            itemsPerPage={perPage}
+                            itemLabel="prestasi"
+                            onPageChange={setPage}
+                            onItemsPerPageChange={(v) => { setPerPage(v); setPage(1); }}
+                            itemsPerPageOptions={[10, 15, 20, 50]}
+                        />
+                    )}
                 </CardContent>
             </Card>
+
+            {/* Form Modal */}
+            <AchievementFormModal
+                open={formOpen}
+                onClose={() => setFormOpen(false)}
+                editData={editTarget}
+                students={students}
+                academicYears={academicYears}
+                onSubmit={handleFormSubmit}
+                isSubmitting={isSubmitting}
+            />
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Hapus Prestasi</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Apakah Anda yakin ingin menghapus prestasi{" "}
+                            <strong>{deleteTarget?.competitionName}</strong> milik{" "}
+                            <strong>{deleteTarget?.studentName}</strong>? Tindakan ini tidak dapat dibatalkan.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleteMutation.isPending}>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeleteConfirm}
+                            disabled={deleteMutation.isPending}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            {deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                            Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

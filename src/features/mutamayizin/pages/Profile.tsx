@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,7 +11,6 @@ import {
     Mail,
     Phone,
     MapPin,
-    Calendar,
     Edit,
     Camera,
     Users,
@@ -20,54 +19,75 @@ import {
     Star,
     BarChart3,
     CheckCircle2,
+    Briefcase,
+    Building2,
 } from "lucide-react";
-import { mutamayizinService, MutamayizinProfileData, MutamayizinDashboardStats } from "../services/mutamayizinService";
+import { useMutamayizinProfile } from "../hooks/useMutamayizinProfile";
+import { useMutamayizinDashboard } from "../hooks/useMutamayizinDashboard";
+import { ErrorState } from "@/features/shared/components/ErrorState";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const ProfileSkeleton: React.FC = () => (
+    <div className="space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <div className="space-y-2">
+                <Skeleton className="h-10 w-48" />
+                <Skeleton className="h-4 w-64" />
+            </div>
+        </div>
+        <Card>
+            <CardContent className="pt-6">
+                <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
+                    <Skeleton className="h-32 w-32 rounded-full" />
+                    <div className="flex-1 space-y-3">
+                        <Skeleton className="h-8 w-48" />
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-4 w-40" />
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <Skeleton key={i} className="h-16 rounded-lg" />
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+        <Card>
+            <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <Skeleton key={i} className="h-16 rounded-lg" />
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+);
 
 export const MutamayizinProfile: React.FC = () => {
     const router = useRouter();
-    const [profileData, setProfileData] = useState<MutamayizinProfileData | null>(null);
-    const [stats, setStats] = useState<MutamayizinDashboardStats>({
-        totalStudents: 0,
-        activeStudents: 0,
-        totalAchievements: 0,
-        totalEkskul: 0,
-        totalTutors: 0,
-        activeTutors: 0,
-    });
-    const [loading, setLoading] = useState(true);
+    const { data: profileData, isLoading: profileLoading, error: profileError, refetch: refetchProfile } = useMutamayizinProfile();
+    const { stats, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useMutamayizinDashboard();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [profile, dashboardStats] = await Promise.all([
-                    mutamayizinService.getProfileData(),
-                    mutamayizinService.getDashboardStats()
-                ]);
-                setProfileData(profile);
-                setStats(dashboardStats);
-            } catch (error) {
-                console.error("Failed to fetch profile data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
+    const isLoading = profileLoading || statsLoading;
+    const error = profileError || statsError;
 
     const handleEditProfile = () => {
         router.push("/mutamayizin-coordinator/profile/edit");
     };
 
-    if (loading || !profileData) {
+    if (isLoading) return <ProfileSkeleton />;
+
+    if (error) {
         return (
-            <div className="space-y-6">
-                <div className="text-center py-12">
-                    <p className="text-muted-foreground">Memuat data...</p>
-                </div>
-            </div>
+            <ErrorState
+                error={(error as Error).message || "Gagal memuat data profil"}
+                onRetry={() => { refetchProfile(); refetchStats(); }}
+            />
         );
     }
+
+    if (!profileData) return null;
 
     const initials = profileData.name
         .split(" ")
@@ -93,7 +113,6 @@ export const MutamayizinProfile: React.FC = () => {
                     <p className="text-muted-foreground mt-1">
                         Kelola informasi profil dan pengaturan akun Anda
                     </p>
-
                 </div>
             </div>
 
@@ -127,7 +146,7 @@ export const MutamayizinProfile: React.FC = () => {
                             <div className="relative group">
                                 <Avatar className="h-32 w-32 border-4 border-primary/10">
                                     <AvatarImage
-                                        src={profileData.profilePicture}
+                                        src={profileData.avatar ?? undefined}
                                         alt={profileData.name}
                                     />
                                     <AvatarFallback className="text-3xl font-semibold bg-blue-800 text-white">
@@ -146,7 +165,7 @@ export const MutamayizinProfile: React.FC = () => {
                                 <div className="space-y-2 mt-1">
                                     <div className="flex items-center justify-center md:justify-start gap-2">
                                         <Badge className="bg-blue-800 text-white">
-                                            {profileData.role}
+                                            PJ Mutamayizin
                                         </Badge>
                                     </div>
                                     <div className="flex items-center justify-center md:justify-start gap-2">
@@ -157,9 +176,11 @@ export const MutamayizinProfile: React.FC = () => {
                                         </Badge>
                                     </div>
                                 </div>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                    NIP: {profileData.nip}
-                                </p>
+                                {profileData.jobTitle && (
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        {profileData.jobTitle}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -212,14 +233,26 @@ export const MutamayizinProfile: React.FC = () => {
 
                                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
                                     <div className="p-2 rounded-full bg-primary/10">
-                                        <Calendar className="h-5 w-5 text-primary" />
+                                        <Building2 className="h-5 w-5 text-primary" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground">
-                                            Bergabung Sejak
-                                        </p>
-                                        {profileData.joinDate ? (
-                                            <p className="text-sm font-medium">{profileData.joinDate}</p>
+                                        <p className="text-xs text-muted-foreground">Departemen</p>
+                                        {profileData.department ? (
+                                            <p className="text-sm font-medium">{profileData.department}</p>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
+                                    <div className="p-2 rounded-full bg-primary/10">
+                                        <Briefcase className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-muted-foreground">Jabatan</p>
+                                        {profileData.jobTitle ? (
+                                            <p className="text-sm font-medium">{profileData.jobTitle}</p>
                                         ) : (
                                             <p className="text-sm text-muted-foreground italic">Tidak ada isi</p>
                                         )}
@@ -253,7 +286,7 @@ export const MutamayizinProfile: React.FC = () => {
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Total Siswa</p>
                                 <p className="text-lg font-semibold text-blue-800">
-                                    {stats.totalStudents}
+                                    {stats?.totalStudents ?? 0}
                                 </p>
                             </div>
                         </div>
@@ -265,7 +298,7 @@ export const MutamayizinProfile: React.FC = () => {
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Siswa Aktif</p>
                                 <p className="text-lg font-semibold">
-                                    {stats.activeStudents}
+                                    {stats?.activeStudents ?? 0}
                                 </p>
                             </div>
                         </div>
@@ -277,7 +310,7 @@ export const MutamayizinProfile: React.FC = () => {
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Total Prestasi</p>
                                 <p className="text-lg font-semibold">
-                                    {stats.totalAchievements}
+                                    {stats?.totalAchievements ?? 0}
                                 </p>
                             </div>
                         </div>
@@ -289,7 +322,7 @@ export const MutamayizinProfile: React.FC = () => {
                             <div className="flex-1">
                                 <p className="text-xs text-muted-foreground">Ekstrakurikuler</p>
                                 <p className="text-lg font-semibold">
-                                    {stats.totalEkskul}
+                                    {stats?.totalEkskul ?? 0}
                                 </p>
                             </div>
                         </div>
