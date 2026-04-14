@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Calendar,
     Search,
@@ -14,9 +14,10 @@ import {
     BookOpen,
     Grid3X3,
     List,
-    Copy,
-    ArrowRight,
     CalendarPlus,
+    GraduationCap,
+    BarChart3,
+    RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,8 +42,7 @@ import {
     DialogTitle,
     DialogFooter,
     DialogDescription,
-} from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from '@/components/ui/dialog';import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
     AlertDialog,
@@ -60,32 +60,43 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 // Types & Services
 import { DayOfWeek, Schedule, DAY_MAP } from '../types/schedule';
-import { Class } from '../types/class';
 import { scheduleService } from '../services/scheduleService';
-import { classService } from '../services/classService';
 
 // Components
 import { ScheduleForm } from '../components/forms/ScheduleForm';
 import { ScheduleFormValues } from '../schemas/scheduleSchema';
 import { ScheduleListSkeleton } from '../components/schedule/ScheduleListSkeleton';
 import { timeSlotService } from '../services/timeSlotService';
-import { Subject } from '../types/subject';
-import { subjectService } from '../services/subjectService';
 import { getSubjectColor } from '../utils/scheduleUtils';
+import { StatCard, EmptyState } from '@/features/shared/components';
+import { useScheduleList } from '../hooks/useScheduleList';
+import { useBreadcrumbAction } from '@/context/BreadcrumbActionContext';
 
 type ViewMode = 'timetable' | 'table';
 
 export const ScheduleList: React.FC = () => {
-    // Data State
-    const [data, setData] = useState<Schedule[]>([]);
-    const [classes, setClasses] = useState<Class[]>([]);
-    const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const { setAction, clearAction } = useBreadcrumbAction();
+
+    const {
+        schedules: data,
+        isLoading,
+        isFetching,
+        isDeleting,
+        createSchedule,
+        updateSchedule,
+        deleteSchedule,
+        deleteBulk,
+    } = useScheduleList();
 
     // View Mode State
     const [viewMode, setViewMode] = useState<ViewMode>('timetable');
@@ -93,7 +104,7 @@ export const ScheduleList: React.FC = () => {
     // Filter State
     const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Senin');
     const [searchTerm, setSearchTerm] = useState('');
-    
+
     // Selection State
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
@@ -104,56 +115,39 @@ export const ScheduleList: React.FC = () => {
     // Delete State
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [isBulkDelete, setIsBulkDelete] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
-
-    // Copy State
-    const [isCopyDialogOpen, setIsCopyDialogOpen] = useState(false);
-    const [isCopying, setIsCopying] = useState(false);
-    const [copySource, setCopySource] = useState<DayOfWeek>('Senin');
-    const [copyTarget, setCopyTarget] = useState<DayOfWeek>('Selasa');
 
     // Time slots per day (dari API)
     const [dayTimeSlots, setDayTimeSlots] = useState<any[]>([]);
+    const [isLoadingSlots, setIsLoadingSlots] = useState(true);
 
     const days: DayOfWeek[] = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
-    // Fetch Data
-    useEffect(() => {
-        const fetchInitialData = async () => {
-            try {
-                setIsLoading(true);
-                const [schedulesData, classesData, subjectsData] = await Promise.all([
-                    scheduleService.getSchedules(),
-                    classService.getClasses(),
-                    subjectService.getSubjects(),
-                ]);
-
-                setData(schedulesData);
-                setSubjects(subjectsData);
-                setClasses(classesData.filter((c: any) => c.type === 'REGULER').sort((a: any, b: any) => {
-                    if (a.grade !== b.grade) return a.grade - b.grade;
-                    return a.name.localeCompare(b.name);
-                }));
-            } catch (error) {
-                console.error('Failed to fetch data:', error);
-                toast.error('Gagal memuat data jadwal');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchInitialData();
-    }, []);
+    // isFetching indicator di breadcrumb
+    React.useEffect(() => {
+        if (isFetching) {
+            setAction(
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <span className="hidden sm:inline">Memperbarui...</span>
+                </div>
+            );
+        } else {
+            clearAction();
+        }
+        return () => clearAction();
+    }, [isFetching, setAction, clearAction]);
 
     // Fetch time slots when day changes
     useEffect(() => {
         const dayKey = DAY_MAP[selectedDay];
+        setIsLoadingSlots(true);
         timeSlotService.getByDay(dayKey as any).then(slots => {
             setDayTimeSlots(slots);
+            setIsLoadingSlots(false);
         });
     }, [selectedDay]);
 
-    // Filter Logic - now based on selected day tab
+    // Filter Logic
     const filteredData = data.filter((item) => {
         const matchesDay = item.day === selectedDay;
         const matchesSearch = !searchTerm ||
@@ -185,86 +179,27 @@ export const ScheduleList: React.FC = () => {
 
     // CRUD Handlers
     const handleCreate = async (values: ScheduleFormValues) => {
-        try {
-            const newItem = await scheduleService.createSchedule({
-                subject_id: values.subjectId,
-                class_id: values.classId,
-                teacher_id: values.teacherId || undefined,
-                day_of_week: DAY_MAP[values.day],
-                start_time: values.startTime,
-                end_time: values.endTime,
-                room: values.room || undefined,
-            });
-            setData(prev => [newItem, ...prev]);
-            toast.success('Jadwal berhasil ditambahkan');
-        } catch (error: any) {
-            toast.error(error?.message ?? 'Gagal membuat jadwal');
-        }
+        await createSchedule(values);
     };
 
     const handleUpdate = async (values: ScheduleFormValues) => {
         if (!editingId) return;
-        try {
-            const updatedItem = await scheduleService.updateSchedule(editingId, {
-                subject_id: values.subjectId,
-                class_id: values.classId,
-                teacher_id: values.teacherId || undefined,
-                day_of_week: DAY_MAP[values.day],
-                start_time: values.startTime,
-                end_time: values.endTime,
-                room: values.room || undefined,
-            });
-            setData(prev => prev.map(item => item.id === editingId ? updatedItem : item));
-            toast.success('Jadwal berhasil diperbarui');
-            setEditingId(null);
-        } catch (error: any) {
-            toast.error(error?.message ?? 'Gagal memperbarui jadwal');
-        }
+        await updateSchedule(editingId, values);
+        setEditingId(null);
     };
 
     const handleDelete = async () => {
         if (!deleteId && !isBulkDelete) return;
-
         try {
-            setIsDeleting(true);
             if (isBulkDelete) {
-                await Promise.all(selectedItems.map(id => scheduleService.deleteSchedule(id)));
-                toast.success(`${selectedItems.length} jadwal berhasil dihapus`);
-                setData(prev => prev.filter(item => !selectedItems.includes(item.id)));
+                await deleteBulk(selectedItems);
                 setSelectedItems([]);
             } else if (deleteId) {
-                await scheduleService.deleteSchedule(deleteId);
-                toast.success('Jadwal berhasil dihapus');
-                setData(prev => prev.filter(item => item.id !== deleteId));
+                await deleteSchedule(deleteId);
             }
-        } catch (error) {
-            console.error('Delete failed:', error);
-            toast.error('Gagal menghapus jadwal');
         } finally {
-            setIsDeleting(false);
             setDeleteId(null);
             setIsBulkDelete(false);
-        }
-    };
-
-    const handleCopySchedule = async () => {
-        if (copySource === copyTarget) {
-            toast.error('Hari asal dan tujuan tidak boleh sama');
-            return;
-        }
-        try {
-            setIsCopying(true);
-            const newSchedules = await scheduleService.copyDaySchedule(
-                DAY_MAP[copySource],
-                DAY_MAP[copyTarget]
-            );
-            setData(prev => [...newSchedules, ...prev]);
-            toast.success(`Jadwal ${copySource} berhasil disalin ke ${copyTarget}`);
-            setIsCopyDialogOpen(false);
-        } catch (error: any) {
-            toast.error(error?.message ?? 'Gagal menyalin jadwal');
-        } finally {
-            setIsCopying(false);
         }
     };
 
@@ -272,6 +207,20 @@ export const ScheduleList: React.FC = () => {
         setEditingId(item.id);
         setIsFormOpen(true);
     };
+
+    // Stats
+    const stats = useMemo(() => {
+        const dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+        const now = new Date();
+        const todayName = dayNames[now.getDay() - 1] ?? '';
+        const lessons = data.filter(d => d.type !== 'break' && d.type !== 'ceremony');
+        return {
+            totalLessons: lessons.length,
+            uniqueSubjects: new Set(lessons.map(d => d.subjectName)).size,
+            todayLessons: lessons.filter(d => d.day === todayName).length,
+            todayName,
+        };
+    }, [data]);
 
     // Render Loading
     if (isLoading) {
@@ -304,14 +253,6 @@ export const ScheduleList: React.FC = () => {
 
                 <div className="flex gap-2">
                     <Button
-                        variant="outline"
-                        onClick={() => setIsCopyDialogOpen(true)}
-                        className="border-blue-200 text-blue-700 hover:bg-blue-50"
-                    >
-                        <Copy className="h-4 w-4 mr-2" />
-                        Salin Jadwal
-                    </Button>
-                    <Button
                         onClick={() => { setEditingId(null); setIsFormOpen(true); }}
                         className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all"
                     >
@@ -321,7 +262,34 @@ export const ScheduleList: React.FC = () => {
                 </div>
             </div>
 
-            {/* Content Card */}
+            {/* Stat Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <StatCard
+                    title="Total Jam Pelajaran"
+                    value={stats.totalLessons}
+                    unit="JP / minggu"
+                    subtitle="Seluruh hari Senin–Jumat"
+                    icon={BookOpen}
+                    color="blue"
+                />
+                <StatCard
+                    title="Mata Pelajaran"
+                    value={stats.uniqueSubjects}
+                    unit="mapel"
+                    subtitle="Jumlah mapel unik"
+                    icon={GraduationCap}
+                    color="amber"
+                />
+                <StatCard
+                    title="Hari Ini"
+                    value={stats.todayLessons}
+                    unit="JP"
+                    subtitle={stats.todayName ? `Jadwal ${stats.todayName}` : 'Hari libur'}
+                    icon={BarChart3}
+                    color="emerald"
+                />
+            </div>
+
             <Card className="border-slate-200 shadow-sm">
                 <CardHeader className="pb-4 space-y-4">
                     <div className="flex items-center justify-between">
@@ -409,7 +377,7 @@ export const ScheduleList: React.FC = () => {
                         <div className="px-6 pt-4">
                             <TabsList className="grid w-full grid-cols-5 h-9">
                                 {days.slice(0, 5).map((day) => (
-                                    <TabsTrigger key={day} value={day} className="text-xs data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
+                                    <TabsTrigger key={day} value={day} className="text-xs uppercase tracking-wider data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900">
                                         {day}
                                     </TabsTrigger>
                                 ))}
@@ -445,23 +413,70 @@ export const ScheduleList: React.FC = () => {
 
                                         if (uniqueClasses.length === 0) {
                                             return (
-                                                <div className="py-12 flex flex-col items-center justify-center">
-                                                    <div className="w-14 h-14 rounded-full bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center mb-3">
-                                                        <FileX className="h-6 w-6 text-slate-400" />
-                                                    </div>
-                                                    <p className="text-slate-500 font-medium text-sm">Belum ada jadwal untuk {day}</p>
-                                                    <p className="text-slate-400 text-xs mt-1">Klik "Buat Jadwal" untuk menambahkan</p>
-                                                </div>
+                                                <EmptyState
+                                                    icon={searchTerm ? FilterX : Calendar}
+                                                    title={searchTerm ? 'Tidak ada jadwal yang cocok' : `Belum ada jadwal untuk ${day}`}
+                                                    description={searchTerm ? 'Coba ubah kata kunci pencarian.' : 'Klik "Buat Jadwal" untuk mulai menambahkan jadwal pelajaran.'}
+                                                    className="py-16"
+                                                >
+                                                    {!searchTerm && (
+                                                        <Button
+                                                            className="mt-4 bg-blue-800 hover:bg-blue-900 text-white"
+                                                            onClick={() => { setEditingId(null); setIsFormOpen(true); }}
+                                                        >
+                                                            <CalendarPlus className="h-4 w-4 mr-2" />
+                                                            Buat Jadwal
+                                                        </Button>
+                                                    )}
+                                                </EmptyState>
                                             );
                                         }
 
-                                        const colCount = uniqueClasses.length + 1;
+                                        const colCount = uniqueClasses.length;
+                                        const timeColWidth = 110;
+                                        const cellMinWidth = 140;
+                                        const gridStyle = {
+                                            display: 'grid',
+                                            gridTemplateColumns: `${timeColWidth}px repeat(${colCount}, minmax(${cellMinWidth}px, 1fr))`,
+                                            gap: '8px',
+                                        } as React.CSSProperties;
+
+                                        const getSubjectFlatColor = (name: string): string => {
+                                            const map: Record<string, string> = {
+                                                Matematika: 'bg-blue-100 text-blue-800',
+                                                Fisika: 'bg-yellow-100 text-yellow-800',
+                                                Kimia: 'bg-purple-100 text-purple-800',
+                                                Biologi: 'bg-emerald-100 text-emerald-800',
+                                                'Bahasa Indonesia': 'bg-orange-100 text-orange-800',
+                                                'Bahasa Inggris': 'bg-pink-100 text-pink-800',
+                                                Sejarah: 'bg-amber-100 text-amber-800',
+                                                PKn: 'bg-red-100 text-red-800',
+                                                PJOK: 'bg-lime-100 text-lime-800',
+                                                'Seni Budaya': 'bg-fuchsia-100 text-fuchsia-800',
+                                                BK: 'bg-slate-100 text-slate-800',
+                                                'Pendidikan Agama': 'bg-teal-100 text-teal-800',
+                                                TIK: 'bg-indigo-100 text-indigo-800',
+                                                Prakarya: 'bg-cyan-100 text-cyan-800',
+                                            };
+                                            if (map[name]) return map[name];
+                                            const palette = [
+                                                'bg-red-100 text-red-800', 'bg-yellow-100 text-yellow-800',
+                                                'bg-cyan-100 text-cyan-800', 'bg-indigo-100 text-indigo-800',
+                                                'bg-rose-100 text-rose-800', 'bg-teal-100 text-teal-800',
+                                                'bg-violet-100 text-violet-800', 'bg-amber-100 text-amber-800',
+                                                'bg-sky-100 text-sky-800', 'bg-lime-100 text-lime-800',
+                                            ];
+                                            let hash = 0;
+                                            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                                            return palette[Math.abs(hash) % palette.length];
+                                        };
 
                                         return (
                                             <div className="overflow-x-auto p-4">
-                                                <div className="space-y-2" style={{ minWidth: `${colCount * 130}px` }}>
-                                                    {/* Header row */}
-                                                    <div className="grid gap-2" style={{ gridTemplateColumns: `100px repeat(${uniqueClasses.length}, 1fr)` }}>
+                                                <div className="space-y-2" style={{ minWidth: `${timeColWidth + colCount * cellMinWidth + (colCount + 1) * 8}px` }}>
+
+                                                    {/* Header */}
+                                                    <div style={gridStyle}>
                                                         <div className="text-xs font-semibold p-2.5 bg-muted rounded-lg text-center text-muted-foreground uppercase tracking-wider">
                                                             Waktu
                                                         </div>
@@ -472,24 +487,38 @@ export const ScheduleList: React.FC = () => {
                                                         ))}
                                                     </div>
 
+                                                    {/* Skeleton rows saat time slots belum tersedia */}
+                                                    {isLoadingSlots && Array.from({ length: 8 }).map((_, i) => (
+                                                        <div key={i} style={gridStyle}>
+                                                            <div className="h-[80px] rounded-lg bg-slate-200 animate-pulse" />
+                                                            {uniqueClasses.map((cls) => (
+                                                                (i + cls.id.charCodeAt(0)) % 3 === 0
+                                                                    ? <div key={cls.id} className="h-[80px] rounded-lg bg-slate-200 animate-pulse" />
+                                                                    : <div key={cls.id} className="h-[80px] rounded-lg border border-dashed border-slate-200 bg-muted/20" />
+                                                            ))}
+                                                        </div>
+                                                    ))}
+
                                                     {/* Slot rows */}
-                                                    {allSlots.map((slot: any) => {
-                                                        // Non-lesson row (break/ishoma/ceremony) — span full
+                                                    {!isLoadingSlots && allSlots.map((slot: any) => {
+                                                        // Non-lesson row
                                                         if (slot.type !== 'lesson') {
-                                                            const cfg = {
-                                                                break:    { bg: 'bg-amber-50/60 border-amber-200 text-amber-700', emoji: '☕' },
-                                                                ishoma:   { bg: 'bg-green-50/60 border-green-200 text-green-700', emoji: '🍽️' },
-                                                                ceremony: { bg: 'bg-blue-50/60 border-blue-200 text-blue-700', emoji: '🚩' },
-                                                            }[slot.type as string] ?? { bg: 'bg-slate-50 border-slate-200 text-slate-500', emoji: '⏸' };
+                                                            const cfg = ({
+                                                                break:    { cls: 'bg-amber-50/60 border-amber-200 text-amber-700', label: '☕ Istirahat' },
+                                                                ishoma:   { cls: 'bg-green-50/60 border-green-200 text-green-700', label: '🍽️ Ishoma' },
+                                                                ceremony: { cls: 'bg-blue-50/60 border-blue-200 text-blue-700', label: '🚩 Upacara' },
+                                                            } as any)[slot.type] ?? { cls: 'bg-slate-50 border-slate-200 text-slate-500', label: slot.label };
 
                                                             return (
-                                                                <div key={slot.id} className="grid gap-2" style={{ gridTemplateColumns: `100px repeat(${uniqueClasses.length}, 1fr)` }}>
-                                                                    <div className={cn("text-xs p-2 rounded-lg flex items-center justify-center font-medium border whitespace-nowrap", cfg.bg)}>
-                                                                        {slot.startTime}
+                                                                <div key={slot.id} style={gridStyle}>
+                                                                    <div className={cn('text-xs p-2 rounded-lg flex items-center justify-center font-medium whitespace-nowrap border', cfg.cls)}>
+                                                                        {slot.startTime} - {slot.endTime}
                                                                     </div>
-                                                                    <div className={cn("rounded-lg border flex items-center justify-center gap-2 py-2 text-xs font-medium", cfg.bg)}
-                                                                        style={{ gridColumn: `2 / span ${uniqueClasses.length}` }}>
-                                                                        {cfg.emoji} {slot.label} • {slot.startTime} – {slot.endTime}
+                                                                    <div
+                                                                        className={cn('rounded-lg border flex items-center justify-center gap-2 py-2.5 text-xs font-medium', cfg.cls)}
+                                                                        style={{ gridColumn: `2 / -1` }}
+                                                                    >
+                                                                        {slot.label || cfg.label}
                                                                     </div>
                                                                 </div>
                                                             );
@@ -497,36 +526,98 @@ export const ScheduleList: React.FC = () => {
 
                                                         // Lesson row
                                                         return (
-                                                            <div key={slot.id} className="grid gap-2" style={{ gridTemplateColumns: `100px repeat(${uniqueClasses.length}, 1fr)` }}>
-                                                                {/* Waktu */}
-                                                                <div className="text-xs p-2 bg-muted rounded-lg flex flex-col items-center justify-center font-medium text-muted-foreground gap-0.5">
-                                                                    <span className="text-[10px] text-slate-600 font-semibold">{slot.label}</span>
-                                                                    <span className="text-slate-500 whitespace-nowrap">{slot.startTime}</span>
-                                                                    <span className="text-slate-400 text-[10px]">– {slot.endTime}</span>
+                                                            <div key={slot.id} style={gridStyle}>
+                                                                {/* Kolom waktu */}
+                                                                <div className="text-xs p-2 bg-muted rounded-lg flex flex-col items-center justify-center font-medium text-muted-foreground gap-1">
+                                                                    <span className="text-[10px] text-slate-700">{slot.label}</span>
+                                                                    <span className="text-slate-600 whitespace-nowrap">{slot.startTime} - {slot.endTime}</span>
                                                                 </div>
 
                                                                 {/* Per kelas */}
                                                                 {uniqueClasses.map(cls => {
-                                                                    const schedule = filteredSchedules.find(
+                                                                    const isPem = cls.name.includes('PEM');
+                                                                    const schedules = filteredSchedules.filter(
                                                                         s => s.classId === cls.id &&
                                                                             s.startTime === slot.startTime &&
                                                                             s.endTime === slot.endTime
                                                                     );
 
-                                                                    if (!schedule) {
+                                                                    if (schedules.length === 0) {
                                                                         return (
                                                                             <button
                                                                                 key={cls.id}
                                                                                 type="button"
                                                                                 onClick={() => { setEditingId(null); setIsFormOpen(true); }}
-                                                                                className="border border-dashed border-muted rounded-lg bg-muted/20 min-h-[80px] flex items-center justify-center hover:border-blue-300 hover:bg-blue-50/30 transition-colors group"
+                                                                                className="border border-dashed border-slate-200 rounded-lg bg-muted/20 min-h-[80px] flex items-center justify-center hover:border-blue-300 hover:bg-blue-50/30 transition-colors group"
                                                                             >
                                                                                 <Plus className="h-4 w-4 text-slate-300 group-hover:text-blue-400" />
                                                                             </button>
                                                                         );
                                                                     }
 
-                                                                    const colors = getSubjectColor(schedule.subjectName);
+                                                                    // Kelas PEM: tampilkan mapel pertama + badge "+N lainnya" dengan popover
+                                                                    if (isPem && schedules.length > 1) {
+                                                                        const firstColor = getSubjectFlatColor(schedules[0].subjectName);
+
+                                                                        // 2+ mapel: card pertama + popover badge
+                                                                        const first = schedules[0];
+                                                                        const rest  = schedules.slice(1);
+                                                                        return (
+                                                                            <div key={cls.id} className="min-h-[80px] flex flex-col gap-1">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => openEdit(first)}
+                                                                                    className={cn('p-2.5 rounded-lg transition-all w-full text-left hover:shadow-md flex-1', firstColor)}
+                                                                                >
+                                                                                    <div className="flex items-center gap-1">
+                                                                                        <BookOpen className="h-3 w-3 flex-shrink-0 opacity-70" />
+                                                                                        <span className="text-xs font-semibold truncate">{first.subjectName}</span>
+                                                                                    </div>
+                                                                                    <div className="flex items-center gap-1 opacity-75 mt-1">
+                                                                                        <User className="h-3 w-3 flex-shrink-0" />
+                                                                                        <span className="text-xs truncate">{first.teacherName || '—'}</span>
+                                                                                    </div>
+                                                                                </button>
+                                                                                <Popover>
+                                                                                    <PopoverTrigger asChild>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            className="text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-md px-2 py-0.5 w-full text-center transition-colors border border-slate-200"
+                                                                                        >
+                                                                                            +{rest.length} lainnya
+                                                                                        </button>
+                                                                                    </PopoverTrigger>
+                                                                                    <PopoverContent className="w-56 p-2 space-y-1.5" side="right">
+                                                                                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-1 pb-1 border-b border-slate-100">Mapel lain di jam ini</p>
+                                                                                        {rest.map(s => {
+                                                                                            const c = getSubjectFlatColor(s.subjectName);
+                                                                                            return (
+                                                                                                <button
+                                                                                                    key={s.id}
+                                                                                                    type="button"
+                                                                                                    onClick={() => openEdit(s)}
+                                                                                                    className={cn('p-2 rounded-lg w-full text-left hover:shadow-sm transition-all', c)}
+                                                                                                >
+                                                                                                    <div className="flex items-center gap-1">
+                                                                                                        <BookOpen className="h-3 w-3 flex-shrink-0 opacity-70" />
+                                                                                                        <span className="text-xs font-semibold truncate">{s.subjectName}</span>
+                                                                                                    </div>
+                                                                                                    <div className="flex items-center gap-1 opacity-75 mt-0.5">
+                                                                                                        <User className="h-3 w-3 flex-shrink-0" />
+                                                                                                        <span className="text-xs truncate">{s.teacherName || '—'}</span>
+                                                                                                    </div>
+                                                                                                </button>
+                                                                                            );
+                                                                                        })}
+                                                                                    </PopoverContent>
+                                                                                </Popover>
+                                                                            </div>
+                                                                        );
+                                                                    }
+
+                                                                    // Kelas reguler: 1 mapel per slot
+                                                                    const schedule = schedules[0];
+                                                                    const colorCls = getSubjectFlatColor(schedule.subjectName);
 
                                                                     return (
                                                                         <button
@@ -534,24 +625,21 @@ export const ScheduleList: React.FC = () => {
                                                                             type="button"
                                                                             onClick={() => openEdit(schedule)}
                                                                             className={cn(
-                                                                                "p-2.5 rounded-lg transition-all min-h-[80px] w-full text-left hover:shadow-md hover:scale-[1.01]",
-                                                                                `bg-gradient-to-br ${colors.bg} border ${colors.border}`
+                                                                                'p-2.5 rounded-lg transition-all min-h-[80px] w-full text-left hover:shadow-md',
+                                                                                colorCls
                                                                             )}
                                                                         >
                                                                             <div className="space-y-1.5">
-                                                                                <div className="flex items-start gap-1">
-                                                                                    <BookOpen className={cn("h-3 w-3 mt-0.5 flex-shrink-0 opacity-70", colors.text)} />
-                                                                                    <span className={cn("text-xs font-semibold line-clamp-2 leading-tight", colors.text)}>
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <BookOpen className="h-3 w-3 flex-shrink-0 opacity-70" />
+                                                                                    <span className="text-xs font-semibold truncate">
                                                                                         {schedule.subjectName}
                                                                                     </span>
                                                                                 </div>
-                                                                                <div className={cn("flex items-center gap-1 opacity-75", colors.subtext)}>
+                                                                                <div className="flex items-center gap-1 opacity-75">
                                                                                     <User className="h-3 w-3 flex-shrink-0" />
                                                                                     <span className="text-xs truncate">{schedule.teacherName || '—'}</span>
                                                                                 </div>
-                                                                                {schedule.room && (
-                                                                                    <span className={cn("text-[10px] opacity-60", colors.subtext)}>{schedule.room}</span>
-                                                                                )}
                                                                             </div>
                                                                         </button>
                                                                     );
@@ -567,19 +655,22 @@ export const ScheduleList: React.FC = () => {
                                     // ========== TABLE VIEW ==========
                                     if (filteredSchedules.length === 0) {
                                         return (
-                                            <div className="py-12 text-center">
-                                                <div className="flex flex-col items-center justify-center">
-                                                    <div className="h-14 w-14 rounded-full bg-slate-50 flex items-center justify-center mb-3">
-                                                        {searchTerm ? <FilterX className="h-6 w-6 text-slate-300" /> : <FileX className="h-6 w-6 text-slate-300" />}
-                                                    </div>
-                                                    <p className="text-slate-500 font-medium text-sm">
-                                                        {searchTerm ? 'Tidak ada jadwal yang cocok' : `Belum ada jadwal untuk ${day}`}
-                                                    </p>
-                                                    <p className="text-slate-400 text-xs mt-1">
-                                                        {searchTerm ? 'Coba ubah pencarian' : 'Klik "Buat Jadwal" untuk menambahkan'}
-                                                    </p>
-                                                </div>
-                                            </div>
+                                            <EmptyState
+                                                icon={searchTerm ? FilterX : Calendar}
+                                                title={searchTerm ? 'Tidak ada jadwal yang cocok' : `Belum ada jadwal untuk ${day}`}
+                                                description={searchTerm ? 'Coba ubah kata kunci pencarian.' : 'Klik "Buat Jadwal" untuk mulai menambahkan jadwal pelajaran.'}
+                                                className="py-16"
+                                            >
+                                                {!searchTerm && (
+                                                    <Button
+                                                        className="mt-4 bg-blue-800 hover:bg-blue-900 text-white"
+                                                        onClick={() => { setEditingId(null); setIsFormOpen(true); }}
+                                                    >
+                                                        <CalendarPlus className="h-4 w-4 mr-2" />
+                                                        Buat Jadwal
+                                                    </Button>
+                                                )}
+                                            </EmptyState>
                                         );
                                     }
 
@@ -738,6 +829,7 @@ export const ScheduleList: React.FC = () => {
             )}
 
             <ScheduleForm
+                key={`${isFormOpen}-${editingId ?? 'new'}`}
                 open={isFormOpen}
                 onOpenChange={(open) => {
                     setIsFormOpen(open);
@@ -782,65 +874,6 @@ export const ScheduleList: React.FC = () => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-            
-            {/* Copy Schedule Dialog */}
-            <Dialog open={isCopyDialogOpen} onOpenChange={setIsCopyDialogOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Salin Jadwal Harian</DialogTitle>
-                        <DialogDescription>
-                            Salin semua jadwal dari satu hari ke hari lain. Jadwal yang sudah ada di hari tujuan tidak akan dihapus (ditambahkan).
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-2 gap-4 items-center justify-items-center">
-                            <div className="w-full space-y-2">
-                                <span className="text-sm font-medium text-slate-700">Dari Hari</span>
-                                <Select value={copySource} onValueChange={(v) => setCopySource(v as DayOfWeek)}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {days.map(d => (
-                                            <SelectItem key={d} value={d}>{d}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            
-                            <ArrowRight className="h-5 w-5 text-slate-400 mt-6" />
-
-                            <div className="w-full space-y-2">
-                                <span className="text-sm font-medium text-slate-700">Ke Hari</span>
-                                <Select value={copyTarget} onValueChange={(v) => setCopyTarget(v as DayOfWeek)}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {days.map(d => (
-                                            <SelectItem key={d} value={d} disabled={d === copySource}>
-                                                {d}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsCopyDialogOpen(false)}>
-                            Batal
-                        </Button>
-                        <Button 
-                            onClick={handleCopySchedule} 
-                            disabled={isCopying || copySource === copyTarget}
-                            className="bg-blue-800 hover:bg-blue-900 text-white"
-                        >
-                            {isCopying ? 'Menyalin...' : 'Salin Jadwal'}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 };

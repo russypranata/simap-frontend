@@ -66,11 +66,6 @@ export const AdminSidebar: React.FC = () => {
                     href: '/admin/subject',
                     icon: BookOpen,
                 },
-                {
-                    title: 'Pengaturan Jam',
-                    href: '/admin/time-slots',
-                    icon: Clock,
-                },
             ],
         },
         {
@@ -78,6 +73,11 @@ export const AdminSidebar: React.FC = () => {
             href: '/admin/schedule-kbm',
             icon: Calendar,
             subItems: [
+                {
+                    title: 'Pengaturan Jam',
+                    href: '/admin/time-slots',
+                    icon: Clock,
+                },
                 {
                     title: 'Jadwal Pelajaran',
                     href: '/admin/schedule',

@@ -5,6 +5,13 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const ScheduleListSkeleton: React.FC = () => {
+    const COL_COUNT = 6;
+    const gridStyle = {
+        display: 'grid',
+        gridTemplateColumns: `110px repeat(${COL_COUNT}, minmax(140px, 1fr))`,
+        gap: '8px',
+    } as React.CSSProperties;
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -16,16 +23,28 @@ export const ScheduleListSkeleton: React.FC = () => {
                     </div>
                     <Skeleton className="h-4 w-72 mt-2" />
                 </div>
-                <div className="flex gap-2">
-                    <Skeleton className="h-10 w-32 rounded-lg" />
-                    <Skeleton className="h-10 w-32 rounded-lg" />
-                </div>
+                <Skeleton className="h-10 w-36 rounded-lg" />
+            </div>
+
+            {/* Stat Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[1, 2, 3].map((i) => (
+                    <div key={i} className="rounded-xl bg-white shadow-sm p-5 space-y-3">
+                        <div className="flex items-center gap-3">
+                            <Skeleton className="h-11 w-11 rounded-xl shrink-0" />
+                            <div className="space-y-1.5 flex-1">
+                                <Skeleton className="h-3 w-24" />
+                                <Skeleton className="h-6 w-16" />
+                            </div>
+                        </div>
+                        <Skeleton className="h-5 w-32 rounded-md" />
+                    </div>
+                ))}
             </div>
 
             {/* Content Card */}
             <Card className="border-slate-200 shadow-sm">
                 <CardHeader className="pb-4 space-y-4">
-                    {/* Card header row */}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <Skeleton className="h-10 w-10 rounded-xl shrink-0" />
@@ -34,12 +53,12 @@ export const ScheduleListSkeleton: React.FC = () => {
                                 <Skeleton className="h-4 w-56" />
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <Skeleton className="h-9 w-20 rounded-lg" />
+                        <div className="flex items-center gap-2">
+                            <Skeleton className="h-8 w-8 rounded-lg" />
+                            <Skeleton className="h-8 w-8 rounded-lg" />
                             <Skeleton className="h-6 w-20 rounded-full" />
                         </div>
                     </div>
-                    {/* Search bar */}
                     <div className="pt-2 border-t border-slate-100">
                         <Skeleton className="h-10 w-full rounded-lg" />
                     </div>
@@ -51,44 +70,38 @@ export const ScheduleListSkeleton: React.FC = () => {
                         <Skeleton className="h-9 w-full rounded-md" />
                     </div>
 
-                    {/* Timetable skeleton */}
-                    <div className="overflow-x-auto mt-4">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200">
-                                    <th className="px-3 py-3 w-[100px] border-r border-slate-200">
-                                        <Skeleton className="h-3 w-12 mx-auto" />
-                                    </th>
-                                    {Array.from({ length: 5 }).map((_, i) => (
-                                        <th key={i} className="px-3 py-3 min-w-[120px] border-r border-slate-100">
-                                            <Skeleton className="h-4 w-16 mx-auto" />
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {Array.from({ length: 8 }).map((_, i) => (
-                                    <tr key={i} className="border-b border-slate-100">
-                                        <td className="px-2 py-3 border-r border-slate-200">
-                                            <div className="flex flex-col items-center gap-1">
-                                                <Skeleton className="h-5 w-14 rounded-full" />
-                                                <Skeleton className="h-4 w-10" />
-                                                <Skeleton className="h-3 w-12" />
-                                            </div>
-                                        </td>
-                                        {Array.from({ length: 5 }).map((_, j) => (
-                                            <td key={j} className="px-2 py-2 border-r border-slate-100">
-                                                {(i + j) % 3 === 0 ? (
-                                                    <Skeleton className="h-14 w-full rounded-md" />
-                                                ) : (
-                                                    <div className="h-14 rounded-md border border-dashed border-slate-100" />
-                                                )}
-                                            </td>
-                                        ))}
-                                    </tr>
+                    {/* Timetable grid — matches actual CSS grid layout */}
+                    <div className="overflow-x-auto p-4">
+                        <div className="space-y-2" style={{ minWidth: `${110 + COL_COUNT * 140 + (COL_COUNT + 1) * 8}px` }}>
+                            {/* Header row */}
+                            <div style={gridStyle}>
+                                <Skeleton className="h-9 rounded-lg" />
+                                {Array.from({ length: COL_COUNT }).map((_, i) => (
+                                    <Skeleton key={i} className="h-9 rounded-lg" />
                                 ))}
-                            </tbody>
-                        </table>
+                            </div>
+
+                            {/* Break row */}
+                            <div style={gridStyle}>
+                                <Skeleton className="h-10 rounded-lg" />
+                                <div
+                                    className="h-10 rounded-lg bg-amber-50/60 border border-amber-100"
+                                    style={{ gridColumn: `2 / -1` }}
+                                />
+                            </div>
+
+                            {/* Lesson rows */}
+                            {Array.from({ length: 7 }).map((_, row) => (
+                                <div key={row} style={gridStyle}>
+                                    <Skeleton className="h-[80px] rounded-lg" />
+                                    {Array.from({ length: COL_COUNT }).map((_, col) => (
+                                        (row + col) % 4 === 0
+                                            ? <Skeleton key={col} className="h-[80px] rounded-lg" />
+                                            : <div key={col} className="h-[80px] rounded-lg border border-dashed border-slate-200 bg-muted/20" />
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </CardContent>
             </Card>

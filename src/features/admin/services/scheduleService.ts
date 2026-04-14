@@ -7,6 +7,8 @@ import {
     DAY_MAP_REVERSE,
 } from '../types/schedule';
 
+const toHHMM = (t: string) => t?.slice(0, 5) ?? '';
+
 const transform = (s: any): Schedule => ({
     id: String(s.id),
     classSubjectId: String(s.class_subject_id ?? ''),
@@ -20,8 +22,8 @@ const transform = (s: any): Schedule => ({
     label: s.label ?? undefined,
     dayOfWeek: s.day_of_week as DayOfWeekEn,
     day: DAY_MAP_REVERSE[s.day_of_week as DayOfWeekEn] ?? 'Senin',
-    startTime: s.start_time,
-    endTime: s.end_time,
+    startTime: toHHMM(s.start_time),
+    endTime: toHHMM(s.end_time),
     room: s.room ?? undefined,
     createdAt: s.created_at ?? '',
     updatedAt: s.updated_at ?? '',

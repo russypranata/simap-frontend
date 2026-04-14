@@ -7,7 +7,6 @@ export const scheduleSchema = z.object({
     subjectId: z.string().min(1, 'Mata pelajaran harus dipilih'),
     classId: z.string().min(1, 'Kelas harus dipilih'),
     teacherId: z.string().optional(),
-    room: z.string().optional(),
 });
 
 export type ScheduleFormValues = z.infer<typeof scheduleSchema>;

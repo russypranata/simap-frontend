@@ -25,8 +25,8 @@ const transform = (s: any): TimeSlot => ({
     id: String(s.id),
     day: s.day,
     label: s.label,
-    startTime: s.start_time,
-    endTime: s.end_time,
+    startTime: (s.start_time ?? '').slice(0, 5),
+    endTime: (s.end_time ?? '').slice(0, 5),
     order: s.order,
     type: s.type,
 });
