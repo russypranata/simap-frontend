@@ -20,13 +20,6 @@ export const useStudentExtracurricular = () => {
         queryKey: ['student-extracurricular'],
         queryFn: () => getStudentExtracurricularData(),
         staleTime: 2 * 60 * 1000,
-        select: (data) => {
-            if (selectedAcademicYear === 'all' && data.extracurriculars.length > 0) {
-                const years = [...new Set(data.extracurriculars.map(e => e.academicYearId))].sort((a, b) => b.localeCompare(a));
-                if (years[0]) setSelectedAcademicYear(years[0]);
-            }
-            return data;
-        },
     });
 
     const allExtracurriculars = query.data?.extracurriculars ?? [];
@@ -37,9 +30,15 @@ export const useStudentExtracurricular = () => {
         return Array.from(unique).sort((a, b) => b.localeCompare(a));
     }, [allExtracurriculars]);
 
+    // Auto-select latest year when data loads
+    const effectiveYear = useMemo(() => {
+        if (selectedAcademicYear !== 'all') return selectedAcademicYear;
+        return academicYears[0] ?? 'all';
+    }, [selectedAcademicYear, academicYears]);
+
     const extracurriculars = useMemo(() =>
-        selectedAcademicYear === 'all' ? allExtracurriculars : allExtracurriculars.filter(e => e.academicYearId === selectedAcademicYear),
-        [allExtracurriculars, selectedAcademicYear]
+        effectiveYear === 'all' ? allExtracurriculars : allExtracurriculars.filter(e => e.academicYearId === effectiveYear),
+        [allExtracurriculars, effectiveYear]
     );
 
     const stats = useMemo(() => ({
@@ -57,12 +56,12 @@ export const useStudentExtracurricular = () => {
 
     const filteredAttendance = useMemo(() =>
         allAttendance.filter(r => {
-            const matchYear     = selectedAcademicYear === 'all' || r.academicYearId === selectedAcademicYear;
+            const matchYear     = effectiveYear === 'all' || r.academicYearId === effectiveYear;
             const matchActivity = filterActivity === 'all' ||
                 r.activity.split(' - ')[0].trim().toLowerCase() === filterActivity.toLowerCase();
             return matchYear && matchActivity;
         }),
-        [allAttendance, selectedAcademicYear, filterActivity]
+        [allAttendance, effectiveYear, filterActivity]
     );
 
     const totalPages = Math.ceil(filteredAttendance.length / itemsPerPage) || 1;
@@ -73,8 +72,8 @@ export const useStudentExtracurricular = () => {
 
     return {
         extracurriculars, paginatedAttendance, stats, academicYears,
-        selectedAcademicYear,
-        handleAcademicYearChange: (v: string) => { setSelectedAcademicYear(v); setFilterActivity('all'); setCurrentPage(1); triggerFetchingOverlay(); },
+        selectedAcademicYear: effectiveYear,
+        handleAcademicYearChange: (v: string) => { setSelectedAcademicYear(v); setFilterActivity('all'); setCurrentPage(1); },
         uniqueActivitiesList, filterActivity,
         handleFilterChange: (v: string) => { setFilterActivity(v); setCurrentPage(1); triggerFetchingOverlay(); },
         currentPage, totalPages, itemsPerPage,

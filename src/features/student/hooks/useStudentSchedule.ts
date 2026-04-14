@@ -23,12 +23,15 @@ export const useStudentSchedule = () => {
         [schedule, currentDay]
     );
 
-    const stats = useMemo(() => ({
-        totalLessons:    schedule.length,
-        uniqueSubjects:  new Set(schedule.map(s => s.subject)).size,
-        todayLessons:    todaySchedule.length,
-        currentLesson:   todaySchedule.find(isScheduleCurrentlyHappening) ?? null,
-    }), [schedule, todaySchedule]);
+    const stats = useMemo(() => {
+        const lessons = schedule.filter(s => s.type === 'lesson');
+        return {
+            totalLessons:    lessons.length,
+            uniqueSubjects:  new Set(lessons.map(s => s.subject)).size,
+            todayLessons:    todaySchedule.filter(s => s.type === 'lesson').length,
+            currentLesson:   todaySchedule.find(isScheduleCurrentlyHappening) ?? null,
+        };
+    }, [schedule, todaySchedule]);
 
     return {
         schedule,

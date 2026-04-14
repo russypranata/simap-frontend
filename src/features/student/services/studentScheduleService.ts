@@ -2,6 +2,8 @@ import { STUDENT_API_URL, getAuthHeaders, handleApiError } from './studentApiCli
 
 export interface ScheduleItem {
     id: number;
+    type: 'lesson' | 'break' | 'ceremony' | 'free';
+    label?: string;
     day: string;
     startTime: string;
     endTime: string;
@@ -47,6 +49,8 @@ export const getStudentSchedule = async (): Promise<ScheduleItem[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (result.data ?? []).map((item: Record<string, any>): ScheduleItem => ({
         id:        item.id,
+        type:      item.type ?? 'lesson',
+        label:     item.label ?? undefined,
         day:       DAY_MAP[item.dayOfWeek ?? item.day_of_week] ?? item.dayOfWeek ?? '',
         startTime: trimTime(item.startTime ?? item.start_time ?? ''),
         endTime:   trimTime(item.endTime   ?? item.end_time   ?? ''),

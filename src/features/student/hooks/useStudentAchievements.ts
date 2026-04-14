@@ -51,14 +51,30 @@ export const useStudentAchievements = () => {
     const startIndex  = (currentPage - 1) * itemsPerPage;
     const paginatedRecords = filteredRecords.slice(startIndex, startIndex + itemsPerPage);
 
+    const ITEMS_PER_PAGE = itemsPerPage;
+
     return {
+        // Aliases used by Achievements.tsx page
+        paginatedAchievements: paginatedRecords,
+        filteredAchievements: filteredRecords,
+        totalAchievements: stats.totalAchievements,
+        nationalAchievements: stats.nationalAchievements,
+        firstPlaceCount: stats.firstPlaceCount,
+        levelFilter: selectedLevel,
+        setLevelFilter: setSelectedLevel,
+        ITEMS_PER_PAGE,
+
+        // Standard names
         paginatedRecords, academicYears, stats,
         selectedAcademicYear,
         setSelectedAcademicYear: (v: string) => { setSelectedAcademicYear(v); setCurrentPage(1); },
         selectedLevel, setSelectedLevel,
         searchQuery, setSearchQuery,
         selectedAchievement, setSelectedAchievement,
-        currentPage, totalPages, itemsPerPage,
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        itemsPerPage,
         setItemsPerPage: (v: number) => { setItemsPerPage(v); setCurrentPage(1); },
         filteredTotal: filteredRecords.length,
         startIndexDisplay: filteredRecords.length === 0 ? 0 : startIndex + 1,

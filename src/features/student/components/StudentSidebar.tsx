@@ -7,7 +7,6 @@ import {
     LayoutDashboard,
     GraduationCap,
     Calendar,
-    Megaphone,
     User,
     CheckCircle,
     Trophy,
@@ -59,11 +58,6 @@ export const StudentSidebar: React.FC = () => {
             title: "Catatan Perilaku",
             href: "/student/behavior",
             icon: ClipboardList,
-        },
-        {
-            title: "Pengumuman",
-            href: "/student/announcements",
-            icon: Megaphone,
         },
         {
             title: "Profil Saya",

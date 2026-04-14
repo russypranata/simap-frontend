@@ -18,25 +18,25 @@ export const useStudentBehavior = () => {
             return data.records;
         },
         staleTime: 2 * 60 * 1000,
-        select: (records) => {
-            if (selectedAcademicYear === 'all' && records.length > 0) {
-                const years = [...new Set(records.map(r => r.academicYearId))].sort((a, b) => b.localeCompare(a));
-                if (years[0]) setSelectedAcademicYear(years[0]);
-            }
-            return records;
-        },
     });
 
     const allRecords = query.data ?? [];
 
+    // Auto-select latest academic year once data loads
     const academicYears = useMemo(() => {
         const unique = new Set(allRecords.map(r => r.academicYearId).filter(Boolean));
         return Array.from(unique).sort((a, b) => b.localeCompare(a));
     }, [allRecords]);
 
+    // Auto-select latest year when data first loads
+    const effectiveYear = useMemo(() => {
+        if (selectedAcademicYear !== 'all') return selectedAcademicYear;
+        return academicYears[0] ?? 'all';
+    }, [selectedAcademicYear, academicYears]);
+
     const recordsForYear = useMemo(() =>
-        selectedAcademicYear === 'all' ? allRecords : allRecords.filter(r => r.academicYearId === selectedAcademicYear),
-        [allRecords, selectedAcademicYear]
+        effectiveYear === 'all' ? allRecords : allRecords.filter(r => r.academicYearId === effectiveYear),
+        [allRecords, effectiveYear]
     );
 
     const stats = useMemo(() => ({
@@ -63,7 +63,7 @@ export const useStudentBehavior = () => {
         filteredRecords: pagedRecords,
         allFilteredCount: totalItems,
         stats, academicYears,
-        selectedAcademicYear,
+        selectedAcademicYear: effectiveYear,
         handleAcademicYearChange: (v: string) => { setSelectedAcademicYear(v); setCurrentPage(1); triggerFetchingOverlay(); },
         locationFilter,
         handleLocationChange: (v: string) => { setLocationFilter(v); setCurrentPage(1); triggerFetchingOverlay(); },

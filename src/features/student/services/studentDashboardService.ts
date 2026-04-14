@@ -34,11 +34,19 @@ export interface EkskulSummary {
     attendanceRate: number;
 }
 
+export interface SubjectScore {
+    subject: string;
+    score: number;
+    grade: string;
+}
+
 export interface StudentDashboardData {
     studentName: string;
     studentClass: string;
     stats: DashboardStats;
     todaySchedule: TodayLesson[];
+    topSubjects: SubjectScore[];
+    bottomSubjects: SubjectScore[];
     monthlyAttendance: MonthlyAttendanceSummary;
     ekskulSummary: EkskulSummary[];
     hasWarning: boolean;
@@ -79,6 +87,16 @@ export const getStudentDashboardData = async (): Promise<StudentDashboardData> =
             ekstrakurikuler:   stats.ekstrakurikuler   ?? 0,
         },
         todaySchedule: (d.todaySchedule ?? d.today_schedule ?? []).slice(0, 5).map(normalizeScheduleItem),
+        topSubjects: (d.topSubjects ?? d.top_subjects ?? []).map((s: Record<string, unknown>) => ({
+            subject: (s.subject ?? '') as string,
+            score:   (s.score ?? 0) as number,
+            grade:   (s.grade ?? '') as string,
+        })),
+        bottomSubjects: (d.bottomSubjects ?? d.bottom_subjects ?? []).map((s: Record<string, unknown>) => ({
+            subject: (s.subject ?? '') as string,
+            score:   (s.score ?? 0) as number,
+            grade:   (s.grade ?? '') as string,
+        })),
         monthlyAttendance: {
             hadir:      d.monthlyAttendance?.hadir      ?? 0,
             sakit:      d.monthlyAttendance?.sakit      ?? 0,

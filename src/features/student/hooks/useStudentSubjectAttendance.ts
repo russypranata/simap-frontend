@@ -17,32 +17,28 @@ export const useStudentSubjectAttendance = () => {
         queryKey: ['student-subject-attendance'],
         queryFn: getStudentSubjectAttendance,
         staleTime: 2 * 60 * 1000,
-        select: (data) => {
-            if (selectedAcademicYear === 'all' && data.length > 0) {
-                const sorted = [...data].sort((a, b) => {
-                    const yc = b.academicYearId.localeCompare(a.academicYearId);
-                    return yc !== 0 ? yc : b.semester - a.semester;
-                });
-                const latest = sorted[0];
-                if (latest) {
-                    setSelectedAcademicYear(latest.academicYearId);
-                    setSelectedSemester(String(latest.semester));
-                }
-            }
-            return data;
-        },
     });
 
     const allRecords = query.data ?? [];
     const subjects      = useMemo(() => Array.from(new Set(allRecords.map(r => r.subject))).sort(), [allRecords]);
     const academicYears = useMemo(() => Array.from(new Set(allRecords.map(r => r.academicYearId))).sort((a, b) => b.localeCompare(a)), [allRecords]);
 
+    // Auto-select latest year/semester when data loads
+    const latestYear = useMemo(() => academicYears[0] ?? 'all', [academicYears]);
+    const effectiveYear     = selectedAcademicYear !== 'all' ? selectedAcademicYear : latestYear;
+    const latestSemester = useMemo(() => {
+        const forYear = allRecords.filter(r => r.academicYearId === effectiveYear);
+        const semesters = [...new Set(forYear.map(r => r.semester))].sort((a, b) => b - a);
+        return semesters[0] ? String(semesters[0]) : 'all';
+    }, [allRecords, effectiveYear]);
+    const effectiveSemester = selectedSemester !== 'all' ? selectedSemester : latestSemester;
+
     const recordsForStats = useMemo(() => allRecords.filter(r => {
         const matchSubject  = selectedSubject  === 'all' || r.subject === selectedSubject;
-        const matchYear     = selectedAcademicYear === 'all' || r.academicYearId === selectedAcademicYear;
-        const matchSemester = selectedSemester === 'all' || r.semester === Number(selectedSemester);
+        const matchYear     = r.academicYearId === effectiveYear;
+        const matchSemester = effectiveSemester === 'all' || r.semester === Number(effectiveSemester);
         return matchSubject && matchYear && matchSemester;
-    }), [allRecords, selectedSubject, selectedAcademicYear, selectedSemester]);
+    }), [allRecords, selectedSubject, effectiveYear, effectiveSemester]);
 
     const stats = useMemo(() => {
         const total = recordsForStats.length;
@@ -74,9 +70,9 @@ export const useStudentSubjectAttendance = () => {
         paginatedRecords, subjects, academicYears, stats,
         selectedStatus, setSelectedStatus,
         selectedSubject, setSelectedSubject,
-        selectedAcademicYear,
-        setSelectedAcademicYear: (v: string) => { setSelectedAcademicYear(v); setCurrentPage(1); },
-        selectedSemester,
+        selectedAcademicYear: effectiveYear,
+        setSelectedAcademicYear: (v: string) => { setSelectedAcademicYear(v); setSelectedSemester('all'); setCurrentPage(1); },
+        selectedSemester: effectiveSemester,
         setSelectedSemester: (v: string) => { setSelectedSemester(v); setCurrentPage(1); },
         currentPage, totalPages, itemsPerPage,
         setItemsPerPage: (v: number) => { setItemsPerPage(v); setCurrentPage(1); },
