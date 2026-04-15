@@ -37,6 +37,7 @@ import {
   Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard } from '@/features/shared/components';
 
 export const EReport: React.FC = () => {
   const { role, isHomeroomTeacher } = useRole();
@@ -201,31 +202,13 @@ export const EReport: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        {/* Header Skeleton */}
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/3 mb-2"></div>
-          <div className="h-4 bg-muted rounded w-1/2"></div>
+      <div className="space-y-6 animate-in fade-in duration-500">
+        <SkeletonPageHeader withAction />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
         </div>
-
-        {/* Stats Cards Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="pb-2">
-                <div className="h-4 bg-muted rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
-                <div className="h-3 bg-muted rounded w-full"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* E-Report Cards Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader>
                 <div className="h-5 bg-muted rounded w-3/4"></div>
@@ -247,107 +230,55 @@ export const EReport: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">
-            E-<span className="text-primary">Rapor</span>
-          </h1>
-          <p className="text-muted-foreground">
-            Kelola dan generate E-Rapor siswa secara digital
-          </p>
-          <div className="flex items-center gap-3 mt-4">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-              <Calendar className="h-4 w-4" />
-              <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
-            </div>
-            <div className="h-4 w-[1px] bg-border" />
-            <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
-          </div>
-        </div>
+      <PageHeader
+        title="E-"
+        titleHighlight="Rapor"
+        icon={FileText}
+        description="Kelola dan generate E-Rapor siswa secara digital"
+      >
+        <Button
+          variant="outline"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center space-x-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <span>Refresh</span>
+        </Button>
 
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center space-x-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={handlePrint}
-            className="flex items-center space-x-2"
-          >
-            <Printer className="h-4 w-4" />
-            <span>Cetak</span>
-          </Button>
-        </div>
-      </div>
+        <Button
+          variant="outline"
+          onClick={handlePrint}
+          className="flex items-center space-x-2"
+        >
+          <Printer className="h-4 w-4" />
+          <span>Cetak</span>
+        </Button>
+      </PageHeader>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total E-Rapor</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              Total E-Rapor
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Selesai</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-            <p className="text-xs text-muted-foreground">
-              E-Rapor selesai
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Dalam Proses</CardTitle>
-            <Clock className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
-            <p className="text-xs text-muted-foreground">
-              Sedang dikerjakan
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Menunggu</CardTitle>
-            <AlertCircle className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
-            <p className="text-xs text-muted-foreground">
-              Menunggu persetujuan
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <StatCard title="Total E-Rapor" value={stats.total} subtitle="Total E-Rapor" icon={FileText} color="blue" />
+        <StatCard title="Selesai" value={stats.completed} subtitle="E-Rapor selesai" icon={CheckCircle} color="green" />
+        <StatCard title="Dalam Proses" value={stats.inProgress} subtitle="Sedang dikerjakan" icon={Clock} color="blue" />
+        <StatCard title="Menunggu" value={stats.pending} subtitle="Menunggu persetujuan" icon={AlertCircle} color="amber" />
       </div>
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="reports">Daftar E-Rapor</TabsTrigger>
-          <TabsTrigger value="statistics">Statistik</TabsTrigger>
+        <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1 gap-0.5">
+          <TabsTrigger value="overview" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <FileText className="h-3.5 w-3.5 mr-1.5" />
+            Daftar E-Rapor
+          </TabsTrigger>
+          <TabsTrigger value="statistics" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <TrendingUp className="h-3.5 w-3.5 mr-1.5" />
+            Statistik
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">

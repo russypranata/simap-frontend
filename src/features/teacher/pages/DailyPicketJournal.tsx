@@ -27,7 +27,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Calendar as CalendarIcon, Plus, Search, Edit, History as HistoryIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Search, Edit, History as HistoryIcon, BookOpen } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -38,6 +38,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/features/shared/components";
 
 // Mock data for journal entries
 const mockJournals = [
@@ -97,6 +98,12 @@ export default function DailyPicketJournal() {
 
     return (
         <div className="space-y-6">
+            <PageHeader
+                title="Jurnal"
+                titleHighlight="Piket Harian"
+                icon={BookOpen}
+                description="Catat dan kelola aktivitas piket harian sekolah"
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Input Form Section */}

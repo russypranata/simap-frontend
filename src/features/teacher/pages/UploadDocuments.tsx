@@ -28,24 +28,20 @@ import {
   Upload,
   Download,
   Search,
-  Filter,
   RefreshCw,
   CheckCircle,
   AlertCircle,
   Clock,
   XCircle,
   Eye,
-  Trash2,
   Plus,
   FileCheck,
   FolderOpen,
-  Settings,
   BarChart3,
   TrendingUp,
-  Calendar,
-  User,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard } from "@/features/shared/components";
 
 export const UploadDocuments: React.FC = () => {
   const {
@@ -292,38 +288,11 @@ export const UploadDocuments: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        {/* Header Skeleton */}
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/3 mb-2"></div>
-          <div className="h-4 bg-muted rounded w-1/2"></div>
+      <div className="space-y-6 animate-in fade-in duration-500">
+        <SkeletonPageHeader withAction />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
         </div>
-
-        {/* Stats Cards Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="pb-2">
-                <div className="h-4 bg-muted rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
-                <div className="h-3 bg-muted rounded w-full"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Upload Form Skeleton */}
-        <Card className="animate-pulse">
-          <CardHeader>
-            <div className="h-5 bg-muted rounded w-1/4"></div>
-            <div className="h-4 bg-muted rounded w-1/3"></div>
-          </CardHeader>
-          <CardContent>
-            <div className="h-32 bg-muted rounded"></div>
-          </CardContent>
-        </Card>
       </div>
     );
   }
@@ -331,91 +300,23 @@ export const UploadDocuments: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Upload Dokumen</h1>
-          <p className="text-muted-foreground">
-            Kelola dan upload dokumen pembelajaran dan administrasi
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center space-x-2"
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-            />
-            <span>Refresh</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={handlePrint}
-            className="flex items-center space-x-2"
-          >
-            <FileText className="h-4 w-4" />
-            <span>Cetak</span>
-          </Button>
-        </div>
-      </div>
+      <PageHeader title="Upload" titleHighlight="Dokumen" icon={Upload} description="Kelola dan upload dokumen pembelajaran dan administrasi">
+        <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing} className="flex items-center space-x-2">
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+          <span>Refresh</span>
+        </Button>
+        <Button variant="outline" onClick={handlePrint} className="flex items-center space-x-2">
+          <FileText className="h-4 w-4" />
+          <span>Cetak</span>
+        </Button>
+      </PageHeader>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Dokumen</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">Dokumen terupload</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tersedia</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {stats.uploaded}
-            </div>
-            <p className="text-xs text-muted-foreground">Dokumen disetujui</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Menunggu</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
-              {stats.pending}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Menunggu persetujuan
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Kelengkapan</CardTitle>
-            <TrendingUp className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {stats.completionRate}%
-            </div>
-            <p className="text-xs text-muted-foreground">Dokumen lengkap</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <StatCard title="Total Dokumen" value={stats.total} subtitle="Dokumen terupload" icon={FileText} color="blue" />
+        <StatCard title="Tersedia" value={stats.uploaded} subtitle="Dokumen disetujui" icon={CheckCircle} color="green" />
+        <StatCard title="Menunggu" value={stats.pending} subtitle="Menunggu persetujuan" icon={Clock} color="amber" />
+        <StatCard title="Kelengkapan" value={`${stats.completionRate}%`} subtitle="Dokumen lengkap" icon={TrendingUp} color="purple" />
       </div>
 
       {/* Main Content */}
@@ -424,10 +325,19 @@ export const UploadDocuments: React.FC = () => {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="upload">Upload Dokumen</TabsTrigger>
-          <TabsTrigger value="list">Daftar Dokumen</TabsTrigger>
-          <TabsTrigger value="status">Status Dokumen</TabsTrigger>
+        <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1 gap-0.5">
+          <TabsTrigger value="upload" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <Upload className="h-3.5 w-3.5 mr-1.5" />
+            Upload Dokumen
+          </TabsTrigger>
+          <TabsTrigger value="list" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <FileText className="h-3.5 w-3.5 mr-1.5" />
+            Daftar Dokumen
+          </TabsTrigger>
+          <TabsTrigger value="status" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+            <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
+            Status Dokumen
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="upload" className="space-y-6">

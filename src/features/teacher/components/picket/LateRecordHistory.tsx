@@ -23,13 +23,13 @@ import {
     Search,
     Calendar,
     User,
-    Clock,
     Eye,
     ChevronLeft,
     ChevronRight,
 } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { StatCard } from "@/features/shared/components";
 
 // Mock history data
 const mockHistoryData = [
@@ -124,46 +124,15 @@ export default function LateRecordHistory() {
     // Get unique teachers
     const teachers = Array.from(new Set(mockHistoryData.map((r) => r.recordedBy)));
 
+    const todayCount = mockHistoryData.filter((r) => r.date === format(new Date(), "yyyy-MM-dd")).length;
+
     return (
         <div className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Catatan</CardTitle>
-                        <History className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{filteredData.length}</div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            Dari {mockHistoryData.length} total catatan
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Hari Ini</CardTitle>
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {mockHistoryData.filter((r) => r.date === format(new Date(), "yyyy-MM-dd")).length}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">Catatan hari ini</p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Guru Piket Aktif</CardTitle>
-                        <User className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{teachers.length}</div>
-                        <p className="text-xs text-muted-foreground mt-1">Guru yang mencatat</p>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <StatCard title="Total Catatan" value={filteredData.length} subtitle={`Dari ${mockHistoryData.length} total catatan`} icon={History} color="blue" />
+                <StatCard title="Hari Ini" value={todayCount} subtitle="Catatan hari ini" icon={Calendar} color="amber" />
+                <StatCard title="Guru Piket Aktif" value={teachers.length} subtitle="Guru yang mencatat" icon={User} color="green" />
             </div>
 
             {/* Main Content */}

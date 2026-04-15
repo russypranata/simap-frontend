@@ -7,37 +7,45 @@ import { HomeroomStudents } from "@/features/teacher/components/homeroom/Homeroo
 import { HomeroomAttendance } from "@/features/teacher/components/homeroom/HomeroomAttendance";
 import { EReport } from "@/features/teacher/components/homeroom/HomeroomEReport";
 import { HomeroomGrades } from "@/features/teacher/components/homeroom/HomeroomGrades";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Users, ClipboardCheck, Award, Calendar, FileText } from "lucide-react";
+import { PageHeader } from "@/features/shared/components";
 
 export const HomeroomDashboard = () => {
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                        Dashboard <span className="text-primary">Wali Kelas</span>
-                    </h1>
-                    <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <GraduationCap className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Kelas XII A</span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-muted-foreground text-sm">Tahun Ajaran 2025/2026</span>
-                        <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                title="Dashboard"
+                titleHighlight="Wali Kelas"
+                icon={GraduationCap}
+                description="Pantau dan kelola data siswa, presensi, nilai, dan E-Rapor kelas Anda"
+            />
 
             <Tabs defaultValue="overview" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-6 mb-8">
-                    <TabsTrigger value="overview">Ringkasan</TabsTrigger>
-                    <TabsTrigger value="students">Data Siswa</TabsTrigger>
-                    <TabsTrigger value="attendance">Presensi</TabsTrigger>
-                    <TabsTrigger value="grades">Nilai</TabsTrigger>
-                    <TabsTrigger value="schedule">Jadwal</TabsTrigger>
-                    <TabsTrigger value="ereport">E-Rapor</TabsTrigger>
+                <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1 gap-0.5">
+                    <TabsTrigger value="overview" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <GraduationCap className="h-3.5 w-3.5 mr-1.5" />
+                        Ringkasan
+                    </TabsTrigger>
+                    <TabsTrigger value="students" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <Users className="h-3.5 w-3.5 mr-1.5" />
+                        Data Siswa
+                    </TabsTrigger>
+                    <TabsTrigger value="attendance" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <ClipboardCheck className="h-3.5 w-3.5 mr-1.5" />
+                        Presensi
+                    </TabsTrigger>
+                    <TabsTrigger value="grades" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <Award className="h-3.5 w-3.5 mr-1.5" />
+                        Nilai
+                    </TabsTrigger>
+                    <TabsTrigger value="schedule" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <Calendar className="h-3.5 w-3.5 mr-1.5" />
+                        Jadwal
+                    </TabsTrigger>
+                    <TabsTrigger value="ereport" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <FileText className="h-3.5 w-3.5 mr-1.5" />
+                        E-Rapor
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-4">

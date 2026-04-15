@@ -11,118 +11,19 @@ import {
     Calendar,
     TrendingUp,
     AlertCircle,
-    ArrowUp,
-    ArrowDown,
     UserCheck,
     FileText,
     Award,
     Megaphone,
-    MoreHorizontal,
     Clock,
     CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-// Reusing the StatCard component design from Dashboard
-interface StatCardProps {
-    title: string;
-    value: string | number;
-    description: string;
-    icon: React.ComponentType<{ className?: string }>;
-    color: string;
-    bgColor: string;
-    trend?: {
-        value: number;
-        isUp: boolean;
-    };
-}
-
-const StatCard: React.FC<StatCardProps> = ({
-    title,
-    value,
-    description,
-    icon: Icon,
-    color,
-    bgColor,
-    trend,
-}) => {
-    return (
-        <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <CardHeader className="relative pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground pr-12">
-                    {title}
-                </CardTitle>
-                <div className={`absolute top-4 right-4 p-2 rounded-lg ${bgColor}`}>
-                    <Icon className={`h-4 w-4 ${color}`} />
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="flex items-center justify-between">
-                    <div className={`text-2xl font-bold ${color}`}>{value}</div>
-                    {trend && (
-                        <div
-                            className={`flex items-center text-xs ${trend.isUp ? "text-green-600" : "text-red-600"
-                                }`}
-                        >
-                            {trend.isUp ? (
-                                <ArrowUp className="h-3 w-3 mr-1" />
-                            ) : (
-                                <ArrowDown className="h-3 w-3 mr-1" />
-                            )}
-                            {trend.value}%
-                        </div>
-                    )}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">{description}</p>
-            </CardContent>
-        </Card>
-    );
-};
+import { StatCard } from "@/features/shared/components";
 
 export const HomeroomOverview = () => {
-    // Mock data
-    const stats: StatCardProps[] = [
-        {
-            title: "Total Siswa",
-            value: "32",
-            description: "Siswa aktif di kelas XII A",
-            icon: Users,
-            color: "text-primary",
-            bgColor: "bg-primary/10",
-            trend: { value: 0, isUp: true },
-        },
-        {
-            title: "Kehadiran Hari Ini",
-            value: "94%",
-            description: "30 Hadir, 1 Sakit, 1 Izin",
-            icon: UserCheck,
-            color: "text-green-600",
-            bgColor: "bg-green-50",
-            trend: { value: 2, isUp: true },
-        },
-        {
-            title: "Rata-rata Nilai",
-            value: "82.5",
-            description: "Semester Ganjil 2024/2025",
-            icon: Award,
-            color: "text-purple-600",
-            bgColor: "bg-purple-50",
-            trend: { value: 5, isUp: true },
-        },
-        {
-            title: "Perlu Perhatian",
-            value: "3",
-            description: "Siswa dengan kehadiran < 80%",
-            icon: AlertCircle,
-            color: "text-orange-600",
-            bgColor: "bg-orange-50",
-            trend: { value: 1, isUp: false },
-        },
-    ];
-
     const attentionList = [
         { name: "Budi Santoso", issue: "Kehadiran rendah (75%)", status: "Warning" },
         { name: "Siti Aminah", issue: "Nilai Matematika dibawah KKM", status: "Danger" },
@@ -132,10 +33,11 @@ export const HomeroomOverview = () => {
     return (
         <div className="space-y-6">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {stats.map((stat, index) => (
-                    <StatCard key={index} {...stat} />
-                ))}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <StatCard title="Total Siswa" value="32" subtitle="Siswa aktif di kelas XII A" icon={Users} color="blue" />
+                <StatCard title="Kehadiran Hari Ini" value="94%" subtitle="30 Hadir, 1 Sakit, 1 Izin" icon={UserCheck} color="green" />
+                <StatCard title="Rata-rata Nilai" value="82.5" subtitle="Semester Ganjil 2024/2025" icon={Award} color="purple" />
+                <StatCard title="Perlu Perhatian" value="3" subtitle="Siswa dengan kehadiran < 80%" icon={AlertCircle} color="amber" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

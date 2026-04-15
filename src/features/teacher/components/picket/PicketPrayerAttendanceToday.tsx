@@ -45,6 +45,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { StatCard } from "@/features/shared/components";
 
 // Prayer times
 const PRAYER_TIMES = [
@@ -268,47 +269,10 @@ export default function PicketPrayerAttendanceToday() {
             </Card>
 
             {/* Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-primary/5 border-primary/20">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Tercatat</CardTitle>
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                            <PrayerIcon className="h-4 w-4 text-primary" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-primary">{stats.total}</div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            Siswa untuk {selectedPrayerInfo?.name}
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-green-50 border-green-200">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Hadir</CardTitle>
-                        <div className="p-2 bg-green-100 rounded-lg">
-                            <Check className="h-4 w-4 text-green-600" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-green-600">{stats.hadir}</div>
-                        <p className="text-xs text-muted-foreground mt-1">Siswa hadir sholat</p>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-red-50 border-red-200">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Tidak Hadir</CardTitle>
-                        <div className="p-2 bg-red-100 rounded-lg">
-                            <X className="h-4 w-4 text-red-600" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-red-600">{stats.tidak}</div>
-                        <p className="text-xs text-muted-foreground mt-1">Siswa tidak hadir</p>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <StatCard title="Total Tercatat" value={stats.total} subtitle={`Siswa untuk ${selectedPrayerInfo?.name}`} icon={PrayerIcon} color="blue" />
+                <StatCard title="Hadir" value={stats.hadir} subtitle="Siswa hadir sholat" icon={Check} color="green" />
+                <StatCard title="Tidak Hadir" value={stats.tidak} subtitle="Siswa tidak hadir" icon={X} color="red" />
             </div>
 
             {/* Main Grid */}

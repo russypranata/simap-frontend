@@ -14,34 +14,22 @@ import PrayerRecordHistory from "@/features/teacher/components/picket/PrayerReco
 export default function PicketPrayerAttendance() {
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                        Presensi <span className="text-primary">Sholat</span>
-                    </h1>
-                    <p className="text-muted-foreground mt-1">
-                        Catat kehadiran siswa dalam pelaksanaan sholat berjamaah
-                    </p>
-                </div>
-            </div>
-
             {/* Tabs */}
             <Tabs defaultValue="today" className="space-y-6">
                 {/* Pill Style Tabs */}
-                <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1.5 gap-1">
+                <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1 gap-0.5">
                     <TabsTrigger
                         value="today"
-                        className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                        className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground"
                     >
-                        <Clock className="h-4 w-4 mr-2" />
+                        <Clock className="h-3.5 w-3.5 mr-1.5" />
                         Hari Ini
                     </TabsTrigger>
                     <TabsTrigger
                         value="history"
-                        className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                        className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground"
                     >
-                        <History className="h-4 w-4 mr-2" />
+                        <History className="h-3.5 w-3.5 mr-1.5" />
                         Riwayat Lengkap
                     </TabsTrigger>
                 </TabsList>

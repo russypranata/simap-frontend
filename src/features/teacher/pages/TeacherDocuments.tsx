@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { DocumentCategory } from "@/features/teacher/components/documents/DocumentCategory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate, getDayName } from "@/features/shared/utils/dateFormatter";
-import { Calendar } from "lucide-react";
+import { Calendar, BookOpen, ClipboardCheck, TrendingUp } from "lucide-react";
 import { MaterialCard } from "@/features/teacher/components/planning/MaterialCard";
 import { LearningObjectiveCard } from "@/features/teacher/components/planning/LearningObjectiveCard";
 import { Material, LearningObjective, ACTIVE_ACADEMIC_YEAR, ACTIVE_SEMESTER, MOCK_MATERIALS, MOCK_LEARNING_OBJECTIVES } from "@/features/teacher/components/planning/types";
@@ -12,6 +12,7 @@ import { MaterialInputView } from "@/features/teacher/components/planning/Materi
 import { MaterialHistoryView } from "@/features/teacher/components/planning/MaterialHistoryView";
 import { LearningObjectiveInputView } from "@/features/teacher/components/planning/LearningObjectiveInputView";
 import { LearningObjectiveHistoryView } from "@/features/teacher/components/planning/LearningObjectiveHistoryView";
+import { PageHeader } from "@/features/shared/components";
 
 type ViewType = "dashboard" | "material-input" | "material-history" | "tp-input" | "tp-history";
 
@@ -93,32 +94,27 @@ export const TeacherDocuments = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                        Administrasi <span className="text-primary">Guru</span>
-                    </h1>
-                    <p className="text-muted-foreground">
-                        Kelola dokumen administrasi semester ini
-                    </p>
-                    <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Tahun Ajaran {ACTIVE_ACADEMIC_YEAR}</span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-muted-foreground text-sm font-medium text-primary">
-                            Semester {ACTIVE_SEMESTER}
-                        </span>
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                title="Administrasi"
+                titleHighlight="Guru"
+                icon={Calendar}
+                description="Kelola dokumen administrasi semester ini"
+            />
 
             <Tabs defaultValue="planning" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="planning">Perencanaan Pembelajaran</TabsTrigger>
-                    <TabsTrigger value="assessment">Asesmen & Evaluasi</TabsTrigger>
-                    <TabsTrigger value="development">Pengembangan & Refleksi</TabsTrigger>
+                <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1 gap-0.5">
+                    <TabsTrigger value="planning" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <BookOpen className="h-3.5 w-3.5 mr-1.5" />
+                        Perencanaan Pembelajaran
+                    </TabsTrigger>
+                    <TabsTrigger value="assessment" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <ClipboardCheck className="h-3.5 w-3.5 mr-1.5" />
+                        Asesmen &amp; Evaluasi
+                    </TabsTrigger>
+                    <TabsTrigger value="development" className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground">
+                        <TrendingUp className="h-3.5 w-3.5 mr-1.5" />
+                        Pengembangan &amp; Refleksi
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="planning" className="space-y-8">

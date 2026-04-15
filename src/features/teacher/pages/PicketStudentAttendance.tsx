@@ -54,6 +54,7 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs";
 import LateRecordHistory from "@/features/teacher/components/picket/LateRecordHistory";
+import { StatCard } from "@/features/shared/components";
 
 // Mock data for students
 const mockStudentsInitial = [
@@ -325,62 +326,29 @@ export default function PicketStudentAttendance() {
     return (
         <Tabs defaultValue="today" className="space-y-6">
             {/* Pill Style Tabs */}
-            <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1.5 gap-1">
+            <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1 gap-0.5">
                 <TabsTrigger
                     value="today"
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground"
                 >
-                    <Clock className="h-4 w-4 mr-2" />
+                    <Clock className="h-3.5 w-3.5 mr-1.5" />
                     Keterlambatan Pagi
                 </TabsTrigger>
                 <TabsTrigger
                     value="history"
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-6 py-2.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground"
                 >
-                    <History className="h-4 w-4 mr-2" />
+                    <History className="h-3.5 w-3.5 mr-1.5" />
                     Riwayat Lengkap
                 </TabsTrigger>
             </TabsList>
 
             <TabsContent value="today" className="space-y-6">
                 {/* Top Stats Row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="bg-red-50 border-red-200">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Terlambat</CardTitle>
-                            <div className="p-2 bg-red-100 rounded-lg">
-                                <UserMinus className="h-4 w-4 text-red-600" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-red-600">{stats.total}</div>
-                            <p className="text-xs text-muted-foreground mt-1">Siswa terlambat hari ini</p>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-orange-50 border-orange-200">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Terakhir Datang</CardTitle>
-                            <div className="p-2 bg-orange-100 rounded-lg">
-                                <Clock className="h-4 w-4 text-orange-600" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-orange-600">{stats.lastTime}</div>
-                            <p className="text-xs text-muted-foreground mt-1">Waktu kedatangan terakhir</p>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-blue-50 border-blue-200">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Kelas Terbanyak</CardTitle>
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                                <AlertCircle className="h-4 w-4 text-blue-600" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-blue-600">{stats.mostLateClass}</div>
-                            <p className="text-xs text-muted-foreground mt-1">Kelas dengan keterlambatan tertinggi</p>
-                        </CardContent>
-                    </Card>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <StatCard title="Total Terlambat" value={stats.total} subtitle="Siswa terlambat hari ini" icon={UserMinus} color="red" />
+                    <StatCard title="Terakhir Datang" value={stats.lastTime} subtitle="Waktu kedatangan terakhir" icon={Clock} color="amber" />
+                    <StatCard title="Kelas Terbanyak" value={stats.mostLateClass} subtitle="Kelas dengan keterlambatan tertinggi" icon={AlertCircle} color="blue" />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[600px] h-fit">

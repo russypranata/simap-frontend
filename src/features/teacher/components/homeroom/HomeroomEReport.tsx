@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Filter, Search, Calendar, Eye, FileText, User, BookOpen } from "lucide-react";
+import { Filter, Search, Eye, FileText, User, BookOpen } from "lucide-react";
 import { mockStudents } from "@/features/teacher/services/mockData";
+import { PageHeader } from "@/features/shared/components";
 
 // Define strict types for our mock data
 interface SubjectGrade {
@@ -98,24 +99,7 @@ export const EReport = () => {
     return (
         <div className="space-y-6">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                        E-Rapor
-                    </h1>
-                    <p className="text-muted-foreground">
-                        Rekap nilai akhir siswa berdasarkan semester.
-                    </p>
-                    <div className="flex items-center gap-3 mt-4">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
-                        </div>
-                        <div className="h-4 w-[1px] bg-border" />
-                        <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
-                    </div>
-                </div>
-            </div>
+            <PageHeader title="E-" titleHighlight="Rapor" icon={FileText} description="Rekap nilai akhir siswa berdasarkan semester." />
 
             {/* Filter Bar */}
             <Card>

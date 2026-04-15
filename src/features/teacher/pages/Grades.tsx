@@ -57,6 +57,7 @@ import {
   Cell,
 } from 'recharts';
 import { toast } from 'sonner';
+import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard } from '@/features/shared/components';
 
 export const Grades: React.FC = () => {
   const {
@@ -388,29 +389,11 @@ export const Grades: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        {/* Header Skeleton */}
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/3 mb-2"></div>
-          <div className="h-4 bg-muted rounded w-1/2"></div>
+      <div className="space-y-6 animate-in fade-in duration-500">
+        <SkeletonPageHeader withAction />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
         </div>
-
-        {/* Stats Cards Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="pb-2">
-                <div className="h-4 bg-muted rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
-                <div className="h-3 bg-muted rounded w-full"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Filter Skeleton */}
         <Card className="animate-pulse">
           <CardHeader>
             <div className="h-5 bg-muted rounded w-1/4"></div>
@@ -425,12 +408,10 @@ export const Grades: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Table Skeleton */}
         <Card className="animate-pulse">
           <CardContent className="p-4">
             <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="h-16 bg-muted rounded"></div>
               ))}
             </div>
@@ -443,83 +424,62 @@ export const Grades: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">
-            Nilai <span className="text-primary">Siswa</span>
-          </h1>
-          <p className="text-muted-foreground">
-            Kelola nilai siswa untuk setiap mata pelajaran
-          </p>
-          <div className="flex items-center gap-3 mt-4">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-              <Calendar className="h-4 w-4" />
-              <span className="text-sm font-semibold">Tahun Ajaran 2025/2026</span>
-            </div>
-            <div className="h-4 w-[1px] bg-border" />
-            <span className="text-muted-foreground text-sm font-medium text-primary">Semester Ganjil</span>
-          </div>
-        </div>
+      <PageHeader
+        title="Nilai"
+        titleHighlight="Siswa"
+        icon={Award}
+        description="Kelola nilai siswa untuk setiap mata pelajaran"
+      >
+        <Button
+          variant="outline"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center space-x-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <span>Refresh</span>
+        </Button>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="flex items-center space-x-2 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="flex items-center space-x-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={handlePrint}
-              className="flex items-center space-x-2"
-            >
-              <Printer className="h-4 w-4" />
-              <span>Cetak</span>
-            </Button>
-          </div>
-
-
-        </div>
-      </div>
-
-
+        <Button
+          variant="outline"
+          onClick={handlePrint}
+          className="flex items-center space-x-2"
+        >
+          <Printer className="h-4 w-4" />
+          <span>Cetak</span>
+        </Button>
+      </PageHeader>
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted/50 rounded-xl mb-6">
+        <TabsList className="inline-flex h-auto items-center justify-center rounded-full bg-muted/50 p-1 gap-0.5">
           <TabsTrigger
             value="input"
-            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground"
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-3.5 w-3.5 mr-1.5" />
             Input Nilai
           </TabsTrigger>
           <TabsTrigger
             value="list"
-            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground"
           >
-            <BookOpen className="h-4 w-4" />
+            <BookOpen className="h-3.5 w-3.5 mr-1.5" />
             Daftar Nilai
           </TabsTrigger>
           <TabsTrigger
             value="statistics"
-            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground"
           >
-            <BarChart3 className="h-4 w-4" />
+            <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
             Statistik
           </TabsTrigger>
           <TabsTrigger
             value="remediation"
-            className="rounded-lg py-2.5 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center justify-center gap-2"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 h-8 py-1.5 text-sm font-medium transition-all data-[state=active]:bg-blue-800 data-[state=active]:text-white data-[state=inactive]:text-muted-foreground"
           >
-            <Users className="h-4 w-4" />
-            Remedial & Pengayaan
+            <Users className="h-3.5 w-3.5 mr-1.5" />
+            Remedial &amp; Pengayaan
           </TabsTrigger>
         </TabsList>
 
@@ -648,81 +608,12 @@ export const Grades: React.FC = () => {
           </Card>
 
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Siswa</CardTitle>
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Users className="h-4 w-4 text-primary" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-primary">{stats.totalStudents}</div>
-                <p className="text-xs text-muted-foreground">
-                  {selectedClassData?.name || 'Pilih kelas'}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Rata-rata Kelas</CardTitle>
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Calculator className="h-4 w-4 text-blue-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600">{stats.averageScore}</div>
-                <p className="text-xs text-muted-foreground">
-                  Skor rata-rata kelas
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Tertinggi</CardTitle>
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">{stats.highestScore}</div>
-                <p className="text-xs text-muted-foreground">
-                  Skor tertinggi
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Terendah</CardTitle>
-                <div className="p-2 bg-red-100 rounded-lg">
-                  <TrendingDown className="h-4 w-4 text-red-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">{stats.lowestScore}</div>
-                <p className="text-xs text-muted-foreground">
-                  Skor terendah
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Tingkat Kelulusan</CardTitle>
-                <div className="p-2 bg-indigo-100 rounded-lg">
-                  <CheckCircle className="h-4 w-4 text-indigo-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-indigo-600">{stats.passRate}%</div>
-                <p className="text-xs text-muted-foreground">
-                  Siswa lulus (≥70)
-                </p>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+            <StatCard title="Total Siswa" value={stats.totalStudents} subtitle={selectedClassData?.name || 'Pilih kelas'} icon={Users} color="blue" />
+            <StatCard title="Rata-rata Kelas" value={stats.averageScore} subtitle="Skor rata-rata kelas" icon={Calculator} color="purple" />
+            <StatCard title="Tertinggi" value={stats.highestScore} subtitle="Skor tertinggi" icon={TrendingUp} color="green" />
+            <StatCard title="Terendah" value={stats.lowestScore} subtitle="Skor terendah" icon={TrendingDown} color="red" />
+            <StatCard title="Tingkat Kelulusan" value={`${stats.passRate}%`} subtitle="Siswa lulus (≥70)" icon={CheckCircle} color="emerald" />
           </div>
 
           {/* Grade Input Form */}
