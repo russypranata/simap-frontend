@@ -137,6 +137,7 @@ const routeConfig: Record<string, RouteItem> = {
     'admin:subject': { label: 'Mata Pelajaran', icon: BookOpen, parent: 'curriculum-data' },
     'admin:schedule': { label: 'Jadwal Pelajaran', icon: Calendar, parent: 'schedule-kbm' },
     'admin:calendar': { label: 'Kalender Akademik', icon: Calendar, parent: 'schedule-kbm' },
+    'admin:schedule-group': { label: 'Jadwal & KBM', icon: Calendar, isClickable: false },
     'admin:attendance': { label: 'Presensi', icon: ClipboardList, parent: 'schedule-kbm' },
     'admin:time-slots': { label: 'Pengaturan Jam', icon: Clock, parent: 'curriculum-data' },
     'admin:assessment': { label: 'Input Nilai', icon: FileText, parent: 'assessments' },
@@ -319,8 +320,16 @@ export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => 
 
                 const config = resolveConfig(segment);
 
+                // Special case: 'schedule' sebagai folder routing (bukan leaf page)
+                // Jika ada segment setelahnya, tampilkan sebagai non-clickable group
+                const isScheduleFolder =
+                    segment === 'schedule' &&
+                    currentRole === 'admin' &&
+                    index < segments.length - 1;
+
                 // Inject non-clickable parent category group if needed
-                if (config?.parent) {
+                // Skip jika segment ini sendiri adalah folder group
+                if (config?.parent && !isScheduleFolder) {
                     const parentConfig = routeConfig[config.parent];
                     if (parentConfig && !breadcrumbs.some(b => b.label === parentConfig.label)) {
                         breadcrumbs.push({
@@ -333,7 +342,9 @@ export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => 
                     }
                 }
 
-                let label = config?.label || formatSegmentLabel(segment);
+                let label = isScheduleFolder
+                    ? 'Jadwal & KBM'
+                    : (config?.label || formatSegmentLabel(segment));
 
                 // For 'edit' segment following a skipped ID, merge the label
                 if (segment === 'edit' && skippedLabel) {
@@ -341,14 +352,15 @@ export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => 
                     skippedLabel = '';
                 }
 
-                const icon = config?.icon || CircleDot;
+                const icon = isScheduleFolder ? Calendar : (config?.icon || CircleDot);
+                const isClickable = isScheduleFolder ? false : (config?.isClickable !== false);
 
                 breadcrumbs.push({
                     label,
                     href: currentPath,
                     isLast: false,
                     icon,
-                    isClickable: config?.isClickable !== false,
+                    isClickable,
                 });
             }
         });

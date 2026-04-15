@@ -88,9 +88,13 @@ export const CalendarEventForm: React.FC<CalendarEventFormProps> = ({
         form.setValue('isHoliday', type === 'holiday');
     }, [type, form]);
 
-    const handleSubmit = (values: CalendarEventFormValues) => {
-        onSubmit(values);
-        onOpenChange(false);
+    const handleSubmit = async (values: CalendarEventFormValues) => {
+        try {
+            await onSubmit(values);
+            onOpenChange(false);
+        } catch {
+            // error handled by parent (toast in hook)
+        }
     };
 
     return (
@@ -174,7 +178,7 @@ export const CalendarEventForm: React.FC<CalendarEventFormProps> = ({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Tipe Kegiatan</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Pilih tipe" />
