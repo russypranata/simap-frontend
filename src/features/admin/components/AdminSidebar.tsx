@@ -25,6 +25,7 @@ import {
     Award,
     Contact,
     Clock,
+    FileBarChart,
 } from 'lucide-react';
 
 export const AdminSidebar: React.FC = () => {
@@ -88,10 +89,22 @@ export const AdminSidebar: React.FC = () => {
                     href: '/admin/schedule/calendar',
                     icon: CalendarDays,
                 },
+            ],
+        },
+        {
+            title: 'Presensi',
+            href: '/admin/attendance',
+            icon: ClipboardCheck,
+            subItems: [
                 {
-                    title: 'Presensi',
+                    title: 'Dashboard Presensi',
                     href: '/admin/attendance',
                     icon: ClipboardCheck,
+                },
+                {
+                    title: 'Laporan Presensi',
+                    href: '/admin/attendance/report',
+                    icon: FileBarChart,
                 },
             ],
         },
