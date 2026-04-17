@@ -33,7 +33,6 @@ import { extracurricularSchema, ExtracurricularFormValues } from '../../schemas/
 import { Extracurricular } from '../../types/extracurricular';
 import { teacherService } from '../../services/teacherService';
 import { Teacher } from '../../types/teacher';
-import { toast } from 'sonner';
 import { useAcademicYear } from '@/context/AcademicYearContext';
 
 interface ExtracurricularFormProps {
@@ -118,7 +117,7 @@ export const ExtracurricularForm: React.FC<ExtracurricularFormProps> = ({
             await onSubmit(values);
             onOpenChange(false);
             form.reset();
-        } catch (error) {
+        } catch {
             // Error handling is usually done in the parent
         } finally {
             setIsSubmitting(false);

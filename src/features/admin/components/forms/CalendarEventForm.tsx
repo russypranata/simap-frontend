@@ -83,6 +83,7 @@ export const CalendarEventForm: React.FC<CalendarEventFormProps> = ({
     }, [initialData, form, open]);
 
     // Auto-set isHoliday based on type
+    // eslint-disable-next-line react-hooks/incompatible-library
     const type = form.watch('type');
     useEffect(() => {
         form.setValue('isHoliday', type === 'holiday');

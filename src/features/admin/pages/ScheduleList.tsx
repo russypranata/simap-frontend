@@ -8,8 +8,6 @@ import {
     Clock,
     User,
     Trash2,
-    FileX,
-    FilterX,
     Edit,
     BookOpen,
     Grid3X3,
@@ -18,6 +16,7 @@ import {
     GraduationCap,
     BarChart3,
     RefreshCw,
+    X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,21 +27,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-    DialogDescription,
-} from '@/components/ui/dialog';import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
     AlertDialog,
@@ -65,19 +50,16 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 // Types & Services
 import { DayOfWeek, Schedule, DAY_MAP } from '../types/schedule';
-import { scheduleService } from '../services/scheduleService';
 
 // Components
 import { ScheduleForm } from '../components/forms/ScheduleForm';
 import { ScheduleFormValues } from '../schemas/scheduleSchema';
 import { ScheduleListSkeleton } from '../components/schedule/ScheduleListSkeleton';
-import { timeSlotService } from '../services/timeSlotService';
-import { getSubjectColor } from '../utils/scheduleUtils';
+import { timeSlotService, TimeSlot } from '../services/timeSlotService';
 import { StatCard, EmptyState } from '@/features/shared/components';
 import { useScheduleList } from '../hooks/useScheduleList';
 import { useBreadcrumbAction } from '@/context/BreadcrumbActionContext';
@@ -117,7 +99,7 @@ export const ScheduleList: React.FC = () => {
     const [isBulkDelete, setIsBulkDelete] = useState(false);
 
     // Time slots per day (dari API)
-    const [dayTimeSlots, setDayTimeSlots] = useState<any[]>([]);
+    const [dayTimeSlots, setDayTimeSlots] = useState<TimeSlot[]>([]);
     const [isLoadingSlots, setIsLoadingSlots] = useState(true);
 
     const days: DayOfWeek[] = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -141,7 +123,7 @@ export const ScheduleList: React.FC = () => {
     useEffect(() => {
         const dayKey = DAY_MAP[selectedDay];
         setIsLoadingSlots(true);
-        timeSlotService.getByDay(dayKey as any).then(slots => {
+        timeSlotService.getByDay(dayKey).then(slots => {
             setDayTimeSlots(slots);
             setIsLoadingSlots(false);
         });
@@ -156,21 +138,6 @@ export const ScheduleList: React.FC = () => {
             (item.teacherName ?? '').toLowerCase().includes(searchTerm.toLowerCase());
         return matchesDay && matchesSearch;
     });
-
-    // Selection Handlers
-    const toggleSelectAll = () => {
-        if (selectedItems.length === filteredData.length) {
-            setSelectedItems([]);
-        } else {
-            setSelectedItems(filteredData.map(s => s.id));
-        }
-    };
-
-    const toggleSelectItem = (id: string) => {
-        setSelectedItems(prev =>
-            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-        );
-    };
 
     const handleBulkDelete = () => {
         if (selectedItems.length === 0) return;
@@ -242,7 +209,7 @@ export const ScheduleList: React.FC = () => {
                                 Pelajaran
                             </span>
                         </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                             <Calendar className="h-5 w-5" />
                         </div>
                     </div>
@@ -397,7 +364,8 @@ export const ScheduleList: React.FC = () => {
                                         item.teacherName.toLowerCase().includes(searchTerm.toLowerCase())
                                     );
 
-                                    const lessonSlots = dayTimeSlots.filter((s: any) => s.type === 'lesson');
+                                    const lessonSlots = dayTimeSlots.filter((s: TimeSlot) => s.type === 'lesson');
+                                    void lessonSlots; // used for reference only
                                     // Get all slots for timetable view (including breaks)
                                     const allSlots = dayTimeSlots;
 
@@ -500,14 +468,14 @@ export const ScheduleList: React.FC = () => {
                                                     ))}
 
                                                     {/* Slot rows */}
-                                                    {!isLoadingSlots && allSlots.map((slot: any) => {
+                                                    {!isLoadingSlots && allSlots.map((slot: TimeSlot) => {
                                                         // Non-lesson row
                                                         if (slot.type !== 'lesson') {
                                                             const cfg = ({
                                                                 break:    { cls: 'bg-amber-50/60 border-amber-200 text-amber-700', label: '☕ Istirahat' },
                                                                 ishoma:   { cls: 'bg-green-50/60 border-green-200 text-green-700', label: '🍽️ Ishoma' },
                                                                 ceremony: { cls: 'bg-blue-50/60 border-blue-200 text-blue-700', label: '🚩 Upacara' },
-                                                            } as any)[slot.type] ?? { cls: 'bg-slate-50 border-slate-200 text-slate-500', label: slot.label };
+                                                            } as Record<string, { cls: string; label: string }>)[slot.type] ?? { cls: 'bg-slate-50 border-slate-200 text-slate-500', label: slot.label };
 
                                                             return (
                                                                 <div key={slot.id} style={gridStyle}>
@@ -726,7 +694,7 @@ export const ScheduleList: React.FC = () => {
                                                                     >
                                                                         <div className="flex flex-col items-center gap-0.5">
                                                                             <span className="inline-flex items-center justify-center h-5 w-14 rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 uppercase">
-                                                                                Jam {dayTimeSlots.filter((s: any) => s.type === 'lesson').findIndex((s: any) => s.startTime === group.startTime) + 1 || '?'}
+                                                                                Jam {dayTimeSlots.filter((s: TimeSlot) => s.type === 'lesson').findIndex((s: TimeSlot) => s.startTime === group.startTime) + 1 || '?'}
                                                                             </span>
                                                                             <span className="text-xs font-bold text-slate-800 font-mono mt-1">
                                                                                 {group.startTime}
@@ -821,6 +789,7 @@ export const ScheduleList: React.FC = () => {
                                 className="text-white hover:bg-slate-800 h-9"
                                 onClick={() => setSelectedItems([])}
                             >
+                                <X className="h-4 w-4 mr-2" />
                                 Batal
                             </Button>
                         </div>

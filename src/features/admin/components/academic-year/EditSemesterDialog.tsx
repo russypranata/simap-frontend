@@ -59,7 +59,8 @@ interface EditSemesterDialogProps {
 
 export const EditSemesterDialog: React.FC<EditSemesterDialogProps> = ({
     semester,
-    academicYearId,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    academicYearId: _academicYearId,
     academicYearStartDate,
     academicYearEndDate,
     isOpen,

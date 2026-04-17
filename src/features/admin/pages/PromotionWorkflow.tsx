@@ -11,9 +11,9 @@ import {
     CheckCircle2,
     AlertCircle,
     Save,
-    ArrowLeftRight,
     ChevronRight,
     ArrowUpCircle,
+    ArrowLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -48,8 +48,8 @@ import { academicYearService } from '../services/academicYearService';
 import { classService } from '../services/classService';
 import { studentService } from '../services/studentService';
 import { AcademicYear } from '../types/academicYear';
-import { Class } from '../types/class';
-import { PromotionAction, StudentPromotion, PromotionPayload } from '../types/promotion';
+import { ClassRoom } from '../types/class';
+import { PromotionAction, StudentPromotion } from '../types/promotion';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -60,8 +60,8 @@ export const PromotionWorkflow: React.FC = () => {
 
     // Data State
     const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
-    const [sourceClasses, setSourceClasses] = useState<Class[]>([]);
-    const [targetClasses, setTargetClasses] = useState<Class[]>([]);
+    const [sourceClasses, setSourceClasses] = useState<ClassRoom[]>([]);
+    const [targetClasses, setTargetClasses] = useState<ClassRoom[]>([]);
 
     // Form State
     const [sourceYearId, setSourceYearId] = useState<string>('');
@@ -108,7 +108,7 @@ export const PromotionWorkflow: React.FC = () => {
             if (activeYear) {
                 setSourceYearId(activeYear.id);
             }
-        } catch (error) {
+        } catch {
             toast.error('Gagal mengambil data tahun ajaran');
         } finally {
             setIsLoading(false);
@@ -118,9 +118,9 @@ export const PromotionWorkflow: React.FC = () => {
     const fetchSourceClasses = async (yearId: string) => {
         try {
             setIsLoading(true);
-            const allClasses = await classService.getClasses();
-            setSourceClasses(allClasses.filter(c => c.academicYearId === yearId && c.type === 'REGULER'));
-        } catch (error) {
+            const allClasses = await classService.getClasses({ academic_year_id: yearId });
+            setSourceClasses(allClasses);
+        } catch {
             toast.error('Gagal mengambil data kelas asal');
         } finally {
             setIsLoading(false);
@@ -130,9 +130,9 @@ export const PromotionWorkflow: React.FC = () => {
     const fetchTargetClasses = async (yearId: string) => {
         try {
             setIsLoading(true);
-            const allClasses = await classService.getClasses();
-            setTargetClasses(allClasses.filter(c => c.academicYearId === yearId && c.type === 'REGULER'));
-        } catch (error) {
+            const allClasses = await classService.getClasses({ academic_year_id: yearId });
+            setTargetClasses(allClasses);
+        } catch {
             toast.error('Gagal mengambil data kelas tujuan');
         } finally {
             setIsLoading(false);
@@ -159,12 +159,11 @@ export const PromotionWorkflow: React.FC = () => {
             }
 
             const unmappedClasses = selectedClassIds.filter(id => {
-                const sourceClass = sourceClasses.find(c => c.id === id);
-                return sourceClass?.grade !== 12 && !classMapping[id];
+                return !classMapping[id];
             });
 
             if (unmappedClasses.length > 0) {
-                toast.error('Silakan tentukan kelas tujuan untuk semua kelas asal pilihan (kecuali kelas 12)');
+                toast.error('Silakan tentukan kelas tujuan untuk semua kelas asal pilihan');
                 return;
             }
 
@@ -173,30 +172,25 @@ export const PromotionWorkflow: React.FC = () => {
                 const results = await Promise.all(
                     selectedClassIds.map(id => studentService.getStudentsByClass(id))
                 );
-                const allStudents = results.flat();
+                const allEnrollments = results.flat();
 
-                if (allStudents.length === 0) {
+                if (allEnrollments.length === 0) {
                     toast.error('Tidak ada siswa di kelas terpilih');
                     setIsLoading(false);
                     return;
                 }
 
-                const initialRecords: StudentPromotion[] = allStudents.map(s => {
-                    const sClass = sourceClasses.find(c => c.id === s.classId);
-                    const isGrade12 = sClass?.grade === 12;
-
-                    return {
-                        studentId: s.id,
-                        studentName: s.name,
-                        nisn: s.nisn,
-                        currentClassId: s.classId || '',
-                        action: isGrade12 ? 'GRADUATE' : 'PROMOTE',
-                        targetClassId: classMapping[s.classId || ''],
-                    };
-                });
+                const initialRecords: StudentPromotion[] = allEnrollments.map(e => ({
+                    studentId:      String(e.student_id),
+                    studentName:    e.student_name ?? `Siswa #${e.student_id}`,
+                    nisn:           String(e.student_id),
+                    currentClassId: String(e.class_id),
+                    action:         'PROMOTE' as PromotionAction,
+                    targetClassId:  classMapping[String(e.class_id)],
+                }));
                 setPromotionRecords(initialRecords);
                 setCurrentStep(3);
-            } catch (error) {
+            } catch {
                 toast.error('Gagal mengambil data siswa');
                 console.error(error);
             } finally {
@@ -214,12 +208,15 @@ export const PromotionWorkflow: React.FC = () => {
     const handleSubmit = async () => {
         try {
             setIsSubmitting(true);
-            const payload: PromotionPayload = {
-                sourceAcademicYearId: sourceYearId,
-                targetAcademicYearId: targetYearId,
-                promotions: promotionRecords,
-            };
-            await studentService.promoteStudents(payload);
+            await studentService.promoteStudents({
+                source_academic_year_id: Number(sourceYearId),
+                target_academic_year_id: Number(targetYearId),
+                promotions: promotionRecords.map(r => ({
+                    student_id:      Number(r.studentId),
+                    action:          r.action,
+                    target_class_id: r.targetClassId ? Number(r.targetClassId) : undefined,
+                })),
+            });
             toast.success('Proses kenaikan kelas berhasil diselesaikan');
 
             setCurrentStep(1);
@@ -228,7 +225,7 @@ export const PromotionWorkflow: React.FC = () => {
             setSelectedClassIds([]);
             setPromotionRecords([]);
             setClassMapping({});
-        } catch (error) {
+        } catch {
             toast.error('Gagal memproses kenaikan kelas');
             console.error(error);
         } finally {
@@ -250,25 +247,11 @@ export const PromotionWorkflow: React.FC = () => {
                 : [...prev, sourceId];
 
             if (!isSelected) {
-                const source = sourceClasses.find(c => c.id === sourceId);
-                if (source && source.grade < 12) {
-                     const sourceSuffix = source.name.replace(/^(X|XI|XII|10|11|12)(\s|-)/, '').trim();
-                    const target = targetClasses.find(tc => {
-                         const targetSuffix = tc.name.replace(/^(X|XI|XII|10|11|12)(\s|-)/, '').trim();
-                        return targetSuffix === sourceSuffix && tc.grade === source.grade + 1;
-                    });
-
-                    if (target) {
-                        setClassMapping(cm => ({ ...cm, [sourceId]: target.id }));
-                    } else {
-                        const fallback = targetClasses.find(tc => tc.grade === source.grade + 1);
-                        if (fallback) {
-                             setClassMapping(cm => ({ ...cm, [sourceId]: fallback.id }));
-                        }
-                    }
-                }
+                // No auto-mapping: ClassRoom does not have a 'grade' field.
+                // Admin must manually select target class from dropdown.
             } else {
-                const { [sourceId]: _, ...rest } = classMapping;
+                const { [sourceId]: _removed, ...rest } = classMapping;
+                void _removed;
                 setClassMapping(rest);
             }
 
@@ -305,7 +288,7 @@ export const PromotionWorkflow: React.FC = () => {
                                 Kelas
                             </span>
                         </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                             <ArrowUpCircle className="h-5 w-5" />
                         </div>
                     </div>
@@ -445,7 +428,7 @@ export const PromotionWorkflow: React.FC = () => {
                                             Ditemukan <strong>{sourceClasses.length}</strong> kelas asal.
                                         </div>
                                         {selectedClassIds.length > 0 && (
-                                            <Badge variant="secondary" className="bg-slate-200 text-slate-800 hover:bg-slate-300">
+                                            <Badge variant="secondary" className="bg-blue-50 text-blue-800 border border-blue-200 text-xs font-medium">
                                                 {selectedClassIds.length} Kelas Dipilih
                                             </Badge>
                                         )}
@@ -453,8 +436,9 @@ export const PromotionWorkflow: React.FC = () => {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                         {sourceClasses.map(c => {
-                                            const isSelected = selectedClassIds.includes(c.id);
-                                            const targetId = classMapping[c.id];
+                                            const classIdStr = String(c.id);
+                                            const isSelected = selectedClassIds.includes(classIdStr);
+                                            const targetId = classMapping[classIdStr];
                                             
                                             return (
                                                 <div 
@@ -465,7 +449,7 @@ export const PromotionWorkflow: React.FC = () => {
                                                             ? "border-blue-400 ring-2 ring-blue-100 shadow-md bg-white" 
                                                             : "border-slate-200 hover:border-slate-300 hover:shadow-sm bg-white"
                                                     )}
-                                                    onClick={() => handleClassSelect(c.id)}
+                                                    onClick={() => handleClassSelect(classIdStr)}
                                                 >
                                                     <div className={cn(
                                                         "p-4 border-b flex items-start justify-between",
@@ -473,12 +457,11 @@ export const PromotionWorkflow: React.FC = () => {
                                                     )}>
                                                         <div>
                                                             <div className="font-bold text-slate-800 flex items-center gap-2 text-base">
-                                                                <Badge variant="outline" className="w-8 justify-center p-0 h-6 bg-white">{c.grade}</Badge>
                                                                 {c.name}
                                                             </div>
                                                             <div className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1.5 font-medium">
                                                                 <Users className="h-3.5 w-3.5" />
-                                                                {c.totalStudents} Siswa
+                                                                {c.total_students} Siswa
                                                             </div>
                                                         </div>
                                                         <Checkbox 
@@ -493,31 +476,24 @@ export const PromotionWorkflow: React.FC = () => {
                                                                 <ArrowRight className="h-3 w-3" />
                                                                 Target Kelas
                                                             </div>
-                                                            {c.grade === 12 ? (
-                                                                <div className="h-10 px-3 flex items-center gap-2 bg-green-50 text-green-700 rounded-md border border-green-200 w-full">
-                                                                    <CheckCircle2 className="h-4 w-4" />
-                                                                    <span className="text-sm font-medium">Otomatis Lulus</span>
-                                                                </div>
-                                                            ) : (
-                                                                <Select 
-                                                                    value={targetId || ''} 
-                                                                    onValueChange={(val) => setClassMapping(prev => ({ ...prev, [c.id]: val }))}
-                                                                >
-                                                                    <SelectTrigger className="h-10 w-full border-slate-300 focus:ring-blue-500">
-                                                                        <SelectValue placeholder="Pilih Target..." />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        {targetClasses
-                                                                            .filter(tc => tc.grade > c.grade)
-                                                                            .sort((a, b) => a.name.localeCompare(b.name))
-                                                                            .map(tc => (
-                                                                                <SelectItem key={tc.id} value={tc.id}>
-                                                                                    {tc.name}
-                                                                                </SelectItem>
-                                                                        ))}
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            )}
+                                                            <Select 
+                                                                value={targetId || ''} 
+                                                                onValueChange={(val) => setClassMapping(prev => ({ ...prev, [classIdStr]: val }))}
+                                                            >
+                                                                <SelectTrigger className="h-10 w-full border-slate-300 focus:ring-blue-500">
+                                                                    <SelectValue placeholder="Pilih Target..." />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {targetClasses
+                                                                        .filter(tc => tc.id !== c.id)
+                                                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                                                        .map(tc => (
+                                                                            <SelectItem key={tc.id} value={String(tc.id)}>
+                                                                                {tc.name}
+                                                                            </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
                                                         </div>
                                                     )}
                                                 </div>
@@ -539,21 +515,21 @@ export const PromotionWorkflow: React.FC = () => {
                             {currentStep === 3 && (
                                 <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
                                     <Table>
-                                        <TableHeader className="bg-slate-50/80">
-                                            <TableRow className="hover:bg-slate-50/80">
-                                                <TableHead className="w-[30%] py-4 font-semibold text-slate-700">Siswa</TableHead>
-                                                <TableHead className="w-[20%] py-4 font-semibold text-slate-700">Kelas Asal</TableHead>
-                                                <TableHead className="w-[30%] py-4 font-semibold text-slate-700">Status & Target</TableHead>
-                                                <TableHead className="w-[20%] py-4 text-right font-semibold text-slate-700">Aksi Manual</TableHead>
+                                        <TableHeader className="bg-slate-50 border-b border-slate-200">
+                                            <TableRow className="hover:bg-slate-50 border-0">
+                                                <TableHead className="w-[30%] py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Siswa</TableHead>
+                                                <TableHead className="w-[20%] py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Kelas Asal</TableHead>
+                                                <TableHead className="w-[30%] py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Status & Target</TableHead>
+                                                <TableHead className="w-[20%] py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Aksi Manual</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {promotionRecords.map((record) => {
-                                                const sourceClassName = sourceClasses.find(c => c.id === record.currentClassId)?.name;
-                                                const targetClassName = targetClasses.find(c => c.id === record.targetClassId)?.name;
+                                                const sourceClassName = sourceClasses.find(c => String(c.id) === record.currentClassId)?.name;
+                                                const targetClassName = targetClasses.find(c => String(c.id) === record.targetClassId)?.name;
 
                                                 return (
-                                                    <TableRow key={record.studentId} className="hover:bg-slate-50/50 transition-colors">
+                                                    <TableRow key={record.studentId} className="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
                                                         <TableCell className="font-medium align-top py-3">
                                                             <div className="font-semibold text-slate-900">{record.studentName}</div>
                                                             <div className="text-xs text-slate-500 font-mono mt-0.5 bg-slate-100 inline-block px-1.5 py-0.5 rounded border border-slate-200">
@@ -665,6 +641,7 @@ export const PromotionWorkflow: React.FC = () => {
                         disabled={currentStep === 1 || isSubmitting}
                         className="bg-white hover:bg-slate-100 text-slate-700 border-slate-300 shadow-sm"
                     >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
                         Kembali
                     </Button>
 

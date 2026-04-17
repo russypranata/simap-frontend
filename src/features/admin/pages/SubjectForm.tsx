@@ -13,6 +13,7 @@ import {
     AlertCircle,
     Check,
     Info,
+    ArrowLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -115,7 +116,7 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({ id }) => {
                 setTimeout(() => router.push('/admin/subject'), 2000);
             })
             .finally(() => setIsLoading(false));
-    }, [id, isEditMode]);
+    }, [id, isEditMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const onSubmit = async (values: FormValues) => {
         try {
@@ -141,9 +142,10 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({ id }) => {
 
             queryClient.invalidateQueries({ queryKey: SUBJECT_KEYS.all });
             router.push('/admin/subject');
-        } catch (err: any) {
-            const msg = err?.errors?.code?.[0]
-                ?? err?.message
+        } catch (err: unknown) {
+            const e = err as { errors?: { code?: string[] }; message?: string };
+            const msg = e?.errors?.code?.[0]
+                ?? e?.message
                 ?? 'Gagal menyimpan data. Silakan coba lagi.';
             setError(msg);
             toast.error(msg);
@@ -168,7 +170,7 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({ id }) => {
                             Mata Pelajaran
                         </span>
                     </h1>
-                    <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                         <BookOpen className="h-5 w-5" />
                     </div>
                 </div>
@@ -375,6 +377,7 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({ id }) => {
                                     onClick={() => router.push('/admin/subject')}
                                     disabled={isSubmitting}
                                 >
+                                    <ArrowLeft className="h-4 w-4 mr-2" />
                                     Batal
                                 </Button>
                                 <Button

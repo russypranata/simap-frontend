@@ -3,9 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    Plus,
     Search,
-    Settings,
     Edit,
     Trash2,
     Eye,
@@ -18,6 +16,7 @@ import {
     GraduationCap,
     Layers,
     BookOpenCheck,
+    X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -31,14 +30,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
     Select,
     SelectContent,
@@ -178,7 +169,7 @@ export const SubjectList: React.FC = () => {
                                 Mata Pelajaran
                             </span>
                         </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                             <BookOpen className="h-5 w-5" />
                         </div>
                     </div>
@@ -302,12 +293,12 @@ export const SubjectList: React.FC = () => {
                                             onCheckedChange={toggleSelectAll}
                                         />
                                     </th>
-                                    <th className="text-left pl-3 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Mata Pelajaran</th>
-                                    <th className="text-center px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tipe</th>
-                                    <th className="text-left px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tingkat</th>
-                                    <th className="text-center px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kategori</th>
-                                    <th className="text-left px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Pengampu</th>
-                                    <th className="text-center px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Aksi</th>
+                                    <th className="text-left pl-3 pr-6 py-4 font-medium text-sm">Mata Pelajaran</th>
+                                    <th className="text-center px-4 py-4 font-medium text-sm">Tipe</th>
+                                    <th className="text-left px-4 py-4 font-medium text-sm">Tingkat</th>
+                                    <th className="text-center px-4 py-4 font-medium text-sm">Kategori</th>
+                                    <th className="text-left px-4 py-4 font-medium text-sm">Pengampu</th>
+                                    <th className="text-center px-4 py-4 font-medium text-sm">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -494,6 +485,7 @@ export const SubjectList: React.FC = () => {
                                 className="text-white hover:bg-slate-800 h-9"
                                 onClick={() => setSelectedItems([])}
                             >
+                                <X className="h-4 w-4 mr-2" />
                                 Batal
                             </Button>
                         </div>

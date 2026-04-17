@@ -42,14 +42,6 @@ import { Subject, SubjectCategory } from '../types/subject';
 import { subjectService } from '../services/subjectService';
 import { SubjectListSkeleton } from '../components/subject';
 
-// Category badge color mapping
-const categoryColors: Record<SubjectCategory, { bg: string; text: string; border: string }> = {
-    UMUM: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-100' },
-    AGAMA: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-100' },
-    KEJURUAN: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-100' },
-    EKSKUL: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-100' },
-};
-
 // Helper to format category for display
 const formatCategory = (cat: SubjectCategory) => {
     const mapping: Record<SubjectCategory, string> = {
@@ -85,7 +77,6 @@ export const SubjectDetail: React.FC<SubjectDetailProps> = ({ id }) => {
             }
         };
         fetchDetail();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     if (isLoading) {
@@ -110,7 +101,6 @@ export const SubjectDetail: React.FC<SubjectDetailProps> = ({ id }) => {
         );
     }
 
-    const colors = categoryColors[subject.category];
     const teachers = subject.teachers || subject.teacherNames?.map((name, index) => ({ 
         id: `mock-id-${index}`, 
         name, 
@@ -254,7 +244,7 @@ export const SubjectDetail: React.FC<SubjectDetailProps> = ({ id }) => {
                     <Card className="border-slate-200 shadow-sm h-full">
                         <CardHeader className="pb-3 space-y-2">
                              <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
+                                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
                                     <AlignLeft className="h-5 w-5" />
                                 </div>
                                 <div>
@@ -287,7 +277,7 @@ export const SubjectDetail: React.FC<SubjectDetailProps> = ({ id }) => {
                         <CardHeader className="pb-2">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
+                                    <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
                                         <Users className="h-5 w-5" />
                                     </div>
                                     <div>

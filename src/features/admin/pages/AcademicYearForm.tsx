@@ -32,6 +32,7 @@ import {
     CalendarDays,
     AlertCircle,
     Info,
+    ArrowLeft,
 } from 'lucide-react';
 
 import { CreateAcademicYearRequest, UpdateAcademicYearRequest } from '../types/academicYear';
@@ -90,6 +91,7 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
                 .catch(() => setError('Gagal memuat data tahun ajaran'))
                 .finally(() => setIsLoading(false));
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, isEditMode]);
 
     const onSubmit = async (values: FormValues) => {
@@ -118,9 +120,10 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
             // Invalidate list cache agar halaman list langsung fresh
             queryClient.invalidateQueries({ queryKey: ACADEMIC_YEAR_KEYS.all });
             router.push('/admin/academic-year');
-        } catch (err: any) {
-            const msg = err?.errors?.name?.[0]
-                ?? err?.message
+        } catch (err: unknown) {
+            const e = err as { errors?: { name?: string[] }; message?: string };
+            const msg = e?.errors?.name?.[0]
+                ?? e?.message
                 ?? 'Gagal menyimpan data tahun ajaran';
             setError(msg);
             toast.error(msg);
@@ -154,7 +157,7 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
                             {isEditMode && academicYearName ? academicYearName : 'Tahun Ajaran'}
                         </span>
                     </h1>
-                    <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                         <Calendar className="h-5 w-5" />
                     </div>
                 </div>
@@ -285,6 +288,7 @@ export const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ id }) => {
                                     onClick={() => router.push('/admin/academic-year')}
                                     disabled={isSubmitting}
                                 >
+                                    <ArrowLeft className="h-4 w-4 mr-2" />
                                     Batal
                                 </Button>
                                 <Button

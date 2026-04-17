@@ -1,159 +1,135 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    Plus,
-    Search,
-    Edit,
-    Trash2,
-    Eye,
-    GraduationCap,
-    Users,
-    FilterX,
-    FileX,
-    MoreHorizontal,
-    UserCircle,
-    Phone,
+    GraduationCap, Search, Settings, UserPlus,
+    Users, Trash2, Edit, Eye, RefreshCw,
+    FilterX, FileX, Loader2, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { useDebounce } from '@/hooks/use-debounce';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+    Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from '@/components/ui/card';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+    DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+    AlertDialog, AlertDialogAction, AlertDialogCancel,
+    AlertDialogContent, AlertDialogDescription,
+    AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
 
-import { Student, StudentStatus } from '../types/student';
-import { MOCK_STUDENTS } from '../data/mockStudentData';
-import { StudentListSkeleton } from '../components/student/StudentListSkeleton';
+import { AdminStudent } from '../types/student';
+import { useStudentList } from '../hooks/useStudentList';
+import { PaginationControls } from '@/features/shared/components/PaginationControls';
 
-const statusStyles: Record<StudentStatus, string> = {
-    active: 'bg-green-50 text-green-700 border-green-200',
-    graduated: 'bg-blue-50 text-blue-700 border-blue-200',
-    transferred: 'bg-orange-50 text-orange-700 border-orange-200',
-    dropped_out: 'bg-red-50 text-red-700 border-red-200',
-};
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
 
-const statusLabels: Record<StudentStatus, string> = {
-    active: 'Aktif',
-    graduated: 'Lulus',
-    transferred: 'Pindah',
-    dropped_out: 'Putus Sekolah',
-};
+const StudentListSkeleton: React.FC = () => (
+    <div className="space-y-6">
+        <div className="flex items-center justify-between">
+            <div className="space-y-2">
+                <Skeleton className="h-9 w-64" />
+                <Skeleton className="h-4 w-48" />
+            </div>
+            <Skeleton className="h-10 w-40" />
+        </div>
+        <Card>
+            <CardHeader className="pb-4 space-y-4">
+                <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-lg" />
+                    <div className="space-y-1">
+                        <Skeleton className="h-5 w-40" />
+                        <Skeleton className="h-4 w-28" />
+                    </div>
+                </div>
+                <Skeleton className="h-10 w-full" />
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="border-t">
+                    {[...Array(8)].map((_, i) => (
+                        <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-slate-50">
+                            <Skeleton className="h-4 w-4" />
+                            <Skeleton className="h-9 w-9 rounded-full" />
+                            <div className="flex-1 space-y-1">
+                                <Skeleton className="h-4 w-40" />
+                                <Skeleton className="h-3 w-28" />
+                            </div>
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-4 w-20" />
+                            <Skeleton className="h-8 w-8 rounded" />
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+);
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export const StudentList: React.FC = () => {
     const router = useRouter();
-    const [students, setStudents] = useState<Student[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    
-    // Filters
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedStatus, setSelectedStatus] = useState<string>('all');
-    const [selectedGeneration, setSelectedGeneration] = useState<string>('all');
+    const [searchInput, setSearchInput] = useState('');
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [selectedItems, setSelectedItems] = useState<number[]>([]);
+    const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
 
-    // Selection & Actions
-    const [selectedItems, setSelectedItems] = useState<string[]>([]);
-    const [deleteId, setDeleteId] = useState<string | null>(null);
-    const [isBulkDelete, setIsBulkDelete] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
+    const debouncedSearch = useDebounce(searchInput, 400);
 
-    useEffect(() => {
-        const loadData = async () => {
-            setIsLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 800)); // Fake delay
-            setStudents(MOCK_STUDENTS);
-            setIsLoading(false);
-        };
-        loadData();
+    const {
+        students,
+        meta,
+        isLoading,
+        isFetching,
+        isError,
+        isDeleting,
+        setFilters,
+        deleteStudent,
+    } = useStudentList();
+
+    React.useEffect(() => {
+        setFilters({ search: debouncedSearch || undefined, page: 1 });
+    }, [debouncedSearch, setFilters]);
+
+    const toggleSelectAll = useCallback(() => {
+        setSelectedItems((prev) =>
+            prev.length === students.length ? [] : students.map((s) => s.id)
+        );
+    }, [students]);
+
+    const toggleSelectItem = useCallback((id: number) => {
+        setSelectedItems((prev) =>
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+        );
     }, []);
 
-    // Unique generations for filter
-    const generations = Array.from(new Set(students.map(s => s.generation))).sort().reverse();
-
-    // Filter Logic
-    const filteredStudents = students.filter(student => {
-        const matchesSearch = 
-            student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            student.nis.includes(searchTerm) ||
-            student.nisn.includes(searchTerm);
-        
-        const matchesStatus = selectedStatus === 'all' || student.status === selectedStatus;
-        const matchesGeneration = selectedGeneration === 'all' || student.generation === selectedGeneration;
-
-        return matchesSearch && matchesStatus && matchesGeneration;
-    });
-
-    const toggleSelectAll = () => {
-        if (selectedItems.length === filteredStudents.length) {
+    const handleDeleteConfirm = useCallback(() => {
+        if (isBulkDeleteOpen) {
+            selectedItems.forEach((id) => deleteStudent(id));
             setSelectedItems([]);
-        } else {
-            setSelectedItems(filteredStudents.map(s => s.id));
+            setIsBulkDeleteOpen(false);
+        } else if (deleteId !== null) {
+            deleteStudent(deleteId);
+            setDeleteId(null);
         }
-    };
-
-    const toggleSelectItem = (id: string) => {
-        setSelectedItems(prev => 
-            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-        );
-    };
-
-    const handleDelete = async () => {
-        setIsDeleting(true);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        if (isBulkDelete) {
-            setStudents(prev => prev.filter(s => !selectedItems.includes(s.id)));
-            setSelectedItems([]);
-            toast.success(`${selectedItems.length} data siswa berhasil dihapus`);
-        } else if (deleteId) {
-            setStudents(prev => prev.filter(s => s.id !== deleteId));
-            toast.success('Data siswa berhasil dihapus');
-        }
-        
-        setIsDeleting(false);
-        setDeleteId(null);
-        setIsBulkDelete(false);
-    };
+    }, [isBulkDeleteOpen, selectedItems, deleteId, deleteStudent]);
 
     if (isLoading) return <StudentListSkeleton />;
 
     return (
         <div className="space-y-6">
-            {/* Context Header */}
+            {/* ── Header ── */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-3">
@@ -165,29 +141,36 @@ export const StudentList: React.FC = () => {
                                 Siswa
                             </span>
                         </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                             <GraduationCap className="h-5 w-5" />
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Kelola data induk siswa, riwayat kelas, dan status akademik.
+                        Kelola data induk siswa, kelas, dan informasi akademik.
                     </p>
                 </div>
-                <Button 
+                <Button
                     onClick={() => router.push('/admin/users/students/new')}
                     className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all"
                 >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <UserPlus className="h-4 w-4 mr-2" />
                     Tambah Siswa
                 </Button>
             </div>
 
-            {/* List Card */}
+            {/* ── Error ── */}
+            {isError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 text-sm">
+                    Gagal memuat data siswa. Silakan coba lagi.
+                </div>
+            )}
+
+            {/* ── Main Card ── */}
             <Card className="border-slate-200 shadow-sm">
                 <CardHeader className="pb-4 space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
+                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
                                 <Users className="h-5 w-5" />
                             </div>
                             <div>
@@ -195,190 +178,105 @@ export const StudentList: React.FC = () => {
                                     Daftar Siswa
                                 </CardTitle>
                                 <CardDescription>
-                                    Total {students.length} siswa terdaftar
+                                    Semua siswa yang terdaftar di sistem
                                 </CardDescription>
                             </div>
                         </div>
+                        <div className="flex items-center gap-2">
+                            {isFetching && !isLoading && (
+                                <RefreshCw className="h-4 w-4 text-slate-400 animate-spin" />
+                            )}
+                            <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100">
+                                {meta?.total ?? students.length} Siswa
+                            </Badge>
+                        </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-slate-100">
-                        {/* Search */}
+                    <div className="flex gap-3 pt-2 border-t border-slate-100">
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Cari Nama, NIS, atau NISN..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Cari nama atau nomor pendaftaran..."
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
                                 className="pl-9 w-full"
                             />
                         </div>
-
-                        {/* Generation Filter */}
-                        <Select value={selectedGeneration} onValueChange={setSelectedGeneration}>
-                            <SelectTrigger className="w-[140px]">
-                                <SelectValue placeholder="Angkatan" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Semua Angkatan</SelectItem>
-                                {generations.map(gen => (
-                                    <SelectItem key={gen} value={gen}>{gen}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-
-                        {/* Status Filter */}
-                        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                            <SelectTrigger className="w-[140px]">
-                                <SelectValue placeholder="Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Semua Status</SelectItem>
-                                <SelectItem value="active">Aktif</SelectItem>
-                                <SelectItem value="graduated">Lulus</SelectItem>
-                                <SelectItem value="transferred">Pindah</SelectItem>
-                                <SelectItem value="dropped_out">Putus Sekolah</SelectItem>
-                            </SelectContent>
-                        </Select>
                     </div>
                 </CardHeader>
+
                 <CardContent className="p-0">
                     <div className="border-t border-slate-200 overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                            <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="pl-4 pr-0 py-4 font-semibold text-xs uppercase tracking-wider w-[40px]">
-                                        <Checkbox 
-                                            checked={filteredStudents.length > 0 && selectedItems.length === filteredStudents.length}
+                                    <th className="pl-4 pr-0 py-4 w-[40px]">
+                                        <Checkbox
+                                            checked={students.length > 0 && selectedItems.length === students.length}
                                             onCheckedChange={toggleSelectAll}
                                         />
                                     </th>
-                                    <th className="pl-3 pr-6 py-4 font-semibold text-xs uppercase tracking-wider">Nama & NIS</th>
-                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Kelas & Angkatan</th>
-                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Orang Tua</th>
-                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-center">Status</th>
-                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right">Aksi</th>
+                                    <th className="pl-3 pr-6 py-4 font-medium text-sm">Nama & No. Pendaftaran</th>
+                                    <th className="px-6 py-4 font-medium text-sm">Kelas</th>
+                                    <th className="px-6 py-4 font-medium text-sm">Kontak</th>
+                                    <th className="px-6 py-4 font-medium text-sm">Wali</th>
+                                    <th className="px-6 py-4 font-medium text-sm text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredStudents.length === 0 ? (
+                                {students.length === 0 ? (
                                     <tr>
                                         <td colSpan={6} className="px-6 py-12 text-center">
                                             <div className="flex flex-col items-center justify-center">
                                                 <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                    {searchTerm ? (
-                                                        <FilterX className="h-8 w-8 text-slate-300" />
-                                                    ) : (
-                                                        <FileX className="h-8 w-8 text-slate-300" />
-                                                    )}
+                                                    {searchInput
+                                                        ? <FilterX className="h-8 w-8 text-slate-300" />
+                                                        : <FileX className="h-8 w-8 text-slate-300" />
+                                                    }
                                                 </div>
-                                                <p className="text-slate-500 font-medium">Data tidak ditemukan</p>
+                                                <p className="text-slate-500 font-medium">
+                                                    {searchInput ? 'Tidak ada hasil yang cocok' : 'Belum ada data siswa'}
+                                                </p>
+                                                <p className="text-slate-400 text-sm mt-1">
+                                                    {searchInput ? 'Coba ubah kata kunci pencarian' : 'Klik "Tambah Siswa" untuk menambahkan'}
+                                                </p>
                                             </div>
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredStudents.map((student) => (
-                                        <tr key={student.id} className={cn(
-                                            "group transition-colors border-b border-slate-50",
-                                            selectedItems.includes(student.id) ? "bg-blue-50/50" : "hover:bg-slate-50/60"
-                                        )}>
-                                            <td className="pl-4 pr-0 py-4">
-                                                <Checkbox 
-                                                    checked={selectedItems.includes(student.id)}
-                                                    onCheckedChange={() => toggleSelectItem(student.id)}
-                                                />
-                                            </td>
-                                            <td className="pl-3 pr-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <Avatar className="h-9 w-9 border border-slate-200">
-                                                        <AvatarImage src={student.profilePicture} />
-                                                        <AvatarFallback className="bg-slate-100 text-slate-500 text-xs">
-                                                            {student.name.substring(0, 2).toUpperCase()}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                    <div>
-                                                        <p className="font-medium text-slate-900">{student.name}</p>
-                                                        <div className="flex items-center gap-2 mt-0.5">
-                                                            <span className="text-[10px] bg-slate-100 text-slate-600 px-1 rounded">
-                                                                {student.nis}
-                                                            </span>
-                                                            <span className="text-[10px] text-slate-400">
-                                                                NISN: {student.nisn}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-col gap-1">
-                                                    <Badge variant="outline" className="w-fit font-normal bg-white text-slate-700 border-slate-300">
-                                                        {student.className || 'Belum Masuk Kelas'}
-                                                    </Badge>
-                                                    <span className="text-xs text-slate-500">
-                                                        Angkatan {student.generation}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-col gap-1">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <UserCircle className="h-3.5 w-3.5 text-slate-400" />
-                                                        <span className="text-xs font-medium text-slate-700">
-                                                            {student.parentName || '-'}
-                                                        </span>
-                                                    </div>
-                                                    {student.parentPhone && (
-                                                        <div className="flex items-center gap-1.5">
-                                                            <Phone className="h-3 w-3 text-slate-400" />
-                                                            <span className="text-[11px] text-slate-500">
-                                                                {student.parentPhone}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                 <Badge 
-                                                    variant="outline"
-                                                    className={cn("text-[10px] uppercase tracking-wider font-semibold", statusStyles[student.status])}
-                                                >
-                                                    {statusLabels[student.status]}
-                                                </Badge>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900 hover:bg-slate-100">
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem onClick={() => router.push(`/admin/users/students/${student.id}`)}>
-                                                            <Eye className="mr-2 h-4 w-4 text-blue-500" /> Detail
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => router.push(`/admin/users/students/${student.id}/edit`)}>
-                                                            <Edit className="mr-2 h-4 w-4 text-amber-500" /> Edit
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem 
-                                                            onClick={() => setDeleteId(student.id)}
-                                                            className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                                                        >
-                                                            <Trash2 className="mr-2 h-4 w-4" /> Hapus
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </td>
-                                        </tr>
+                                    students.map((student) => (
+                                        <StudentRow
+                                            key={student.id}
+                                            student={student}
+                                            isSelected={selectedItems.includes(student.id)}
+                                            onToggleSelect={() => toggleSelectItem(student.id)}
+                                            onView={() => router.push(`/admin/users/students/${student.id}`)}
+                                            onEdit={() => router.push(`/admin/users/students/${student.id}/edit`)}
+                                            onDelete={() => setDeleteId(student.id)}
+                                        />
                                     ))
                                 )}
                             </tbody>
                         </table>
                     </div>
+
+                    {meta && meta.last_page > 1 && (
+                        <PaginationControls
+                            currentPage={meta.current_page}
+                            totalPages={meta.last_page}
+                            totalItems={meta.total}
+                            startIndex={(meta.current_page - 1) * meta.per_page + 1}
+                            endIndex={Math.min(meta.current_page * meta.per_page, meta.total)}
+                            itemsPerPage={meta.per_page}
+                            itemLabel="siswa"
+                            onPageChange={(page) => setFilters({ page })}
+                            onItemsPerPageChange={(perPage) => setFilters({ page: 1, per_page: perPage })}
+                        />
+                    )}
                 </CardContent>
             </Card>
 
-            {/* Bulk Actions & Delete Dialog (Same as Teachers) */}
+            {/* ── Bulk Action Bar ── */}
             {selectedItems.length > 0 && (
                 <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4">
                     <div className="bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-6 border border-slate-800">
@@ -389,21 +287,14 @@ export const StudentList: React.FC = () => {
                             <span className="text-sm font-medium text-slate-300">Siswa dipilih</span>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="text-white hover:bg-slate-800 h-9"
-                                onClick={() => setIsBulkDelete(true)}
-                            >
+                            <Button variant="ghost" size="sm" className="text-white hover:bg-slate-800 h-9"
+                                onClick={() => setIsBulkDeleteOpen(true)}>
                                 <Trash2 className="h-4 w-4 mr-2 text-red-400" />
                                 Hapus Massal
                             </Button>
-                            <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="text-white hover:bg-slate-800 h-9"
-                                onClick={() => setSelectedItems([])}
-                            >
+                            <Button variant="ghost" size="sm" className="text-white hover:bg-slate-800 h-9"
+                                onClick={() => setSelectedItems([])}>
+                                <X className="h-4 w-4 mr-2" />
                                 Batal
                             </Button>
                         </div>
@@ -411,26 +302,159 @@ export const StudentList: React.FC = () => {
                 </div>
             )}
 
-             <AlertDialog open={!!deleteId || isBulkDelete} onOpenChange={(open) => !open && (setDeleteId(null), setIsBulkDelete(false))}>
-                <AlertDialogContent>
+            {/* ── Delete Confirmation ── */}
+            <AlertDialog
+                open={deleteId !== null || isBulkDeleteOpen}
+                onOpenChange={(open) => { if (!open) { setDeleteId(null); setIsBulkDeleteOpen(false); } }}
+            >
+                <AlertDialogContent className="max-w-md">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Hapus Data Siswa?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Tindakan ini tidak dapat dibatalkan. {isBulkDelete ? `${selectedItems.length} data siswa` : 'Data siswa ini'} akan dihapus permanen.
-                        </AlertDialogDescription>
+                        <div className="flex items-center gap-4 mb-1">
+                            <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                                <Trash2 className="h-6 w-6 text-red-600" />
+                            </div>
+                            <div>
+                                <AlertDialogTitle className="text-lg">
+                                    {isBulkDeleteOpen ? `Hapus ${selectedItems.length} Siswa?` : 'Hapus Data Siswa?'}
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="mt-1">
+                                    Data akan dihapus permanen dan tidak dapat dipulihkan.
+                                </AlertDialogDescription>
+                            </div>
+                        </div>
+                        <div className="ml-16 p-3 bg-red-50 border border-red-100 rounded-lg">
+                            <p className="text-xs text-red-700 leading-relaxed">
+                                ⚠️ Semua data terkait termasuk nilai, presensi, dan keanggotaan ekskul juga akan ikut terhapus.
+                            </p>
+                        </div>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
+                    <AlertDialogFooter className="mt-2">
                         <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
-                        <AlertDialogAction 
-                            onClick={handleDelete}
+                        <AlertDialogAction
+                            onClick={handleDeleteConfirm}
                             className="bg-red-600 hover:bg-red-700 text-white"
                             disabled={isDeleting}
                         >
-                            {isDeleting ? 'Menghapus...' : 'Ya, Hapus'}
+                            {isDeleting ? (
+                                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Menghapus...</>
+                            ) : 'Ya, Hapus'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
         </div>
+    );
+};
+
+// ─── Row Component ────────────────────────────────────────────────────────────
+
+interface StudentRowProps {
+    student: AdminStudent;
+    isSelected: boolean;
+    onToggleSelect: () => void;
+    onView: () => void;
+    onEdit: () => void;
+    onDelete: () => void;
+}
+
+const StudentRow: React.FC<StudentRowProps> = ({
+    student, isSelected, onToggleSelect, onView, onEdit, onDelete,
+}) => {
+    const initials = student.name
+        .split(' ').map((n) => n[0]).join('').toUpperCase().substring(0, 2);
+
+    const guardian = student.guardian_details;
+
+    return (
+        <tr className={cn(
+            'group transition-colors border-b border-slate-50',
+            isSelected ? 'bg-blue-50/50' : 'hover:bg-slate-50/60'
+        )}>
+            <td className="pl-4 pr-0 py-4">
+                <Checkbox checked={isSelected} onCheckedChange={onToggleSelect} />
+            </td>
+
+            {/* Nama & No. Pendaftaran */}
+            <td className="pl-3 pr-6 py-4">
+                <div className="flex items-center gap-3">
+                    <Avatar className="h-9 w-9 border border-blue-200 shrink-0">
+                        <AvatarImage src={student.avatar ?? undefined} />
+                        <AvatarFallback className="bg-blue-100 text-blue-800 text-xs font-medium">
+                            {initials}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div>
+                        <p className="font-medium text-slate-900">{student.name}</p>
+                        <p className="text-xs text-slate-500 font-mono mt-0.5">{student.admission_number}</p>
+                    </div>
+                </div>
+            </td>
+
+            {/* Kelas */}
+            <td className="px-6 py-4">
+                {student.class_name ? (
+                    <div>
+                        <Badge className="bg-blue-800 text-white text-xs font-medium">
+                            {student.class_name}
+                        </Badge>
+                        {student.academic_year_name && (
+                            <p className="text-xs text-slate-400 mt-1">TA. {student.academic_year_name}</p>
+                        )}
+                    </div>
+                ) : (
+                    <span className="text-sm text-slate-400">—</span>
+                )}
+            </td>
+
+            {/* Kontak */}
+            <td className="px-6 py-4">
+                <div className="flex flex-col gap-0.5">
+                    <span className="text-sm text-slate-700">{student.phone ?? '—'}</span>
+                    {student.email && (
+                        <span className="text-xs text-slate-400 truncate max-w-[160px]">{student.email}</span>
+                    )}
+                </div>
+            </td>
+
+            {/* Wali */}
+            <td className="px-6 py-4">
+                {guardian ? (
+                    <div>
+                        <p className="text-sm text-slate-700">{guardian.name}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{guardian.phone ?? '—'}</p>
+                    </div>
+                ) : (
+                    <span className="text-sm text-slate-400">—</span>
+                )}
+            </td>
+
+            {/* Aksi */}
+            <td className="px-6 py-4 text-right">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900 hover:bg-slate-100">
+                            <Settings className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={onView} className="cursor-pointer">
+                            <Eye className="mr-2 h-4 w-4 text-blue-600" />
+                            Lihat Detail
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
+                            <Edit className="mr-2 h-4 w-4 text-amber-600" />
+                            Edit Data
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={onDelete} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Hapus Data
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </td>
+        </tr>
     );
 };

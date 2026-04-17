@@ -37,8 +37,8 @@ export const useScheduleList = () => {
             });
             toast.success('Jadwal berhasil ditambahkan');
             invalidate();
-        } catch (error: any) {
-            toast.error(error?.message ?? 'Gagal membuat jadwal');
+        } catch (error: Error | unknown) {
+            toast.error((error as Error)?.message ?? 'Gagal membuat jadwal');
             throw error;
         } finally {
             setIsSubmitting(false);
@@ -58,8 +58,8 @@ export const useScheduleList = () => {
             });
             toast.success('Jadwal berhasil diperbarui');
             invalidate();
-        } catch (error: any) {
-            toast.error(error?.message ?? 'Gagal memperbarui jadwal');
+        } catch (error: Error | unknown) {
+            toast.error((error as Error)?.message ?? 'Gagal memperbarui jadwal');
             throw error;
         } finally {
             setIsSubmitting(false);

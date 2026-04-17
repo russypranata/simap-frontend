@@ -58,6 +58,7 @@ export const AcademicYearDetail: React.FC<AcademicYearDetailProps> = ({ id }) =>
 
     useEffect(() => {
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchData = async () => {
@@ -159,7 +160,7 @@ export const AcademicYearDetail: React.FC<AcademicYearDetailProps> = ({ id }) =>
                                 {academicYear.name}
                             </span>
                         </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                             <Calendar className="h-5 w-5" />
                         </div>
                     </div>
@@ -184,7 +185,7 @@ export const AcademicYearDetail: React.FC<AcademicYearDetailProps> = ({ id }) =>
                         <CardHeader className="pb-4">
                             <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                    <CalendarDays className="h-5 w-5 text-primary" />
+                                    <CalendarDays className="h-5 w-5 text-blue-700" />
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg font-semibold text-gray-900">Informasi Tahun Ajaran</CardTitle>
@@ -230,7 +231,7 @@ export const AcademicYearDetail: React.FC<AcademicYearDetailProps> = ({ id }) =>
                         <CardHeader className="pb-4">
                             <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                    <Clock className="h-5 w-5 text-primary" />
+                                    <Clock className="h-5 w-5 text-blue-700" />
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg font-semibold text-gray-900">Semester</CardTitle>

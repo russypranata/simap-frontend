@@ -38,7 +38,7 @@ export const TimeSlotList: React.FC<TimeSlotListProps> = ({ day, dayLabel }) => 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [serverKey]);
 
-    const handleChange = (id: string, field: keyof TimeSlot, value: any) => {
+    const handleChange = (id: string, field: keyof TimeSlot, value: string | number) => {
         setSlots(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
         setIsDirty(true);
     };

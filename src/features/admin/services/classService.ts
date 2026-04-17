@@ -1,4 +1,4 @@
-import { apiClient, PaginatedResponse } from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 import { ClassRoom, CreateClassRoomRequest, UpdateClassRoomRequest, TeacherDropdown } from '../types/class';
 
 export const classService = {

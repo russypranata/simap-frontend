@@ -1,6 +1,6 @@
 import { Schedule } from '../types/schedule';
 import { SubjectCategory } from '../types/subject';
-import { TimeSlot, DayKey } from '../services/timeSlotService';
+import { TimeSlot } from '../services/timeSlotService';
 
 // Palette for dynamic coloring
 const COLOR_PALETTE = [
@@ -28,6 +28,7 @@ const getStringHash = (str: string): number => {
     return Math.abs(hash);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getSubjectColor = (subjectName: string, _category?: SubjectCategory | string) => {
     return COLOR_PALETTE[getStringHash(subjectName) % COLOR_PALETTE.length];
 };

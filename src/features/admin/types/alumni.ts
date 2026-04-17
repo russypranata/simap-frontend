@@ -1,10 +1,26 @@
-export interface Alumni {
-    id: string;
-    nisn: string;
+// ============================================================
+// Alumni Types
+// ============================================================
+
+export interface AdminAlumni {
+    id: number;
+    user_id: number;
     name: string;
-    graduationYear: string; // "2023"
-    className: string; // Last class, e.g. "XII-IPA-1"
-    phone: string;
-    university?: string; // Optional: Where they continued studies
-    job?: string; // Optional: Current job
+    email: string;
+    avatar: string | null;
+    phone: string | null;
+    address: string | null;
+    admission_number: string;
+    religion: string | null;
+    last_class_name: string | null;
+    graduation_year: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AlumniFilters {
+    search?: string;
+    graduation_year?: string;
+    page?: number;
+    per_page?: number;
 }

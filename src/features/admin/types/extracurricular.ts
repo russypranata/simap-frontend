@@ -1,5 +1,5 @@
 // ============================================================
-// API Types (sesuai backend response)
+// Extracurricular Types — sesuai backend API response
 // ============================================================
 
 export interface RegularSchedule {
@@ -13,11 +13,12 @@ export interface Extracurricular {
     id: number;
     name: string;
     tutor_id: number;
-    tutor_name?: string;
-    nip?: string;
-    join_date?: string;
+    tutor_name: string | null;
+    nip: string | null;
+    join_date: string | null;
     regular_schedules: RegularSchedule[];
     member_count: number;
+    active_member_count: number;
     created_at: string;
     updated_at: string;
 }
@@ -25,25 +26,31 @@ export interface Extracurricular {
 export interface ExtracurricularMember {
     id: number;
     student_profile_id: number;
-    student_name?: string;
+    student_name: string | null;
     academic_year_id: number;
-    academic_year_name?: string;
-    join_date?: string;
-    status: string;
-    inactive_date?: string;
-    inactive_reason?: string;
+    academic_year_name: string | null;
+    join_date: string | null;
+    status: 'active' | 'inactive';
+    inactive_date: string | null;
+    inactive_reason: string | null;
+}
+
+export interface TutorOption {
+    id: number;
+    name: string;
+    extracurricular: string | null;
+    tutor_profile_id: number | null;
 }
 
 export interface CreateExtracurricularRequest {
+    tutor_user_id: number;
     name: string;
-    tutor_id: number;
     nip?: string;
     join_date?: string;
 }
 
 export interface UpdateExtracurricularRequest {
     name?: string;
-    tutor_id?: number;
     nip?: string;
     join_date?: string;
 }
@@ -54,55 +61,13 @@ export interface AddMemberRequest {
     join_date?: string;
 }
 
-// ============================================================
-// Legacy types (digunakan oleh mock data & attendance service)
-// ============================================================
-
-export type ExtracurricularCategory = 'Olahraga' | 'Seni' | 'Akademik' | 'Keagamaan' | 'Lainnya';
-
-/** @deprecated Gunakan Extracurricular (API type) untuk data real */
-export interface ExtracurricularLegacy {
-    id: string;
-    name: string;
-    category: ExtracurricularCategory;
-    mentorId: string;
-    mentorName: string;
-    day: string;
-    time: string;
-    location?: string;
-    maxCapacity: number;
-    currentCapacity: number;
-    academicYearId: string;
-    description?: string;
+export interface TransferTutorRequest {
+    new_tutor_user_id: number;
+    reason?: string;
 }
 
-export interface ExtracurricularAttendanceRecap {
-    extracurricularId: string;
-    extracurricularName: string;
-    category: ExtracurricularCategory;
-    totalSessions: number;
-    attendanceRate: number;
-    lastActivity: string;
-}
-
-export interface ExtracurricularSession {
-    id: string;
-    extracurricularId: string;
-    date: string;
-    startTime: string;
-    endTime: string;
-    topic: string;
-    attendanceCount: number;
-    totalMembers: number;
-    attendancePercentage: number;
-    mentorName: string;
-}
-
-export interface SessionMemberAttendance {
-    studentId: string;
-    studentName: string;
-    nis: string;
-    class: string;
-    status: 'hadir' | 'sakit' | 'izin' | 'alpa';
-    note?: string;
+export interface ExtracurricularFilters {
+    search?: string;
+    page?: number;
+    per_page?: number;
 }

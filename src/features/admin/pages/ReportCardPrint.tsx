@@ -45,7 +45,7 @@ export const ReportCardPrint: React.FC = () => {
                                 Rapor
                             </span>
                         </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                             <Printer className="h-5 w-5" />
                         </div>
                     </div>
@@ -59,7 +59,7 @@ export const ReportCardPrint: React.FC = () => {
                 <CardHeader className="pb-4 space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
+                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
                                 <Printer className="h-5 w-5" />
                             </div>
                             <div>

@@ -15,7 +15,6 @@ import {
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -37,7 +36,11 @@ import {
     AlertCircle,
     Check,
     ChevronsUpDown,
-    Info,
+    UserCheck,
+    Calendar,
+    Users,
+    BookOpen,
+    ArrowLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -55,24 +58,18 @@ import {
 } from '@/components/ui/popover';
 import { toast } from 'sonner';
 
-import { Teacher, Student } from '../types/class';
-import { Subject } from '../types/subject';
+import { TeacherDropdown } from '../types/class';
+import { AcademicYear } from '../types/academicYear';
 import { classService } from '../services/classService';
 import { academicYearService } from '../services/academicYearService';
-import { subjectService } from '../services/subjectService';
 import { ClassFormSkeleton } from '../components/class';
 
-// Schema
+// ─── Schema ───────────────────────────────────────────────────────────────────
 const formSchema = z.object({
-    name: z.string().min(1, 'Nama kelas wajib diisi'),
-    grade: z.string().min(1, 'Tingkat wajib dipilih'),
-    type: z.enum(['REGULER', 'PEMINATAN']),
-    peminatanCategory: z.enum(['IKH', 'AKH']).optional(),
-    subjectId: z.string().optional(),
-    capacity: z.coerce.number().min(1, 'Kapasitas minimal 1'),
-    homeroomTeacherId: z.string().optional(),
-    academicYearId: z.string().optional(),
-    genderCategory: z.enum(['PUTRA', 'PUTRI', 'CAMPURAN']),
+    name:                z.string().min(1, 'Nama kelas wajib diisi').max(255),
+    type:                z.enum(['reguler', 'peminatan_group']).default('reguler'),
+    academic_year_id:    z.string().min(1, 'Tahun ajaran wajib dipilih'),
+    homeroom_teacher_id: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -84,67 +81,57 @@ interface ClassFormProps {
 export const ClassForm: React.FC<ClassFormProps> = ({ id }) => {
     const router = useRouter();
     const isEditMode = Boolean(id);
-    const [isLoading, setIsLoading] = useState(isEditMode);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [teachers, setTeachers] = useState<Teacher[]>([]);
-    const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [activeYearId, setActiveYearId] = useState<string>('');
 
-    const form = useForm({
+    const [isLoading, setIsLoading]       = useState(isEditMode);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError]               = useState<string | null>(null);
+    const [teachers, setTeachers]         = useState<TeacherDropdown[]>([]);
+    const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
+    const [teacherPopoverOpen, setTeacherPopoverOpen] = useState(false);
+
+    const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: '',
-            grade: '',
-            type: 'REGULER' as const,
-            peminatanCategory: undefined,
-            subjectId: '',
-            capacity: 30,
-            homeroomTeacherId: '',
-            academicYearId: '',
-            genderCategory: 'CAMPURAN' as const,
+            name:                '',
+            type:                'reguler',
+            academic_year_id:    '',
+            homeroom_teacher_id: '',
         },
     });
 
     useEffect(() => {
         loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, isEditMode]);
 
     const loadInitialData = async () => {
         try {
             setIsLoading(true);
-            // 1. Load Teachers, Subjects and Active Year
-            const [teachersData, yearsData, subjectsData] = await Promise.all([
+
+            const [teachersData, yearsData] = await Promise.all([
                 classService.getTeachers(),
                 academicYearService.getAcademicYears(),
-                subjectService.getSubjects(),
             ]);
-            setTeachers(teachersData);
-            setSubjects(subjectsData.filter(s => s.type === 'PEMINATAN'));
-            
-            const activeYear = yearsData.find(y => y.isActive);
-            if (activeYear) setActiveYearId(activeYear.name); // Using name as ID for mock simplification
 
-            // 2. Load Class Data if Edit Mode
+            setTeachers(teachersData);
+            setAcademicYears(yearsData);
+
             if (isEditMode && id) {
                 const classData = await classService.getClassById(id);
                 if (classData) {
-                    // Update activeYearId to match the class's year
-                    if (classData.academicYearId) {
-                        setActiveYearId(classData.academicYearId);
-                    }
-                    
                     form.reset({
-                        name: classData.name,
-                        grade: classData.grade.toString(),
-                        type: classData.type,
-                        peminatanCategory: classData.peminatanCategory,
-                        subjectId: classData.subjectId || '',
-                        capacity: classData.capacity,
-                        homeroomTeacherId: classData.homeroomTeacherId || '',
-                        academicYearId: classData.academicYearId || activeYear?.name,
-                        genderCategory: classData.genderCategory,
+                        name:                classData.name,
+                        type:                classData.type ?? 'reguler',
+                        academic_year_id:    String(classData.academic_year_id),
+                        homeroom_teacher_id: classData.homeroom_teacher_id
+                            ? String(classData.homeroom_teacher_id)
+                            : '',
                     });
+                }
+            } else {
+                const activeYear = yearsData.find(y => y.isActive);
+                if (activeYear) {
+                    form.setValue('academic_year_id', activeYear.id);
                 }
             }
         } catch (err) {
@@ -161,15 +148,13 @@ export const ClassForm: React.FC<ClassFormProps> = ({ id }) => {
             setError(null);
 
             const payload = {
-                name: values.name,
-                grade: parseInt(values.grade),
-                type: values.type,
-                peminatanCategory: values.peminatanCategory,
-                subjectId: values.subjectId,
-                capacity: values.capacity,
-                homeroomTeacherId: values.homeroomTeacherId === 'none' ? undefined : values.homeroomTeacherId,
-                academicYearId: activeYearId,
-                genderCategory: values.genderCategory,
+                name:                values.name,
+                type:                values.type,
+                academic_year_id:    Number(values.academic_year_id),
+                // Wali kelas hanya dikirim untuk kelas reguler
+                homeroom_teacher_id: values.type === 'reguler' && values.homeroom_teacher_id
+                    ? Number(values.homeroom_teacher_id)
+                    : undefined,
             };
 
             if (isEditMode && id) {
@@ -191,13 +176,15 @@ export const ClassForm: React.FC<ClassFormProps> = ({ id }) => {
         }
     };
 
-    if (isLoading) {
-        return <ClassFormSkeleton />;
-    }
+    if (isLoading) return <ClassFormSkeleton />;
+
+    // Watch tipe untuk conditional rendering
+    const classType = form.watch('type');
+    const isReguler = classType === 'reguler';
 
     return (
         <div className="space-y-6">
-            {/* Header */}
+            {/* ── Header ── */}
             <div>
                 <div className="flex items-center gap-3">
                     <h1 className="text-3xl font-bold tracking-tight">
@@ -208,158 +195,46 @@ export const ClassForm: React.FC<ClassFormProps> = ({ id }) => {
                             Kelas
                         </span>
                     </h1>
-                    <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                         <School className="h-5 w-5" />
                     </div>
                 </div>
                 <p className="text-muted-foreground mt-1">
                     {isEditMode
-                        ? 'Perbarui informasi dan pengaturan detail kelas'
-                        : 'Buat kelas baru untuk tahun ajaran aktif'}
+                        ? 'Perbarui informasi kelas yang sudah ada'
+                        : 'Buat kelas baru untuk tahun ajaran yang dipilih'}
                 </p>
             </div>
 
-            {/* Error Alert */}
+            {/* ── Error Alert ── */}
             {error && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-                    <AlertCircle className="h-5 w-5 text-red-600" />
+                    <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
                     <p className="text-sm text-red-800">{error}</p>
                 </div>
             )}
 
-            {/* Form Card */}
-            <Card className="border-slate-200">
-                <CardHeader className="pb-2">
+            {/* ── Form Card ── */}
+            <Card className="border-slate-200 shadow-sm">
+                <CardHeader className="pb-4 border-b border-slate-100">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
+                        <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
                             <School className="h-5 w-5" />
                         </div>
                         <div>
                             <CardTitle className="text-lg font-semibold text-gray-900">Informasi Kelas</CardTitle>
                             <CardDescription className="text-sm text-muted-foreground">
-                                Lengkapi informasi identitas kelas dan pengaturan rombongan belajar
+                                Lengkapi informasi identitas kelas
                             </CardDescription>
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-4">
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+
+                            {/* ── Field Grid ── */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Tipe Kelas */}
-                                <FormField
-                                    control={form.control}
-                                    name="type"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Tipe Kelas</FormLabel>
-                                            <Select 
-                                                onValueChange={(val) => {
-                                                    field.onChange(val);
-                                                    if (val === 'REGULER') {
-                                                        form.setValue('peminatanCategory', undefined);
-                                                        form.setValue('subjectId', '');
-                                                    } else {
-                                                        form.setValue('homeroomTeacherId', '');
-                                                    }
-                                                }} 
-                                                defaultValue={field.value} 
-                                                value={field.value}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue placeholder="Pilih Tipe Kelas" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="REGULER">Reguler (Wajib)</SelectItem>
-                                                    <SelectItem value="PEMINATAN">Peminatan (Elektif)</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                {/* Tingkat */}
-                                <FormField
-                                    control={form.control}
-                                    name="grade"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Tingkat</FormLabel>
-                                            <Select 
-                                                onValueChange={(val) => {
-                                                    field.onChange(val);
-                                                    // Trigger rename suggestion if applicable
-                                                }} 
-                                                defaultValue={field.value}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue placeholder="Pilih Tingkat" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="10">Kelas 10 (X)</SelectItem>
-                                                    <SelectItem value="11">Kelas 11 (XI)</SelectItem>
-                                                    <SelectItem value="12">Kelas 12 (XII)</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                {/* Conditional Fields for PEMINATAN */}
-                                {form.watch('type') === 'PEMINATAN' && (
-                                    <>
-                                        <FormField
-                                            control={form.control}
-                                            name="peminatanCategory"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Kategori Peminatan</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Pilih Kategori" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            <SelectItem value="AKH">PEM AKH (Akhlak)</SelectItem>
-                                                            <SelectItem value="IKH">PEM IKH (Ikhtishosh)</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <FormField
-                                            control={form.control}
-                                            name="subjectId"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Mata Pelajaran Peminatan</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Pilih Mata Pelajaran" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            {subjects.map((s) => (
-                                                                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </>
-                                )}
 
                                 {/* Nama Kelas */}
                                 <FormField
@@ -367,108 +242,185 @@ export const ClassForm: React.FC<ClassFormProps> = ({ id }) => {
                                     name="name"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Nama Kelas</FormLabel>
-                                            <div className="flex gap-2">
-                                                <FormControl>
-                                                    <Input placeholder="Contoh: X-A" {...field} />
-                                                </FormControl>
-                                                {form.watch('type') === 'PEMINATAN' && (
-                                                    <Button 
-                                                        type="button" 
-                                                        variant="outline" 
-                                                        size="sm"
-                                                        className="h-10 text-xs shrink-0"
-                                                        onClick={() => {
-                                                            const grade = form.getValues('grade');
-                                                            const category = form.getValues('peminatanCategory');
-                                                            const subjectId = form.getValues('subjectId');
-                                                            const subject = subjects.find(s => s.id === subjectId);
-                                                            
-                                                            if (grade && category && subject) {
-                                                                const romanGrade = grade === '10' ? 'X' : grade === '11' ? 'XI' : 'XII';
-                                                                form.setValue('name', `${romanGrade} PEM ${category} ${subject.name.toUpperCase()}`);
-                                                            } else {
-                                                                toast.error('Lengkapi Sertifikat/Mata Pelajaran untuk saran nama');
-                                                            }
-                                                        }}
-                                                    >
-                                                        Saran Nama
-                                                    </Button>
-                                                )}
-                                            </div>
-                                            <FormDescription className="text-[11px] flex items-center gap-1.5 text-slate-500 mt-1">
-                                                <Info className="h-3 w-3 text-blue-500 shrink-0" />
-                                                Gunakan penamaan yang konsisten (misal: X-A, XI PEM AKH BIOLOGI).
-                                            </FormDescription>
+                                            <FormLabel className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                                                <School className="h-4 w-4 text-slate-400" />
+                                                Nama Kelas <span className="text-red-500">*</span>
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Contoh: X A, XI B, XII C"
+                                                    className="h-10"
+                                                    {...field}
+                                                />
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
 
-                                {/* Wali Kelas (Combobox) - Only for Regular classes */}
-                                {form.watch('type') === 'REGULER' && (
+                                {/* Tahun Ajaran */}
+                                <FormField
+                                    control={form.control}
+                                    name="academic_year_id"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                                                <Calendar className="h-4 w-4 text-slate-400" />
+                                                Tahun Ajaran <span className="text-red-500">*</span>
+                                            </FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger className="h-10 w-full">
+                                                        <SelectValue placeholder="Pilih Tahun Ajaran" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {academicYears.map(year => (
+                                                        <SelectItem key={year.id} value={year.id}>
+                                                            {year.name} {year.isActive && '(Aktif)'}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                {/* Tipe Kelas — full width */}
+                                <FormField
+                                    control={form.control}
+                                    name="type"
+                                    render={({ field }) => (
+                                        <FormItem className="md:col-span-2">
+                                            <FormLabel className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                                                <School className="h-4 w-4 text-slate-400" />
+                                                Tipe Kelas <span className="text-red-500">*</span>
+                                            </FormLabel>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {/* Reguler */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        field.onChange('reguler');
+                                                    }}
+                                                    className={cn(
+                                                        'flex items-start gap-3 p-4 rounded-lg border-2 text-left transition-all',
+                                                        field.value === 'reguler'
+                                                            ? 'border-blue-500 bg-blue-50'
+                                                            : 'border-slate-200 bg-white hover:border-slate-300'
+                                                    )}
+                                                >
+                                                    <div className={cn(
+                                                        'h-9 w-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
+                                                        field.value === 'reguler' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
+                                                    )}>
+                                                        <Users className="h-5 w-5" />
+                                                    </div>
+                                                    <div>
+                                                        <p className={cn('text-sm font-semibold', field.value === 'reguler' ? 'text-blue-900' : 'text-slate-700')}>
+                                                            Reguler
+                                                        </p>
+                                                        <p className="text-xs text-slate-500 mt-0.5">
+                                                            Kelas inti (X A, XI B, XII A, dll). Punya wali kelas dan daftar siswa tetap.
+                                                        </p>
+                                                    </div>
+                                                </button>
+
+                                                {/* Peminatan Group */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        field.onChange('peminatan_group');
+                                                        form.setValue('homeroom_teacher_id', '');
+                                                    }}
+                                                    className={cn(
+                                                        'flex items-start gap-3 p-4 rounded-lg border-2 text-left transition-all',
+                                                        field.value === 'peminatan_group'
+                                                            ? 'border-amber-500 bg-amber-50'
+                                                            : 'border-slate-200 bg-white hover:border-slate-300'
+                                                    )}
+                                                >
+                                                    <div className={cn(
+                                                        'h-9 w-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
+                                                        field.value === 'peminatan_group' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'
+                                                    )}>
+                                                        <BookOpen className="h-5 w-5" />
+                                                    </div>
+                                                    <div>
+                                                        <p className={cn('text-sm font-semibold', field.value === 'peminatan_group' ? 'text-amber-900' : 'text-slate-700')}>
+                                                            Peminatan
+                                                        </p>
+                                                        <p className="text-xs text-slate-500 mt-0.5">
+                                                            Wadah kelas peminatan (XI PEM IKH, XI PEM AKH). Siswa masuk via mapel peminatan.
+                                                        </p>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                {/* Wali Kelas — hanya untuk kelas reguler */}
+                                {isReguler && (
                                     <FormField
                                         control={form.control}
-                                        name="homeroomTeacherId"
+                                        name="homeroom_teacher_id"
                                         render={({ field }) => (
-                                            <FormItem className="flex flex-col">
-                                                <FormLabel>Wali Kelas</FormLabel>
-                                                <Popover>
+                                            <FormItem className="flex flex-col md:col-span-2">
+                                                <FormLabel className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                                                    <UserCheck className="h-4 w-4 text-slate-400" />
+                                                    Wali Kelas{' '}
+                                                    <span className="text-slate-400 font-normal">(opsional)</span>
+                                                </FormLabel>
+                                                <Popover open={teacherPopoverOpen} onOpenChange={setTeacherPopoverOpen}>
                                                     <PopoverTrigger asChild>
                                                         <FormControl>
                                                             <Button
                                                                 variant="outline"
                                                                 role="combobox"
                                                                 className={cn(
-                                                                    "w-full justify-between font-normal",
-                                                                    !field.value && "text-muted-foreground"
+                                                                    'w-full h-10 justify-between font-normal',
+                                                                    !field.value && 'text-muted-foreground'
                                                                 )}
                                                             >
                                                                 {field.value
-                                                                    ? teachers.find(
-                                                                        (t) => t.id === field.value
-                                                                    )?.name
-                                                                    : "Pilih Wali Kelas"}
+                                                                    ? teachers.find(t => String(t.id) === field.value)?.name
+                                                                    : 'Pilih Wali Kelas'}
                                                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                             </Button>
                                                         </FormControl>
                                                     </PopoverTrigger>
-                                                    <PopoverContent className="w-full p-0">
+                                                    <PopoverContent className="w-full p-0" align="start">
                                                         <Command>
-                                                            <CommandInput placeholder="Cari guru..." />
+                                                            <CommandInput placeholder="Cari nama guru..." />
                                                             <CommandList>
                                                                 <CommandEmpty>Guru tidak ditemukan.</CommandEmpty>
                                                                 <CommandGroup>
                                                                     <CommandItem
-                                                                        value="none"
+                                                                        value="__none__"
                                                                         onSelect={() => {
-                                                                            form.setValue("homeroomTeacherId", "");
+                                                                            form.setValue('homeroom_teacher_id', '');
+                                                                            setTeacherPopoverOpen(false);
                                                                         }}
                                                                     >
-                                                                        <Check
-                                                                            className={cn(
-                                                                                "mr-2 h-4 w-4",
-                                                                                field.value === "" ? "opacity-100" : "opacity-0"
-                                                                            )}
-                                                                        />
-                                                                        -- Belum Ada --
+                                                                        <Check className={cn('mr-2 h-4 w-4', !field.value ? 'opacity-100' : 'opacity-0')} />
+                                                                        — Belum Ada —
                                                                     </CommandItem>
-                                                                    {teachers.map((teacher) => (
+                                                                    {teachers.map(teacher => (
                                                                         <CommandItem
                                                                             value={teacher.name}
                                                                             key={teacher.id}
                                                                             onSelect={() => {
-                                                                                form.setValue("homeroomTeacherId", teacher.id);
+                                                                                form.setValue('homeroom_teacher_id', String(teacher.id));
+                                                                                setTeacherPopoverOpen(false);
                                                                             }}
                                                                         >
-                                                                            <Check
-                                                                                className={cn(
-                                                                                    "mr-2 h-4 w-4",
-                                                                                    teacher.id === field.value
-                                                                                        ? "opacity-100"
-                                                                                        : "opacity-0"
-                                                                                )}
-                                                                            />
+                                                                            <Check className={cn('mr-2 h-4 w-4', String(teacher.id) === field.value ? 'opacity-100' : 'opacity-0')} />
                                                                             {teacher.name}
                                                                         </CommandItem>
                                                                     ))}
@@ -482,78 +434,34 @@ export const ClassForm: React.FC<ClassFormProps> = ({ id }) => {
                                         )}
                                     />
                                 )}
-
-                                {/* Kapasitas */}
-                                <FormField
-                                    control={form.control}
-                                    name="capacity"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Kapasitas Siswa</FormLabel>
-                                            <FormControl>
-                                                <Input 
-                                                    type="number"
-                                                    {...field}
-                                                    value={(field.value as string | number) ?? ''}
-                                                />
-                                            </FormControl>
-                                            <FormDescription className="text-[11px] flex items-center gap-1.5 text-slate-500 mt-1">
-                                                <Info className="h-3 w-3 text-blue-500 shrink-0" />
-                                                Standard kapasitas kelas biasanya 30-36 siswa.
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                {/* Kategori Gender */}
-                                <FormField
-                                    control={form.control}
-                                    name="genderCategory"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Kategori Gender</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue placeholder="Pilih Kategori" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="PUTRA">Putra (Laki-laki)</SelectItem>
-                                                    <SelectItem value="PUTRI">Putri (Perempuan)</SelectItem>
-                                                    <SelectItem value="CAMPURAN">Campuran</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
                             </div>
 
-                            <div className="flex gap-3 pt-4 border-t">
+                            {/* ── Actions ── */}
+                            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
                                 <Button
                                     type="button"
                                     variant="outline"
                                     onClick={() => router.push('/admin/class')}
                                     disabled={isSubmitting}
+                                    className="min-w-[90px]"
                                 >
+                                    <ArrowLeft className="h-4 w-4 mr-2" />
                                     Batal
                                 </Button>
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="bg-blue-800 hover:bg-blue-900 text-white"
+                                    className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all min-w-[140px]"
                                 >
                                     {isSubmitting ? (
                                         <>
-                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                             Menyimpan...
                                         </>
                                     ) : (
                                         <>
-                                            <Save className="h-4 w-4 mr-2" />
-                                            Simpan
+                                            <Save className="mr-2 h-4 w-4" />
+                                            {isEditMode ? 'Perbarui Kelas' : 'Buat Kelas'}
                                         </>
                                     )}
                                 </Button>

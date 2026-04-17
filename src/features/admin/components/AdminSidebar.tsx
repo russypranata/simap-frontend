@@ -13,17 +13,14 @@ import {
     Users,
     Briefcase,
     Shield,
-    UserCog,
     FileText,
     CalendarDays,
     ClipboardCheck,
     Printer,
     ArrowUpCircle,
-    UserCheck,
     UserPlus,
     ArrowLeftRight,
     Award,
-    Contact,
     Clock,
     FileBarChart,
 } from 'lucide-react';
@@ -144,11 +141,6 @@ export const AdminSidebar: React.FC = () => {
                     icon: School,
                 },
                 {
-                    title: 'Wali Kelas',
-                    href: '/admin/class-management/homeroom',
-                    icon: UserCheck,
-                },
-                {
                     title: 'Kenaikan Kelas',
                     href: '/admin/class-management/promotion',
                     icon: ArrowUpCircle,
@@ -169,11 +161,6 @@ export const AdminSidebar: React.FC = () => {
                     title: 'Daftar Ekskul',
                     href: '/admin/extracurricular',
                     icon: Award,
-                },
-                {
-                    title: 'Keanggotaan',
-                    href: '/admin/extracurricular/members',
-                    icon: Users,
                 },
                 {
                     title: 'Rekap Presensi',
@@ -223,33 +210,14 @@ export const AdminSidebar: React.FC = () => {
             ],
         },
         {
-            title: 'Data Pegawai',
-            href: '/admin/users-staff',
+            title: 'Data PTK',
+            href: '/admin/users/teachers',
             icon: Briefcase,
-            subItems: [
-                {
-                    title: 'Guru / Pendidik',
-                    href: '/admin/users/teachers',
-                    icon: UserCog,
-                },
-                {
-                    title: 'Tendik / Staf',
-                    href: '/admin/users/staff',
-                    icon: Contact,
-                },
-            ],
         },
         {
             title: 'Hak Akses',
-            href: '/admin/access-control',
+            href: '/admin/users/management',
             icon: Shield,
-            subItems: [
-                {
-                    title: 'Manajemen Pengguna',
-                    href: '/admin/users/management',
-                    icon: Shield,
-                },
-            ],
         },
     ];
 

@@ -1,74 +1,44 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-    Award,
-    Search,
-    Filter,
-    Download,
-    GraduationCap,
-    MoreVertical,
-    Plus,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Award, Search, RefreshCw, FilterX, FileX, GraduationCap } from 'lucide-react';
+import { useDebounce } from '@/hooks/use-debounce';
+
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MOCK_ALUMNI } from '../data/mockAlumniData';
-import { Alumni } from '../types/alumni';
-import { AlumniForm } from '../components/forms/AlumniForm';
-import { AlumniFormValues } from '../schemas/alumniSchema';
-import { toast } from 'sonner';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+
+import { useAlumniList } from '../hooks/useAlumniList';
+import { PaginationControls } from '@/features/shared/components/PaginationControls';
+
+const AlumniSkeleton = () => (
+    <div className="space-y-6">
+        <div className="space-y-2"><Skeleton className="h-9 w-64" /><Skeleton className="h-4 w-48" /></div>
+        <Card><CardHeader className="pb-4 space-y-4">
+            <div className="flex items-center gap-3"><Skeleton className="h-10 w-10 rounded-lg" /><div className="space-y-1"><Skeleton className="h-5 w-40" /><Skeleton className="h-4 w-28" /></div></div>
+            <Skeleton className="h-10 w-full" />
+        </CardHeader><CardContent className="p-0"><div className="border-t">{[...Array(6)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-slate-50">
+                <Skeleton className="h-9 w-9 rounded-full" /><div className="flex-1 space-y-1"><Skeleton className="h-4 w-40" /><Skeleton className="h-3 w-28" /></div>
+                <Skeleton className="h-6 w-20 rounded-full" /><Skeleton className="h-4 w-24" />
+            </div>
+        ))}</div></CardContent></Card>
+    </div>
+);
 
 export const AlumniList: React.FC = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [data, setData] = useState<Alumni[]>(MOCK_ALUMNI);
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [editingId, setEditingId] = useState<string | null>(null);
+    const [searchInput, setSearchInput] = useState('');
+    const debouncedSearch = useDebounce(searchInput, 400);
 
-    const filteredData = data.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const { alumni, meta, isLoading, isFetching, isError, setFilters } = useAlumniList();
 
-    const handleCreate = (values: AlumniFormValues) => {
-        const newItem: Alumni = {
-            id: `alum-${Date.now()}`,
-            ...values,
-        };
-        setData([newItem, ...data]);
-        toast.success('Data alumni berhasil ditambahkan');
-    };
+    React.useEffect(() => {
+        setFilters({ search: debouncedSearch || undefined, page: 1 });
+    }, [debouncedSearch, setFilters]);
 
-    const handleUpdate = (values: AlumniFormValues) => {
-        if (!editingId) return;
-        setData(prev => prev.map(item => item.id === editingId ? { ...item, ...values } : item));
-        toast.success('Data alumni diperbarui');
-        setEditingId(null);
-    };
-
-    const handleDelete = (id: string) => {
-        if (confirm('Hapus data alumni ini?')) {
-            setData(prev => prev.filter(item => item.id !== id));
-            toast.success('Data alumni dihapus');
-        }
-    };
-
-    const openEdit = (item: Alumni) => {
-        setEditingId(item.id);
-        setIsFormOpen(true);
-    };
+    if (isLoading) return <AlumniSkeleton />;
 
     return (
         <div className="space-y-6">
@@ -76,143 +46,98 @@ export const AlumniList: React.FC = () => {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
-                                Data{' '}
-                            </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
-                                Alumni
-                            </span>
+                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Data </span>
+                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Alumni</span>
                         </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
-                            <Award className="h-5 w-5" />
-                        </div>
+                        <div className="p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200"><Award className="h-5 w-5" /></div>
                     </div>
-                    <p className="text-muted-foreground mt-1">
-                        Arsip data siswa yang telah lulus (Alumni).
-                    </p>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="outline">
-                        <Download className="h-4 w-4 mr-2" />
-                        Export Data
-                    </Button>
-                    <Button
-                        onClick={() => { setEditingId(null); setIsFormOpen(true); }}
-                        className="bg-blue-800 hover:bg-blue-900 text-white shadow-md hover:shadow-lg transition-all"
-                    >
-                         <Plus className="h-4 w-4 mr-2" />
-                        Tambah Alumni
-                    </Button>
+                    <p className="text-muted-foreground mt-1">Arsip data siswa yang telah lulus dari sekolah.</p>
                 </div>
             </div>
+
+            {isError && <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 text-sm">Gagal memuat data alumni.</div>}
 
             <Card className="border-slate-200 shadow-sm">
                 <CardHeader className="pb-4 space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
-                                <GraduationCap className="h-5 w-5" />
-                            </div>
+                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0"><GraduationCap className="h-5 w-5" /></div>
                             <div>
-                                <CardTitle className="text-lg font-semibold text-gray-900">
-                                    Daftar Alumni
-                                </CardTitle>
-                                <CardDescription>
-                                    Total {data.length} alumni terdata
-                                </CardDescription>
+                                <CardTitle className="text-lg font-semibold text-gray-900">Daftar Alumni</CardTitle>
+                                <CardDescription>Siswa yang sudah tidak aktif di tahun ajaran berjalan</CardDescription>
                             </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {isFetching && !isLoading && <RefreshCw className="h-4 w-4 text-slate-400 animate-spin" />}
+                            <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100">{meta?.total ?? alumni.length} Alumni</Badge>
                         </div>
                     </div>
-
-                    <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-slate-100">
-                        <div className="relative flex-1">
+                    <div className="pt-2 border-t border-slate-100">
+                        <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Cari nama alumni..."
-                                className="pl-9 w-full"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                            <Input placeholder="Cari nama atau nomor pendaftaran..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9" />
                         </div>
-                        <Button variant="outline" className="w-[100px]">
-                            <Filter className="h-4 w-4 mr-2" />
-                            Filter
-                        </Button>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-x-auto border-t border-slate-200">
+                    <div className="border-t border-slate-200 overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                            <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Nama & NISN</th>
-                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Tahun Lulus</th>
-                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Kelas Terakhir</th>
-                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Karir / Studi Lanjut</th>
-                                    <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right">Aksi</th>
+                                    <th className="pl-4 pr-6 py-4 font-medium text-sm">Nama & No. Pendaftaran</th>
+                                    <th className="px-6 py-4 font-medium text-sm">Kelas Terakhir</th>
+                                    <th className="px-6 py-4 font-medium text-sm">Tahun Ajaran</th>
+                                    <th className="px-6 py-4 font-medium text-sm">Kontak</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {filteredData.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                                            <div className="flex flex-col items-center justify-center">
-                                                <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                    <GraduationCap className="h-8 w-8 text-slate-300" />
-                                                </div>
-                                                <p className="text-slate-500 font-medium">Data tidak ditemukan</p>
+                            <tbody>
+                                {alumni.length === 0 ? (
+                                    <tr><td colSpan={4} className="px-6 py-12 text-center">
+                                        <div className="flex flex-col items-center justify-center">
+                                            <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+                                                {searchInput ? <FilterX className="h-8 w-8 text-slate-300" /> : <FileX className="h-8 w-8 text-slate-300" />}
                                             </div>
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    filteredData.map((item) => (
-                                        <tr key={item.id} className="hover:bg-slate-50/60 transition-colors group">
+                                            <p className="text-slate-500 font-medium">{searchInput ? 'Tidak ada hasil' : 'Belum ada data alumni'}</p>
+                                            <p className="text-slate-400 text-sm mt-1">Alumni adalah siswa yang tidak lagi terdaftar di kelas aktif</p>
+                                        </div>
+                                    </td></tr>
+                                ) : alumni.map((a) => {
+                                    const initials = a.name.split(' ').map((n) => n[0]).join('').toUpperCase().substring(0, 2);
+                                    return (
+                                        <tr key={a.id} className="group transition-colors border-b border-slate-50 hover:bg-slate-50/60">
+                                            <td className="pl-4 pr-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar className="h-9 w-9 border border-blue-200 shrink-0">
+                                                        <AvatarImage src={a.avatar ?? undefined} />
+                                                        <AvatarFallback className="bg-blue-100 text-blue-800 text-xs font-semibold">{initials}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <p className="font-medium text-slate-900">{a.name}</p>
+                                                        <p className="text-xs text-slate-500 font-mono mt-0.5">{a.admission_number}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
                                             <td className="px-6 py-4">
-                                                <div className="font-medium text-slate-900">{item.name}</div>
-                                                <div className="text-xs text-slate-500 mt-0.5 bg-slate-100 w-fit px-1 rounded">{item.nisn}</div>
+                                                {a.last_class_name
+                                                    ? <Badge className="bg-blue-800 text-white text-xs font-medium">{a.last_class_name}</Badge>
+                                                    : <span className="text-sm text-slate-400">—</span>}
                                             </td>
-                                            <td className="px-6 py-4 text-slate-600">
-                                                <Badge variant="outline" className="bg-white text-slate-700 font-normal">
-                                                    {item.graduationYear}
-                                                </Badge>
-                                            </td>
-                                            <td className="px-6 py-4 text-slate-600">
-                                                {item.className}
-                                            </td>
-                                            <td className="px-6 py-4 text-slate-600 italic">
-                                                {item.university || item.job || '-'}
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900 hover:bg-slate-100">
-                                                            <MoreVertical className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem onClick={() => openEdit(item)}>Edit Data</DropdownMenuItem>
-                                                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(item.id)}>Hapus</DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </td>
+                                            <td className="px-6 py-4 text-sm text-slate-700">{a.graduation_year ?? '—'}</td>
+                                            <td className="px-6 py-4 text-sm text-slate-700">{a.phone ?? '—'}</td>
                                         </tr>
-                                    ))
-                                )}
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
+                    {meta && meta.last_page > 1 && (
+                        <PaginationControls currentPage={meta.current_page} totalPages={meta.last_page} totalItems={meta.total}
+                            startIndex={(meta.current_page - 1) * meta.per_page + 1} endIndex={Math.min(meta.current_page * meta.per_page, meta.total)}
+                            itemsPerPage={meta.per_page} itemLabel="alumni"
+                            onPageChange={(page) => setFilters({ page })} onItemsPerPageChange={(perPage) => setFilters({ page: 1, per_page: perPage })} />
+                    )}
                 </CardContent>
             </Card>
-
-            <AlumniForm
-                open={isFormOpen}
-                onOpenChange={(open) => {
-                    setIsFormOpen(open);
-                    if (!open) setEditingId(null);
-                }}
-                initialData={editingId ? data.find(d => d.id === editingId) : null}
-                onSubmit={editingId ? handleUpdate : handleCreate}
-            />
         </div>
     );
 };

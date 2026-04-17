@@ -107,7 +107,7 @@ export const AdminProfileForm: React.FC<AdminProfileFormProps> = ({
             <Card>
                 <CardHeader className="pb-4">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
                             <User className="h-5 w-5" />
                         </div>
                         <div>
@@ -164,7 +164,7 @@ export const AdminProfileForm: React.FC<AdminProfileFormProps> = ({
                         {/* Nama Lengkap */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-primary" />
+                                <User className="h-4 w-4 text-blue-700" />
                                 <Label htmlFor="name" className="mb-0">
                                     Nama Lengkap
                                     <span className="text-red-500 ml-1">*</span>
@@ -182,7 +182,7 @@ export const AdminProfileForm: React.FC<AdminProfileFormProps> = ({
                         {/* Username */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <AtSign className="h-4 w-4 text-primary" />
+                                <AtSign className="h-4 w-4 text-blue-700" />
                                 <Label htmlFor="username" className="mb-0">
                                     Username
                                     <span className="text-red-500 ml-1">*</span>
@@ -201,7 +201,7 @@ export const AdminProfileForm: React.FC<AdminProfileFormProps> = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                    <Shield className="h-4 w-4 text-primary" />
+                                    <Shield className="h-4 w-4 text-blue-700" />
                                     <Label htmlFor="role" className="mb-0">
                                         Role Sistem
                                     </Label>
@@ -219,7 +219,7 @@ export const AdminProfileForm: React.FC<AdminProfileFormProps> = ({
                             </div>
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                    <Building2 className="h-4 w-4 text-primary" />
+                                    <Building2 className="h-4 w-4 text-blue-700" />
                                     <Label htmlFor="department" className="mb-0">
                                         Departemen / Unit
                                     </Label>
@@ -241,7 +241,7 @@ export const AdminProfileForm: React.FC<AdminProfileFormProps> = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                    <Mail className="h-4 w-4 text-primary" />
+                                    <Mail className="h-4 w-4 text-blue-700" />
                                     <Label htmlFor="email" className="mb-0">
                                         Email Resmi
                                         <span className="text-red-500 ml-1">*</span>
@@ -258,7 +258,7 @@ export const AdminProfileForm: React.FC<AdminProfileFormProps> = ({
                             </div>
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                    <Phone className="h-4 w-4 text-primary" />
+                                    <Phone className="h-4 w-4 text-blue-700" />
                                     <Label htmlFor="phone" className="mb-0">
                                         Nomor Telepon
                                         <span className="text-red-500 ml-1">*</span>

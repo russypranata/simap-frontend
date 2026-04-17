@@ -28,6 +28,7 @@ import {
     FileText,
     Printer,
     Briefcase,
+    Shield,
 } from 'lucide-react';
 import {
     Breadcrumb,
@@ -59,7 +60,7 @@ const routeConfig: Record<string, RouteItem> = {
     'class-management': { label: 'Manajemen Kelas', icon: School, isClickable: false },
     'extracurricular-management': { label: 'Manajemen Ekskul', icon: Trophy, isClickable: false },
     'users-student': { label: 'Data Siswa', icon: Users, isClickable: false },
-    'users-staff': { label: 'Data Pegawai', icon: Briefcase, isClickable: false },
+    'users-staff': { label: 'Manajemen PTK', icon: Briefcase, isClickable: false },
     'access-control': { label: 'Hak Akses', icon: Settings, isClickable: false },
     'assessments': { label: 'Penilaian', icon: ClipboardList, isClickable: false },
 
@@ -143,17 +144,17 @@ const routeConfig: Record<string, RouteItem> = {
     'admin:assessment': { label: 'Input Nilai', icon: FileText, parent: 'assessments' },
     'admin:report-card': { label: 'Cetak Rapor', icon: Printer, parent: 'assessments' },
     'admin:schedule-management': { label: 'Jadwal Pelajaran', icon: Calendar },
-    'admin:extracurricular': { label: 'Daftar Ekskul', icon: Trophy, parent: 'extracurricular-management' },
-    'admin:members': { label: 'Keanggotaan', icon: Users, parent: 'extracurricular-management' },
+    'admin:extracurricular': { label: 'Manajemen Ekskul', icon: Trophy, parent: 'extracurricular-management' },
+    'admin:members':         { label: 'Keanggotaan', icon: Users, parent: 'extracurricular-management' },
     'admin:users': { label: 'Manajemen Pengguna', icon: Users, isClickable: false },
-    'admin:teachers': { label: 'Guru / Pendidik', icon: Users, parent: 'users-staff' },
-    'admin:staff': { label: 'Tendik / Staf', icon: Users, parent: 'users-staff' },
+    'admin:teachers': { label: 'Data PTK', icon: Users, parent: 'users-staff' },
+    'admin:staff': { label: 'Tendik / Staf', icon: Briefcase, parent: 'users-staff' },
     'admin:students': { label: 'Siswa Aktif', icon: GraduationCap, parent: 'users-student' },
     'admin:parents': { label: 'Wali Murid', icon: Users, parent: 'users-student' },
     'admin:ppdb': { label: 'PPDB / Calon', icon: Users, parent: 'users-student' },
     'admin:mutation': { label: 'Mutasi', icon: Users, parent: 'users-student' },
     'admin:alumni': { label: 'Alumni', icon: Trophy, parent: 'users-student' },
-    'admin:management': { label: 'Manajemen Pengguna', icon: Settings, parent: 'access-control' },
+    'admin:management': { label: 'Hak Akses & Pengguna', icon: Shield },
     'admin:kelola-pengguna': { label: 'Kelola Pengguna', icon: Users, parent: 'users' },
     'admin:profile': { label: 'Profil', icon: User },
     'admin:settings': { label: 'Pengaturan', icon: Settings },
@@ -195,6 +196,9 @@ const roleSegments = [
     'mutamayizin-coordinator',
     'admin'
 ];
+
+// Routing folder segments to skip (not meaningful pages)
+const skipSegments = ['users'];
 
 
 interface BreadcrumbData {
@@ -281,9 +285,9 @@ export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => 
             return routeConfig[roleKey] ?? routeConfig[segment];
         };
 
-        // Filter out role-based segments
+        // Filter out role-based segments and skip segments
         const filteredSegments = segments.filter(
-            segment => !roleSegments.includes(segment)
+            segment => !roleSegments.includes(segment) && !skipSegments.includes(segment)
         );
 
         if (filteredSegments.length === 0) {
@@ -294,11 +298,14 @@ export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => 
         let currentPath = '';
         let skippedLabel = '';
 
+        // Track the last meaningful non-ID, non-role segment for context
+        let lastMeaningfulSegment = '';
+
         segments.forEach((segment, index) => {
             currentPath += `/${segment}`;
 
-            // Only add to breadcrumbs if not a role segment
-            if (!roleSegments.includes(segment)) {
+            // Only add to breadcrumbs if not a role segment or skip segment
+            if (!roleSegments.includes(segment) && !skipSegments.includes(segment)) {
                 // Skip duplicate 'dashboard' label if already injected
                 if (segment === 'dashboard' && breadcrumbs.some(b => b.label === 'Dasbor')) {
                     return;
@@ -346,9 +353,24 @@ export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => 
                     ? 'Jadwal & KBM'
                     : (config?.label || formatSegmentLabel(segment));
 
+                // For 'new' segment, use context-aware label based on parent
+                if (segment === 'new') {
+                    const parentConfig = resolveConfig(lastMeaningfulSegment);
+                    if (parentConfig) {
+                        label = `Tambah ${parentConfig.label}`;
+                    } else {
+                        label = 'Tambah Baru';
+                    }
+                }
+
                 // For 'edit' segment following a skipped ID, merge the label
                 if (segment === 'edit' && skippedLabel) {
-                    label = `Edit ${skippedLabel.replace('Detail ', '')}`;
+                    const parentConfig = resolveConfig(lastMeaningfulSegment);
+                    if (parentConfig) {
+                        label = `Edit ${parentConfig.label}`;
+                    } else {
+                        label = `Edit ${skippedLabel.replace('Detail ', '')}`;
+                    }
                     skippedLabel = '';
                 }
 
@@ -362,6 +384,11 @@ export const NavbarBreadcrumb: React.FC<NavbarBreadcrumbProps> = ({ items }) => 
                     icon,
                     isClickable,
                 });
+
+        // Update last meaningful segment (skip IDs and generic segments)
+                if (!isIdSegment && segment !== 'new' && segment !== 'edit' && segment !== 'users') {
+                    lastMeaningfulSegment = segment;
+                }
             }
         });
 

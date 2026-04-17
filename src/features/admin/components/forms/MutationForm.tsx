@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -55,6 +55,7 @@ export const MutationForm: React.FC<MutationFormProps> = ({
         },
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const type = form.watch('type');
 
     return (

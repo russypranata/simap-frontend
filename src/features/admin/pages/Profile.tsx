@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,8 +25,7 @@ import {
 
 import { AdminProfileData } from '../data/mockAdminData';
 import { 
-    getAdminProfile, 
-    uploadAdminAvatar 
+    getAdminProfile,
 } from '../services/adminProfileService';
 import { 
     AdminPhotoRequirementsModal,
@@ -40,7 +38,6 @@ export const AdminProfile: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isPhotoOpen, setIsPhotoOpen] = useState(false);
     const [isReqModalOpen, setIsReqModalOpen] = useState(false);
-    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -60,21 +57,6 @@ export const AdminProfile: React.FC = () => {
     const handleAvatarClick = () => {
         if (profileData?.profilePicture) {
             setIsPhotoOpen(true);
-        }
-    };
-
-    const handleFileChange = async (file: File) => {
-        setUploading(true);
-        try {
-            const response = await uploadAdminAvatar(file);
-            setProfileData((prev: AdminProfileData | null) => 
-                prev ? { ...prev, profilePicture: response.profilePicture } : null
-            );
-            toast.success('Foto profil berhasil diperbarui');
-        } catch (error: any) {
-            toast.error(error.message || 'Gagal mengunggah foto');
-        } finally {
-            setUploading(false);
         }
     };
 
@@ -103,7 +85,7 @@ export const AdminProfile: React.FC = () => {
                                 Saya
                             </span>
                         </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                             <Shield className="h-5 w-5" />
                         </div>
                     </div>
@@ -126,7 +108,7 @@ export const AdminProfile: React.FC = () => {
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
                                 <User className="h-5 w-5" />
                             </div>
                             <div>
@@ -189,32 +171,32 @@ export const AdminProfile: React.FC = () => {
                         {/* Info Grid */}
                         <div className="space-y-4 pt-4 border-t">
                             <h3 className="text-base font-medium text-foreground flex items-center gap-2">
-                                <User className="h-4.5 w-4.5 text-primary" /> Informasi Akun
+                                <User className="h-4.5 w-4.5 text-blue-700" /> Informasi Akun
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                    <div className="p-2 rounded-full bg-primary/10"><AtSign className="h-5 w-5 text-primary" /></div>
+                                    <div className="p-2 rounded-full bg-blue-100"><AtSign className="h-5 w-5 text-blue-700" /></div>
                                     <div className="flex-1">
                                         <p className="text-xs text-muted-foreground">Username</p>
                                         <p className="text-sm font-medium">{profileData.username}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                    <div className="p-2 rounded-full bg-primary/10"><Mail className="h-5 w-5 text-primary" /></div>
+                                    <div className="p-2 rounded-full bg-blue-100"><Mail className="h-5 w-5 text-blue-700" /></div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-xs text-muted-foreground">Email Resmi</p>
                                         <p className="text-sm font-medium truncate">{profileData.email}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                    <div className="p-2 rounded-full bg-primary/10"><Phone className="h-5 w-5 text-primary" /></div>
+                                    <div className="p-2 rounded-full bg-blue-100"><Phone className="h-5 w-5 text-blue-700" /></div>
                                     <div className="flex-1">
                                         <p className="text-xs text-muted-foreground">Nomor Telepon</p>
                                         <p className="text-sm font-medium">{profileData.phone}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                                    <div className="p-2 rounded-full bg-primary/10"><Calendar className="h-5 w-5 text-primary" /></div>
+                                    <div className="p-2 rounded-full bg-blue-100"><Calendar className="h-5 w-5 text-blue-700" /></div>
                                     <div className="flex-1">
                                         <p className="text-xs text-muted-foreground">Bergabung Sejak</p>
                                         <p className="text-sm font-medium">{profileData.joinDate}</p>

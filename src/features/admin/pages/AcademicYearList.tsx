@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/dialog';
 import {
     Calendar,
-    CalendarPlus,
     Eye,
     Edit,
     CheckCircle2,
@@ -103,7 +102,7 @@ export const AcademicYearList: React.FC = () => {
                                 Tahun Ajaran
                             </span>
                         </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                             <Calendar className="h-5 w-5" />
                         </div>
                     </div>

@@ -70,7 +70,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
         queryKey: ['schedule-form-classes'],
         queryFn: async () => {
             const data = await classService.getClasses();
-            return (Array.isArray(data) ? data : []).map((c: any) => ({ id: String(c.id), name: c.name }));
+            return (Array.isArray(data) ? data : []).map((c: { id: string | number; name: string }) => ({ id: String(c.id), name: c.name }));
         },
         staleTime: 5 * 60 * 1000,
     });
@@ -116,14 +116,15 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     useEffect(() => {
         const { day, startTime, endTime, teacherId, classId } = watchedValues;
         if (day && startTime && endTime && (teacherId || classId)) {
-            setConflict(checkScheduleConflict({ day, startTime, endTime, teacherId, classId } as any, existingSchedules, initialData?.id));
+            setConflict(checkScheduleConflict({ day, startTime, endTime, teacherId, classId } as Partial<Schedule>, existingSchedules, initialData?.id));
         } else {
             setConflict({ hasConflict: false });
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [watchedValues.day, watchedValues.startTime, watchedValues.endTime, watchedValues.teacherId, watchedValues.classId]);
 
     const handleSubmit = (values: ScheduleFormValues) => {
-        if (checkScheduleConflict(values as any, existingSchedules, initialData?.id).hasConflict) return;
+        if (checkScheduleConflict(values as Partial<Schedule>, existingSchedules, initialData?.id).hasConflict) return;
         onSubmit(values);
         onOpenChange(false);
     };

@@ -12,7 +12,8 @@ interface SemesterBadgeProps {
 
 export const SemesterBadge: React.FC<SemesterBadgeProps> = ({
     name,
-    isActive = false,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    isActive: _isActive = false,
     className,
 }) => {
     const isGanjil = name === 'Ganjil' || name === '1';

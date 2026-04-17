@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
     ClipboardCheck,
-    Users,
     UserX,
     Clock,
     UserCheck,
@@ -40,8 +39,8 @@ const statusLabels: Record<string, string> = {
 };
 
 export const AttendanceDashboard: React.FC = () => {
-    const todayRef = useRef(new Date().toISOString().split('T')[0]);
-    const [selectedDate, setSelectedDate] = useState(todayRef.current);
+    const today = new Date().toISOString().split('T')[0];
+    const [selectedDate, setSelectedDate] = useState(today);
     const { academicYear: activeYear } = useAcademicYear();
 
     const {
@@ -78,7 +77,7 @@ export const AttendanceDashboard: React.FC = () => {
                                 Presensi
                             </span>
                         </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                             <ClipboardCheck className="h-5 w-5" />
                         </div>
                     </div>

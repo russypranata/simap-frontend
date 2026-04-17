@@ -82,12 +82,13 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
                 newPassword: '',
                 confirmPassword: '',
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Password update error:', error);
-            if (error.errors) {
-                setErrors(error.errors);
+            const err = error as { errors?: Record<string, string[]>; message?: string };
+            if (err.errors) {
+                setErrors(err.errors);
             }
-            toast.error(error.message || 'Gagal memperbarui kata sandi');
+            toast.error(err.message || 'Gagal memperbarui kata sandi');
         } finally {
             setLoading(false);
         }

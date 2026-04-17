@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { CalendarEvent } from '../types/calendar';
@@ -14,11 +14,10 @@ export const CALENDAR_KEYS = {
 
 export const useAcademicCalendar = () => {
     // Stable today reference — tidak berubah selama session
-    const todayRef = useRef(new Date());
-    const today = todayRef.current;
+    const today = useMemo(() => new Date(), []);
 
-    const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-    const [currentYear, setCurrentYear] = useState(today.getFullYear());
+    const [currentMonth, setCurrentMonth] = useState(() => today.getMonth());
+    const [currentYear, setCurrentYear] = useState(() => today.getFullYear());
 
     // Modal & Form State
     const [isFormOpen, setIsFormOpen] = useState(false);

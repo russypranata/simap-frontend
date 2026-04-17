@@ -1,6 +1,5 @@
 import { Schedule } from '../types/schedule';
 import { MOCK_SCHEDULES } from '../data/mockScheduleData';
-import { MOCK_TIME_SLOTS, TimeSlot, getLessonSlots } from '../data/mockTimeSlots';
 
 // ======== Query Helpers ========
 

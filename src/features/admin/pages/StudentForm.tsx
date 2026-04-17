@@ -1,453 +1,416 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, startTransition } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { ArrowLeft, Save, Upload, Loader2, User, BookOpen, Contact, GraduationCap } from 'lucide-react';
-import { toast } from 'sonner';
+import { z } from 'zod';
+import {
+    GraduationCap, Save, Loader2, AlertCircle,
+    User, Users, Info, ArrowLeft, Wand2,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+    Form, FormControl, FormDescription, FormField,
+    FormItem, FormLabel, FormMessage,
+} from '@/components/ui/form';
+import {
+    Select, SelectContent, SelectItem,
+    SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
-import { MOCK_STUDENTS } from '../data/mockStudentData';
+import { useStudentList, useStudentDetail } from '../hooks/useStudentList';
 
-const studentSchema = z.object({
-    name: z.string().min(3, 'Nama harus diisi minimal 3 karakter'),
-    nis: z.string().min(3, 'NIS harus diisi'),
-    nisn: z.string().min(10, 'NISN harus 10 digit').max(10, 'NISN harus 10 digit'),
-    gender: z.enum(['L', 'P']),
-    placeOfBirth: z.string().optional(),
-    dateOfBirth: z.string().optional(),
-    
-    // Academic
-    generation: z.string().min(4, 'Tahun masuk harus 4 digit'),
-    className: z.string().optional(), // Nanti jadi Select Class ID
-    status: z.enum(['active', 'graduated', 'transferred', 'dropped_out'] as const),
+// ─── Schema ───────────────────────────────────────────────────────────────────
 
-    // Parent
-    parentName: z.string().min(3, 'Nama Wali harus diisi'),
-    parentPhone: z.string().min(10, 'Nomor HP Wali minimal 10 digit'),
-    
-    // Contact
-    email: z.string().email('Email tidak valid').optional().or(z.literal('')),
-    phoneNumber: z.string().optional(),
-    address: z.string().min(5, 'Alamat harus diisi'),
+const baseSchema = z.object({
+    name:             z.string().min(3, 'Nama minimal 3 karakter'),
+    email:            z.string().email('Email tidak valid'),
+    username:         z.string().min(3, 'Username minimal 3 karakter').regex(/^[a-z0-9._]+$/, 'Hanya huruf kecil, angka, titik, underscore'),
+    phone:            z.string().optional(),
+    address:          z.string().optional(),
+    dob:              z.string().optional(),
+    birth_place:      z.string().optional(),
+    gender:           z.enum(['L', 'P']).optional(),
+    admission_number: z.string().min(1, 'No. pendaftaran wajib diisi'),
+    religion:         z.string().optional(),
+    guardian_name:    z.string().optional(),
+    guardian_phone:   z.string().optional(),
+    guardian_relation:z.string().optional(),
 });
 
-type StudentFormValues = z.infer<typeof studentSchema>;
+const createSchema = baseSchema.extend({
+    password: z.string().min(8, 'Password minimal 8 karakter'),
+});
+
+const editSchema = baseSchema.extend({
+    password: z.string().min(8).optional().or(z.literal('')),
+});
+
+type CreateValues = z.infer<typeof createSchema>;
+type EditValues   = z.infer<typeof editSchema>;
+type FormValues   = CreateValues | EditValues;
+
+// ─── Section Header ───────────────────────────────────────────────────────────
+
+const SectionHeader: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => (
+    <div className="flex items-center gap-3">
+        <div className="p-2.5 rounded-xl bg-blue-100 shrink-0">
+            <span className="h-5 w-5 block [&>svg]:h-5 [&>svg]:w-5 text-blue-700">{icon}</span>
+        </div>
+        <div>
+            <CardTitle className="text-lg font-semibold text-slate-800">{title}</CardTitle>
+            <CardDescription className="text-sm text-slate-600 mt-0.5">{description}</CardDescription>
+        </div>
+    </div>
+);
+
+// ─── Auto-generate username ───────────────────────────────────────────────────
+
+const generateUsername = (name: string): string =>
+    name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s]/g, '').trim().split(/\s+/).filter(Boolean).join('.');
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export const StudentForm: React.FC = () => {
     const router = useRouter();
     const params = useParams();
-    const id = params.id as string;
-    const isEditMode = !!id;
+    const rawId = params?.id as string | undefined;
+    const isEdit = !!rawId && rawId !== 'new';
+    const studentId = isEdit ? Number(rawId) : null;
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const { createStudent, updateStudent, isCreating, isUpdating } = useStudentList();
+    const { data: student, isLoading: isLoadingStudent, isError } = useStudentDetail(studentId);
 
-    const form = useForm<StudentFormValues>({
-        resolver: zodResolver(studentSchema),
+    const isSaving = isCreating || isUpdating;
+    const [usernameEdited, setUsernameEdited] = useState(false);
+
+    const form = useForm<FormValues>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(isEdit ? editSchema : createSchema) as any,
         defaultValues: {
-            name: '',
-            nis: '',
-            nisn: '',
-            gender: 'L',
-            placeOfBirth: '',
-            dateOfBirth: '',
-            generation: new Date().getFullYear().toString(),
-            className: '',
-            status: 'active',
-            parentName: '',
-            parentPhone: '',
-            email: '',
-            phoneNumber: '',
-            address: '',
+            name: '', email: '', username: '', phone: '', address: '',
+            dob: '', birth_place: '', gender: undefined, password: '',
+            admission_number: '', religion: '',
+            guardian_name: '', guardian_phone: '', guardian_relation: 'Orang Tua',
         },
     });
 
-    useEffect(() => {
-        if (isEditMode) {
-            const student = MOCK_STUDENTS.find(s => s.id === id);
-            if (student) {
-                form.reset({
-                    name: student.name,
-                    nis: student.nis,
-                    nisn: student.nisn,
-                    gender: student.gender,
-                    placeOfBirth: student.placeOfBirth || '',
-                    dateOfBirth: student.dateOfBirth,
-                    generation: student.generation,
-                    className: student.className || '',
-                    status: (student.status as any),
-                    parentName: student.parentName || '',
-                    parentPhone: student.parentPhone || '',
-                    email: student.email || '',
-                    phoneNumber: student.phoneNumber || '',
-                    address: student.address,
-                });
-                if (student.profilePicture) {
-                    setPreviewImage(student.profilePicture);
-                }
-            } else {
-                toast.error('Data siswa tidak ditemukan');
-                router.push('/admin/users/students');
-            }
-        }
-    }, [isEditMode, id, form, router]);
+    const watchedName = useWatch({ control: form.control, name: 'name' }) as string;
 
-    const onSubmit = async (data: StudentFormValues) => {
-        try {
-            setIsLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            console.log('Student Data:', data);
-            toast.success(isEditMode ? 'Data siswa diperbarui' : 'Siswa baru ditambahkan');
+    // Auto-generate username
+    useEffect(() => {
+        if (!isEdit && !usernameEdited && watchedName) {
+            const generated = generateUsername(watchedName);
+            if (generated) form.setValue('username', generated, { shouldValidate: false });
+        }
+    }, [watchedName, isEdit, usernameEdited, form]);
+
+    // Populate form saat edit
+    useEffect(() => {
+        if (isEdit && student) {
+            const g = student.guardian_details;
+            form.reset({
+                name:             student.name,
+                email:            student.email,
+                username:         student.username,
+                phone:            student.phone ?? '',
+                address:          student.address ?? '',
+                dob:              student.dob ?? '',
+                birth_place:      student.birth_place ?? '',
+                gender:           (student.gender as 'L' | 'P') ?? undefined,
+                password:         '',
+                admission_number: student.admission_number,
+                religion:         student.religion ?? '',
+                guardian_name:    g?.name ?? '',
+                guardian_phone:   g?.phone ?? '',
+                guardian_relation:g?.relation ?? 'Orang Tua',
+            });
+            startTransition(() => { setUsernameEdited(true); });
+        }
+    }, [isEdit, student, form]);
+
+    const onSubmit = async (values: FormValues) => {
+        const clean = (v: string | undefined) => (v === '' ? undefined : v);
+        const payload = {
+            name:             values.name,
+            email:            values.email,
+            username:         values.username,
+            phone:            clean(values.phone),
+            address:          clean(values.address),
+            dob:              clean(values.dob),
+            birth_place:      clean(values.birth_place),
+            gender:           values.gender,
+            admission_number: values.admission_number,
+            religion:         clean(values.religion),
+            guardian_name:    clean(values.guardian_name),
+            guardian_phone:   clean(values.guardian_phone),
+            guardian_relation:clean(values.guardian_relation),
+        };
+
+        if (isEdit && studentId) {
+            await updateStudent({
+                id: studentId,
+                data: { ...payload, password: clean((values as EditValues).password) },
+            });
+            router.push(`/admin/users/students/${studentId}`);
+        } else {
+            await createStudent({ ...payload, password: (values as CreateValues).password });
             router.push('/admin/users/students');
-        } catch (error) {
-            console.error(error);
-            toast.error('Gagal menyimpan data');
-        } finally {
-            setIsLoading(false);
         }
     };
 
+    // ── Loading ──
+    if (isEdit && isLoadingStudent) {
+        return (
+            <div className="space-y-6">
+                <div className="space-y-2"><Skeleton className="h-9 w-64" /><Skeleton className="h-4 w-48" /></div>
+                <Card><CardContent className="pt-6 space-y-4">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</CardContent></Card>
+            </div>
+        );
+    }
+
+    if (isEdit && isError) {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 gap-4">
+                <AlertCircle className="h-12 w-12 text-red-400" />
+                <p className="text-slate-600 font-medium">Data siswa tidak ditemukan</p>
+                <Button variant="outline" onClick={() => router.push('/admin/users/students')}>
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Kembali ke Daftar
+                </Button>
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-4">
-             {/* Header */}
-             <div>
+        <div className="space-y-6 pb-6">
+            {/* ── Header ── */}
+            <div>
                 <div className="flex items-center gap-3">
                     <h1 className="text-3xl font-bold tracking-tight">
                         <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
-                            {isEditMode ? 'Edit ' : 'Tambah '}
+                            {isEdit ? 'Edit ' : 'Tambah '}
                         </span>
                         <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
-                            Siswa
+                            Data Siswa
                         </span>
                     </h1>
-                     <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    <div className="p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                         <GraduationCap className="h-5 w-5" />
                     </div>
                 </div>
                 <p className="text-muted-foreground mt-1">
-                    {isEditMode 
-                        ? 'Perbarui informasi akademik dan data diri siswa.' 
-                        : 'Input data siswa baru ke dalam sistem.'}
+                    {isEdit ? 'Perbarui informasi data siswa.' : 'Tambahkan siswa baru ke sistem.'}
                 </p>
             </div>
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                    
-                    {/* 1. Identitas Siswa */}
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center gap-2">
-                                <User className="h-5 w-5 text-blue-600" />
-                                <CardTitle>Identitas Siswa</CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                             {/* Foto Profil */}
-                             <div className="flex items-center gap-6 mb-6">
-                                <Avatar className="h-24 w-24 border-2 border-slate-100">
-                                    <AvatarImage src={previewImage || ''} />
-                                    <AvatarFallback className="bg-slate-100 text-2xl font-bold text-slate-400">
-                                        SIS
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div className="space-y-2">
-                                    <Button variant="outline" size="sm" type="button" className="text-xs">
-                                        <Upload className="h-3 w-3 mr-2" />
-                                        Upload Foto
-                                    </Button>
-                                </div>
-                            </div>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <FormField
-                                    control={form.control}
-                                    name="name"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Nama Lengkap <span className="text-red-500">*</span></FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Nama sesuai ijazah" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="gender"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Jenis Kelamin <span className="text-red-500">*</span></FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Pilih jenis kelamin" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="L">Laki-laki</SelectItem>
-                                                    <SelectItem value="P">Perempuan</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <div className="grid grid-cols-2 gap-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="nis"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>NIS (Lokal) <span className="text-red-500">*</span></FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Nomor Induk Sekolah" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="nisn"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>NISN (Nasional) <span className="text-red-500">*</span></FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="10 digit angka" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="placeOfBirth"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Tempat Lahir</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Kota" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="dateOfBirth"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Tanggal Lahir</FormLabel>
-                                                <FormControl>
-                                                    <Input type="date" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* 2. Data Akademik */}
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center gap-2">
-                                <BookOpen className="h-5 w-5 text-blue-600" />
-                                <CardTitle>Data Akademik</CardTitle>
-                            </div>
+                    {/* ── Card 1: Akun Sistem ── */}
+                    <Card className="border-slate-200 shadow-sm">
+                        <CardHeader className="pb-3">
+                            <SectionHeader icon={<User />} title="Akun Sistem" description="Kredensial login siswa di aplikasi" />
                         </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <FormField
-                                    control={form.control}
-                                    name="generation"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Angkatan / Tahun Masuk <span className="text-red-500">*</span></FormLabel>
-                                            <FormControl>
-                                                <Input type="number" placeholder="2023" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="className"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Kelas Saat Ini</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Contoh: X IPA 1" {...field} />
-                                                {/* Nanti diganti Select dari Class Service */}
-                                            </FormControl>
-                                            <FormDescription className="text-xs">Kosongkan jika belum ada kelas.</FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="status"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Status Siswa <span className="text-red-500">*</span></FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Pilih status" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="active">Aktif</SelectItem>
-                                                    <SelectItem value="graduated">Lulus</SelectItem>
-                                                    <SelectItem value="transferred">Pindah Sekolah</SelectItem>
-                                                    <SelectItem value="dropped_out">Putus Sekolah / DO</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
+                        <CardContent className="space-y-5">
+                            <FormField control={form.control} name="name" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Nama Lengkap <span className="text-red-500">*</span></FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Nama lengkap siswa" autoComplete="off" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
 
-                    {/* 3. Data Wali & Kontak */}
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center gap-2">
-                                <Contact className="h-5 w-5 text-blue-600" />
-                                <CardTitle>Data Wali & Kontak</CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <FormField
-                                    control={form.control}
-                                    name="parentName"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Nama Wali Murid <span className="text-red-500">*</span></FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Nama Ayah/Ibu/Wali" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="parentPhone"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>No. HP Wali <span className="text-red-500">*</span></FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="08xxxxxxxxxx" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Email Siswa (Opsional)</FormLabel>
-                                            <FormControl>
-                                                <Input type="email" placeholder="siswa@sekolah.sch.id" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="phoneNumber"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>No. HP Siswa (Opsional)</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="08xxxxxxxxxx" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                            <FormField
-                                control={form.control}
-                                name="address"
-                                render={({ field }) => (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <FormField control={form.control} name="email" render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Alamat Lengkap <span className="text-red-500">*</span></FormLabel>
+                                        <FormLabel>Email <span className="text-red-500">*</span></FormLabel>
                                         <FormControl>
-                                            <Textarea placeholder="Alamat domisili saat ini..." className="resize-none h-20" {...field} />
+                                            <Input type="email" placeholder="email@sekolah.id" autoComplete="off" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
-                                )}
-                            />
+                                )} />
+                                <FormField control={form.control} name="username" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Username <span className="text-red-500">*</span>
+                                            {!isEdit && !usernameEdited && (
+                                                <span className="ml-2 inline-flex items-center gap-1 text-[10px] text-blue-600 font-normal">
+                                                    <Wand2 className="h-3 w-3" />auto
+                                                </span>
+                                            )}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="nama.siswa"
+                                                autoComplete="off"
+                                                {...field}
+                        onChange={(e) => { field.onChange(e); startTransition(() => { setUsernameEdited(true); }); }}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <FormField control={form.control} name="phone" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>No. Handphone</FormLabel>
+                                        <FormControl><Input placeholder="08xxxxxxxxxx" autoComplete="off" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={form.control} name="password" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Password {!isEdit && <span className="text-red-500">*</span>}
+                                            {isEdit && <span className="text-slate-400 font-normal text-xs ml-1">(kosongkan jika tidak diubah)</span>}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input type="password" placeholder={isEdit ? '••••••••' : 'Min. 8 karakter'} autoComplete="new-password" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            </div>
                         </CardContent>
                     </Card>
 
-                    {/* Submit Button */}
-                    <div className="flex justify-end gap-4 pt-4">
-                        <Button 
-                            type="button" 
-                            variant="outline" 
-                            onClick={() => router.back()}
-                            disabled={isLoading}
-                        >
+                    {/* ── Card 2: Data Pribadi ── */}
+                    <Card className="border-slate-200 shadow-sm">
+                        <CardHeader className="pb-3">
+                            <SectionHeader icon={<GraduationCap />} title="Data Pribadi" description="Identitas dan informasi diri siswa" />
+                        </CardHeader>
+                        <CardContent className="space-y-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <FormField control={form.control} name="admission_number" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>No. Pendaftaran <span className="text-red-500">*</span></FormLabel>
+                                        <FormControl><Input placeholder="ADM-2024-0001" autoComplete="off" {...field} /></FormControl>
+                                        <FormDescription className="text-[11px] flex items-center gap-1.5 text-slate-500">
+                                            <Info className="h-3 w-3 text-blue-500 shrink-0" />
+                                            Nomor unik pendaftaran siswa.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={form.control} name="gender" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Jenis Kelamin</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                                            <FormControl><SelectTrigger><SelectValue placeholder="Pilih jenis kelamin" /></SelectTrigger></FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="L">Laki-laki</SelectItem>
+                                                <SelectItem value="P">Perempuan</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={form.control} name="birth_place" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Tempat Lahir</FormLabel>
+                                        <FormControl><Input placeholder="Kota lahir" autoComplete="off" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={form.control} name="dob" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Tanggal Lahir</FormLabel>
+                                        <FormControl><Input type="date" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={form.control} name="religion" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Agama</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                                            <FormControl><SelectTrigger><SelectValue placeholder="Pilih agama" /></SelectTrigger></FormControl>
+                                            <SelectContent>
+                                                {['Islam','Kristen','Katolik','Hindu','Buddha','Konghucu'].map((r) => (
+                                                    <SelectItem key={r} value={r}>{r}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            </div>
+                            <FormField control={form.control} name="address" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Alamat Lengkap</FormLabel>
+                                    <FormControl>
+                                        <Textarea placeholder="Jl. Contoh No. 1, Kelurahan, Kecamatan, Kota..." className="resize-none h-20" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                        </CardContent>
+                    </Card>
+
+                    {/* ── Card 3: Data Wali ── */}
+                    <Card className="border-slate-200 shadow-sm">
+                        <CardHeader className="pb-3">
+                            <SectionHeader icon={<Users />} title="Data Wali" description="Informasi orang tua atau wali siswa" />
+                        </CardHeader>
+                        <CardContent className="space-y-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <FormField control={form.control} name="guardian_name" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Nama Wali</FormLabel>
+                                        <FormControl><Input placeholder="Nama orang tua / wali" autoComplete="off" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={form.control} name="guardian_phone" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>No. HP Wali</FormLabel>
+                                        <FormControl><Input placeholder="08xxxxxxxxxx" autoComplete="off" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={form.control} name="guardian_relation" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Hubungan</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value ?? 'Orang Tua'}>
+                                            <FormControl><SelectTrigger><SelectValue placeholder="Pilih hubungan" /></SelectTrigger></FormControl>
+                                            <SelectContent>
+                                                {['Ayah','Ibu','Orang Tua','Kakak','Paman','Bibi','Wali'].map((r) => (
+                                                    <SelectItem key={r} value={r}>{r}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* ── Actions ── */}
+                    <div className="flex gap-3 pt-2">
+                        <Button type="button" variant="outline" onClick={() => router.push('/admin/users/students')} disabled={isSaving}>
+                            <ArrowLeft className="h-4 w-4 mr-2" />
                             Batal
                         </Button>
-                        <Button 
-                            type="submit" 
-                            className="bg-blue-800 hover:bg-blue-900 min-w-[140px]"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Menyimpan...
-                                </>
+                        <Button type="submit" className="bg-blue-800 hover:bg-blue-900 text-white min-w-[160px]" disabled={isSaving}>
+                            {isSaving ? (
+                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Menyimpan...</>
+                            ) : isEdit ? (
+                                <><Save className="mr-2 h-4 w-4" />Simpan Perubahan</>
                             ) : (
-                                <>
-                                    <Save className="mr-2 h-4 w-4" />
-                                    Simpan Data
-                                </>
+                                <><GraduationCap className="mr-2 h-4 w-4" />Tambah Siswa</>
                             )}
                         </Button>
                     </div>

@@ -3,34 +3,34 @@ import { CalendarEvent, EventType } from '../types/calendar';
 import { CalendarEventFormValues } from '../schemas/calendarSchema';
 
 // Transform backend camelCase response → CalendarEvent
-const transformEvent = (e: any): CalendarEvent => ({
+const transformEvent = (e: Record<string, unknown>): CalendarEvent => ({
     id: String(e.id),
     academicYearId: e.academicYearId ? String(e.academicYearId) : null,
-    title: e.title,
-    description: e.description ?? '',
-    startDate: e.startDate,
-    endDate: e.endDate,
+    title: e.title as string,
+    description: (e.description as string) ?? '',
+    startDate: e.startDate as string,
+    endDate: e.endDate as string,
     type: e.type as EventType,
-    isHoliday: e.isHoliday ?? false,
-    createdAt: e.createdAt ?? '',
-    updatedAt: e.updatedAt ?? '',
+    isHoliday: (e.isHoliday as boolean) ?? false,
+    createdAt: (e.createdAt as string) ?? '',
+    updatedAt: (e.updatedAt as string) ?? '',
 });
 
 export const getCalendarEvents = async (params?: { month?: string }): Promise<CalendarEvent[]> => {
     const query = params?.month ? `?month=${encodeURIComponent(params.month)}` : '';
-    const data = await apiClient.get<any>(`/admin/calendar-events${query}`);
+    const data = await apiClient.get<unknown>(`/admin/calendar-events${query}`);
     // Backend returns array directly (via resource collection)
     const list = Array.isArray(data) ? data : [];
     return list.map(transformEvent);
 };
 
 export const getCalendarEventById = async (id: string): Promise<CalendarEvent> => {
-    const data = await apiClient.get<any>(`/admin/calendar-events/${id}`);
+    const data = await apiClient.get<Record<string, unknown>>(`/admin/calendar-events/${id}`);
     return transformEvent(data);
 };
 
 export const createCalendarEvent = async (values: CalendarEventFormValues): Promise<CalendarEvent> => {
-    const res = await apiClient.post<any>('/admin/calendar-events', {
+    const res = await apiClient.post<Record<string, unknown>>('/admin/calendar-events', {
         title: values.title,
         description: values.description ?? '',
         start_date: values.startDate,
@@ -42,7 +42,7 @@ export const createCalendarEvent = async (values: CalendarEventFormValues): Prom
 };
 
 export const updateCalendarEvent = async (id: string, values: CalendarEventFormValues): Promise<CalendarEvent> => {
-    const res = await apiClient.put<any>(`/admin/calendar-events/${id}`, {
+    const res = await apiClient.put<Record<string, unknown>>(`/admin/calendar-events/${id}`, {
         title: values.title,
         description: values.description ?? '',
         start_date: values.startDate,
@@ -58,8 +58,8 @@ export const deleteCalendarEvent = async (id: string): Promise<void> => {
 };
 
 export const syncHolidays = async (year: number): Promise<{ added: number }> => {
-    const res = await apiClient.post<any>('/admin/calendar-events/sync-holidays', { year });
-    return { added: res?.added ?? 0 };
+    const res = await apiClient.post<Record<string, unknown>>('/admin/calendar-events/sync-holidays', { year });
+    return { added: (res?.added as number) ?? 0 };
 };
 
 export const calendarEventService = {

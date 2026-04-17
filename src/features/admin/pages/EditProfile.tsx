@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Shield, Calendar, Pencil, Lock, Key } from 'lucide-react';
+import { User, Pencil, Lock, Key } from 'lucide-react';
 import { AdminProfileData } from '../data/mockAdminData';
 import { getAdminProfile } from '../services/adminProfileService';
 import { useRouter } from 'next/navigation';
@@ -56,8 +56,8 @@ export const EditAdminProfile: React.FC = () => {
             toast.success('Profil berhasil diperbarui');
             router.push('/admin/profile');
             router.refresh();
-        } catch (error: any) {
-            toast.error(error.message || 'Gagal memperbarui profil');
+        } catch (error) {
+            toast.error((error as Error).message || 'Gagal memperbarui profil');
         } finally {
             setSaving(false);
         }
@@ -85,7 +85,7 @@ export const EditAdminProfile: React.FC = () => {
                                 Profil
                             </span>
                         </h1>
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                             <Pencil className="h-5 w-5" />
                         </div>
                     </div>
@@ -107,7 +107,7 @@ export const EditAdminProfile: React.FC = () => {
             <Card className="overflow-hidden gap-3">
                 <CardHeader className="pb-2">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
                             <Lock className="h-5 w-5" />
                         </div>
                         <div>
@@ -162,8 +162,8 @@ export const EditAdminProfile: React.FC = () => {
             <Card className="bg-blue-50 border-blue-800/20">
                 <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                        <div className="p-2 bg-primary/10 rounded-full">
-                            <User className="h-5 w-5 text-primary" />
+                        <div className="p-2 bg-blue-100 rounded-full">
+                            <User className="h-5 w-5 text-blue-700" />
                         </div>
                         <div className="space-y-1">
                             <p className="text-sm font-semibold text-blue-800">

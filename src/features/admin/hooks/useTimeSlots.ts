@@ -32,8 +32,8 @@ export const useTimeSlots = (day: DayKey) => {
             await timeSlotService.bulkUpdate(day, payload);
             queryClient.invalidateQueries({ queryKey: TIME_SLOT_KEYS.day(day) });
             toast.success(`Konfigurasi hari berhasil disimpan`);
-        } catch (err: any) {
-            toast.error(err?.message ?? 'Gagal menyimpan slot waktu');
+        } catch (err: Error | unknown) {
+            toast.error((err as Error)?.message ?? 'Gagal menyimpan slot waktu');
             throw err;
         } finally {
             setIsSaving(false);

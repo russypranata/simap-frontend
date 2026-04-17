@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import {
     FileBarChart,
     Search,
@@ -168,11 +168,13 @@ export const AttendanceReport: React.FC = () => {
 
     // Reset filter saat ganti tab
     useEffect(() => {
-        setFilters({ page: 1, per_page: 10, date: today });
-        setFilterMode('date');
-        setTempClassId('all');
-        setTempStatus('all');
-        setTempPrayerTime('all');
+        startTransition(() => {
+            setFilters({ page: 1, per_page: 10, date: today });
+            setFilterMode('date');
+            setTempClassId('all');
+            setTempStatus('all');
+            setTempPrayerTime('all');
+        });
     }, [activeTab]);
 
     const { data: classes = [] } = useQuery({
@@ -448,7 +450,7 @@ export const AttendanceReport: React.FC = () => {
                                     : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
                             )}
                         >
-                            <Icon className={cn('h-3.5 w-3.5', isActive ? 'text-primary' : '')} />
+                            <Icon className={cn('h-3.5 w-3.5', isActive ? 'text-blue-700' : '')} />
                             <span>{tab.label}</span>
                         </button>
                     );
@@ -460,7 +462,7 @@ export const AttendanceReport: React.FC = () => {
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-primary flex-shrink-0">
+                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
                                 <ActiveIcon className="h-5 w-5" />
                             </div>
                             <div>

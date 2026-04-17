@@ -84,6 +84,37 @@ class ApiClient {
         return this.handleResponse<T>(response);
     }
 
+    /**
+     * GET request yang mengembalikan seluruh response body (untuk paginated responses).
+     * Berbeda dengan get() yang hanya mengambil data.data.
+     */
+    async getRaw<T>(path: string, options: RequestInit = {}): Promise<T> {
+        const response = await fetch(`${BASE_URL}${path}`, {
+            ...options,
+            method: 'GET',
+            headers: this.getHeaders(options),
+        });
+
+        const contentType = response.headers.get('content-type');
+        const isJson = contentType && contentType.includes('application/json');
+        const data = isJson ? await response.json() : null;
+
+        if (!response.ok) {
+            const error: ApiError = data || {
+                code: response.status,
+                status: 'error',
+                message: response.statusText,
+            };
+            const customError = new Error(error.message) as Error & ApiError;
+            customError.code = error.code;
+            customError.status = error.status;
+            customError.errors = error.errors;
+            throw customError;
+        }
+
+        return data as T;
+    }
+
     async post<T>(path: string, body: any, options: RequestInit = {}): Promise<T> {
         const isFormData = body instanceof FormData;
         const headers = this.getHeaders(options);

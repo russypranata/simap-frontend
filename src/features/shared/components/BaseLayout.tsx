@@ -48,7 +48,7 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
     return (
         <BreadcrumbActionProvider>
         <SidebarContext.Provider value={{ collapsed: sidebarCollapsed, setCollapsed: setSidebarCollapsed }}>
-            <div className="flex h-screen overflow-hidden bg-background">
+            <div className="flex min-h-screen bg-background">
                 {/* Desktop Sidebar - Fixed on the left, hidden on mobile */}
                 <aside className="fixed left-0 top-0 z-40 h-full bg-white shadow-md transition-all duration-300 hidden md:block">
                     {sidebar}
@@ -104,9 +104,9 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
                         </div>
                     </header>
 
-                    {/* Page content - only this area can scroll */}
-                    <main className="flex-1 overflow-y-auto overflow-x-auto pt-16">
-                        <div className="min-h-full p-6">
+                    {/* Page content */}
+                    <main className="flex-1 pt-16">
+                        <div className="p-6">
                             <BreadcrumbRow />
                             {children}
                         </div>

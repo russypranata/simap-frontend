@@ -1,6 +1,9 @@
+export type ClassType = 'reguler' | 'peminatan_group';
+
 export interface ClassRoom {
     id: number;
     name: string;
+    type: ClassType;
     academic_year_id: number;
     academic_year_name?: string;
     homeroom_teacher_id?: number;
@@ -12,12 +15,14 @@ export interface ClassRoom {
 
 export interface CreateClassRoomRequest {
     name: string;
+    type?: ClassType;
     academic_year_id: number;
     homeroom_teacher_id?: number;
 }
 
 export interface UpdateClassRoomRequest {
     name?: string;
+    type?: ClassType;
     academic_year_id?: number;
     homeroom_teacher_id?: number;
 }

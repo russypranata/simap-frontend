@@ -21,24 +21,24 @@ export interface TimeSlotPayload {
     type: TimeSlotType;
 }
 
-const transform = (s: any): TimeSlot => ({
+const transform = (s: Record<string, unknown>): TimeSlot => ({
     id: String(s.id),
-    day: s.day,
-    label: s.label,
-    startTime: (s.start_time ?? '').slice(0, 5),
-    endTime: (s.end_time ?? '').slice(0, 5),
-    order: s.order,
-    type: s.type,
+    day: s.day as DayKey,
+    label: s.label as string,
+    startTime: ((s.start_time as string) ?? '').slice(0, 5),
+    endTime: ((s.end_time as string) ?? '').slice(0, 5),
+    order: s.order as number,
+    type: s.type as TimeSlotType,
 });
 
 export const timeSlotService = {
     getByDay: async (day: DayKey): Promise<TimeSlot[]> => {
-        const data = await apiClient.get<any[]>(`/admin/time-slots?day=${day}`);
+        const data = await apiClient.get<Record<string, unknown>[]>(`/admin/time-slots?day=${day}`);
         return Array.isArray(data) ? data.map(transform) : [];
     },
 
     bulkUpdate: async (day: DayKey, slots: TimeSlotPayload[]): Promise<TimeSlot[]> => {
-        const data = await apiClient.put<any[]>(`/admin/time-slots/${day}`, { slots });
+        const data = await apiClient.put<Record<string, unknown>[]>(`/admin/time-slots/${day}`, { slots });
         return Array.isArray(data) ? data.map(transform) : [];
     },
 };
