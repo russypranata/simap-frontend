@@ -36,7 +36,7 @@ import { useExtracurricularList, useExtracurricularDetail, useTutorOptions } fro
 
 const formSchema = z.object({
     name:          z.string().min(3, 'Nama minimal 3 karakter'),
-    tutor_user_id: z.number({ required_error: 'Tutor harus dipilih' }).min(1, 'Tutor harus dipilih'),
+    tutor_user_id: z.number({ error: 'Tutor harus dipilih' }).min(1, 'Tutor harus dipilih'),
     nip:           z.string().optional(),
     join_date:     z.string().optional(),
 });

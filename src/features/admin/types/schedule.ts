@@ -37,6 +37,9 @@ export interface Schedule {
     room?: string;
     createdAt: string;
     updatedAt: string;
+    // Extended fields used by compact schedule transformer
+    academicYear?: string;
+    semester?: string | number;
 }
 
 export interface CreateScheduleRequest {

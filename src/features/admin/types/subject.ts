@@ -12,6 +12,9 @@ export interface Subject {
     teacherNames: string[];    // mapped from teacher_names
     createdAt: string;
     updatedAt: string;
+    // Extended fields returned by getById
+    teachers?: Array<{ id: string; name: string; nip?: string; specialization?: string }>;
+    gradeSpecificJp?: Record<string, number>;
 }
 
 export interface CreateSubjectRequest {

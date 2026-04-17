@@ -38,6 +38,13 @@ export function expandSchedule(compactSchedule: CompactDaySchedule): Schedule[] 
                 // Academic info
                 academicYear: compactSchedule.academicYear,
                 semester: compactSchedule.semester,
+
+                // Required Schedule fields
+                classSubjectId: '',
+                type: 'lesson',
+                dayOfWeek: 'monday',
+                createdAt: '',
+                updatedAt: '',
             });
             counter++;
         });

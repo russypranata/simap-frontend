@@ -10,7 +10,7 @@ import {
 const transformSemester = (s: Record<string, unknown>): Semester => ({
     id: String(s.id),
     name: s.name as string,
-    code: (s.code as string) ?? (s.name === 'Semester 1 (Ganjil)' ? '1' : '2'),
+    code: ((s.code as string) ?? (s.name === 'Semester 1 (Ganjil)' ? '1' : '2')) as "1" | "2",
     startDate: s.start_date as string,
     endDate: s.end_date as string,
     isActive: (s.is_active as boolean) ?? false,

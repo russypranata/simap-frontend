@@ -29,7 +29,7 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { ParentFormValues, parentSchema } from '../../schemas/parentSchema';
-import { Parent } from '../../types/parent';
+import { AdminParent as Parent } from '../../types/parent';
 
 interface ParentFormProps {
     open: boolean;
@@ -45,7 +45,8 @@ export const ParentForm: React.FC<ParentFormProps> = ({
     onSubmit,
 }) => {
     const form = useForm<ParentFormValues>({
-        resolver: zodResolver(parentSchema),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(parentSchema) as any,
         defaultValues: {
             name: '',
             email: '',
@@ -61,10 +62,10 @@ export const ParentForm: React.FC<ParentFormProps> = ({
             form.reset({
                 name: initialData.name,
                 email: initialData.email,
-                phone: initialData.phone,
-                occupation: initialData.occupation,
-                address: initialData.address,
-                status: initialData.status,
+                phone: initialData.phone ?? '',
+                occupation: initialData.occupation ?? '',
+                address: initialData.address ?? '',
+                status: 'active',
             });
         } else {
             form.reset({

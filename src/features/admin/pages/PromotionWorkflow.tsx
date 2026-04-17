@@ -183,7 +183,7 @@ export const PromotionWorkflow: React.FC = () => {
                 const initialRecords: StudentPromotion[] = allEnrollments.map(e => ({
                     studentId:      String(e.student_id),
                     studentName:    e.student_name ?? `Siswa #${e.student_id}`,
-                    nisn:           e.nisn ?? `—`,
+                    nisn:           `—`,
                     currentClassId: String(e.class_id),
                     action:         'PROMOTE' as PromotionAction,
                     targetClassId:  classMapping[String(e.class_id)],

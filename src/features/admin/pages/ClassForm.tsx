@@ -67,7 +67,7 @@ import { ClassFormSkeleton } from '../components/class';
 // ─── Schema ───────────────────────────────────────────────────────────────────
 const formSchema = z.object({
     name:                z.string().min(1, 'Nama kelas wajib diisi').max(255),
-    type:                z.enum(['reguler', 'peminatan_group']).default('reguler'),
+    type:                z.enum(['reguler', 'peminatan_group']),
     academic_year_id:    z.string().min(1, 'Tahun ajaran wajib dipilih'),
     homeroom_teacher_id: z.string().optional(),
 });

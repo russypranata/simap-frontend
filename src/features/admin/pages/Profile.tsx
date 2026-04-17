@@ -38,6 +38,7 @@ export const AdminProfile: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isPhotoOpen, setIsPhotoOpen] = useState(false);
     const [isReqModalOpen, setIsReqModalOpen] = useState(false);
+    const [uploading] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {

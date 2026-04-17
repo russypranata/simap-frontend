@@ -71,12 +71,12 @@ export default function AttendanceDetailPage() {
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const [ekskulData, sessionsData] = await Promise.all([
-                extracurricularService.getById(id),
+            const [ekskulResult, sessionsData] = await Promise.all([
+                extracurricularService.getById(Number(id)),
                 extracurricularAttendanceService.getSessions(id)
             ]);
             
-            if (ekskulData) setEkskul(ekskulData);
+            if (ekskulResult) setEkskul(ekskulResult.extracurricular);
             setSessions(sessionsData);
         } catch (error) {
             console.error('Failed to fetch attendance details:', error);

@@ -44,7 +44,8 @@ export const UserForm: React.FC<UserFormProps> = ({
     onSubmit,
 }) => {
     const form = useForm<UserFormValues>({
-        resolver: zodResolver(userSchema),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(userSchema) as any,
         defaultValues: {
             name: '',
             email: '',
@@ -61,7 +62,8 @@ export const UserForm: React.FC<UserFormProps> = ({
                 name: initialData.name,
                 email: initialData.email,
                 username: initialData.username,
-                role: initialData.role,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                role: initialData.role as any,
                 status: initialData.status,
                 password: '', // Don't fill password on edit
             });

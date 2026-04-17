@@ -17,6 +17,7 @@ import {
     BarChart3,
     RefreshCw,
     X,
+    FilterX,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

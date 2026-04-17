@@ -57,7 +57,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParentDailyAttendance } from "../hooks/useParentDailyAttendance";
-import type { DailyAttendanceRecord } from "../services/dailyAttendanceService";
+import type { AttendanceStatus, DailyAttendanceRecord } from "../services/dailyAttendanceService";
 import {
     ErrorState,
     LoadingOverlay,

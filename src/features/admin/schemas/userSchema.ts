@@ -31,7 +31,8 @@ const baseUserSchema = z.object({
         .string()
         .min(3, 'Username minimal 3 karakter')
         .regex(/^[a-z0-9._]+$/, 'Hanya huruf kecil, angka, titik, underscore'),
-    role: z.enum(USER_ROLES, { required_error: 'Role wajib dipilih' }),
+    role: z.enum(USER_ROLES, { error: 'Role wajib dipilih' }),
+    status: z.enum(['active', 'inactive', 'suspended']).optional(),
     phone: z.string().optional(),
     address: z.string().optional(),
     dob: z.string().optional(),

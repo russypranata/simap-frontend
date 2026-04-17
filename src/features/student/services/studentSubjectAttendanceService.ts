@@ -12,6 +12,7 @@ export interface SubjectAttendanceRecord {
     teacher: string;
     status: SubjectStatus;
     time: string;
+    lessonHour?: number;
     topic?: string;
     notes?: string;
     academicYearId: string;

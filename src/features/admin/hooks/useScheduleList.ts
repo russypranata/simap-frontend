@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { scheduleService } from '../services/scheduleService';
 import { ScheduleFormValues } from '../schemas/scheduleSchema';
-import { DAY_MAP } from '../types/schedule';
+import { DAY_MAP, Schedule } from '../types/schedule';
 
 export const SCHEDULE_KEYS = {
     all: ['admin-schedules'] as const,
@@ -14,9 +14,9 @@ export const useScheduleList = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const query = useQuery({
+    const query = useQuery<Schedule[]>({
         queryKey: SCHEDULE_KEYS.all,
-        queryFn: scheduleService.getSchedules,
+        queryFn: () => scheduleService.getSchedules(),
         staleTime: 0,
         gcTime: 5 * 60 * 1000,
     });

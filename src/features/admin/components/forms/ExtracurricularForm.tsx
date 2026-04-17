@@ -55,7 +55,8 @@ export const ExtracurricularForm: React.FC<ExtracurricularFormProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<ExtracurricularFormValues>({
-        resolver: zodResolver(extracurricularSchema),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(extracurricularSchema) as any,
         defaultValues: {
             name: '',
             category: 'Lainnya',
@@ -73,8 +74,8 @@ export const ExtracurricularForm: React.FC<ExtracurricularFormProps> = ({
     useEffect(() => {
         const fetchTeachers = async () => {
             try {
-                const data = await teacherService.getTeachers();
-                setTeachers(data);
+                const response = await teacherService.getTeachers();
+                setTeachers(response.data ?? []);
             } catch (error) {
                 console.error('Failed to fetch teachers:', error);
             }
@@ -86,12 +87,12 @@ export const ExtracurricularForm: React.FC<ExtracurricularFormProps> = ({
         if (initialData) {
             form.reset({
                 name: initialData.name,
-                category: initialData.category,
-                mentorId: initialData.mentorId,
-                mentorName: initialData.mentorName,
-                day: initialData.day,
-                time: initialData.time,
-                maxCapacity: initialData.maxCapacity,
+                category: (initialData.category as ExtracurricularFormValues['category']) ?? 'Lainnya',
+                mentorId: initialData.mentorId ?? '',
+                mentorName: initialData.mentorName ?? '',
+                day: initialData.day ?? '',
+                time: initialData.time ?? '',
+                maxCapacity: initialData.maxCapacity ?? 30,
                 location: initialData.location || '',
                 description: initialData.description || '',
             });
@@ -216,7 +217,7 @@ export const ExtracurricularForm: React.FC<ExtracurricularFormProps> = ({
                                         <Select 
                                             onValueChange={(val) => {
                                                 field.onChange(val);
-                                                const teacher = teachers.find(t => t.id === val);
+                                                const teacher = teachers.find(t => String(t.id) === val);
                                                 if (teacher) {
                                                     form.setValue('mentorName', teacher.name);
                                                 }
@@ -231,7 +232,7 @@ export const ExtracurricularForm: React.FC<ExtracurricularFormProps> = ({
                                             </FormControl>
                                             <SelectContent>
                                                 {teachers.map(t => (
-                                                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                                                    <SelectItem key={t.id} value={String(t.id)}>{t.name}</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>

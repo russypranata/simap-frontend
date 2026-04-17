@@ -1,13 +1,13 @@
 import { apiClient } from '@/lib/api-client';
-import { Subject, CreateSubjectRequest, UpdateSubjectRequest } from '../types/subject';
+import { Subject, SubjectCategory, SubjectType, CreateSubjectRequest, UpdateSubjectRequest } from '../types/subject';
 
 const transform = (s: Record<string, unknown>): Subject => ({
     id: String(s.id),
     name: s.name as string,
     code: s.code as string,
     description: (s.description as string) ?? undefined,
-    category: (s.category as string) ?? 'UMUM',
-    type: (s.type as string) ?? 'WAJIB',
+    category: (s.category as SubjectCategory) ?? 'UMUM',
+    type: (s.type as SubjectType) ?? 'WAJIB',
     gradeLevel: Array.isArray(s.grade_level) ? s.grade_level as string[] : [],
     teacherNames: Array.isArray(s.teacher_names) ? s.teacher_names as string[] : [],
     createdAt: (s.created_at as string) ?? '',

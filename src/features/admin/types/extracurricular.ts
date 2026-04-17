@@ -21,6 +21,16 @@ export interface Extracurricular {
     active_member_count: number;
     created_at: string;
     updated_at: string;
+    // Extended fields used by legacy ExtracurricularForm component
+    mentorName?: string | null;
+    category?: string | null;
+    day?: string | null;
+    time?: string | null;
+    location?: string | null;
+    currentCapacity?: number;
+    mentorId?: string | null;
+    maxCapacity?: number;
+    description?: string | null;
 }
 
 export interface ExtracurricularMember {
@@ -70,4 +80,25 @@ export interface ExtracurricularFilters {
     search?: string;
     page?: number;
     per_page?: number;
+}
+
+// Used by the attendance detail page
+export interface ExtracurricularSession {
+    id: number;
+    date: string;
+    topic: string;
+    startTime: string;
+    endTime: string;
+    attendanceCount: number;
+    totalMembers: number;
+    attendancePercentage: number;
+}
+
+export interface SessionMemberAttendance {
+    studentId: number;
+    studentName: string;
+    nis: string;
+    class: string;
+    status: 'hadir' | 'sakit' | 'izin' | 'alpa';
+    note: string | null;
 }

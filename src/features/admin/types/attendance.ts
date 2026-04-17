@@ -43,6 +43,7 @@ export interface AdminMorningAttendance {
     notes: string | null;
     location: string | null;
     recordedBy: string | null;
+    status?: string;
 }
 
 // Response dari GET /admin/attendance/prayer (per item)

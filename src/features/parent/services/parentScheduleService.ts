@@ -11,6 +11,7 @@ export interface ScheduleItem {
     subject: string;
     teacher: string;
     room: string;
+    lessonNumber?: number | string;
 }
 
 export interface ChildScheduleData {

@@ -577,10 +577,10 @@ export const AttendanceReport: React.FC = () => {
                                                             variant="outline"
                                                             className={cn(
                                                                 'text-xs font-medium',
-                                                                STATUS_COLORS[item.status] ?? 'text-slate-600 bg-slate-50 border-slate-200'
+                                                                (item.status ? STATUS_COLORS[item.status] : undefined) ?? 'text-slate-600 bg-slate-50 border-slate-200'
                                                             )}
                                                         >
-                                                            {STATUS_LABELS[item.status] ?? item.status}
+                                                            {item.status ? (STATUS_LABELS[item.status] ?? item.status) : '—'}
                                                         </Badge>
                                                     </td>
                                                 )}

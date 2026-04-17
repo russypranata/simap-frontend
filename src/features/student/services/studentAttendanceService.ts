@@ -6,6 +6,8 @@ export interface DailyAttendanceRecord {
     date: string;
     status: AttendanceStatus;
     notes?: string;
+    submittedBy?: string;
+    submittedAt?: string;
 }
 
 export interface DailyAttendanceResponse {

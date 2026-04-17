@@ -66,7 +66,7 @@ const formSchema = z.object({
     type: z.enum(['WAJIB', 'PEMINATAN'], {
         message: 'Tipe mata pelajaran wajib dipilih',
     }),
-    gradeLevel: z.array(z.string()).max(3).optional().default([]),
+    gradeLevel: z.array(z.string()).max(3),
     description: z.string().max(500, 'Deskripsi maksimal 500 karakter').optional(),
 });
 
@@ -86,7 +86,8 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({ id }) => {
     const [error, setError] = useState<string | null>(null);
 
     const form = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(formSchema) as any,
         defaultValues: {
             code: '',
             name: '',

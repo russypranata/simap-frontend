@@ -21,7 +21,7 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { AlumniFormValues, alumniSchema } from '../../schemas/alumniSchema';
-import { Alumni } from '../../types/alumni';
+import { AdminAlumni as Alumni } from '../../types/alumni';
 
 interface AlumniFormProps {
     open: boolean;
@@ -37,7 +37,8 @@ export const AlumniForm: React.FC<AlumniFormProps> = ({
     onSubmit,
 }) => {
     const form = useForm<AlumniFormValues>({
-        resolver: zodResolver(alumniSchema),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(alumniSchema) as any,
         defaultValues: {
             nisn: '',
             name: '',
@@ -52,13 +53,13 @@ export const AlumniForm: React.FC<AlumniFormProps> = ({
     useEffect(() => {
         if (initialData) {
             form.reset({
-                nisn: initialData.nisn,
+                nisn: initialData.admission_number ?? '',
                 name: initialData.name,
-                graduationYear: initialData.graduationYear,
-                className: initialData.className,
-                phone: initialData.phone,
-                university: initialData.university || '',
-                job: initialData.job || '',
+                graduationYear: initialData.graduation_year ?? '',
+                className: initialData.last_class_name ?? '',
+                phone: initialData.phone ?? '',
+                university: '',
+                job: '',
             });
         } else {
             form.reset({

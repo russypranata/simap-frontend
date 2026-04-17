@@ -1,5 +1,5 @@
 import { apiClient, PaginatedResponse } from '@/lib/api-client';
-import { Curriculum } from '../types/curriculum';
+import { Curriculum, CurriculumStatus } from '../types/curriculum';
 import { CurriculumFormValues } from '../schemas/curriculumSchema';
 
 const buildQuery = (params?: { search?: string; status?: string; page?: number; per_page?: number }) => {
@@ -20,7 +20,7 @@ const transform = (d: Record<string, unknown>): Curriculum => ({
     description:      (d.description as string) ?? '',
     academicYearId:   d.academic_year_id ? String(d.academic_year_id) : '',
     academicYearName: (d.academic_year_name as string) ?? '',
-    status:           d.status as string,
+    status:           d.status as CurriculumStatus,
     totalSubjects:    0, // not tracked in backend yet
     createdAt:        (d.created_at as string) ?? '',
     updatedAt:        (d.updated_at as string) ?? '',
