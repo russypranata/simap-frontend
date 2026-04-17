@@ -22,7 +22,7 @@ import {
     Briefcase,
     Building2,
 } from "lucide-react";
-import { useMutamayizinProfile } from "../hooks/useMutamayizinProfile";
+import { useMutamayizinProfile, useUpdateMutamayizinAvatar } from "../hooks/useMutamayizinProfile";
 import { useMutamayizinDashboard } from "../hooks/useMutamayizinDashboard";
 import { ErrorState } from "@/features/shared/components/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -68,6 +68,14 @@ export const MutamayizinProfile: React.FC = () => {
     const router = useRouter();
     const { data: profileData, isLoading: profileLoading, error: profileError, refetch: refetchProfile } = useMutamayizinProfile();
     const { stats, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useMutamayizinDashboard();
+    const avatarMutation = useUpdateMutamayizinAvatar();
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            avatarMutation.mutate(file);
+        }
+    };
 
     const isLoading = profileLoading || statsLoading;
     const error = profileError || statsError;
@@ -153,9 +161,19 @@ export const MutamayizinProfile: React.FC = () => {
                                         {initials}
                                     </AvatarFallback>
                                 </Avatar>
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer">
+                                <label
+                                    htmlFor="profile-picture"
+                                    className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
+                                >
                                     <Camera className="h-8 w-8 text-white" />
-                                </div>
+                                </label>
+                                <input
+                                    id="profile-picture"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarChange}
+                                    className="hidden"
+                                />
                             </div>
 
                             <div className="flex-1 text-center md:text-left space-y-2">

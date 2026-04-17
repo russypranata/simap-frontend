@@ -20,7 +20,7 @@ import {
     Briefcase,
     Building2,
 } from "lucide-react";
-import { useMutamayizinProfile, useUpdateMutamayizinProfile } from "../hooks/useMutamayizinProfile";
+import { useMutamayizinProfile, useUpdateMutamayizinProfile, useUpdateMutamayizinAvatar } from "../hooks/useMutamayizinProfile";
 import { ErrorState } from "@/features/shared/components/ErrorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { UpdateProfileData } from "../services/mutamayizinService";
@@ -54,6 +54,14 @@ export const EditMutamayizinProfile: React.FC = () => {
     const router = useRouter();
     const { data: profileData, isLoading, error, refetch } = useMutamayizinProfile();
     const updateMutation = useUpdateMutamayizinProfile();
+    const avatarMutation = useUpdateMutamayizinAvatar();
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            avatarMutation.mutate(file);
+        }
+    };
 
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -163,15 +171,26 @@ export const EditMutamayizinProfile: React.FC = () => {
                                             {initials}
                                         </AvatarFallback>
                                     </Avatar>
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer">
+                                    <label
+                                        htmlFor="profile-picture"
+                                        className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer"
+                                    >
                                         <Camera className="h-8 w-8 text-white" />
-                                    </div>
+                                    </label>
+                                    <input
+                                        id="profile-picture"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleAvatarChange}
+                                        className="hidden"
+                                    />
                                 </div>
                                 <Button
                                     type="button"
                                     variant="outline"
                                     size="sm"
                                     className="text-blue-800 hover:text-blue-900 border-blue-800/30 hover:border-blue-800"
+                                    onClick={() => document.getElementById("profile-picture")?.click()}
                                 >
                                     <Camera className="h-4 w-4 mr-2" />
                                     Ubah Foto Profil

@@ -339,9 +339,9 @@ export const MutamayizinAchievements: React.FC = () => {
 
     // Filter state
     const [search, setSearch] = useState("");
-    const [academicYearId, setAcademicYearId] = useState<string>("");
-    const [semester, setSemester] = useState<string>("");
-    const [levelFilter, setLevelFilter] = useState<string>("");
+    const [academicYearId, setAcademicYearId] = useState<string>("all");
+    const [semester, setSemester] = useState<string>("all");
+    const [levelFilter, setLevelFilter] = useState<string>("all");
 
     // Debounced search
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -358,9 +358,9 @@ export const MutamayizinAchievements: React.FC = () => {
         page,
         per_page: perPage,
         search: debouncedSearch || undefined,
-        academic_year_id: academicYearId || undefined,
-        semester: semester || undefined,
-        level: levelFilter || undefined,
+        academic_year_id: academicYearId !== "all" ? academicYearId : undefined,
+        semester: semester !== "all" ? semester : undefined,
+        level: levelFilter !== "all" ? levelFilter : undefined,
     });
 
     const createMutation = useCreateAchievement();
@@ -559,7 +559,7 @@ export const MutamayizinAchievements: React.FC = () => {
                                     <SelectValue placeholder="Tahun Ajaran" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">Semua Tahun</SelectItem>
+                                    <SelectItem value="all">Semua Tahun</SelectItem>
                                     {academicYears.map((ay) => (
                                         <SelectItem key={ay.id} value={String(ay.id)}>{ay.name}</SelectItem>
                                     ))}
@@ -572,7 +572,7 @@ export const MutamayizinAchievements: React.FC = () => {
                                     <SelectValue placeholder="Semester" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">Semua Semester</SelectItem>
+                                    <SelectItem value="all">Semua Semester</SelectItem>
                                     {SEMESTER_OPTIONS.map((s) => (
                                         <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                                     ))}
@@ -586,7 +586,7 @@ export const MutamayizinAchievements: React.FC = () => {
                                     <SelectValue placeholder="Level" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">Semua Level</SelectItem>
+                                    <SelectItem value="all">Semua Level</SelectItem>
                                     {LEVEL_OPTIONS.map((l) => (
                                         <SelectItem key={l} value={l}>
                                             {l.charAt(0).toUpperCase() + l.slice(1)}
