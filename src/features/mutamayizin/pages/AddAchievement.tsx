@@ -1,57 +1,88 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
     Award,
     Calendar,
     ArrowLeft,
     Upload,
-    User,
     Trophy,
     Image as ImageIcon,
     Save,
     Loader2,
-} from "lucide-react";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { toast } from 'sonner';
+import {
+    createAchievement,
+    getStudents,
+    getAcademicYears,
+} from '../services/mutamayizinService';
+import type {
+    StudentOption,
+    AcademicYear,
+} from '../services/mutamayizinService';
 
 export const AddAchievement: React.FC = () => {
     const router = useRouter();
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [isCustomRank, setIsCustomRank] = useState(false);
-    const [customRank, setCustomRank] = useState("");
+    const [customRank, setCustomRank] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [students, setStudents] = useState<StudentOption[]>([]);
+    const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
+    const [isLoadingOptions, setIsLoadingOptions] = useState(true);
 
     const [formData, setFormData] = useState({
-        studentName: "",
-        competitionName: "",
-        category: "",
-        rank: "",
-        eventName: "",
-        organizer: "",
-        level: "",
-        date: "",
+        studentProfileId: '',
+        academicYearId: '',
+        competitionName: '',
+        category: '',
+        rank: '',
+        eventName: '',
+        organizer: '',
+        level: '',
+        date: '',
     });
 
+    useEffect(() => {
+        const loadOptions = async () => {
+            try {
+                const [studentsData, yearsData] = await Promise.all([
+                    getStudents(),
+                    getAcademicYears(),
+                ]);
+                setStudents(studentsData);
+                setAcademicYears(yearsData);
+            } catch (error) {
+                console.error('Failed to load options:', error);
+                toast.error('Gagal memuat data siswa dan tahun ajaran');
+            } finally {
+                setIsLoadingOptions(false);
+            }
+        };
+        loadOptions();
+    }, []);
+
     const handleRankChange = (value: string) => {
-        if (value === "Lainnya") {
+        if (value === 'Lainnya') {
             setIsCustomRank(true);
-            setFormData({ ...formData, rank: "" });
-            setCustomRank("");
+            setFormData({ ...formData, rank: '' });
+            setCustomRank('');
         } else {
             setIsCustomRank(false);
-            setCustomRank("");
+            setCustomRank('');
             setFormData({ ...formData, rank: value });
         }
     };
@@ -61,16 +92,21 @@ export const AddAchievement: React.FC = () => {
         if (!file) return;
 
         // Validate file type
-        const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+        const validTypes = [
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/webp',
+        ];
         if (!validTypes.includes(file.type)) {
-            toast.error("Format file tidak valid! Gunakan JPG, PNG, atau WebP");
+            toast.error('Format file tidak valid! Gunakan JPG, PNG, atau WebP');
             return;
         }
 
         // Validate file size (max 5MB)
         const maxSize = 5 * 1024 * 1024; // 5MB
         if (file.size > maxSize) {
-            toast.error("Ukuran file terlalu besar! Maksimal 5MB");
+            toast.error('Ukuran file terlalu besar! Maksimal 5MB');
             return;
         }
 
@@ -78,18 +114,25 @@ export const AddAchievement: React.FC = () => {
     };
 
     const validateForm = (): boolean => {
-        // Validate custom rank
         if (isCustomRank && !customRank.trim()) {
-            toast.error("Silakan masukkan peringkat!");
+            toast.error('Silakan masukkan peringkat!');
             return false;
         }
 
-        // Validate required text fields
+        if (!formData.studentProfileId) {
+            toast.error('Silakan pilih siswa!');
+            return false;
+        }
+
+        if (!formData.academicYearId) {
+            toast.error('Silakan pilih tahun ajaran!');
+            return false;
+        }
+
         const requiredFields = [
-            { value: formData.studentName, name: "Nama Siswa" },
-            { value: formData.competitionName, name: "Nama Lomba" },
-            { value: formData.eventName, name: "Nama Event" },
-            { value: formData.organizer, name: "Penyelenggara Kegiatan" },
+            { value: formData.competitionName, name: 'Nama Lomba' },
+            { value: formData.eventName, name: 'Nama Event' },
+            { value: formData.organizer, name: 'Penyelenggara Kegiatan' },
         ];
 
         for (const field of requiredFields) {
@@ -99,24 +142,23 @@ export const AddAchievement: React.FC = () => {
             }
         }
 
-        // Validate dropdowns
         if (!isCustomRank && !formData.rank) {
-            toast.error("Silakan pilih peringkat!");
+            toast.error('Silakan pilih peringkat!');
             return false;
         }
 
         if (!formData.level) {
-            toast.error("Silakan pilih tingkat lomba!");
+            toast.error('Silakan pilih tingkat lomba!');
             return false;
         }
 
         if (!formData.date) {
-            toast.error("Silakan pilih tanggal kegiatan!");
+            toast.error('Silakan pilih tanggal kegiatan!');
             return false;
         }
 
         if (!selectedImage) {
-            toast.error("Silakan upload foto!");
+            toast.error('Silakan upload foto!');
             return false;
         }
 
@@ -131,51 +173,65 @@ export const AddAchievement: React.FC = () => {
         setIsSubmitting(true);
 
         try {
-            // Use custom rank if "Lainnya" is selected
             const finalRank = isCustomRank ? customRank.trim() : formData.rank;
 
-            // Sanitize form data (trim whitespace)
-            const sanitizedData = {
-                studentName: formData.studentName.trim(),
-                competitionName: formData.competitionName.trim(),
+            console.log(
+                'Submitting achievement with photo:',
+                selectedImage?.name,
+                selectedImage?.size,
+            );
+
+            const result = await createAchievement({
+                student_profile_id: parseInt(formData.studentProfileId),
+                academic_year_id: parseInt(formData.academicYearId),
+                competition_name: formData.competitionName.trim(),
                 category: formData.category.trim(),
                 rank: finalRank,
-                eventName: formData.eventName.trim(),
+                event_name: formData.eventName.trim(),
                 organizer: formData.organizer.trim(),
                 level: formData.level,
                 date: formData.date,
-            };
+                photo: selectedImage || undefined,
+            });
 
-            // TODO: Save to API/Service
-            console.log("Form submitted:", sanitizedData, selectedImage);
+            console.log('Achievement created successfully:', result);
 
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            toast.success('Prestasi berhasil ditambahkan!');
 
-            toast.success("Prestasi berhasil ditambahkan!");
-
-            // Redirect back to list
-            router.push("/mutamayizin-coordinator/achievements");
+            router.push(`/mutamayizin-coordinator/achievements/${result.id}`);
         } catch (error) {
-            console.error("Error submitting form:", error);
-            toast.error("Gagal menambahkan prestasi. Silakan coba lagi!");
+            console.error('Error submitting form:', error);
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : 'Gagal menambahkan prestasi. Silakan coba lagi!',
+            );
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleCancel = () => {
-        // Check if form has unsaved changes
-        const hasChanges = formData.studentName || formData.competitionName ||
-            formData.category || formData.rank || formData.eventName ||
-            formData.organizer || formData.level || formData.date || selectedImage;
+        const hasChanges =
+            formData.studentProfileId ||
+            formData.academicYearId ||
+            formData.competitionName ||
+            formData.category ||
+            formData.rank ||
+            formData.eventName ||
+            formData.organizer ||
+            formData.level ||
+            formData.date ||
+            selectedImage;
 
         if (hasChanges) {
-            const confirmLeave = window.confirm("Anda memiliki perubahan yang belum disimpan. Yakin ingin keluar?");
+            const confirmLeave = window.confirm(
+                'Anda memiliki perubahan yang belum disimpan. Yakin ingin keluar?',
+            );
             if (!confirmLeave) return;
         }
 
-        router.push("/mutamayizin-coordinator/achievements");
+        router.push('/mutamayizin-coordinator/achievements');
     };
 
     return (
@@ -194,15 +250,20 @@ export const AddAchievement: React.FC = () => {
                             <ArrowLeft className="h-4 w-4" />
                         </Button>
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Tambah </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Prestasi</span>
+                            <span className="bg-linear-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
+                                Tambah{' '}
+                            </span>
+                            <span className="bg-linear-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
+                                Prestasi
+                            </span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
                             <Award className="h-5 w-5" />
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Isi formulir di bawah untuk menambahkan data prestasi siswa Program Mutamayizin
+                        Isi formulir di bawah untuk menambahkan data prestasi
+                        siswa Program Mutamayizin
                     </p>
                 </div>
             </div>
@@ -213,8 +274,8 @@ export const AddAchievement: React.FC = () => {
                 <div className="bg-blue-800 p-5 relative overflow-hidden">
                     {/* Decorative Geometric Pattern */}
                     <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
-                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
+                        <div className="absolute top-0 right-0 w-40 h-40 border-20 border-white rounded-full -translate-y-1/2 translate-x-1/4" />
+                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-8 border-white rounded-full translate-y-1/2" />
                     </div>
 
                     <div className="flex items-center gap-4 relative z-10">
@@ -222,8 +283,13 @@ export const AddAchievement: React.FC = () => {
                             <Trophy className="h-7 w-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white">Form Input Prestasi</h2>
-                            <p className="text-blue-100 text-sm">Lengkapi semua field yang ditandai dengan tanda bintang (*)</p>
+                            <h2 className="text-xl font-bold text-white">
+                                Form Input Prestasi
+                            </h2>
+                            <p className="text-blue-100 text-sm">
+                                Lengkapi semua field yang ditandai dengan tanda
+                                bintang (*)
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -233,28 +299,97 @@ export const AddAchievement: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Nama Siswa */}
                             <div className="space-y-2">
-                                <Label htmlFor="studentName" className="text-sm font-medium">
-                                    Nama Siswa <span className="text-red-500">*</span>
+                                <Label
+                                    htmlFor="studentProfileId"
+                                    className="text-sm font-medium"
+                                >
+                                    Nama Siswa{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        id="studentName"
-                                        placeholder="Masukkan nama lengkap siswa"
-                                        className="pl-10"
-                                        value={formData.studentName}
-                                        onChange={(e) => setFormData({ ...formData, studentName: e.target.value })}
-                                        required
-                                        disabled={isSubmitting}
-                                        aria-label="Nama siswa"
-                                    />
-                                </div>
+                                <Select
+                                    value={formData.studentProfileId}
+                                    onValueChange={(value) =>
+                                        setFormData({
+                                            ...formData,
+                                            studentProfileId: value,
+                                        })
+                                    }
+                                    required
+                                    disabled={isSubmitting || isLoadingOptions}
+                                >
+                                    <SelectTrigger id="studentProfileId">
+                                        <SelectValue
+                                            placeholder={
+                                                isLoadingOptions
+                                                    ? 'Memuat...'
+                                                    : 'Pilih siswa'
+                                            }
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {students.map((student) => (
+                                            <SelectItem
+                                                key={student.id}
+                                                value={String(student.id)}
+                                            >
+                                                {student.name} - {student.nis} (
+                                                {student.class})
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Tahun Ajaran */}
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="academicYearId"
+                                    className="text-sm font-medium"
+                                >
+                                    Tahun Ajaran{' '}
+                                    <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
+                                    value={formData.academicYearId}
+                                    onValueChange={(value) =>
+                                        setFormData({
+                                            ...formData,
+                                            academicYearId: value,
+                                        })
+                                    }
+                                    required
+                                    disabled={isSubmitting || isLoadingOptions}
+                                >
+                                    <SelectTrigger id="academicYearId">
+                                        <SelectValue
+                                            placeholder={
+                                                isLoadingOptions
+                                                    ? 'Memuat...'
+                                                    : 'Pilih tahun ajaran'
+                                            }
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {academicYears.map((year) => (
+                                            <SelectItem
+                                                key={year.id}
+                                                value={String(year.id)}
+                                            >
+                                                {year.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             {/* Nama Lomba */}
                             <div className="space-y-2">
-                                <Label htmlFor="competitionName" className="text-sm font-medium">
-                                    Nama Lomba <span className="text-red-500">*</span>
+                                <Label
+                                    htmlFor="competitionName"
+                                    className="text-sm font-medium"
+                                >
+                                    Nama Lomba{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <div className="relative">
                                     <Trophy className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -263,7 +398,12 @@ export const AddAchievement: React.FC = () => {
                                         placeholder="Contoh: Olimpiade Matematika"
                                         className="pl-10"
                                         value={formData.competitionName}
-                                        onChange={(e) => setFormData({ ...formData, competitionName: e.target.value })}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                competitionName: e.target.value,
+                                            })
+                                        }
                                         required
                                         disabled={isSubmitting}
                                         aria-label="Nama lomba"
@@ -273,14 +413,22 @@ export const AddAchievement: React.FC = () => {
 
                             {/* Kategori Lomba */}
                             <div className="space-y-2">
-                                <Label htmlFor="category" className="text-sm font-medium">
+                                <Label
+                                    htmlFor="category"
+                                    className="text-sm font-medium"
+                                >
                                     Kategori Lomba
                                 </Label>
                                 <Input
                                     id="category"
                                     placeholder="Contoh: Akademik, Non-Akademik, Olahraga"
                                     value={formData.category}
-                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            category: e.target.value,
+                                        })
+                                    }
                                     disabled={isSubmitting}
                                     aria-label="Kategori lomba"
                                 />
@@ -291,11 +439,17 @@ export const AddAchievement: React.FC = () => {
 
                             {/* Juara Ke */}
                             <div className="space-y-2">
-                                <Label htmlFor="rank" className="text-sm font-medium">
-                                    Juara Ke <span className="text-red-500">*</span>
+                                <Label
+                                    htmlFor="rank"
+                                    className="text-sm font-medium"
+                                >
+                                    Juara Ke{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Select
-                                    value={isCustomRank ? "Lainnya" : formData.rank}
+                                    value={
+                                        isCustomRank ? 'Lainnya' : formData.rank
+                                    }
                                     onValueChange={handleRankChange}
                                     required
                                     disabled={isSubmitting}
@@ -304,10 +458,18 @@ export const AddAchievement: React.FC = () => {
                                         <SelectValue placeholder="Pilih peringkat" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Juara 1">Juara 1</SelectItem>
-                                        <SelectItem value="Juara 2">Juara 2</SelectItem>
-                                        <SelectItem value="Juara 3">Juara 3</SelectItem>
-                                        <SelectItem value="Lainnya">Lainnya (Input Manual)</SelectItem>
+                                        <SelectItem value="Juara 1">
+                                            Juara 1
+                                        </SelectItem>
+                                        <SelectItem value="Juara 2">
+                                            Juara 2
+                                        </SelectItem>
+                                        <SelectItem value="Juara 3">
+                                            Juara 3
+                                        </SelectItem>
+                                        <SelectItem value="Lainnya">
+                                            Lainnya (Input Manual)
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                                 {isCustomRank && (
@@ -315,14 +477,20 @@ export const AddAchievement: React.FC = () => {
                                         <Input
                                             placeholder="Contoh: Juara Harapan 1, Finalis, Juara Favorit"
                                             value={customRank}
-                                            onChange={(e) => setCustomRank(e.target.value)}
+                                            onChange={(e) =>
+                                                setCustomRank(e.target.value)
+                                            }
                                             required
                                             disabled={isSubmitting}
                                             aria-label="Peringkat custom"
                                             aria-describedby="rank-help"
                                         />
-                                        <p id="rank-help" className="text-xs text-muted-foreground">
-                                            Masukkan peringkat yang diterima (wajib diisi)
+                                        <p
+                                            id="rank-help"
+                                            className="text-xs text-muted-foreground"
+                                        >
+                                            Masukkan peringkat yang diterima
+                                            (wajib diisi)
                                         </p>
                                     </div>
                                 )}
@@ -330,14 +498,23 @@ export const AddAchievement: React.FC = () => {
 
                             {/* Nama Event */}
                             <div className="space-y-2">
-                                <Label htmlFor="eventName" className="text-sm font-medium">
-                                    Nama Event <span className="text-red-500">*</span>
+                                <Label
+                                    htmlFor="eventName"
+                                    className="text-sm font-medium"
+                                >
+                                    Nama Event{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="eventName"
                                     placeholder="Contoh: OSN Tingkat Provinsi 2024"
                                     value={formData.eventName}
-                                    onChange={(e) => setFormData({ ...formData, eventName: e.target.value })}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            eventName: e.target.value,
+                                        })
+                                    }
                                     required
                                     disabled={isSubmitting}
                                     aria-label="Nama event"
@@ -346,14 +523,23 @@ export const AddAchievement: React.FC = () => {
 
                             {/* Penyelenggara Kegiatan */}
                             <div className="space-y-2">
-                                <Label htmlFor="organizer" className="text-sm font-medium">
-                                    Penyelenggara Kegiatan <span className="text-red-500">*</span>
+                                <Label
+                                    htmlFor="organizer"
+                                    className="text-sm font-medium"
+                                >
+                                    Penyelenggara Kegiatan{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="organizer"
                                     placeholder="Contoh: Dinas Pendidikan Provinsi Kalbar"
                                     value={formData.organizer}
-                                    onChange={(e) => setFormData({ ...formData, organizer: e.target.value })}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            organizer: e.target.value,
+                                        })
+                                    }
                                     required
                                     disabled={isSubmitting}
                                     aria-label="Penyelenggara kegiatan"
@@ -362,12 +548,21 @@ export const AddAchievement: React.FC = () => {
 
                             {/* Tingkat */}
                             <div className="space-y-2">
-                                <Label htmlFor="level" className="text-sm font-medium">
-                                    Tingkat <span className="text-red-500">*</span>
+                                <Label
+                                    htmlFor="level"
+                                    className="text-sm font-medium"
+                                >
+                                    Tingkat{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Select
                                     value={formData.level}
-                                    onValueChange={(value) => setFormData({ ...formData, level: value })}
+                                    onValueChange={(value) =>
+                                        setFormData({
+                                            ...formData,
+                                            level: value,
+                                        })
+                                    }
                                     required
                                     disabled={isSubmitting}
                                 >
@@ -375,20 +570,36 @@ export const AddAchievement: React.FC = () => {
                                         <SelectValue placeholder="Pilih tingkat lomba" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Sekolah">Sekolah</SelectItem>
-                                        <SelectItem value="Kecamatan">Kecamatan</SelectItem>
-                                        <SelectItem value="Kabupaten">Kabupaten</SelectItem>
-                                        <SelectItem value="Provinsi">Provinsi</SelectItem>
-                                        <SelectItem value="Nasional">Nasional</SelectItem>
-                                        <SelectItem value="Internasional">Internasional</SelectItem>
+                                        <SelectItem value="Sekolah">
+                                            Sekolah
+                                        </SelectItem>
+                                        <SelectItem value="Kecamatan">
+                                            Kecamatan
+                                        </SelectItem>
+                                        <SelectItem value="Kabupaten">
+                                            Kabupaten
+                                        </SelectItem>
+                                        <SelectItem value="Provinsi">
+                                            Provinsi
+                                        </SelectItem>
+                                        <SelectItem value="Nasional">
+                                            Nasional
+                                        </SelectItem>
+                                        <SelectItem value="Internasional">
+                                            Internasional
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             {/* Tanggal Kegiatan */}
                             <div className="space-y-2">
-                                <Label htmlFor="date" className="text-sm font-medium">
-                                    Tanggal Kegiatan <span className="text-red-500">*</span>
+                                <Label
+                                    htmlFor="date"
+                                    className="text-sm font-medium"
+                                >
+                                    Tanggal Kegiatan{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <div className="relative">
                                     <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -397,11 +608,20 @@ export const AddAchievement: React.FC = () => {
                                         type="date"
                                         className="pl-10"
                                         value={formData.date}
-                                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                date: e.target.value,
+                                            })
+                                        }
                                         required
                                         disabled={isSubmitting}
                                         aria-label="Tanggal kegiatan"
-                                        max={new Date().toISOString().split('T')[0]}
+                                        max={
+                                            new Date()
+                                                .toISOString()
+                                                .split('T')[0]
+                                        }
                                     />
                                 </div>
                                 <p className="text-xs text-muted-foreground">
@@ -411,7 +631,10 @@ export const AddAchievement: React.FC = () => {
 
                             {/* Upload Foto - Full width */}
                             <div className="space-y-2 md:col-span-2">
-                                <Label htmlFor="photo" className="text-sm font-medium">
+                                <Label
+                                    htmlFor="photo"
+                                    className="text-sm font-medium"
+                                >
                                     Foto <span className="text-red-500">*</span>
                                 </Label>
                                 <div className="space-y-2">
@@ -427,17 +650,30 @@ export const AddAchievement: React.FC = () => {
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        onClick={() => document.getElementById("photo")?.click()}
+                                        onClick={() =>
+                                            document
+                                                .getElementById('photo')
+                                                ?.click()
+                                        }
                                         className="w-full max-w-md"
                                         disabled={isSubmitting}
                                     >
                                         <Upload className="h-4 w-4 mr-2" />
-                                        {selectedImage ? selectedImage.name : "Pilih Foto"}
+                                        {selectedImage
+                                            ? selectedImage.name
+                                            : 'Pilih Foto'}
                                     </Button>
                                     {selectedImage ? (
                                         <p className="text-xs text-muted-foreground flex items-center gap-1">
                                             <ImageIcon className="h-3 w-3" />
-                                            File terpilih: {selectedImage.name} ({(selectedImage.size / 1024).toFixed(1)} KB)
+                                            File terpilih: {
+                                                selectedImage.name
+                                            }{' '}
+                                            (
+                                            {(
+                                                selectedImage.size / 1024
+                                            ).toFixed(1)}{' '}
+                                            KB)
                                         </p>
                                     ) : (
                                         <p className="text-xs text-muted-foreground">

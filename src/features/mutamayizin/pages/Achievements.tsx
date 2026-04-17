@@ -1,23 +1,24 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
     Dialog,
     DialogContent,
@@ -25,7 +26,7 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -35,7 +36,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
     Award,
     Plus,
@@ -49,48 +50,53 @@ import {
     Trash2,
     User,
     Loader2,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+    Eye,
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import {
     useMutamayizinAchievements,
     useCreateAchievement,
     useUpdateAchievement,
     useDeleteAchievement,
-} from "../hooks/useMutamayizinAchievements";
-import { getStudents, getAcademicYears, getAchievement } from "../services/mutamayizinService";
+} from '../hooks/useMutamayizinAchievements';
+import {
+    getStudents,
+    getAcademicYears,
+    getAchievement,
+} from '../services/mutamayizinService';
 import type {
     Achievement,
     AchievementDetail,
     StudentOption,
     AcademicYear,
     CreateAchievementData,
-} from "../services/mutamayizinService";
-import { PaginationControls } from "@/features/shared/components/PaginationControls";
-import { EmptyState } from "@/features/shared/components/EmptyState";
-import { ErrorState } from "@/features/shared/components/ErrorState";
-import { SkeletonTableRow } from "@/features/shared/components/SkeletonBlocks";
+} from '../services/mutamayizinService';
+import { PaginationControls } from '@/features/shared/components/PaginationControls';
+import { EmptyState } from '@/features/shared/components/EmptyState';
+import { ErrorState } from '@/features/shared/components/ErrorState';
+import { SkeletonTableRow } from '@/features/shared/components/SkeletonBlocks';
 
 // ==================== HELPERS ====================
 
 const getRankBadgeColor = (rank: string) => {
     switch (rank) {
-        case "Juara 1":
-            return "bg-emerald-100 text-emerald-700 border-emerald-300";
-        case "Juara 2":
-            return "bg-sky-100 text-sky-700 border-sky-300";
-        case "Juara 3":
-            return "bg-orange-100 text-orange-700 border-orange-300";
+        case 'Juara 1':
+            return 'bg-emerald-100 text-emerald-700 border-emerald-300';
+        case 'Juara 2':
+            return 'bg-sky-100 text-sky-700 border-sky-300';
+        case 'Juara 3':
+            return 'bg-orange-100 text-orange-700 border-orange-300';
         default:
-            return "bg-zinc-100 text-zinc-600 border-zinc-300";
+            return 'bg-zinc-100 text-zinc-600 border-zinc-300';
     }
 };
 
-const getLevelBadgeColor = () => "bg-amber-100 text-amber-800 border-amber-300";
+const getLevelBadgeColor = () => 'bg-amber-100 text-amber-800 border-amber-300';
 
-const LEVEL_OPTIONS = ["kabupaten", "provinsi", "nasional", "internasional"];
+const LEVEL_OPTIONS = ['kabupaten', 'provinsi', 'nasional', 'internasional'];
 const SEMESTER_OPTIONS = [
-    { value: "1", label: "Semester 1" },
-    { value: "2", label: "Semester 2" },
+    { value: '1', label: 'Semester 1' },
+    { value: '2', label: 'Semester 2' },
 ];
 
 // ==================== FORM MODAL ====================
@@ -107,14 +113,14 @@ interface AchievementFormData {
 }
 
 const EMPTY_FORM: AchievementFormData = {
-    student_profile_id: "",
-    academic_year_id: "",
-    competition_name: "",
-    category: "",
-    rank: "",
-    level: "",
-    date: "",
-    semester: "",
+    student_profile_id: '',
+    academic_year_id: '',
+    competition_name: '',
+    category: '',
+    rank: '',
+    level: '',
+    date: '',
+    semester: '',
 };
 
 interface AchievementFormModalProps {
@@ -138,22 +144,24 @@ const AchievementFormModal: React.FC<AchievementFormModalProps> = ({
 }) => {
     const [form, setForm] = useState<AchievementFormData>(EMPTY_FORM);
 
+    // Reset form when modal opens with new editData (using key to force remount)
     useEffect(() => {
         if (editData) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setForm({
-                student_profile_id: String(editData.studentProfileId ?? ""),
-                academic_year_id: String(editData.academicYearId ?? ""),
+                student_profile_id: String(editData.studentProfileId ?? ''),
+                academic_year_id: String(editData.academicYearId ?? ''),
                 competition_name: editData.competitionName,
-                category: editData.category ?? "",
+                category: editData.category ?? '',
                 rank: editData.rank,
                 level: editData.level,
                 date: editData.date,
-                semester: String(editData.semester ?? ""),
+                semester: String(editData.semester ?? ''),
             });
         } else {
             setForm(EMPTY_FORM);
         }
-    }, [editData, open]);
+    }, [editData]);
 
     const handleChange = (field: keyof AchievementFormData, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -177,18 +185,26 @@ const AchievementFormModal: React.FC<AchievementFormModalProps> = ({
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
             <DialogContent className="max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>{editData ? "Edit Prestasi" : "Tambah Prestasi"}</DialogTitle>
+                    <DialogTitle>
+                        {editData ? 'Edit Prestasi' : 'Tambah Prestasi'}
+                    </DialogTitle>
                     <DialogDescription>
-                        {editData ? "Perbarui data prestasi siswa." : "Isi data prestasi siswa baru."}
+                        {editData
+                            ? 'Perbarui data prestasi siswa.'
+                            : 'Isi data prestasi siswa baru.'}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Siswa */}
                     <div className="space-y-1.5">
-                        <Label htmlFor="student">Siswa <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="student">
+                            Siswa <span className="text-red-500">*</span>
+                        </Label>
                         <Select
                             value={form.student_profile_id}
-                            onValueChange={(v) => handleChange("student_profile_id", v)}
+                            onValueChange={(v) =>
+                                handleChange('student_profile_id', v)
+                            }
                             required
                         >
                             <SelectTrigger id="student">
@@ -206,10 +222,14 @@ const AchievementFormModal: React.FC<AchievementFormModalProps> = ({
 
                     {/* Tahun Ajaran */}
                     <div className="space-y-1.5">
-                        <Label htmlFor="academic_year">Tahun Ajaran <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="academic_year">
+                            Tahun Ajaran <span className="text-red-500">*</span>
+                        </Label>
                         <Select
                             value={form.academic_year_id}
-                            onValueChange={(v) => handleChange("academic_year_id", v)}
+                            onValueChange={(v) =>
+                                handleChange('academic_year_id', v)
+                            }
                             required
                         >
                             <SelectTrigger id="academic_year">
@@ -217,7 +237,10 @@ const AchievementFormModal: React.FC<AchievementFormModalProps> = ({
                             </SelectTrigger>
                             <SelectContent>
                                 {academicYears.map((ay) => (
-                                    <SelectItem key={ay.id} value={String(ay.id)}>
+                                    <SelectItem
+                                        key={ay.id}
+                                        value={String(ay.id)}
+                                    >
                                         {ay.name}
                                     </SelectItem>
                                 ))}
@@ -230,14 +253,16 @@ const AchievementFormModal: React.FC<AchievementFormModalProps> = ({
                         <Label htmlFor="semester">Semester</Label>
                         <Select
                             value={form.semester}
-                            onValueChange={(v) => handleChange("semester", v)}
+                            onValueChange={(v) => handleChange('semester', v)}
                         >
                             <SelectTrigger id="semester">
                                 <SelectValue placeholder="Pilih semester..." />
                             </SelectTrigger>
                             <SelectContent>
                                 {SEMESTER_OPTIONS.map((s) => (
-                                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                                    <SelectItem key={s.value} value={s.value}>
+                                        {s.label}
+                                    </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -245,11 +270,16 @@ const AchievementFormModal: React.FC<AchievementFormModalProps> = ({
 
                     {/* Nama Kompetisi */}
                     <div className="space-y-1.5">
-                        <Label htmlFor="competition_name">Nama Kompetisi <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="competition_name">
+                            Nama Kompetisi{' '}
+                            <span className="text-red-500">*</span>
+                        </Label>
                         <Input
                             id="competition_name"
                             value={form.competition_name}
-                            onChange={(e) => handleChange("competition_name", e.target.value)}
+                            onChange={(e) =>
+                                handleChange('competition_name', e.target.value)
+                            }
                             placeholder="Contoh: Olimpiade Matematika"
                             required
                         />
@@ -261,18 +291,24 @@ const AchievementFormModal: React.FC<AchievementFormModalProps> = ({
                         <Input
                             id="category"
                             value={form.category}
-                            onChange={(e) => handleChange("category", e.target.value)}
+                            onChange={(e) =>
+                                handleChange('category', e.target.value)
+                            }
                             placeholder="Contoh: Akademik, Olahraga, Seni"
                         />
                     </div>
 
                     {/* Peringkat */}
                     <div className="space-y-1.5">
-                        <Label htmlFor="rank">Peringkat <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="rank">
+                            Peringkat <span className="text-red-500">*</span>
+                        </Label>
                         <Input
                             id="rank"
                             value={form.rank}
-                            onChange={(e) => handleChange("rank", e.target.value)}
+                            onChange={(e) =>
+                                handleChange('rank', e.target.value)
+                            }
                             placeholder="Contoh: Juara 1, Juara 2, Harapan 1"
                             required
                         />
@@ -280,10 +316,12 @@ const AchievementFormModal: React.FC<AchievementFormModalProps> = ({
 
                     {/* Level */}
                     <div className="space-y-1.5">
-                        <Label htmlFor="level">Level <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="level">
+                            Level <span className="text-red-500">*</span>
+                        </Label>
                         <Select
                             value={form.level}
-                            onValueChange={(v) => handleChange("level", v)}
+                            onValueChange={(v) => handleChange('level', v)}
                             required
                         >
                             <SelectTrigger id="level">
@@ -301,18 +339,27 @@ const AchievementFormModal: React.FC<AchievementFormModalProps> = ({
 
                     {/* Tanggal */}
                     <div className="space-y-1.5">
-                        <Label htmlFor="date">Tanggal <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="date">
+                            Tanggal <span className="text-red-500">*</span>
+                        </Label>
                         <Input
                             id="date"
                             type="date"
                             value={form.date}
-                            onChange={(e) => handleChange("date", e.target.value)}
+                            onChange={(e) =>
+                                handleChange('date', e.target.value)
+                            }
                             required
                         />
                     </div>
 
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onClose}
+                            disabled={isSubmitting}
+                        >
                             Batal
                         </Button>
                         <Button
@@ -320,8 +367,10 @@ const AchievementFormModal: React.FC<AchievementFormModalProps> = ({
                             className="bg-blue-800 hover:bg-blue-900 text-white"
                             disabled={isSubmitting}
                         >
-                            {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                            {editData ? "Simpan Perubahan" : "Tambah Prestasi"}
+                            {isSubmitting && (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            )}
+                            {editData ? 'Simpan Perubahan' : 'Tambah Prestasi'}
                         </Button>
                     </DialogFooter>
                 </form>
@@ -338,30 +387,40 @@ export const MutamayizinAchievements: React.FC = () => {
     const [perPage, setPerPage] = useState(15);
 
     // Filter state
-    const [search, setSearch] = useState("");
-    const [academicYearId, setAcademicYearId] = useState<string>("all");
-    const [semester, setSemester] = useState<string>("all");
-    const [levelFilter, setLevelFilter] = useState<string>("all");
+    const [search, setSearch] = useState('');
+    const [academicYearId, setAcademicYearId] = useState<string>('all');
+    const [semester, setSemester] = useState<string>('all');
+    const [levelFilter, setLevelFilter] = useState<string>('all');
 
     // Debounced search
-    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     useEffect(() => {
         const t = setTimeout(() => setDebouncedSearch(search), 400);
         return () => clearTimeout(t);
     }, [search]);
 
-    // Reset page when filters change
-    useEffect(() => { setPage(1); }, [debouncedSearch, academicYearId, semester, levelFilter]);
+    // Reset page when filters change (skip first render)
+    const isFirstRenderRef = React.useRef(true);
+    useEffect(() => {
+        if (isFirstRenderRef.current) {
+            isFirstRenderRef.current = false;
+            return;
+        }
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setPage(1);
+    }, [debouncedSearch, academicYearId, semester, levelFilter]);
 
     // Hooks
-    const { achievements, isLoading, error, meta, refetch } = useMutamayizinAchievements({
-        page,
-        per_page: perPage,
-        search: debouncedSearch || undefined,
-        academic_year_id: academicYearId !== "all" ? academicYearId : undefined,
-        semester: semester !== "all" ? semester : undefined,
-        level: levelFilter !== "all" ? levelFilter : undefined,
-    });
+    const { achievements, isLoading, error, meta, refetch } =
+        useMutamayizinAchievements({
+            page,
+            per_page: perPage,
+            search: debouncedSearch || undefined,
+            academic_year_id:
+                academicYearId !== 'all' ? academicYearId : undefined,
+            semester: semester !== 'all' ? semester : undefined,
+            level: levelFilter !== 'all' ? levelFilter : undefined,
+        });
 
     const createMutation = useCreateAchievement();
     const updateMutation = useUpdateAchievement();
@@ -371,13 +430,22 @@ export const MutamayizinAchievements: React.FC = () => {
     const [students, setStudents] = useState<StudentOption[]>([]);
     const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
     useEffect(() => {
-        getStudents().then(setStudents).catch(() => {});
-        getAcademicYears().then(setAcademicYears).catch(() => {});
+        getStudents()
+            .then(setStudents)
+            .catch(() => {});
+        getAcademicYears()
+            .then(setAcademicYears)
+            .catch(() => {});
     }, []);
+
+    // Router
+    const router = useRouter();
 
     // Modal state
     const [formOpen, setFormOpen] = useState(false);
-    const [editTarget, setEditTarget] = useState<AchievementDetail | null>(null);
+    const [editTarget, setEditTarget] = useState<AchievementDetail | null>(
+        null,
+    );
     const [editLoading, setEditLoading] = useState(false);
 
     // Delete dialog state
@@ -424,7 +492,7 @@ export const MutamayizinAchievements: React.FC = () => {
         if (editTarget) {
             updateMutation.mutate(
                 { id: editTarget.id, data },
-                { onSuccess: () => setFormOpen(false) }
+                { onSuccess: () => setFormOpen(false) },
             );
         } else {
             createMutation.mutate(data, {
@@ -433,7 +501,8 @@ export const MutamayizinAchievements: React.FC = () => {
         }
     };
 
-    const isSubmitting = createMutation.isPending || updateMutation.isPending || editLoading;
+    const isSubmitting =
+        createMutation.isPending || updateMutation.isPending || editLoading;
 
     // Pagination values
     const totalItems = meta?.total ?? 0;
@@ -448,15 +517,20 @@ export const MutamayizinAchievements: React.FC = () => {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Data </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Prestasi</span>
+                            <span className="bg-linear-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
+                                Data{' '}
+                            </span>
+                            <span className="bg-linear-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
+                                Prestasi
+                            </span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
                             <Award className="h-5 w-5" />
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Kelola data dan riwayat prestasi siswa Program Mutamayizin
+                        Kelola data dan riwayat prestasi siswa Program
+                        Mutamayizin
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -474,16 +548,20 @@ export const MutamayizinAchievements: React.FC = () => {
             <Card className="overflow-hidden p-0">
                 <div className="bg-blue-800 p-4 relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
-                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
+                        <div className="absolute top-0 right-0 w-40 h-40 border-20 border-white rounded-full -translate-y-1/2 translate-x-1/4" />
+                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-8 border-white rounded-full translate-y-1/2" />
                     </div>
                     <div className="flex items-center gap-3 relative z-10">
                         <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
                             <Award className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white">Statistik Prestasi</h2>
-                            <p className="text-blue-100 text-sm">Program Mutamayizin Alfityan</p>
+                            <h2 className="text-xl font-bold text-white">
+                                Statistik Prestasi
+                            </h2>
+                            <p className="text-blue-100 text-sm">
+                                Program Mutamayizin Alfityan
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -493,28 +571,44 @@ export const MutamayizinAchievements: React.FC = () => {
                             <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
                                 <Trophy className="h-4 w-4 text-blue-800" />
                             </div>
-                            <p className="text-2xl font-bold text-slate-900">{totalItems}</p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Prestasi</p>
+                            <p className="text-2xl font-bold text-slate-900">
+                                {totalItems}
+                            </p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">
+                                Total Prestasi
+                            </p>
                         </div>
                         <div className="p-2.5 text-center">
                             <div className="inline-flex p-2 bg-red-100 rounded-full mb-1.5">
                                 <Star className="h-4 w-4 text-red-600" />
                             </div>
                             <p className="text-2xl font-bold text-slate-900">
-                                {achievements.filter((a) =>
-                                    ["nasional", "internasional"].includes(a.level?.toLowerCase() ?? "")
-                                ).length}
+                                {
+                                    achievements.filter((a) =>
+                                        ['nasional', 'internasional'].includes(
+                                            a.level?.toLowerCase() ?? '',
+                                        ),
+                                    ).length
+                                }
                             </p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Nasional &amp; Internasional</p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">
+                                Nasional &amp; Internasional
+                            </p>
                         </div>
                         <div className="p-2.5 text-center">
                             <div className="inline-flex p-2 bg-emerald-100 rounded-full mb-1.5">
                                 <TrendingUp className="h-4 w-4 text-emerald-600" />
                             </div>
                             <p className="text-2xl font-bold text-emerald-600">
-                                {achievements.filter((a) => a.rank === "Juara 1").length}
+                                {
+                                    achievements.filter(
+                                        (a) => a.rank === 'Juara 1',
+                                    ).length
+                                }
                             </p>
-                            <p className="text-xs font-medium text-muted-foreground mt-0.5">Juara 1</p>
+                            <p className="text-xs font-medium text-muted-foreground mt-0.5">
+                                Juara 1
+                            </p>
                         </div>
                     </div>
                 </CardContent>
@@ -529,8 +623,13 @@ export const MutamayizinAchievements: React.FC = () => {
                                 <Award className="h-5 w-5 text-primary" />
                             </div>
                             <div>
-                                <CardTitle className="text-lg font-semibold">Daftar Prestasi Siswa</CardTitle>
-                                <CardDescription>Daftar pencapaian dan kompetisi siswa Program Mutamayizin</CardDescription>
+                                <CardTitle className="text-lg font-semibold">
+                                    Daftar Prestasi Siswa
+                                </CardTitle>
+                                <CardDescription>
+                                    Daftar pencapaian dan kompetisi siswa
+                                    Program Mutamayizin
+                                </CardDescription>
                             </div>
                         </div>
                         <Badge className="bg-blue-100 text-blue-800 border-blue-200">
@@ -554,42 +653,68 @@ export const MutamayizinAchievements: React.FC = () => {
                             </div>
 
                             {/* Tahun Ajaran */}
-                            <Select value={academicYearId} onValueChange={setAcademicYearId}>
+                            <Select
+                                value={academicYearId}
+                                onValueChange={setAcademicYearId}
+                            >
                                 <SelectTrigger className="w-[180px] h-11">
                                     <SelectValue placeholder="Tahun Ajaran" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Semua Tahun</SelectItem>
+                                    <SelectItem value="all">
+                                        Semua Tahun
+                                    </SelectItem>
                                     {academicYears.map((ay) => (
-                                        <SelectItem key={ay.id} value={String(ay.id)}>{ay.name}</SelectItem>
+                                        <SelectItem
+                                            key={ay.id}
+                                            value={String(ay.id)}
+                                        >
+                                            {ay.name}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
 
                             {/* Semester */}
-                            <Select value={semester} onValueChange={setSemester}>
-                                <SelectTrigger className="w-[160px] h-11">
+                            <Select
+                                value={semester}
+                                onValueChange={setSemester}
+                            >
+                                <SelectTrigger className="w-40 h-11">
                                     <SelectValue placeholder="Semester" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Semua Semester</SelectItem>
+                                    <SelectItem value="all">
+                                        Semua Semester
+                                    </SelectItem>
                                     {SEMESTER_OPTIONS.map((s) => (
-                                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                                        <SelectItem
+                                            key={s.value}
+                                            value={s.value}
+                                        >
+                                            {s.label}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
 
                             {/* Level */}
-                            <Select value={levelFilter} onValueChange={setLevelFilter}>
-                                <SelectTrigger className="w-[160px] h-11">
+                            <Select
+                                value={levelFilter}
+                                onValueChange={setLevelFilter}
+                            >
+                                <SelectTrigger className="w-40 h-11">
                                     <Filter className="h-4 w-4 mr-2" />
                                     <SelectValue placeholder="Level" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Semua Level</SelectItem>
+                                    <SelectItem value="all">
+                                        Semua Level
+                                    </SelectItem>
                                     {LEVEL_OPTIONS.map((l) => (
                                         <SelectItem key={l} value={l}>
-                                            {l.charAt(0).toUpperCase() + l.slice(1)}
+                                            {l.charAt(0).toUpperCase() +
+                                                l.slice(1)}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -601,7 +726,10 @@ export const MutamayizinAchievements: React.FC = () => {
                     {error && !isLoading && (
                         <div className="p-4">
                             <ErrorState
-                                error={(error as Error).message ?? "Gagal memuat data prestasi."}
+                                error={
+                                    (error as Error).message ??
+                                    'Gagal memuat data prestasi.'
+                                }
                                 onRetry={refetch}
                             />
                         </div>
@@ -613,21 +741,44 @@ export const MutamayizinAchievements: React.FC = () => {
                             <table className="w-full">
                                 <thead className="bg-muted/50">
                                     <tr>
-                                        <th className="text-left p-4 font-medium text-sm w-12">No</th>
-                                        <th className="text-left p-4 font-medium text-sm min-w-[160px]">Nama Siswa</th>
-                                        <th className="text-left p-4 font-medium text-sm w-28">Kelas</th>
-                                        <th className="text-left p-4 font-medium text-sm min-w-[200px]">Nama Kompetisi</th>
-                                        <th className="text-left p-4 font-medium text-sm w-32">Kategori</th>
-                                        <th className="text-left p-4 font-medium text-sm w-32">Peringkat</th>
-                                        <th className="text-left p-4 font-medium text-sm w-32">Level</th>
-                                        <th className="text-left p-4 font-medium text-sm w-32">Tanggal</th>
-                                        <th className="text-center p-4 font-medium text-sm w-24">Aksi</th>
+                                        <th className="text-left p-4 font-medium text-sm w-12">
+                                            No
+                                        </th>
+                                        <th className="text-left p-4 font-medium text-sm min-w-40">
+                                            Nama Siswa
+                                        </th>
+                                        <th className="text-left p-4 font-medium text-sm w-28">
+                                            Kelas
+                                        </th>
+                                        <th className="text-left p-4 font-medium text-sm min-w-[200px]">
+                                            Nama Kompetisi
+                                        </th>
+                                        <th className="text-left p-4 font-medium text-sm w-32">
+                                            Kategori
+                                        </th>
+                                        <th className="text-left p-4 font-medium text-sm w-32">
+                                            Peringkat
+                                        </th>
+                                        <th className="text-left p-4 font-medium text-sm w-32">
+                                            Level
+                                        </th>
+                                        <th className="text-left p-4 font-medium text-sm w-32">
+                                            Tanggal
+                                        </th>
+                                        <th className="text-center p-4 font-medium text-sm w-24">
+                                            Aksi
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {isLoading ? (
-                                        Array.from({ length: perPage > 10 ? 10 : perPage }).map((_, i) => (
-                                            <SkeletonTableRow key={i} cols={9} />
+                                        Array.from({
+                                            length: perPage > 10 ? 10 : perPage,
+                                        }).map((_, i) => (
+                                            <SkeletonTableRow
+                                                key={i}
+                                                cols={9}
+                                            />
                                         ))
                                     ) : achievements.length === 0 ? (
                                         <tr>
@@ -638,94 +789,146 @@ export const MutamayizinAchievements: React.FC = () => {
                                                     description={
                                                         debouncedSearch
                                                             ? `Tidak ada prestasi yang cocok dengan pencarian "${debouncedSearch}"`
-                                                            : "Belum ada data prestasi untuk filter yang dipilih."
+                                                            : 'Belum ada data prestasi untuk filter yang dipilih.'
                                                     }
                                                 />
                                             </td>
                                         </tr>
                                     ) : (
-                                        achievements.map((achievement, index) => (
-                                            <tr
-                                                key={achievement.id}
-                                                className="border-b hover:bg-muted/50 transition-all duration-150"
-                                            >
-                                                <td className="p-4">
-                                                    <span className="text-sm font-medium text-muted-foreground">
-                                                        {(page - 1) * perPage + index + 1}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                                                            <User className="h-4 w-4 text-blue-800" />
+                                        achievements.map(
+                                            (achievement, index) => (
+                                                <tr
+                                                    key={achievement.id}
+                                                    className="border-b hover:bg-muted/50 transition-all duration-150"
+                                                >
+                                                    <td className="p-4">
+                                                        <span className="text-sm font-medium text-muted-foreground">
+                                                            {(page - 1) *
+                                                                perPage +
+                                                                index +
+                                                                1}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                                                                <User className="h-4 w-4 text-blue-800" />
+                                                            </div>
+                                                            <span className="text-foreground text-sm">
+                                                                {
+                                                                    achievement.studentName
+                                                                }
+                                                            </span>
                                                         </div>
-                                                        <span className="text-foreground text-sm">{achievement.studentName}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <span className="text-sm text-muted-foreground">{achievement.className}</span>
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="space-y-0.5">
-                                                        <div className="text-sm text-foreground leading-tight">{achievement.competitionName}</div>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <span className="text-sm text-muted-foreground">{achievement.category}</span>
-                                                </td>
-                                                <td className="p-4">
-                                                    <Badge
-                                                        variant="outline"
-                                                        className={`${getRankBadgeColor(achievement.rank)} font-medium px-2.5 py-1 text-xs`}
-                                                    >
-                                                        <Star className="h-3.5 w-3.5 mr-1.5" />
-                                                        {achievement.rank}
-                                                    </Badge>
-                                                </td>
-                                                <td className="p-4">
-                                                    <Badge
-                                                        variant="outline"
-                                                        className={`${getLevelBadgeColor()} font-medium px-2.5 py-1 text-xs`}
-                                                    >
-                                                        <MapPin className="h-3.5 w-3.5 mr-1.5" />
-                                                        {achievement.level
-                                                            ? achievement.level.charAt(0).toUpperCase() + achievement.level.slice(1)
-                                                            : "-"}
-                                                    </Badge>
-                                                </td>
-                                                <td className="p-4">
-                                                    <span className="text-sm text-muted-foreground">
-                                                        {new Date(achievement.date).toLocaleDateString("id-ID", {
-                                                            day: "numeric",
-                                                            month: "short",
-                                                            year: "numeric",
-                                                        })}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex items-center justify-center gap-1.5">
-                                                        <Button
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {
+                                                                achievement.className
+                                                            }
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="space-y-0.5">
+                                                            <div className="text-sm text-foreground leading-tight">
+                                                                {
+                                                                    achievement.competitionName
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {
+                                                                achievement.category
+                                                            }
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <Badge
                                                             variant="outline"
-                                                            size="sm"
-                                                            className="h-8 w-8 p-0 bg-amber-50 hover:bg-amber-100 text-amber-600 border-amber-200"
-                                                            onClick={() => handleEdit(achievement)}
-                                                            title="Edit"
+                                                            className={`${getRankBadgeColor(achievement.rank)} font-medium px-2.5 py-1 text-xs`}
                                                         >
-                                                            <Edit className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                        <Button
+                                                            <Star className="h-3.5 w-3.5 mr-1.5" />
+                                                            {achievement.rank}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <Badge
                                                             variant="outline"
-                                                            size="sm"
-                                                            className="h-8 w-8 p-0 bg-red-50 hover:bg-red-100 text-red-600 border-red-200"
-                                                            onClick={() => handleDeleteClick(achievement)}
-                                                            title="Hapus"
+                                                            className={`${getLevelBadgeColor()} font-medium px-2.5 py-1 text-xs`}
                                                         >
-                                                            <Trash2 className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
+                                                            <MapPin className="h-3.5 w-3.5 mr-1.5" />
+                                                            {achievement.level
+                                                                ? achievement.level
+                                                                      .charAt(0)
+                                                                      .toUpperCase() +
+                                                                  achievement.level.slice(
+                                                                      1,
+                                                                  )
+                                                                : '-'}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {new Date(
+                                                                achievement.date,
+                                                            ).toLocaleDateString(
+                                                                'id-ID',
+                                                                {
+                                                                    day: 'numeric',
+                                                                    month: 'short',
+                                                                    year: 'numeric',
+                                                                },
+                                                            )}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex items-center justify-center gap-1.5">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0 bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200"
+                                                                onClick={() =>
+                                                                    router.push(
+                                                                        `/mutamayizin-coordinator/achievements/${achievement.id}`,
+                                                                    )
+                                                                }
+                                                                title="Lihat Detail"
+                                                            >
+                                                                <Eye className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0 bg-amber-50 hover:bg-amber-100 text-amber-600 border-amber-200"
+                                                                onClick={() =>
+                                                                    handleEdit(
+                                                                        achievement,
+                                                                    )
+                                                                }
+                                                                title="Edit"
+                                                            >
+                                                                <Edit className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0 bg-red-50 hover:bg-red-100 text-red-600 border-red-200"
+                                                                onClick={() =>
+                                                                    handleDeleteClick(
+                                                                        achievement,
+                                                                    )
+                                                                }
+                                                                title="Hapus"
+                                                            >
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ),
+                                        )
                                     )}
                                 </tbody>
                             </table>
@@ -743,7 +946,10 @@ export const MutamayizinAchievements: React.FC = () => {
                             itemsPerPage={perPage}
                             itemLabel="prestasi"
                             onPageChange={setPage}
-                            onItemsPerPageChange={(v) => { setPerPage(v); setPage(1); }}
+                            onItemsPerPageChange={(v) => {
+                                setPerPage(v);
+                                setPage(1);
+                            }}
                             itemsPerPageOptions={[10, 15, 20, 50]}
                         />
                     )}
@@ -762,24 +968,32 @@ export const MutamayizinAchievements: React.FC = () => {
             />
 
             {/* Delete Confirmation Dialog */}
-            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+            >
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Hapus Prestasi</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Apakah Anda yakin ingin menghapus prestasi{" "}
-                            <strong>{deleteTarget?.competitionName}</strong> milik{" "}
-                            <strong>{deleteTarget?.studentName}</strong>? Tindakan ini tidak dapat dibatalkan.
+                            Apakah Anda yakin ingin menghapus prestasi{' '}
+                            <strong>{deleteTarget?.competitionName}</strong>{' '}
+                            milik <strong>{deleteTarget?.studentName}</strong>?
+                            Tindakan ini tidak dapat dibatalkan.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={deleteMutation.isPending}>Batal</AlertDialogCancel>
+                        <AlertDialogCancel disabled={deleteMutation.isPending}>
+                            Batal
+                        </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDeleteConfirm}
                             disabled={deleteMutation.isPending}
                             className="bg-red-600 hover:bg-red-700 text-white"
                         >
-                            {deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                            {deleteMutation.isPending && (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            )}
                             Hapus
                         </AlertDialogAction>
                     </AlertDialogFooter>

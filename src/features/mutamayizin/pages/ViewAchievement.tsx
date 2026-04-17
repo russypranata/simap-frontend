@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useRouter, useParams } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import React, { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
     Award,
     Calendar,
@@ -22,211 +22,324 @@ import {
     Maximize2,
     X,
     History,
-} from "lucide-react";
+    Loader2,
+} from 'lucide-react';
+import { getAchievement } from '../services/mutamayizinService';
+import type { AchievementDetail } from '../services/mutamayizinService';
 
-// Mock data - in real app, fetch based on ID
-// Unified Mock Data Source
 const ALL_ACHIEVEMENTS_DATA = [
     {
         id: 1,
-        studentName: "Ahmad Rizki",
-        studentNIS: "2024001",
-        studentClass: "X A",
+        studentName: 'Ahmad Rizki',
+        studentNIS: '2024001',
+        studentClass: 'X A',
         studentPhoto: null,
-        competitionName: "Olimpiade Matematika",
-        category: "Akademik",
-        rank: "Juara 1",
-        eventName: "OSN Tingkat Provinsi",
-        organizer: "Dinas Pendidikan Provinsi Kalimantan Barat",
-        level: "Provinsi",
-        date: "2024-11-15",
+        competitionName: 'Olimpiade Matematika',
+        category: 'Akademik',
+        rank: 'Juara 1',
+        eventName: 'OSN Tingkat Provinsi',
+        organizer: 'Dinas Pendidikan Provinsi Kalimantan Barat',
+        level: 'Provinsi',
+        date: '2024-11-15',
         photos: [
-            "https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80&w=1000", /* Trophy */
-            "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=1000", /* Student Success */
-            "https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&q=80&w=1000", /* Conference/Event */
+            'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&q=80&w=1000',
+            'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=1000',
+            'https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&q=80&w=1000',
         ],
     },
     {
         id: 101,
-        studentName: "Ahmad Rizki",
-        studentNIS: "2024001",
-        studentClass: "X A",
+        studentName: 'Ahmad Rizki',
+        studentNIS: '2024001',
+        studentClass: 'X A',
         studentPhoto: null,
-        competitionName: "Kompetisi Sains Madrasah",
-        category: "Akademik",
-        rank: "Juara 3",
-        eventName: "KSM Kabupaten",
-        organizer: "Kemenag Kabupaten",
-        level: "Kabupaten",
-        date: "2024-08-10",
+        competitionName: 'Kompetisi Sains Madrasah',
+        category: 'Akademik',
+        rank: 'Juara 3',
+        eventName: 'KSM Kabupaten',
+        organizer: 'Kemenag Kabupaten',
+        level: 'Kabupaten',
+        date: '2024-08-10',
         photo: null,
     },
     {
         id: 102,
-        studentName: "Ahmad Rizki",
-        studentNIS: "2024001",
-        studentClass: "X A",
+        studentName: 'Ahmad Rizki',
+        studentNIS: '2024001',
+        studentClass: 'X A',
         studentPhoto: null,
-        competitionName: "Lomba Cerdas Cermat",
-        category: "Akademik",
-        rank: "Juara 1",
-        eventName: "LCC Sekolah",
-        organizer: "OSIS SMA",
-        level: "Sekolah",
-        date: "2024-05-02",
+        competitionName: 'Lomba Cerdas Cermat',
+        category: 'Akademik',
+        rank: 'Juara 1',
+        eventName: 'LCC Sekolah',
+        organizer: 'OSIS SMA',
+        level: 'Sekolah',
+        date: '2024-05-02',
         photo: null,
     },
     {
         id: 103,
-        studentName: "Ahmad Rizki",
-        studentNIS: "2024001",
-        studentClass: "X A",
+        studentName: 'Ahmad Rizki',
+        studentNIS: '2024001',
+        studentClass: 'X A',
         studentPhoto: null,
-        competitionName: "Olimpiade Matematika Nasional",
-        category: "Akademik",
-        rank: "Juara 2",
-        eventName: "OSN Nasional",
-        organizer: "Puspresnas",
-        level: "Nasional",
-        date: "2023-11-15",
+        competitionName: 'Olimpiade Matematika Nasional',
+        category: 'Akademik',
+        rank: 'Juara 2',
+        eventName: 'OSN Nasional',
+        organizer: 'Puspresnas',
+        level: 'Nasional',
+        date: '2023-11-15',
         photo: null,
     },
     {
         id: 104,
-        studentName: "Ahmad Rizki",
-        studentNIS: "2024001",
-        studentClass: "X A",
+        studentName: 'Ahmad Rizki',
+        studentNIS: '2024001',
+        studentClass: 'X A',
         studentPhoto: null,
-        competitionName: "Lomba Pidato Bahasa Arab",
-        category: "Bahasa",
-        rank: "Juara 1",
-        eventName: "Festival Bahasa Arab",
-        organizer: "MGMP Bahasa Arab",
-        level: "Provinsi",
-        date: "2023-08-20",
+        competitionName: 'Lomba Pidato Bahasa Arab',
+        category: 'Bahasa',
+        rank: 'Juara 1',
+        eventName: 'Festival Bahasa Arab',
+        organizer: 'MGMP Bahasa Arab',
+        level: 'Provinsi',
+        date: '2023-08-20',
         photo: null,
     },
     {
         id: 105,
-        studentName: "Ahmad Rizki",
-        studentNIS: "2024001",
-        studentClass: "X A",
+        studentName: 'Ahmad Rizki',
+        studentNIS: '2024001',
+        studentClass: 'X A',
         studentPhoto: null,
-        competitionName: "Musabaqah Tilawatil Quran",
-        category: "Keagamaan",
-        rank: "Harapan 1",
-        eventName: "MTQ Kabupaten",
-        organizer: "LPTQ Kabupaten",
-        level: "Kabupaten",
-        date: "2023-05-10",
+        competitionName: 'Musabaqah Tilawatil Quran',
+        category: 'Keagamaan',
+        rank: 'Harapan 1',
+        eventName: 'MTQ Kabupaten',
+        organizer: 'LPTQ Kabupaten',
+        level: 'Kabupaten',
+        date: '2023-05-10',
         photo: null,
     },
     {
         id: 106,
-        studentName: "Ahmad Rizki",
-        studentNIS: "2024001",
-        studentClass: "X A",
+        studentName: 'Ahmad Rizki',
+        studentNIS: '2024001',
+        studentClass: 'X A',
         studentPhoto: null,
-        competitionName: "Lomba Kaligrafi Islam",
-        category: "Seni",
-        rank: "Juara 3",
-        eventName: "Pekan Seni Islami",
-        organizer: "Yayasan Al-Fityan",
-        level: "Sekolah",
-        date: "2023-03-05",
+        competitionName: 'Lomba Kaligrafi Islam',
+        category: 'Seni',
+        rank: 'Juara 3',
+        eventName: 'Pekan Seni Islami',
+        organizer: 'Yayasan Al-Fityan',
+        level: 'Sekolah',
+        date: '2023-03-05',
         photo: null,
     },
     {
         id: 107,
-        studentName: "Ahmad Rizki",
-        studentNIS: "2024001",
-        studentClass: "X A",
+        studentName: 'Ahmad Rizki',
+        studentNIS: '2024001',
+        studentClass: 'X A',
         studentPhoto: null,
-        competitionName: "Science Fair Project",
-        category: "Sains",
-        rank: "Juara 2",
-        eventName: "Expo Pendidikan",
-        organizer: "Dinas Pendidikan Kota",
-        level: "Kecamatan",
-        date: "2023-01-15",
+        competitionName: 'Science Fair Project',
+        category: 'Sains',
+        rank: 'Juara 2',
+        eventName: 'Expo Pendidikan',
+        organizer: 'Dinas Pendidikan Kota',
+        level: 'Kecamatan',
+        date: '2023-01-15',
         photo: null,
     },
 ];
+
+// Mock data type for ALL_ACHIEVEMENTS_DATA
+interface MockAchievement {
+    id: number;
+    studentName: string;
+    studentNIS: string;
+    studentClass: string;
+    studentPhoto: string | null;
+    competitionName: string;
+    category: string;
+    rank: string;
+    eventName: string;
+    organizer: string;
+    level: string;
+    date: string;
+    photos?: string[];
+    photo?: string | null;
+}
 
 export const ViewAchievement: React.FC = () => {
     const router = useRouter();
     const params = useParams();
 
-    // State for Carousel & Lightbox
-    const [currentPhotoIndex, setCurrentPhotoIndex] = React.useState(0);
-    const [isLightboxOpen, setIsLightboxOpen] = React.useState(false);
+    const [achievement, setAchievement] = useState<AchievementDetail | null>(
+        null,
+    );
+    const [isLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
-    // Simulate fetching data based on ID
+    const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
     const achievementId = params?.id ? Number(params.id) : 1;
-    const mockAchievementData = ALL_ACHIEVEMENTS_DATA.find((a) => a.id === achievementId) || ALL_ACHIEVEMENTS_DATA[0];
 
-    // Normalize photos logic
-    // @ts-ignore
-    const photos = mockAchievementData.photos || (mockAchievementData.photo ? [mockAchievementData.photo] : []);
-    const hasPhotos = photos.length > 0;
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setError(null);
 
-    const nextPhoto = (e?: any) => {
-        e?.stopPropagation();
-        if (hasPhotos) setCurrentPhotoIndex((prev) => (prev + 1) % photos.length);
-    };
+        if (useMock) {
+            return;
+        }
 
-    const prevPhoto = (e?: any) => {
-        e?.stopPropagation();
-        if (hasPhotos) setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length);
-    };
+        getAchievement(achievementId)
+            .then((result) => {
+                setAchievement(result);
+            })
+            .catch((err) => setError(err.message));
+    }, [achievementId, useMock]);
 
-    // Keyboard navigation for Lightbox
-    React.useEffect(() => {
+    useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!isLightboxOpen) return;
-            if (e.key === "ArrowRight") nextPhoto();
-            if (e.key === "ArrowLeft") prevPhoto();
-            if (e.key === "Escape") setIsLightboxOpen(false);
+            if (e.key === 'ArrowRight')
+                setCurrentPhotoIndex((prev) => {
+                    const photoArr = achievement?.photos
+                        ? achievement.photos.map(
+                              (p: { id: number; url: string }) => p.url,
+                          )
+                        : [];
+                    return photoArr.length > 0
+                        ? (prev + 1) % photoArr.length
+                        : prev;
+                });
+            if (e.key === 'ArrowLeft')
+                setCurrentPhotoIndex((prev) => {
+                    const photoArr = achievement?.photos
+                        ? achievement.photos.map(
+                              (p: { id: number; url: string }) => p.url,
+                          )
+                        : [];
+                    return photoArr.length > 0
+                        ? (prev - 1 + photoArr.length) % photoArr.length
+                        : prev;
+                });
+            if (e.key === 'Escape') setIsLightboxOpen(false);
         };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [isLightboxOpen, photos.length]);
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isLightboxOpen, achievement?.photos]);
 
-    const otherAchievements = ALL_ACHIEVEMENTS_DATA.filter((a) => a.id !== mockAchievementData.id);
+    const mockAchievementData = useMock
+        ? ALL_ACHIEVEMENTS_DATA.find(
+              (a: MockAchievement) => a.id === achievementId,
+          ) || ALL_ACHIEVEMENTS_DATA[0]
+        : null;
+
+    const data = useMock ? mockAchievementData : achievement;
+
+    const studentName = data?.studentName ?? '';
+    const studentNis = useMock
+        ? ((data as MockAchievement)?.studentNIS ?? '')
+        : ((data as AchievementDetail)?.studentNis ?? '');
+    const studentClass = useMock
+        ? ((data as MockAchievement)?.studentClass ?? '')
+        : ((data as AchievementDetail)?.className ?? '');
+    const competitionName = data?.competitionName ?? '';
+    const category = data?.category ?? '';
+    const rank = data?.rank ?? '';
+    const level = data?.level ?? '';
+    const date = data?.date ?? '';
+    const eventName = data?.eventName ?? '';
+    const organizer = data?.organizer ?? '';
+    const apiPhotos = data?.photos;
+    const photos: string[] = apiPhotos
+        ? apiPhotos.map((p) => (typeof p === 'string' ? p : p.url))
+        : [];
+    const hasPhotos = photos.length > 0;
+
+    const otherAchievements = useMock
+        ? ALL_ACHIEVEMENTS_DATA.filter(
+              (a: MockAchievement) => a.id !== achievementId,
+          )
+        : [];
 
     const handleBack = () => {
-        router.push("/mutamayizin-coordinator/achievements");
+        router.push('/mutamayizin-coordinator/achievements');
     };
 
     const handleEdit = () => {
-        router.push(`/mutamayizin-coordinator/achievements/${mockAchievementData.id}/edit`);
+        router.push(
+            `/mutamayizin-coordinator/achievements/${achievementId}/edit`,
+        );
     };
 
-    const getLevelBadgeColor = () => {
-        return "bg-amber-100 text-amber-800 border-amber-300";
-    };
+    const getLevelBadgeColor = () =>
+        'bg-amber-100 text-amber-800 border-amber-300';
 
-    const getRankBadgeColor = (rank: string) => {
-        switch (rank) {
-            case "Juara 1":
-                return "bg-emerald-100 text-emerald-700 border-emerald-300";
-            case "Juara 2":
-                return "bg-sky-100 text-sky-700 border-sky-300";
-            case "Juara 3":
-                return "bg-orange-100 text-orange-700 border-orange-300";
+    const getRankBadgeColor = (r: string) => {
+        switch (r) {
+            case 'Juara 1':
+                return 'bg-emerald-100 text-emerald-700 border-emerald-300';
+            case 'Juara 2':
+                return 'bg-sky-100 text-sky-700 border-sky-300';
+            case 'Juara 3':
+                return 'bg-orange-100 text-orange-700 border-orange-300';
             default:
-                return "bg-zinc-100 text-zinc-600 border-zinc-300";
+                return 'bg-zinc-100 text-zinc-600 border-zinc-300';
         }
     };
 
     const getInitials = (name: string) => {
         return name
-            .split(" ")
+            .split(' ')
             .map((n) => n[0])
-            .join("")
+            .join('')
             .toUpperCase()
             .substring(0, 2);
     };
+
+    const nextPhoto = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        if (hasPhotos)
+            setCurrentPhotoIndex((prev) => (prev + 1) % photos.length);
+    };
+
+    const prevPhoto = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        if (hasPhotos)
+            setCurrentPhotoIndex(
+                (prev) => (prev - 1 + photos.length) % photos.length,
+            );
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (error && !useMock) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+                <p className="text-muted-foreground">
+                    Gagal memuat data: {error}
+                </p>
+                <Button
+                    onClick={() =>
+                        router.push('/mutamayizin-coordinator/achievements')
+                    }
+                >
+                    Kembali ke Daftar
+                </Button>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -243,15 +356,23 @@ export const ViewAchievement: React.FC = () => {
                 <div className="flex-1">
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">
-                            <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">Detail </span>
-                            <span className="bg-gradient-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">Prestasi</span>
+                            <span className="bg-linear-to-r from-slate-900 via-slate-700 to-slate-600 bg-clip-text text-transparent">
+                                Detail{' '}
+                            </span>
+                            <span className="bg-linear-to-r from-blue-800 via-primary to-blue-400 bg-clip-text text-transparent">
+                                Prestasi
+                            </span>
                         </h1>
                         <div className="flex items-center gap-2 p-2 rounded-full bg-primary/10 text-primary border border-primary/20">
                             <Award className="h-5 w-5" />
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Informasi lengkap prestasi <span className="font-semibold text-foreground">{mockAchievementData.studentName}</span> pada Program Mutamayizin
+                        Informasi lengkap prestasi{' '}
+                        <span className="font-semibold text-foreground">
+                            {studentName}
+                        </span>{' '}
+                        pada Program Mutamayizin
                     </p>
                 </div>
                 <Button
@@ -268,8 +389,8 @@ export const ViewAchievement: React.FC = () => {
                 {/* Decorative Header */}
                 <div className="bg-blue-800 p-5 relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
-                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
+                        <div className="absolute top-0 right-0 w-40 h-40 border-20 border-white rounded-full -translate-y-1/2 translate-x-1/4" />
+                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-8 border-white rounded-full translate-y-1/2" />
                     </div>
 
                     <div className="flex items-center gap-4 relative z-10">
@@ -277,8 +398,10 @@ export const ViewAchievement: React.FC = () => {
                             <Trophy className="h-7 w-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white">{mockAchievementData.competitionName}</h2>
-                            <p className="text-blue-100 text-sm">{mockAchievementData.category}</p>
+                            <h2 className="text-xl font-bold text-white">
+                                {competitionName}
+                            </h2>
+                            <p className="text-blue-100 text-sm">{category}</p>
                         </div>
                     </div>
                 </div>
@@ -287,36 +410,57 @@ export const ViewAchievement: React.FC = () => {
                     {/* Student Info Section */}
                     <div>
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                 <User className="h-5 w-5" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-semibold">Informasi Siswa</h3>
-                                <p className="text-sm text-muted-foreground">Data diri siswa peraih prestasi</p>
+                                <h3 className="text-lg font-semibold">
+                                    Informasi Siswa
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Data diri siswa peraih prestasi
+                                </p>
                             </div>
                         </div>
                         <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-xl">
                             {/* Avatar */}
-                            <div className="w-14 h-14 rounded-full bg-blue-800 flex items-center justify-center flex-shrink-0 ring-4 ring-primary/10 overflow-hidden">
-                                {mockAchievementData.studentPhoto ? (
-                                    <img src={mockAchievementData.studentPhoto} alt={mockAchievementData.studentName} className="w-full h-full rounded-full object-cover" />
+                            <div className="w-14 h-14 rounded-full bg-blue-800 flex items-center justify-center shrink-0 ring-4 ring-primary/10 overflow-hidden">
+                                {useMock && (data as MockAchievement)?.studentPhoto ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={(data as MockAchievement).studentPhoto!}
+                                        alt={studentName}
+                                        className="w-full h-full rounded-full object-cover"
+                                    />
                                 ) : (
                                     <span className="text-lg font-semibold text-white">
-                                        {getInitials(mockAchievementData.studentName)}
+                                        {getInitials(studentName)}
                                     </span>
                                 )}
                             </div>
                             {/* Info */}
                             <div className="flex-1">
-                                <p className="text-lg font-bold text-foreground">{mockAchievementData.studentName}</p>
+                                <p className="text-lg font-bold text-foreground">
+                                    {studentName}
+                                </p>
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
                                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                                         <IdCard className="h-3.5 w-3.5" />
-                                        <span>NIS: <span className="font-mono font-semibold text-foreground">{mockAchievementData.studentNIS}</span></span>
+                                        <span>
+                                            NIS:{' '}
+                                            <span className="font-mono font-semibold text-foreground">
+                                                {studentNis}
+                                            </span>
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                                         <GraduationCap className="h-3.5 w-3.5" />
-                                        <span>Kelas <span className="font-semibold text-foreground">{mockAchievementData.studentClass}</span></span>
+                                        <span>
+                                            Kelas{' '}
+                                            <span className="font-semibold text-foreground">
+                                                {studentClass}
+                                            </span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -329,104 +473,138 @@ export const ViewAchievement: React.FC = () => {
                     {/* Achievement Details Section */}
                     <div>
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                 <Trophy className="h-5 w-5" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-semibold">Detail Prestasi</h3>
-                                <p className="text-sm text-muted-foreground">Rincian kompetisi dan capaian juara</p>
+                                <h3 className="text-lg font-semibold">
+                                    Detail Prestasi
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Rincian kompetisi dan capaian juara
+                                </p>
                             </div>
                         </div>
                         <div className="space-y-4">
                             {/* Nama Lomba - Full Width for emphasis */}
                             <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 w-full">
-                                <div className="p-2 rounded-full bg-primary/10 flex-shrink-0">
+                                <div className="p-2 rounded-full bg-primary/10 shrink-0">
                                     <Trophy className="h-5 w-5 text-primary" />
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-xs text-muted-foreground">Nama Lomba / Kompetisi</p>
-                                    <p className="text-sm font-semibold">{mockAchievementData.competitionName}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Nama Lomba / Kompetisi
+                                    </p>
+                                    <p className="text-sm font-semibold">
+                                        {competitionName}
+                                    </p>
                                 </div>
                             </div>
 
                             {/* Horizontal Flow Layout (Flex Wrap) */}
                             <div className="flex flex-wrap gap-4">
-
                                 {/* Peringkat */}
-                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-[240px]">
-                                    <div className="p-2 rounded-full bg-primary/10 flex-shrink-0">
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-60">
+                                    <div className="p-2 rounded-full bg-primary/10 shrink-0">
                                         <Star className="h-5 w-5 text-primary" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground mb-1">Peringkat</p>
-                                        <Badge variant="outline" className={`${getRankBadgeColor(mockAchievementData.rank)} text-xs px-2 py-0.5 font-medium border-none`}>
-                                            {mockAchievementData.rank}
+                                        <p className="text-xs text-muted-foreground mb-1">
+                                            Peringkat
+                                        </p>
+                                        <Badge
+                                            variant="outline"
+                                            className={`${getRankBadgeColor(rank)} text-xs px-2 py-0.5 font-medium border-none`}
+                                        >
+                                            {rank}
                                         </Badge>
                                     </div>
                                 </div>
 
                                 {/* Tingkat */}
-                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-[240px]">
-                                    <div className="p-2 rounded-full bg-primary/10 flex-shrink-0">
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-60">
+                                    <div className="p-2 rounded-full bg-primary/10 shrink-0">
                                         <MapPin className="h-5 w-5 text-primary" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground mb-1">Tingkat</p>
-                                        <Badge variant="outline" className={`${getLevelBadgeColor()} text-xs px-2 py-0.5 font-medium border-none`}>
-                                            {mockAchievementData.level}
+                                        <p className="text-xs text-muted-foreground mb-1">
+                                            Tingkat
+                                        </p>
+                                        <Badge
+                                            variant="outline"
+                                            className={`${getLevelBadgeColor()} text-xs px-2 py-0.5 font-medium border-none`}
+                                        >
+                                            {level}
                                         </Badge>
                                     </div>
                                 </div>
 
                                 {/* Kategori */}
-                                {mockAchievementData.category && (
-                                    <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-[240px]">
-                                        <div className="p-2 rounded-full bg-primary/10 flex-shrink-0">
+                                {category && (
+                                    <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-60">
+                                        <div className="p-2 rounded-full bg-primary/10 shrink-0">
                                             <Award className="h-5 w-5 text-primary" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-xs text-muted-foreground">Kategori</p>
-                                            <p className="text-sm font-semibold">{mockAchievementData.category}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                Kategori
+                                            </p>
+                                            <p className="text-sm font-semibold">
+                                                {category}
+                                            </p>
                                         </div>
                                     </div>
                                 )}
 
                                 {/* Tanggal */}
-                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-[240px]">
-                                    <div className="p-2 rounded-full bg-primary/10 flex-shrink-0">
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-60">
+                                    <div className="p-2 rounded-full bg-primary/10 shrink-0">
                                         <Calendar className="h-5 w-5 text-primary" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground">Tanggal</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Tanggal
+                                        </p>
                                         <p className="text-sm font-semibold">
-                                            {new Date(mockAchievementData.date).toLocaleDateString("id-ID", {
-                                                day: "numeric",
-                                                month: "long",
-                                                year: "numeric"
-                                            })}
+                                            {new Date(date).toLocaleDateString(
+                                                'id-ID',
+                                                {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                },
+                                            )}
                                         </p>
                                     </div>
                                 </div>
 
                                 {/* Penyelenggara */}
-                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-[240px]">
-                                    <div className="p-2 rounded-full bg-primary/10 flex-shrink-0">
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-60">
+                                    <div className="p-2 rounded-full bg-primary/10 shrink-0">
                                         <Building2 className="h-5 w-5 text-primary" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground">Penyelenggara</p>
-                                        <p className="text-sm font-semibold">{mockAchievementData.organizer}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Penyelenggara
+                                        </p>
+                                        <p className="text-sm font-semibold">
+                                            {organizer}
+                                        </p>
                                     </div>
                                 </div>
 
                                 {/* Nama Event */}
-                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-[240px]">
-                                    <div className="p-2 rounded-full bg-primary/10 flex-shrink-0">
+                                <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 flex-1 min-w-60">
+                                    <div className="p-2 rounded-full bg-primary/10 shrink-0">
                                         <Award className="h-5 w-5 text-primary" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground">Event</p>
-                                        <p className="text-sm font-semibold">{mockAchievementData.eventName}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Event
+                                        </p>
+                                        <p className="text-sm font-semibold">
+                                            {eventName}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -439,12 +617,16 @@ export const ViewAchievement: React.FC = () => {
                     {/* Documentation Photo Section */}
                     <div>
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                 <IdCard className="h-5 w-5" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-semibold">Foto Dokumentasi</h3>
-                                <p className="text-sm text-muted-foreground">Bukti sertifikat atau dokumentasi kegiatan</p>
+                                <h3 className="text-lg font-semibold">
+                                    Foto Dokumentasi
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Bukti sertifikat atau dokumentasi kegiatan
+                                </p>
                             </div>
                         </div>
                         {hasPhotos ? (
@@ -456,6 +638,7 @@ export const ViewAchievement: React.FC = () => {
                                         className="w-full h-full cursor-pointer relative"
                                         onClick={() => setIsLightboxOpen(true)}
                                     >
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={photos[currentPhotoIndex]}
                                             alt={`Dokumentasi ${currentPhotoIndex + 1}`}
@@ -466,7 +649,9 @@ export const ViewAchievement: React.FC = () => {
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                                             <div className="flex items-center gap-2 text-white bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-sm">
                                                 <Maximize2 className="h-4 w-4" />
-                                                <span className="text-sm font-medium">Buka Galeri</span>
+                                                <span className="text-sm font-medium">
+                                                    Buka Galeri
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -491,7 +676,8 @@ export const ViewAchievement: React.FC = () => {
 
                                     {/* Counter Badge */}
                                     <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/60 text-white text-xs rounded-md backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {currentPhotoIndex + 1} / {photos.length}
+                                        {currentPhotoIndex + 1} /{' '}
+                                        {photos.length}
                                     </div>
                                 </div>
 
@@ -501,11 +687,14 @@ export const ViewAchievement: React.FC = () => {
                                         {photos.map((_, idx) => (
                                             <button
                                                 key={idx}
-                                                onClick={() => setCurrentPhotoIndex(idx)}
-                                                className={`w-2 h-2 rounded-full transition-all ${currentPhotoIndex === idx
-                                                    ? "bg-primary w-6"
-                                                    : "bg-muted-foreground/30 hover:bg-primary/50"
-                                                    }`}
+                                                onClick={() =>
+                                                    setCurrentPhotoIndex(idx)
+                                                }
+                                                className={`w-2 h-2 rounded-full transition-all ${
+                                                    currentPhotoIndex === idx
+                                                        ? 'bg-primary w-6'
+                                                        : 'bg-muted-foreground/30 hover:bg-primary/50'
+                                                }`}
                                             />
                                         ))}
                                     </div>
@@ -536,6 +725,7 @@ export const ViewAchievement: React.FC = () => {
 
                     {/* Main Image */}
                     <div className="relative w-full max-w-5xl max-h-[85vh] px-4 flex items-center justify-center">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={photos[currentPhotoIndex]}
                             alt="Full Preview"
@@ -564,11 +754,14 @@ export const ViewAchievement: React.FC = () => {
                                 {photos.map((_, idx) => (
                                     <button
                                         key={idx}
-                                        onClick={() => setCurrentPhotoIndex(idx)}
-                                        className={`w-2 h-2 rounded-full transition-all ${currentPhotoIndex === idx
-                                            ? "bg-white w-6"
-                                            : "bg-white/30 hover:bg-white/50"
-                                            }`}
+                                        onClick={() =>
+                                            setCurrentPhotoIndex(idx)
+                                        }
+                                        className={`w-2 h-2 rounded-full transition-all ${
+                                            currentPhotoIndex === idx
+                                                ? 'bg-white w-6'
+                                                : 'bg-white/30 hover:bg-white/50'
+                                        }`}
                                     />
                                 ))}
                             </div>
@@ -582,8 +775,8 @@ export const ViewAchievement: React.FC = () => {
                 {/* Decorative Header */}
                 <div className="bg-blue-800 p-5 relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
-                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
+                        <div className="absolute top-0 right-0 w-40 h-40 border-20 border-white rounded-full -translate-y-1/2 translate-x-1/4" />
+                        <div className="absolute bottom-0 right-1/3 w-20 h-20 border-8 border-white rounded-full translate-y-1/2" />
                     </div>
 
                     <div className="flex items-center justify-between relative z-10 w-full">
@@ -592,28 +785,37 @@ export const ViewAchievement: React.FC = () => {
                                 <History className="h-7 w-7 text-white" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold text-white">Prestasi Lainnya</h2>
-                                <p className="text-blue-100 text-sm">Riwayat pencapaian {mockAchievementData.studentName} lainnya</p>
+                                <h2 className="text-xl font-bold text-white">
+                                    Prestasi Lainnya
+                                </h2>
+                                <p className="text-blue-100 text-sm">
+                                    Riwayat pencapaian {studentName} lainnya
+                                </p>
                             </div>
                         </div>
                         <Badge className="bg-white/20 hover:bg-white/30 text-white border-none px-3 py-1.5 backdrop-blur-md hidden sm:flex items-center gap-2">
                             <Trophy className="h-4 w-4" />
-                            <span className="font-semibold">{otherAchievements.length} Prestasi Lainnya</span>
+                            <span className="font-semibold">
+                                {otherAchievements.length} Prestasi Lainnya
+                            </span>
                         </Badge>
                     </div>
                 </div>
 
                 <CardContent className="p-6 pt-2">
-
-                    <div className="grid gap-3 max-h-[320px] overflow-y-auto pr-2">
+                    <div className="grid gap-3 max-h-80 overflow-y-auto pr-2">
                         {otherAchievements.map((achievement, index) => (
                             <div
                                 key={achievement.id}
                                 className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border bg-card hover:bg-muted/50 hover:border-primary/20 transition-all cursor-pointer"
-                                onClick={() => router.push(`/mutamayizin-coordinator/achievements/${achievement.id}`)}
+                                onClick={() =>
+                                    router.push(
+                                        `/mutamayizin-coordinator/achievements/${achievement.id}`,
+                                    )
+                                }
                             >
                                 <div className="flex items-start gap-4">
-                                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-800 font-semibold text-sm mt-0.5 border border-blue-200">
+                                    <div className="shrink-0 w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-800 font-semibold text-sm mt-0.5 border border-blue-200">
                                         {index + 1}
                                     </div>
                                     <div className="space-y-1">
@@ -621,7 +823,10 @@ export const ViewAchievement: React.FC = () => {
                                             <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                                                 {achievement.competitionName}
                                             </h4>
-                                            <Badge variant="outline" className={`${getRankBadgeColor(achievement.rank)} text-xs px-2 py-0.5 font-medium`}>
+                                            <Badge
+                                                variant="outline"
+                                                className={`${getRankBadgeColor(achievement.rank)} text-xs px-2 py-0.5 font-medium`}
+                                            >
                                                 <Star className="h-3 w-3 mr-1" />
                                                 {achievement.rank}
                                             </Badge>
@@ -634,16 +839,22 @@ export const ViewAchievement: React.FC = () => {
                                             <div className="w-1 h-1 rounded-full bg-border" />
                                             <div className="flex items-center gap-1">
                                                 <Calendar className="h-3.5 w-3.5" />
-                                                {new Date(achievement.date).toLocaleDateString("id-ID", {
-                                                    day: "numeric",
-                                                    month: "long",
-                                                    year: "numeric"
+                                                {new Date(
+                                                    achievement.date,
+                                                ).toLocaleDateString('id-ID', {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
                                                 })}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <Button size="sm" variant="ghost" className="self-start sm:self-center bg-blue-100 hover:bg-blue-200 text-blue-800 hover:text-blue-900 border-blue-200">
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="self-start sm:self-center bg-blue-100 hover:bg-blue-200 text-blue-800 hover:text-blue-900 border-blue-200"
+                                >
                                     Detail
                                     <ChevronRight className="ml-2 h-4 w-4" />
                                 </Button>

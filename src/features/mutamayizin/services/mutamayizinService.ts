@@ -77,12 +77,17 @@ export interface Achievement {
     semester: number;
 }
 
+export interface AchievementPhoto {
+    id: number;
+    url: string;
+}
+
 export interface AchievementDetail extends Achievement {
     studentProfileId: number;
     academicYearId: number;
     eventName?: string;
     organizer?: string;
-    photo?: string;
+    photos: AchievementPhoto[];
 }
 
 export interface AchievementParams {
@@ -229,9 +234,10 @@ export interface CreateAchievementData {
     category?: string;
     event_name?: string;
     organizer?: string;
+    photo?: File;
 }
 
-export type UpdateAchievementData = Partial<CreateAchievementData>;
+export type UpdateAchievementData = Partial<Omit<CreateAchievementData, 'photo'> & { photo?: File | null }>;
 
 // ==================== SERVICE FUNCTIONS ====================
 
@@ -278,10 +284,61 @@ export const getAchievement = async (id: number): Promise<AchievementDetail> => 
 export const createAchievement = async (
     data: CreateAchievementData
 ): Promise<AchievementDetail> => {
+    const hasFile = data.photo instanceof File;
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+
+    console.log('createAchievement called', { 
+        hasFile, 
+        photoName: data.photo instanceof File ? data.photo.name : null,
+        photoSize: data.photo instanceof File ? data.photo.size : null,
+        photoType: data.photo instanceof File ? data.photo.type : null
+    });
+
+    if (hasFile) {
+        const formData = new FormData();
+        formData.append("student_profile_id", String(data.student_profile_id));
+        formData.append("academic_year_id", String(data.academic_year_id));
+        formData.append("competition_name", data.competition_name);
+        formData.append("rank", data.rank);
+        formData.append("level", data.level);
+        formData.append("date", data.date);
+        if (data.semester !== undefined) formData.append("semester", String(data.semester));
+        if (data.category) formData.append("category", data.category);
+        if (data.event_name) formData.append("event_name", data.event_name);
+        if (data.organizer) formData.append("organizer", data.organizer);
+        formData.append("photo", data.photo!);
+
+        const response = await fetch(`${MUTAMAYIZIN_API_URL}/achievements`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: "application/json",
+            },
+            body: formData,
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('Error response:', errorData);
+            const error = new Error(errorData.message || `HTTP ${response.status}`) as Error & { code: number; errors?: Record<string, string[]> };
+            error.code = response.status;
+            error.errors = errorData.errors;
+            throw error;
+        }
+        const result = await response.json();
+        console.log('Success response:', result);
+        return result.data;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { photo: _, ...jsonData } = data;
     const response = await fetch(`${MUTAMAYIZIN_API_URL}/achievements`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify(data),
+        body: JSON.stringify(jsonData),
     });
     if (!response.ok) await handleApiError(response);
     const result = await response.json();
@@ -292,14 +349,76 @@ export const updateAchievement = async (
     id: number,
     data: UpdateAchievementData
 ): Promise<AchievementDetail> => {
+    const hasFile = data.photo instanceof File;
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+
+    if (hasFile) {
+        const formData = new FormData();
+        if (data.student_profile_id !== undefined) formData.append("student_profile_id", String(data.student_profile_id));
+        if (data.academic_year_id !== undefined) formData.append("academic_year_id", String(data.academic_year_id));
+        if (data.competition_name !== undefined) formData.append("competition_name", data.competition_name);
+        if (data.rank !== undefined) formData.append("rank", data.rank);
+        if (data.level !== undefined) formData.append("level", data.level.toLowerCase());
+        if (data.date !== undefined) formData.append("date", data.date);
+        if (data.semester !== undefined) formData.append("semester", String(data.semester));
+        if (data.category !== undefined) formData.append("category", data.category);
+        if (data.event_name !== undefined) formData.append("event_name", data.event_name);
+        if (data.organizer !== undefined) formData.append("organizer", data.organizer);
+        formData.append("photo", data.photo!);
+
+        const response = await fetch(`${MUTAMAYIZIN_API_URL}/achievements/${id}`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: "application/json",
+            },
+            body: formData,
+        });
+        if (!response.ok) await handleApiError(response);
+        const result = await response.json();
+        return result.data;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { photo: _, ...jsonData } = data as UpdateAchievementData & { photo?: File | null };
+    if (jsonData.level) jsonData.level = jsonData.level.toLowerCase();
     const response = await fetch(`${MUTAMAYIZIN_API_URL}/achievements/${id}`, {
         method: "PUT",
         headers: getAuthHeaders(),
-        body: JSON.stringify(data),
+        body: JSON.stringify(jsonData),
     });
     if (!response.ok) await handleApiError(response);
     const result = await response.json();
     return result.data;
+};
+
+export const uploadAchievementPhoto = async (id: number, photo: File): Promise<string> => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+    const formData = new FormData();
+    formData.append("photo", photo);
+    const response = await fetch(`${MUTAMAYIZIN_API_URL}/achievements/${id}/photo`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+        },
+        body: formData,
+    });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    return result.data.photo;
+};
+
+export const deleteAchievementPhoto = async (photoId: number): Promise<void> => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+    const response = await fetch(`${MUTAMAYIZIN_API_URL}/achievement-photos/${photoId}`, {
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+        },
+    });
+    if (!response.ok) await handleApiError(response);
 };
 
 export const deleteAchievement = async (id: number): Promise<void> => {
@@ -473,6 +592,8 @@ export const mutamayizinService = {
     createAchievement,
     updateAchievement,
     deleteAchievement,
+    uploadAchievementPhoto,
+    deleteAchievementPhoto,
     getExtracurriculars,
     getExtracurricularDetail,
     getAttendanceSessions,
