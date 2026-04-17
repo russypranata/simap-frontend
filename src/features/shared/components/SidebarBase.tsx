@@ -60,24 +60,40 @@ export const SidebarBase: React.FC<SidebarBaseProps> = ({
     const { collapsed, setCollapsed } = useSidebarContext();
     const pathname = usePathname();
 
-    // Initialize openSubmenus with items that have defaultOpen: true or have active children
+    // Initialize openSubmenus — persist in localStorage so it survives refresh
     const getDefaultOpenSubmenus = () => {
-        return menuItems
+        // Always open the submenu that contains the current active path
+        const activeParents = menuItems
             .filter(item =>
                 item.defaultOpen ||
                 item.subItems?.some(sub => pathname === sub.href || pathname?.startsWith(sub.href))
             )
             .map(item => item.href);
+
+        // Also restore previously opened submenus from localStorage
+        try {
+            const saved = localStorage.getItem('sidebar_open_submenus');
+            if (saved) {
+                const parsed: string[] = JSON.parse(saved);
+                // Merge: always include active parents, plus any saved ones
+                return Array.from(new Set([...activeParents, ...parsed]));
+            }
+        } catch { /* ignore */ }
+
+        return activeParents;
     };
 
     const [openSubmenus, setOpenSubmenus] = useState<string[]>(getDefaultOpenSubmenus);
 
     const toggleSubmenu = (href: string) => {
-        setOpenSubmenus((prev) =>
-            prev.includes(href)
+        setOpenSubmenus((prev) => {
+            const next = prev.includes(href)
                 ? prev.filter((item) => item !== href)
-                : [...prev, href]
-        );
+                : [...prev, href];
+            // Persist to localStorage
+            try { localStorage.setItem('sidebar_open_submenus', JSON.stringify(next)); } catch { /* ignore */ }
+            return next;
+        });
     };
 
     const filteredMenuItems = menuItems.filter(

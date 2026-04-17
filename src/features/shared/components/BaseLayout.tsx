@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, createContext, useContext, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
@@ -25,6 +25,7 @@ const BreadcrumbRow: React.FC = () => {
         </div>
     );
 };
+
 const SidebarContext = createContext<{
     collapsed: boolean;
     setCollapsed: (collapsed: boolean) => void;
@@ -35,36 +36,48 @@ const SidebarContext = createContext<{
 
 export const useSidebarContext = () => useContext(SidebarContext);
 
+const SIDEBAR_COLLAPSED_KEY = 'sidebar_collapsed';
+
 export const BaseLayout: React.FC<BaseLayoutProps> = ({
     children,
     sidebar,
     navbar,
     footer,
-    breadcrumbAction,
 }) => {
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+    // Persist collapsed state in localStorage so it survives navigation & refresh
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
+        }
+        return false;
+    });
+
+    const handleSetCollapsed = (value: boolean) => {
+        setSidebarCollapsed(value);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(value));
+        }
+    };
 
     return (
         <BreadcrumbActionProvider>
-        <SidebarContext.Provider value={{ collapsed: sidebarCollapsed, setCollapsed: setSidebarCollapsed }}>
+        <SidebarContext.Provider value={{ collapsed: sidebarCollapsed, setCollapsed: handleSetCollapsed }}>
             <div className="flex min-h-screen bg-background">
-                {/* Desktop Sidebar - Fixed on the left, hidden on mobile */}
+                {/* Desktop Sidebar */}
                 <aside className="fixed left-0 top-0 z-40 h-full bg-white shadow-md transition-all duration-300 hidden md:block">
                     {sidebar}
                 </aside>
 
-                {/* Mobile Sidebar Drawer - Overlay on mobile devices */}
+                {/* Mobile Sidebar Drawer */}
                 <>
-                    {/* Overlay for mobile sidebar */}
                     {mobileSidebarOpen && (
                         <div
                             className="fixed inset-0 z-40 bg-black/50 md:hidden"
                             onClick={() => setMobileSidebarOpen(false)}
                         />
                     )}
-
-                    {/* Mobile sidebar */}
                     <aside
                         className={cn(
                             "fixed left-0 top-0 z-50 h-full bg-white shadow-md transition-transform duration-300 md:hidden w-64",
@@ -82,7 +95,6 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
                         sidebarCollapsed ? "md:ml-16" : "md:ml-64"
                     )}
                 >
-                    {/* Navbar - Fixed at the top */}
                     <header
                         className={cn(
                             "fixed top-0 right-0 z-30 h-16 w-full bg-white shadow-sm transition-all duration-300",
@@ -90,7 +102,6 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
                         )}
                     >
                         <div className="flex h-16 items-center justify-between px-4">
-                            {/* Hamburger menu for mobile */}
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -99,12 +110,10 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
                             >
                                 <Menu className="h-5 w-5" />
                             </Button>
-
                             <div className="flex-1">{navbar}</div>
                         </div>
                     </header>
 
-                    {/* Page content */}
                     <main className="flex-1 pt-16">
                         <div className="p-6">
                             <BreadcrumbRow />

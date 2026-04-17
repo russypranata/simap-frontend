@@ -24,12 +24,15 @@ export default function AdminRootLayout({ children }: { children: React.ReactNod
         }
     }, [isAuthenticated, isLoading, role, router]);
 
-    if (isLoading) return <AuthLoadingSkeleton />;
-    if (!isAuthenticated || role !== 'admin') return null;
+    // Render layout immediately — show skeleton only inside content area
+    // This prevents sidebar from remounting on every refresh
+    if (!isAuthenticated && !isLoading) return null;
 
     return (
         <AcademicYearProvider>
-            <AdminLayout>{children}</AdminLayout>
+            <AdminLayout>
+                {isLoading ? <AuthLoadingSkeleton /> : children}
+            </AdminLayout>
         </AcademicYearProvider>
     );
 }
