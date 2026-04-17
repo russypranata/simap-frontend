@@ -152,14 +152,14 @@ export const AttendanceDashboard: React.FC = () => {
                     {/* ── Presensi Pagi & Sholat ── */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Presensi Pagi */}
-                        <Card className="border-slate-200 shadow-sm">
-                            <CardHeader className="pb-3">
+                        <Card className="border-slate-100 shadow-sm overflow-hidden gap-0">
+                            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-9 w-9 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-100">
-                                        <Sun className="h-5 w-5" />
+                                    <div className="p-2 bg-amber-100 rounded-lg">
+                                        <Sun className="h-5 w-5 text-amber-700" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-base font-semibold">Keterlambatan Pagi</CardTitle>
+                                        <CardTitle className="text-lg text-slate-800">Keterlambatan Pagi</CardTitle>
                                         <CardDescription className="text-xs">Siswa yang tercatat terlambat masuk</CardDescription>
                                     </div>
                                 </div>
@@ -179,14 +179,14 @@ export const AttendanceDashboard: React.FC = () => {
                         </Card>
 
                         {/* Presensi Sholat */}
-                        <Card className="border-slate-200 shadow-sm">
-                            <CardHeader className="pb-3">
+                        <Card className="border-slate-100 shadow-sm overflow-hidden gap-0">
+                            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-9 w-9 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
-                                        <Moon className="h-5 w-5" />
+                                    <div className="p-2 bg-indigo-100 rounded-lg">
+                                        <Moon className="h-5 w-5 text-indigo-700" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-base font-semibold">Presensi Sholat</CardTitle>
+                                        <CardTitle className="text-lg text-slate-800">Presensi Sholat</CardTitle>
                                         <CardDescription className="text-xs">Kehadiran sholat berjamaah hari ini</CardDescription>
                                     </div>
                                 </div>
@@ -220,10 +220,17 @@ export const AttendanceDashboard: React.FC = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Ringkasan Ketidakhadiran Mapel */}
                         <div className="lg:col-span-1">
-                            <Card className="border-slate-200 shadow-sm">
-                                <CardHeader>
-                                    <CardTitle className="text-base">Ringkasan Ketidakhadiran</CardTitle>
-                                    <CardDescription>Breakdown presensi mapel hari ini</CardDescription>
+                            <Card className="border-slate-100 shadow-sm overflow-hidden gap-0">
+                                <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-red-100 rounded-lg">
+                                            <UserX className="h-5 w-5 text-red-700" />
+                                        </div>
+                                        <div>
+                                            <CardTitle className="text-lg text-slate-800">Ringkasan Ketidakhadiran</CardTitle>
+                                            <CardDescription>Breakdown presensi mapel hari ini</CardDescription>
+                                        </div>
+                                    </div>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     {summaryLoading ? (
@@ -270,17 +277,24 @@ export const AttendanceDashboard: React.FC = () => {
 
                         {/* Log Presensi Mapel Terbaru */}
                         <div className="lg:col-span-2">
-                            <Card className="border-slate-200 shadow-sm">
-                                <CardHeader className="flex flex-row items-center justify-between pb-3">
-                                    <div>
-                                        <CardTitle className="text-base">Log Presensi Mapel Terbaru</CardTitle>
-                                        <CardDescription>Data presensi mata pelajaran hari ini</CardDescription>
+                            <Card className="border-slate-100 shadow-sm overflow-hidden gap-0">
+                                <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-blue-100 rounded-lg">
+                                                <ClipboardCheck className="h-5 w-5 text-blue-700" />
+                                            </div>
+                                            <div>
+                                                <CardTitle className="text-lg text-slate-800">Log Presensi Mapel Terbaru</CardTitle>
+                                                <CardDescription>Data presensi mata pelajaran hari ini</CardDescription>
+                                            </div>
+                                        </div>
+                                        <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 text-xs gap-1" asChild>
+                                            <Link href="/admin/attendance/report">
+                                                Lihat Semua <ArrowRight className="h-3.5 w-3.5" />
+                                            </Link>
+                                        </Button>
                                     </div>
-                                    <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 text-xs" asChild>
-                                        <Link href="/admin/attendance/report">
-                                            Lihat Semua <ArrowRight className="h-3.5 w-3.5 ml-1" />
-                                        </Link>
-                                    </Button>
                                 </CardHeader>
                                 <CardContent className="p-0">
                                     {recentLoading ? (
@@ -301,22 +315,22 @@ export const AttendanceDashboard: React.FC = () => {
                                     ) : recentData?.data && recentData.data.length > 0 ? (
                                         <div className="divide-y divide-slate-100">
                                             {recentData.data.map((log) => (
-                                                <div key={log.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                                                <div key={log.id} className="px-4 py-4 flex items-center justify-between hover:bg-slate-50/60 transition-colors">
                                                     <div className="flex items-center gap-3">
                                                         <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-semibold text-xs border border-slate-200 flex-shrink-0">
                                                             {(log.studentName ?? '??').substring(0, 2).toUpperCase()}
                                                         </div>
                                                         <div>
-                                                            <p className="font-medium text-slate-900 text-sm">{log.studentName ?? '-'}</p>
+                                                            <p className="font-medium text-slate-900">{log.studentName ?? '-'}</p>
                                                             <p className="text-xs text-slate-500">
                                                                 {log.className ?? '-'}
-                                                                {log.subjectName ? ` • ${log.subjectName}` : ''}
+                                                                {log.subjectName ? ` · ${log.subjectName}` : ''}
                                                             </p>
                                                         </div>
                                                     </div>
                                                     <Badge
                                                         variant="outline"
-                                                        className={`uppercase text-[10px] tracking-wider font-semibold ${statusColors[log.status] ?? 'text-slate-600 bg-slate-50 border-slate-200'}`}
+                                                        className={`text-xs font-medium ${statusColors[log.status] ?? 'text-slate-600 bg-slate-50 border-slate-200'}`}
                                                     >
                                                         {statusLabels[log.status] ?? log.status}
                                                     </Badge>

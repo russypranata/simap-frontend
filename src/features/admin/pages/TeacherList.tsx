@@ -274,9 +274,9 @@ export const TeacherList: React.FC = () => {
                 <CardContent className="p-0">
                     <div className="border-t border-slate-200 overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                            <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="pl-4 pr-0 py-4 font-medium text-sm w-[40px]">
+                                    <th className="pl-4 pr-0 py-4 w-[40px]">
                                         <Checkbox
                                             checked={
                                                 teachers.length > 0 &&
@@ -285,32 +285,26 @@ export const TeacherList: React.FC = () => {
                                             onCheckedChange={toggleSelectAll}
                                         />
                                     </th>
-                                    <th className="pl-3 pr-6 py-4 font-medium text-sm">Nama & NIP</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Jabatan Kepegawaian</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Akses Sistem</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Kontak</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-center">Status</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-right">Aksi</th>
+                                    <th className="pl-3 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama & NIP</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Jabatan Kepegawaian</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Akses Sistem</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kontak</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Status</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {teachers.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className="px-6 py-12 text-center">
-                                            <div className="flex flex-col items-center justify-center">
-                                                <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                    {searchInput || selectedRole !== 'all' ? (
-                                                        <FilterX className="h-8 w-8 text-slate-300" />
-                                                    ) : (
-                                                        <FileX className="h-8 w-8 text-slate-300" />
-                                                    )}
-                                                </div>
-                                                <p className="text-slate-500 font-medium">
-                                                    Data tidak ditemukan
-                                                </p>
-                                                <p className="text-slate-400 text-sm mt-1">
-                                                    Coba sesuaikan filter pencarian Anda
-                                                </p>
+                                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                                                {searchInput || selectedRole !== 'all' ? (
+                                                    <FilterX className="h-8 w-8 text-slate-300 mb-2" />
+                                                ) : (
+                                                    <FileX className="h-8 w-8 text-slate-300 mb-2" />
+                                                )}
+                                                <p className="text-sm text-slate-500">Data tidak ditemukan</p>
+                                                <p className="text-xs text-slate-400 mt-1">Coba sesuaikan filter pencarian Anda</p>
                                             </div>
                                         </td>
                                     </tr>

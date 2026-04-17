@@ -16,7 +16,7 @@ export function usePpdbList() {
     const { data, isLoading, isFetching, isError } = useQuery({
         queryKey: PPDB_KEYS.list(filters),
         queryFn:  () => ppdbService.getRegistrations(filters),
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         placeholderData: (prev) => prev,
     });
 

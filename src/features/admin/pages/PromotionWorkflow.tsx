@@ -183,14 +183,14 @@ export const PromotionWorkflow: React.FC = () => {
                 const initialRecords: StudentPromotion[] = allEnrollments.map(e => ({
                     studentId:      String(e.student_id),
                     studentName:    e.student_name ?? `Siswa #${e.student_id}`,
-                    nisn:           String(e.student_id),
+                    nisn:           e.nisn ?? `—`,
                     currentClassId: String(e.class_id),
                     action:         'PROMOTE' as PromotionAction,
                     targetClassId:  classMapping[String(e.class_id)],
                 }));
                 setPromotionRecords(initialRecords);
                 setCurrentStep(3);
-            } catch {
+            } catch (error) {
                 toast.error('Gagal mengambil data siswa');
                 console.error(error);
             } finally {
@@ -225,7 +225,7 @@ export const PromotionWorkflow: React.FC = () => {
             setSelectedClassIds([]);
             setPromotionRecords([]);
             setClassMapping({});
-        } catch {
+        } catch (error) {
             toast.error('Gagal memproses kenaikan kelas');
             console.error(error);
         } finally {
@@ -623,11 +623,27 @@ export const PromotionWorkflow: React.FC = () => {
                                         <div className="bg-white p-3 rounded-full shadow-sm mb-4">
                                             <AlertCircle className="h-8 w-8 text-red-600" />
                                         </div>
-                                        <h3 className="text-lg font-bold text-red-900 mb-2">Konfirmasi Tindakan</h3>
-                                        <p className="text-red-700/80 max-w-lg mb-6 leading-relaxed">
-                                            Proses ini akan memperbarui data siswa secara permanen. Pastikan semua pemetaan dan status sudah benar sebelum melanjutkan. Tanggung jawab kebenaran data ada pada pengguna.
+                                        <h3 className="text-lg font-bold text-red-900 mb-2">Konfirmasi Tindakan Permanen</h3>
+                                        <p className="text-red-700/80 max-w-lg leading-relaxed">
+                                            Proses ini akan memperbarui data siswa secara permanen dan tidak dapat dibatalkan.
+                                            Pastikan semua pemetaan dan status sudah benar sebelum melanjutkan.
                                         </p>
                                     </div>
+
+                                    {stats.graduated > 0 && (
+                                        <div className="rounded-lg border border-purple-200 bg-purple-50 p-4 flex items-start gap-3">
+                                            <AlertCircle className="h-5 w-5 text-purple-600 shrink-0 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm font-semibold text-purple-900">
+                                                    {stats.graduated} siswa akan ditandai sebagai Lulus (Alumni)
+                                                </p>
+                                                <p className="text-xs text-purple-700 mt-1 leading-relaxed">
+                                                    Siswa yang lulus akan dipindahkan ke daftar alumni dan tidak lagi terdaftar sebagai siswa aktif.
+                                                    Tindakan ini tidak dapat dibalik secara otomatis.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </>

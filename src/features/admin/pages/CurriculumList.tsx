@@ -166,20 +166,18 @@ export const CurriculumList: React.FC = () => {
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="pl-4 pr-6 py-4 font-medium text-sm">Nama Kurikulum</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Tahun Ajaran</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-center">Status</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-right">Aksi</th>
+                                    <th className="pl-4 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama Kurikulum</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tahun Ajaran</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Status</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {curricula.length === 0 ? (
                                     <tr><td colSpan={4} className="px-6 py-12 text-center">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                {searchInput || statusFilter !== 'all' ? <FilterX className="h-8 w-8 text-slate-300" /> : <FileX className="h-8 w-8 text-slate-300" />}
-                                            </div>
-                                            <p className="text-slate-500 font-medium">{searchInput || statusFilter !== 'all' ? 'Tidak ada hasil' : 'Belum ada kurikulum'}</p>
+                                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                                            {searchInput || statusFilter !== 'all' ? <FilterX className="h-8 w-8 text-slate-300 mb-2" /> : <FileX className="h-8 w-8 text-slate-300 mb-2" />}
+                                            <p className="text-sm text-slate-500">{searchInput || statusFilter !== 'all' ? 'Tidak ada hasil' : 'Belum ada kurikulum'}</p>
                                         </div>
                                     </td></tr>
                                 ) : curricula.map((item) => (

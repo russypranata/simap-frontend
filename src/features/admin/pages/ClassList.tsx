@@ -330,7 +330,7 @@ export const ClassList: React.FC = () => {
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="px-4 py-4 font-medium text-sm w-[50px] text-center">
+                                    <th className="px-4 py-4 w-[50px] text-center">
                                         <Checkbox
                                             checked={
                                                 filteredClasses.length > 0 &&
@@ -339,12 +339,12 @@ export const ClassList: React.FC = () => {
                                             onCheckedChange={toggleSelectAll}
                                         />
                                     </th>
-                                    <th className="px-4 py-4 font-medium text-sm">Nama Kelas</th>
-                                    <th className="px-4 py-4 font-medium text-sm">Tipe</th>
-                                    <th className="px-4 py-4 font-medium text-sm">Tahun Ajaran</th>
-                                    <th className="px-4 py-4 font-medium text-sm">Wali Kelas</th>
-                                    <th className="px-4 py-4 font-medium text-sm text-center">Anggota</th>
-                                    <th className="px-4 py-4 font-medium text-sm text-center">Aksi</th>
+                                    <th className="px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama Kelas</th>
+                                    <th className="px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tipe</th>
+                                    <th className="px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tahun Ajaran</th>
+                                    <th className="px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Wali Kelas</th>
+                                    <th className="px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Anggota</th>
+                                    <th className="px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 bg-white">

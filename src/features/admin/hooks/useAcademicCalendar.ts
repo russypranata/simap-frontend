@@ -46,7 +46,7 @@ export const useAcademicCalendar = () => {
     } = useQuery({
         queryKey: CALENDAR_KEYS.byMonth(currentYear, currentMonth),
         queryFn: () => calendarEventService.getCalendarEvents({ month: monthParam }),
-        staleTime: 2 * 60 * 1000, // 2 menit
+        staleTime: 0,
     });
 
     // -- Optimized Map --

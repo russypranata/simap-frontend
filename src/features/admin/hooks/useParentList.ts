@@ -17,7 +17,7 @@ export function useParentList() {
     const { data, isLoading, isFetching, isError } = useQuery({
         queryKey: PARENT_KEYS.list(filters),
         queryFn:  () => parentService.getParents(filters),
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         placeholderData: (prev) => prev,
     });
 
@@ -60,6 +60,6 @@ export function useParentDetail(id: number | null) {
         queryKey: PARENT_KEYS.detail(id!),
         queryFn:  () => parentService.getParentById(id!),
         enabled:  !!id,
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
     });
 }

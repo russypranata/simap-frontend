@@ -17,7 +17,7 @@ export const useStaffList = (initialFilters?: StaffFilters) => {
     const query = useQuery({
         queryKey: STAFF_KEYS.list(filters),
         queryFn: () => staffService.getStaff(filters),
-        staleTime: 30 * 1000,
+        staleTime: 0,
         gcTime: 5 * 60 * 1000,
     });
 

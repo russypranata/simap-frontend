@@ -285,7 +285,7 @@ export const SubjectList: React.FC = () => {
                 <CardContent className="p-0">
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead>
+                            <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr className="bg-slate-50 border-b border-slate-200">
                                     <th className="pl-4 pr-0 py-4 w-[40px]">
                                         <Checkbox
@@ -293,37 +293,33 @@ export const SubjectList: React.FC = () => {
                                             onCheckedChange={toggleSelectAll}
                                         />
                                     </th>
-                                    <th className="text-left pl-3 pr-6 py-4 font-medium text-sm">Mata Pelajaran</th>
-                                    <th className="text-center px-4 py-4 font-medium text-sm">Tipe</th>
-                                    <th className="text-left px-4 py-4 font-medium text-sm">Tingkat</th>
-                                    <th className="text-center px-4 py-4 font-medium text-sm">Kategori</th>
-                                    <th className="text-left px-4 py-4 font-medium text-sm">Pengampu</th>
-                                    <th className="text-center px-4 py-4 font-medium text-sm">Aksi</th>
+                                    <th className="text-left pl-3 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Mata Pelajaran</th>
+                                    <th className="text-center px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tipe</th>
+                                    <th className="text-left px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tingkat</th>
+                                    <th className="text-center px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kategori</th>
+                                    <th className="text-left px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Pengampu</th>
+                                    <th className="text-center px-4 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredSubjects.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="p-12">
-                                            <div className="flex flex-col items-center justify-center text-center space-y-4">
-                                                <div className="w-14 h-14 rounded-full bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center">
+                                        <td colSpan={7} className="px-6 py-12 text-center">
+                                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                                                {searchTerm || selectedCategory !== 'all' || selectedType !== 'all' || selectedGrade !== 'all'
+                                                    ? <FilterX className="h-8 w-8 text-slate-300 mb-2" />
+                                                    : <FileX className="h-8 w-8 text-slate-300 mb-2" />
+                                                }
+                                                <p className="text-sm text-slate-500">
                                                     {searchTerm || selectedCategory !== 'all' || selectedType !== 'all' || selectedGrade !== 'all'
-                                                        ? <FilterX className="h-7 w-7 text-slate-400" />
-                                                        : <FileX className="h-7 w-7 text-slate-400" />
-                                                    }
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-semibold text-slate-800">
-                                                        {searchTerm || selectedCategory !== 'all' || selectedType !== 'all' || selectedGrade !== 'all'
-                                                            ? 'Tidak ada hasil yang cocok'
-                                                            : 'Belum ada mata pelajaran'}
-                                                    </h3>
-                                                    <p className="text-sm text-slate-500 mt-1">
-                                                        {searchTerm || selectedCategory !== 'all' || selectedType !== 'all' || selectedGrade !== 'all'
-                                                            ? 'Coba ubah filter pencarian'
-                                                            : 'Klik tombol "Tambah Mapel" untuk menambahkan'}
-                                                    </p>
-                                                </div>
+                                                        ? 'Tidak ada hasil yang cocok'
+                                                        : 'Belum ada mata pelajaran'}
+                                                </p>
+                                                <p className="text-xs text-slate-400 mt-1">
+                                                    {searchTerm || selectedCategory !== 'all' || selectedType !== 'all' || selectedGrade !== 'all'
+                                                        ? 'Coba ubah filter pencarian'
+                                                        : 'Klik tombol "Tambah Mapel" untuk menambahkan'}
+                                                </p>
                                             </div>
                                         </td>
                                     </tr>

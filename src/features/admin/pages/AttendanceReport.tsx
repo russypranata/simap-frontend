@@ -459,19 +459,19 @@ export const AttendanceReport: React.FC = () => {
 
             {/* ── Main Card ── */}
             <Card className="border-slate-200 shadow-sm overflow-hidden">
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-4 border-b border-slate-50 bg-slate-50/50">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
-                                <ActiveIcon className="h-5 w-5" />
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                                <ActiveIcon className="h-5 w-5 text-blue-700" />
                             </div>
                             <div>
-                                <CardTitle className="text-lg font-semibold text-gray-900">{activeTabInfo.label}</CardTitle>
+                                <CardTitle className="text-lg text-gray-900">{activeTabInfo.label}</CardTitle>
                                 <CardDescription>{activeTabInfo.description}</CardDescription>
                             </div>
                         </div>
                         {totalItems > 0 && !isLoading && (
-                            <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100 font-semibold h-7 px-3 rounded-full text-[11px]">
+                            <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100">
                                 {totalItems.toLocaleString('id-ID')} data
                             </Badge>
                         )}
@@ -489,34 +489,34 @@ export const AttendanceReport: React.FC = () => {
                     ) : (
                         <div className="border-t border-slate-200 overflow-x-auto">
                             <table className="w-full text-sm">
-                                <thead>
+                                <thead className="bg-slate-50 border-b border-slate-200">
                                     <tr className="bg-slate-50 border-b border-slate-200">
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Nama Siswa</th>
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">NIS</th>
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Kelas</th>
+                                        <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama Siswa</th>
+                                        <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">NIS</th>
+                                        <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">Kelas</th>
                                         {activeTab === 'daily' && (
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Mata Pelajaran</th>
+                                            <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">Mata Pelajaran</th>
                                         )}
                                         {activeTab === 'morning' && (<>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Waktu</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Lokasi</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Dicatat Oleh</th>
+                                            <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">Waktu</th>
+                                            <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">Lokasi</th>
+                                            <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">Dicatat Oleh</th>
                                         </>)}
                                         {activeTab === 'prayer' && (<>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Waktu Sholat</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Lokasi</th>
+                                            <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">Waktu Sholat</th>
+                                            <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">Lokasi</th>
                                         </>)}
                                         {activeTab === 'extracurricular' && (
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Ekskul</th>
+                                            <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">Ekskul</th>
                                         )}
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Tanggal</th>
+                                        <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">Tanggal</th>
                                         {activeTab !== 'morning' && (
-                                            <th className="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Status</th>
+                                            <th className="px-4 py-4 text-center font-semibold text-xs text-slate-600 uppercase tracking-wider">Status</th>
                                         )}
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Catatan</th>
+                                        <th className="px-4 py-4 text-left font-semibold text-xs text-slate-600 uppercase tracking-wider">Catatan</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody>
                                     {isLoading ? (
                                         Array.from({ length: filters.per_page ?? 10 }).map((_, i) => (
                                             <SkeletonTableRow key={i} cols={activeTab === 'morning' ? 8 : 7} />
@@ -533,14 +533,14 @@ export const AttendanceReport: React.FC = () => {
                                         </tr>
                                     ) : (
                                         items.map((item) => (
-                                            <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
-                                                <td className="px-4 py-3">
+                                            <tr key={item.id} className="group transition-colors border-b border-slate-50 hover:bg-slate-50/60">
+                                                <td className="px-4 py-4">
                                                     <span className="text-sm font-medium text-slate-800">{item.studentName ?? '—'}</span>
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-4 py-4">
                                                     <span className="text-xs font-mono text-slate-400">{item.studentNis ?? '—'}</span>
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-4 py-4">
                                                     {item.className
                                                         ? <Badge variant="outline" className="text-xs font-medium text-slate-600 border-slate-200 bg-slate-50">{item.className}</Badge>
                                                         : <span className="text-slate-300">—</span>}
@@ -551,14 +551,14 @@ export const AttendanceReport: React.FC = () => {
                                                     </td>
                                                 )}
                                                 {activeTab === 'morning' && (<>
-                                                    <td className="px-4 py-3">
+                                                    <td className="px-4 py-4">
                                                         <span className="text-xs font-mono text-slate-600">{'time' in item ? (item.time ?? '—') : '—'}</span>
                                                     </td>
                                                     <td className="px-4 py-3 text-sm text-slate-600">{'location' in item ? (item.location ?? '—') : '—'}</td>
                                                     <td className="px-4 py-3 text-sm text-slate-600">{'recordedBy' in item ? (item.recordedBy ?? '—') : '—'}</td>
                                                 </>)}
                                                 {activeTab === 'prayer' && (<>
-                                                    <td className="px-4 py-3">
+                                                    <td className="px-4 py-4">
                                                         <span className="text-sm text-slate-600 capitalize">{'prayerTime' in item ? (item.prayerTime ?? '—') : '—'}</span>
                                                     </td>
                                                     <td className="px-4 py-3 text-sm text-slate-600">{'location' in item ? (item.location ?? '—') : '—'}</td>
@@ -566,7 +566,7 @@ export const AttendanceReport: React.FC = () => {
                                                 {activeTab === 'extracurricular' && (
                                                     <td className="px-4 py-3 text-sm text-slate-600">{'ekskulName' in item ? item.ekskulName : '—'}</td>
                                                 )}
-                                                <td className="px-4 py-3">
+                                                <td className="px-4 py-4">
                                                     <span className="text-xs text-slate-500 whitespace-nowrap">
                                                         {item.date ? formatDate(item.date) : '—'}
                                                     </span>
@@ -576,7 +576,7 @@ export const AttendanceReport: React.FC = () => {
                                                         <Badge
                                                             variant="outline"
                                                             className={cn(
-                                                                'text-[11px] font-semibold px-2 py-0.5',
+                                                                'text-xs font-medium',
                                                                 STATUS_COLORS[item.status] ?? 'text-slate-600 bg-slate-50 border-slate-200'
                                                             )}
                                                         >

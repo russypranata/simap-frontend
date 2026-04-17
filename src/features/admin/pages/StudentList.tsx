@@ -216,28 +216,26 @@ export const StudentList: React.FC = () => {
                                             onCheckedChange={toggleSelectAll}
                                         />
                                     </th>
-                                    <th className="pl-3 pr-6 py-4 font-medium text-sm">Nama & No. Pendaftaran</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Kelas</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Kontak</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Wali</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-right">Aksi</th>
+                                    <th className="pl-3 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama & No. Pendaftaran</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kelas</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kontak</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Wali</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {students.length === 0 ? (
                                     <tr>
                                         <td colSpan={6} className="px-6 py-12 text-center">
-                                            <div className="flex flex-col items-center justify-center">
-                                                <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                    {searchInput
-                                                        ? <FilterX className="h-8 w-8 text-slate-300" />
-                                                        : <FileX className="h-8 w-8 text-slate-300" />
-                                                    }
-                                                </div>
-                                                <p className="text-slate-500 font-medium">
+                                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                                                {searchInput
+                                                    ? <FilterX className="h-8 w-8 text-slate-300 mb-2" />
+                                                    : <FileX className="h-8 w-8 text-slate-300 mb-2" />
+                                                }
+                                                <p className="text-sm text-slate-500">
                                                     {searchInput ? 'Tidak ada hasil yang cocok' : 'Belum ada data siswa'}
                                                 </p>
-                                                <p className="text-slate-400 text-sm mt-1">
+                                                <p className="text-xs text-slate-400 mt-1">
                                                     {searchInput ? 'Coba ubah kata kunci pencarian' : 'Klik "Tambah Siswa" untuk menambahkan'}
                                                 </p>
                                             </div>

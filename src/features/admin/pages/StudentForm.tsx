@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, startTransition } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -81,9 +81,21 @@ const generateUsername = (name: string): string =>
 export const StudentForm: React.FC = () => {
     const router = useRouter();
     const params = useParams();
+    const searchParams = useSearchParams();
     const rawId = params?.id as string | undefined;
     const isEdit = !!rawId && rawId !== 'new';
     const studentId = isEdit ? Number(rawId) : null;
+
+    // Pre-fill from PPDB conversion
+    const fromPpdb = searchParams?.get('from_ppdb');
+    const ppdbDefaults = fromPpdb ? {
+        name:          searchParams?.get('name') ?? '',
+        dob:           searchParams?.get('dob') ?? '',
+        birth_place:   searchParams?.get('birth_place') ?? '',
+        gender:        (searchParams?.get('gender') as 'L' | 'P') ?? undefined,
+        guardian_name: searchParams?.get('parent_name') ?? '',
+        guardian_phone:searchParams?.get('parent_phone') ?? '',
+    } : null;
 
     const { createStudent, updateStudent, isCreating, isUpdating } = useStudentList();
     const { data: student, isLoading: isLoadingStudent, isError } = useStudentDetail(studentId);
@@ -95,10 +107,20 @@ export const StudentForm: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(isEdit ? editSchema : createSchema) as any,
         defaultValues: {
-            name: '', email: '', username: '', phone: '', address: '',
-            dob: '', birth_place: '', gender: undefined, password: '',
-            admission_number: '', religion: '',
-            guardian_name: '', guardian_phone: '', guardian_relation: 'Orang Tua',
+            name:             ppdbDefaults?.name ?? '',
+            email:            '',
+            username:         '',
+            phone:            '',
+            address:          '',
+            dob:              ppdbDefaults?.dob ?? '',
+            birth_place:      ppdbDefaults?.birth_place ?? '',
+            gender:           ppdbDefaults?.gender ?? undefined,
+            password:         '',
+            admission_number: '',
+            religion:         '',
+            guardian_name:    ppdbDefaults?.guardian_name ?? '',
+            guardian_phone:   ppdbDefaults?.guardian_phone ?? '',
+            guardian_relation:'Orang Tua',
         },
     });
 
@@ -210,6 +232,19 @@ export const StudentForm: React.FC = () => {
                     {isEdit ? 'Perbarui informasi data siswa.' : 'Tambahkan siswa baru ke sistem.'}
                 </p>
             </div>
+
+            {/* PPDB conversion banner */}
+            {fromPpdb && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 flex items-start gap-3">
+                    <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                        <p className="text-sm font-semibold text-blue-900">Data dari PPDB</p>
+                        <p className="text-xs text-blue-700 mt-0.5">
+                            Beberapa field sudah diisi otomatis dari data pendaftar PPDB. Lengkapi data yang masih kosong sebelum menyimpan.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

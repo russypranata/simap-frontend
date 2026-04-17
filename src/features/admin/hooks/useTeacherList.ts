@@ -17,7 +17,7 @@ export const useTeacherList = (initialFilters?: TeacherFilters) => {
     const query = useQuery({
         queryKey: TEACHER_KEYS.list(filters),
         queryFn: () => teacherService.getTeachers(filters),
-        staleTime: 30 * 1000, // 30 detik
+        staleTime: 0,
         gcTime: 5 * 60 * 1000,
     });
 

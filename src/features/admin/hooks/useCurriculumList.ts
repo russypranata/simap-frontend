@@ -19,7 +19,7 @@ export function useCurriculumList() {
     const { data, isLoading, isFetching, isError } = useQuery({
         queryKey:  KEYS.list(filters),
         queryFn:   () => curriculumService.getAll(filters),
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         placeholderData: (prev) => prev,
     });
 

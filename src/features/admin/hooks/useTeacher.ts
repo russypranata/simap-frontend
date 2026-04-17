@@ -11,7 +11,7 @@ export const useTeacher = (id: number | null) => {
         queryKey: TEACHER_KEYS.detail(id ?? 0),
         queryFn: () => teacherService.getTeacherById(id!),
         enabled: id !== null && id > 0,
-        staleTime: 30 * 1000,
+        staleTime: 0,
         gcTime: 5 * 60 * 1000,
     });
 

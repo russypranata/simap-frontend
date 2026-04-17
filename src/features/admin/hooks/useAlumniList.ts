@@ -14,7 +14,7 @@ export function useAlumniList() {
     const { data, isLoading, isFetching, isError } = useQuery({
         queryKey: ALUMNI_KEYS.list(filters),
         queryFn:  () => alumniService.getAlumni(filters),
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         placeholderData: (prev) => prev,
     });
 

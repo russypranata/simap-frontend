@@ -1,14 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Award, Search, RefreshCw, FilterX, FileX, GraduationCap } from 'lucide-react';
+import { Award, Search, RefreshCw, FilterX, FileX, GraduationCap, Eye } from 'lucide-react';
 import { useDebounce } from '@/hooks/use-debounce';
+import { useRouter } from 'next/navigation';
 
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 import { useAlumniList } from '../hooks/useAlumniList';
 import { PaginationControls } from '@/features/shared/components/PaginationControls';
@@ -29,6 +31,7 @@ const AlumniSkeleton = () => (
 );
 
 export const AlumniList: React.FC = () => {
+    const router = useRouter();
     const [searchInput, setSearchInput] = useState('');
     const debouncedSearch = useDebounce(searchInput, 400);
 
@@ -84,21 +87,20 @@ export const AlumniList: React.FC = () => {
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="pl-4 pr-6 py-4 font-medium text-sm">Nama & No. Pendaftaran</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Kelas Terakhir</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Tahun Ajaran</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Kontak</th>
+                                    <th className="pl-4 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama & No. Pendaftaran</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kelas Terakhir</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tahun Lulus</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kontak</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {alumni.length === 0 ? (
                                     <tr><td colSpan={4} className="px-6 py-12 text-center">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                {searchInput ? <FilterX className="h-8 w-8 text-slate-300" /> : <FileX className="h-8 w-8 text-slate-300" />}
-                                            </div>
-                                            <p className="text-slate-500 font-medium">{searchInput ? 'Tidak ada hasil' : 'Belum ada data alumni'}</p>
-                                            <p className="text-slate-400 text-sm mt-1">Alumni adalah siswa yang tidak lagi terdaftar di kelas aktif</p>
+                                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                                            {searchInput ? <FilterX className="h-8 w-8 text-slate-300 mb-2" /> : <FileX className="h-8 w-8 text-slate-300 mb-2" />}
+                                            <p className="text-sm text-slate-500">{searchInput ? 'Tidak ada hasil' : 'Belum ada data alumni'}</p>
+                                            <p className="text-xs text-slate-400 mt-1">Alumni adalah siswa yang tidak lagi terdaftar di kelas aktif</p>
                                         </div>
                                     </td></tr>
                                 ) : alumni.map((a) => {
@@ -124,6 +126,17 @@ export const AlumniList: React.FC = () => {
                                             </td>
                                             <td className="px-6 py-4 text-sm text-slate-700">{a.graduation_year ?? '—'}</td>
                                             <td className="px-6 py-4 text-sm text-slate-700">{a.phone ?? '—'}</td>
+                                            <td className="px-6 py-4 text-right">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                                    onClick={() => router.push(`/admin/users/alumni/${a.id}`)}
+                                                    title="Detail"
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </Button>
+                                            </td>
                                         </tr>
                                     );
                                 })}

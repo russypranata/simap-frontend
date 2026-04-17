@@ -30,7 +30,7 @@ export function useExtracurricularList() {
     const { data, isLoading, isFetching, isError } = useQuery({
         queryKey: EKSKUL_KEYS.list(filters),
         queryFn:  () => extracurricularService.getAll(filters),
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         placeholderData: (prev) => prev,
     });
 
@@ -108,7 +108,7 @@ export function useExtracurricularDetail(id: number | null) {
         queryKey: EKSKUL_KEYS.detail(id!),
         queryFn:  () => extracurricularService.getById(id!),
         enabled:  !!id,
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
     });
 }
 

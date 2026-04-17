@@ -116,21 +116,19 @@ export const ParentList: React.FC = () => {
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="pl-4 pr-6 py-4 font-medium text-sm">Nama Wali</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Siswa (Anak)</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Kontak</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Pekerjaan</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-right">Aksi</th>
+                                    <th className="pl-4 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama Wali</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Siswa (Anak)</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kontak</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Pekerjaan</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {parents.length === 0 ? (
                                     <tr><td colSpan={5} className="px-6 py-12 text-center">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                {searchInput ? <FilterX className="h-8 w-8 text-slate-300" /> : <FileX className="h-8 w-8 text-slate-300" />}
-                                            </div>
-                                            <p className="text-slate-500 font-medium">{searchInput ? 'Tidak ada hasil' : 'Belum ada data wali murid'}</p>
+                                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                                            {searchInput ? <FilterX className="h-8 w-8 text-slate-300 mb-2" /> : <FileX className="h-8 w-8 text-slate-300 mb-2" />}
+                                            <p className="text-sm text-slate-500">{searchInput ? 'Tidak ada hasil' : 'Belum ada data wali murid'}</p>
                                         </div>
                                     </td></tr>
                                 ) : parents.map((parent) => {

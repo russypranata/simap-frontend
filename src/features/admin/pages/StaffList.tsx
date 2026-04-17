@@ -230,29 +230,40 @@ export const StaffList: React.FC = () => {
                 <CardContent className="p-0">
                     <div className="overflow-x-auto border-t border-slate-200">
                         {isLoading ? (
-                            <div className="flex items-center justify-center py-16">
-                                <RefreshCw className="h-6 w-6 text-slate-400 animate-spin" />
+                            <div className="divide-y divide-slate-100">
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className="flex items-center gap-4 px-6 py-4">
+                                        <div className="h-9 w-9 rounded-full bg-slate-100 animate-pulse shrink-0" />
+                                        <div className="flex-1 space-y-1.5">
+                                            <div className="h-4 w-40 bg-slate-100 rounded animate-pulse" />
+                                            <div className="h-3 w-24 bg-slate-100 rounded animate-pulse" />
+                                        </div>
+                                        <div className="h-6 w-20 bg-slate-100 rounded animate-pulse" />
+                                        <div className="h-6 w-16 bg-slate-100 rounded animate-pulse" />
+                                        <div className="h-8 w-8 bg-slate-100 rounded animate-pulse" />
+                                    </div>
+                                ))}
                             </div>
                         ) : (
                             <table className="w-full text-sm text-left">
-                                <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                                <thead className="bg-slate-50 border-b border-slate-200">
                                     <tr>
-                                        <th className="px-6 py-4 font-medium text-sm">
+                                        <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                                             Nama & NIP
                                         </th>
-                                        <th className="px-6 py-4 font-medium text-sm">
+                                        <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                                             Jabatan Kepegawaian
                                         </th>
-                                        <th className="px-6 py-4 font-medium text-sm">
+                                        <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                                             Akses Sistem
                                         </th>
-                                        <th className="px-6 py-4 font-medium text-sm">
+                                        <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                                             Kontak
                                         </th>
-                                        <th className="px-6 py-4 font-medium text-sm text-center">
+                                        <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">
                                             Status
                                         </th>
-                                        <th className="px-6 py-4 font-medium text-sm text-right">
+                                        <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">
                                             Aksi
                                         </th>
                                     </tr>
@@ -261,17 +272,13 @@ export const StaffList: React.FC = () => {
                                     {staff.length === 0 ? (
                                         <tr>
                                             <td colSpan={6} className="px-6 py-12 text-center">
-                                                <div className="flex flex-col items-center justify-center">
-                                                    <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                        {searchInput ? (
-                                                            <FilterX className="h-8 w-8 text-slate-300" />
-                                                        ) : (
-                                                            <FileX className="h-8 w-8 text-slate-300" />
-                                                        )}
-                                                    </div>
-                                                    <p className="text-slate-500 font-medium">
-                                                        Data tidak ditemukan
-                                                    </p>
+                                                <div className="flex flex-col items-center justify-center py-8 text-center">
+                                                    {searchInput ? (
+                                                        <FilterX className="h-8 w-8 text-slate-300 mb-2" />
+                                                    ) : (
+                                                        <FileX className="h-8 w-8 text-slate-300 mb-2" />
+                                                    )}
+                                                    <p className="text-sm text-slate-500">Data tidak ditemukan</p>
                                                 </div>
                                             </td>
                                         </tr>

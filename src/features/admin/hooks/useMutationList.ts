@@ -16,7 +16,7 @@ export function useMutationList() {
     const { data, isLoading, isFetching, isError } = useQuery({
         queryKey: MUTATION_KEYS.list(filters),
         queryFn:  () => mutationService.getMutations(filters),
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         placeholderData: (prev) => prev,
     });
 

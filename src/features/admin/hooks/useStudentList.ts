@@ -27,7 +27,7 @@ export function useStudentList() {
     const { data, isLoading, isFetching, isError } = useQuery({
         queryKey: STUDENT_KEYS.list(filters),
         queryFn:  () => studentService.getStudents(filters),
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         placeholderData: (prev) => prev,
     });
 
@@ -91,6 +91,6 @@ export function useStudentDetail(id: number | null) {
         queryKey: STUDENT_KEYS.detail(id!),
         queryFn:  () => studentService.getStudentById(id!),
         enabled:  !!id,
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
     });
 }

@@ -23,7 +23,7 @@ import {
     Camera,
 } from 'lucide-react';
 
-import { AdminProfileData } from '../data/mockAdminData';
+import { AdminProfileData } from '../services/adminProfileService';
 import { 
     getAdminProfile,
 } from '../services/adminProfileService';

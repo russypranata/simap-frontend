@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import {
     UserPlus, Search, Settings, Trash2, RefreshCw,
     FilterX, FileX, Loader2, CheckCircle, XCircle, MessageSquare,
+    ArrowRight, GraduationCap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -36,6 +37,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { PPDBStatus } from '../types/ppdb';
 import { usePpdbList } from '../hooks/usePpdbList';
 import { PaginationControls } from '@/features/shared/components/PaginationControls';
+import { useRouter } from 'next/navigation';
 
 const STATUS_STYLE: Record<PPDBStatus, string> = {
     pending:   'bg-slate-100 text-slate-700 border-slate-200',
@@ -79,6 +81,7 @@ const PpdbSkeleton = () => (
 );
 
 export const PPDBList: React.FC = () => {
+    const router = useRouter();
     const [searchInput, setSearchInput] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -168,22 +171,20 @@ export const PPDBList: React.FC = () => {
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="pl-4 pr-6 py-4 font-medium text-sm">Nama & No. Reg</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Asal Sekolah</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Nilai</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Wali</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-center">Status</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-right">Aksi</th>
+                                    <th className="pl-4 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama & No. Reg</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Asal Sekolah</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nilai</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Wali</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Status</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {registrations.length === 0 ? (
                                     <tr><td colSpan={6} className="px-6 py-12 text-center">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                {searchInput || statusFilter !== 'all' ? <FilterX className="h-8 w-8 text-slate-300" /> : <FileX className="h-8 w-8 text-slate-300" />}
-                                            </div>
-                                            <p className="text-slate-500 font-medium">Belum ada data pendaftar</p>
+                                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                                            {searchInput || statusFilter !== 'all' ? <FilterX className="h-8 w-8 text-slate-300 mb-2" /> : <FileX className="h-8 w-8 text-slate-300 mb-2" />}
+                                            <p className="text-sm text-slate-500">Belum ada data pendaftar</p>
                                         </div>
                                     </td></tr>
                                 ) : registrations.map((r) => (
@@ -213,7 +214,7 @@ export const PPDBList: React.FC = () => {
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900 hover:bg-slate-100"><Settings className="h-4 w-4" /></Button>
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="w-48">
+                                                <DropdownMenuContent align="end" className="w-52">
                                                     <DropdownMenuLabel>Ubah Status</DropdownMenuLabel>
                                                     <DropdownMenuSeparator />
                                                     {r.status !== 'interview' && (
@@ -230,6 +231,18 @@ export const PPDBList: React.FC = () => {
                                                         <DropdownMenuItem onClick={() => updateStatus({ id: r.id, status: 'rejected' })} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
                                                             <XCircle className="mr-2 h-4 w-4" />Tolak
                                                         </DropdownMenuItem>
+                                                    )}
+                                                    {r.status === 'accepted' && (
+                                                        <>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                onClick={() => router.push(`/admin/users/students/new?from_ppdb=${r.id}&name=${encodeURIComponent(r.name)}&nisn=${encodeURIComponent(r.nisn)}&dob=${encodeURIComponent(r.dob)}&birth_place=${encodeURIComponent(r.birth_place)}&gender=${r.gender}&previous_school=${encodeURIComponent(r.previous_school)}&parent_name=${encodeURIComponent(r.parent_name)}&parent_phone=${encodeURIComponent(r.parent_phone)}`)}
+                                                                className="cursor-pointer text-blue-700 focus:text-blue-700 focus:bg-blue-50"
+                                                            >
+                                                                <GraduationCap className="mr-2 h-4 w-4" />
+                                                                Daftarkan sebagai Siswa
+                                                            </DropdownMenuItem>
+                                                        </>
                                                     )}
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem onClick={() => setDeleteId(r.id)} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">

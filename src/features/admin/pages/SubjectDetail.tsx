@@ -303,25 +303,23 @@ export const SubjectDetail: React.FC<SubjectDetailProps> = ({ id }) => {
                         <CardContent className="p-0">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm text-left">
-                                    <thead className="bg-white text-slate-500 border-b border-slate-100">
+                                    <thead className="bg-slate-50 border-b border-slate-200">
                                         <tr>
-                                            <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider w-[50px] text-center">No</th>
-                                            <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Nama Guru</th>
-                                            <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">NIP</th>
-                                            <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-center">Status</th>
-                                            <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-right">Aksi</th>
+                                            <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider w-[50px] text-center">No</th>
+                                            <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama Guru</th>
+                                            <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">NIP</th>
+                                            <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Status</th>
+                                            <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50 bg-white">
                                         {filteredTeachers.length === 0 ? (
                                             <tr>
                                                 <td colSpan={5} className="px-6 py-12 text-center">
-                                                    <div className="flex flex-col items-center justify-center gap-2">
-                                                        <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
-                                                            <Search className="h-6 w-6" />
-                                                        </div>
-                                                        <p className="text-slate-900 font-medium mt-2">Tidak ada guru ditemukan</p>
-                                                        <p className="text-slate-500 text-sm">Coba sesuaikan kata kunci pencarian Anda</p>
+                                                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                                                        <Search className="h-8 w-8 text-slate-300 mb-2" />
+                                                        <p className="text-sm text-slate-500">Tidak ada guru ditemukan</p>
+                                                        <p className="text-xs text-slate-400 mt-1">Coba sesuaikan kata kunci pencarian Anda</p>
                                                     </div>
                                                 </td>
                                             </tr>

@@ -37,7 +37,7 @@ export const useClassList = (yearId?: string | number) =>
     useQuery({
         queryKey: CLASS_MGMT_KEYS.classes(yearId),
         queryFn:  () => classService.getClasses(yearId ? { academic_year_id: yearId } : undefined),
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         enabled:  !!yearId,
     });
 
@@ -46,7 +46,7 @@ export const useHomeroomList = (yearId?: string | number) =>
     useQuery({
         queryKey: CLASS_MGMT_KEYS.classes(yearId),
         queryFn:  () => classService.getClasses(yearId ? { academic_year_id: yearId } : undefined),
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         enabled:  !!yearId,
     });
 
@@ -96,13 +96,13 @@ export const usePlacementData = (yearId?: string | number) => {
     const unenrolledQuery = useQuery({
         queryKey: CLASS_MGMT_KEYS.unenrolled(),
         queryFn:  () => enrollmentService.getUnenrolledStudents(),
-        staleTime: 2 * 60 * 1000,
+        staleTime: 0,
     });
 
     const classesQuery = useQuery({
         queryKey: CLASS_MGMT_KEYS.classes(yearId),
         queryFn:  () => classService.getClasses(yearId ? { academic_year_id: yearId } : undefined),
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         enabled:  !!yearId,
     });
 

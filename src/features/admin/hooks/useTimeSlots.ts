@@ -14,8 +14,8 @@ export const useTimeSlots = (day: DayKey) => {
     const query = useQuery({
         queryKey: TIME_SLOT_KEYS.day(day),
         queryFn: () => timeSlotService.getByDay(day),
-        staleTime: 5 * 60 * 1000, // jam pelajaran jarang berubah
-        gcTime: 10 * 60 * 1000,
+        staleTime: 0,
+        gcTime: 5 * 60 * 1000,
     });
 
     const save = async (slots: TimeSlot[]) => {

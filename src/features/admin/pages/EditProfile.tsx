@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { User, Pencil, Lock, Key } from 'lucide-react';
-import { AdminProfileData } from '../data/mockAdminData';
+import { AdminProfileData } from '../services/adminProfileService';
 import { getAdminProfile } from '../services/adminProfileService';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';

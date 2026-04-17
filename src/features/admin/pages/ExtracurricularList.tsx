@@ -190,30 +190,28 @@ export const ExtracurricularList: React.FC = () => {
                 <CardContent className="p-0">
                     <div className="border-t border-slate-200 overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                            <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="pl-4 pr-6 py-4 font-medium text-sm">Ekstrakurikuler</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Tutor</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Jadwal</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-center">Anggota</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-right">Aksi</th>
+                                    <th className="pl-4 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Ekstrakurikuler</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tutor</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Jadwal</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Anggota</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {extracurriculars.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-12 text-center">
-                                            <div className="flex flex-col items-center justify-center">
-                                                <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                    {searchInput
-                                                        ? <FilterX className="h-8 w-8 text-slate-300" />
-                                                        : <FileX className="h-8 w-8 text-slate-300" />
-                                                    }
-                                                </div>
-                                                <p className="text-slate-500 font-medium">
+                                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                                                {searchInput
+                                                    ? <FilterX className="h-8 w-8 text-slate-300 mb-2" />
+                                                    : <FileX className="h-8 w-8 text-slate-300 mb-2" />
+                                                }
+                                                <p className="text-sm text-slate-500">
                                                     {searchInput ? 'Tidak ada hasil yang cocok' : 'Belum ada data ekstrakurikuler'}
                                                 </p>
-                                                <p className="text-slate-400 text-sm mt-1">
+                                                <p className="text-xs text-slate-400 mt-1">
                                                     {searchInput ? 'Coba ubah kata kunci pencarian' : 'Klik "Tambah Ekskul" untuk menambahkan'}
                                                 </p>
                                             </div>

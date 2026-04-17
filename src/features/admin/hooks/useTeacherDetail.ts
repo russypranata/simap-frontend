@@ -12,7 +12,7 @@ export const useTeacherDetail = (id: number) => {
         queryKey: TEACHER_KEYS.detail(id),
         queryFn: () => teacherService.getTeacherById(id),
         enabled: !!id && !isNaN(id),
-        staleTime: 30 * 1000,
+        staleTime: 0,
         gcTime: 5 * 60 * 1000,
     });
 

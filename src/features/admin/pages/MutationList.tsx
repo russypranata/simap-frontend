@@ -171,22 +171,20 @@ export const MutationList: React.FC = () => {
                         <table className="w-full text-sm text-left">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="pl-4 pr-6 py-4 font-medium text-sm">Siswa</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Jenis</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Asal / Tujuan</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Tanggal</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-center">Status</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-right">Aksi</th>
+                                    <th className="pl-4 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Siswa</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Jenis</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Asal / Tujuan</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tanggal</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Status</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {mutations.length === 0 ? (
                                     <tr><td colSpan={6} className="px-6 py-12 text-center">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                {searchInput || typeFilter !== 'all' || statusFilter !== 'all' ? <FilterX className="h-8 w-8 text-slate-300" /> : <FileX className="h-8 w-8 text-slate-300" />}
-                                            </div>
-                                            <p className="text-slate-500 font-medium">Belum ada data mutasi</p>
+                                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                                            {searchInput || typeFilter !== 'all' || statusFilter !== 'all' ? <FilterX className="h-8 w-8 text-slate-300 mb-2" /> : <FileX className="h-8 w-8 text-slate-300 mb-2" />}
+                                            <p className="text-sm text-slate-500">Belum ada data mutasi</p>
                                         </div>
                                     </td></tr>
                                 ) : mutations.map((m) => (

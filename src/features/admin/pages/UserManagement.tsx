@@ -87,15 +87,15 @@ const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 const ROLE_BADGE: Record<UserRole, string> = {
-    admin:                    'bg-blue-800 text-white',
-    subject_teacher:          'bg-blue-800 text-white',
-    picket_teacher:           'bg-blue-800 text-white',
-    homeroom_teacher:         'bg-blue-800 text-white',
-    student:                  'bg-blue-800 text-white',
-    parent:                   'bg-blue-800 text-white',
-    extracurricular_tutor:    'bg-blue-800 text-white',
-    mutamayizin_coordinator:  'bg-blue-800 text-white',
-    headmaster:               'bg-blue-800 text-white',
+    admin:                    'bg-red-700 text-white',
+    subject_teacher:          'bg-blue-700 text-white',
+    picket_teacher:           'bg-sky-600 text-white',
+    homeroom_teacher:         'bg-indigo-600 text-white',
+    student:                  'bg-emerald-600 text-white',
+    parent:                   'bg-teal-600 text-white',
+    extracurricular_tutor:    'bg-purple-600 text-white',
+    mutamayizin_coordinator:  'bg-amber-600 text-white',
+    headmaster:               'bg-slate-800 text-white',
 };
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -365,31 +365,27 @@ export const UserManagement: React.FC = () => {
                 <CardContent className="p-0">
                     <div className="border-t border-slate-200 overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                            <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="pl-4 pr-6 py-4 font-medium text-sm">Nama & Akun</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Akses Sistem</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Kontak</th>
-                                    <th className="px-6 py-4 font-medium text-sm">Terdaftar</th>
-                                    <th className="px-6 py-4 font-medium text-sm text-right">Aksi</th>
+                                    <th className="pl-4 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama & Akun</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Akses Sistem</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kontak</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Terdaftar</th>
+                                    <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {users.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-12 text-center">
-                                            <div className="flex flex-col items-center justify-center">
-                                                <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                                    {searchInput || selectedRole !== 'all' ? (
-                                                        <FilterX className="h-8 w-8 text-slate-300" />
-                                                    ) : (
-                                                        <FileX className="h-8 w-8 text-slate-300" />
-                                                    )}
-                                                </div>
-                                                <p className="text-slate-500 font-medium">Data tidak ditemukan</p>
-                                                <p className="text-slate-400 text-sm mt-1">
-                                                    Coba sesuaikan filter pencarian Anda
-                                                </p>
+                                            <div className="flex flex-col items-center justify-center py-8 text-center">
+                                                {searchInput || selectedRole !== 'all' ? (
+                                                    <FilterX className="h-8 w-8 text-slate-300 mb-2" />
+                                                ) : (
+                                                    <FileX className="h-8 w-8 text-slate-300 mb-2" />
+                                                )}
+                                                <p className="text-sm text-slate-500">Data tidak ditemukan</p>
+                                                <p className="text-xs text-slate-400 mt-1">Coba sesuaikan filter pencarian Anda</p>
                                             </div>
                                         </td>
                                     </tr>

@@ -27,9 +27,8 @@ export function useUserManagement() {
     } = useQuery({
         queryKey: USER_KEYS.list(filters),
         queryFn: () => userService.getUsers(filters),
-        // Ikuti global default (5 menit) — data user tidak berubah terlalu sering
-        staleTime: 5 * 60 * 1000,
-        // gcTime ikuti global default (10 menit)
+        staleTime: 0,
+        gcTime: 5 * 60 * 1000,
         placeholderData: (prev) => prev,
     });
 

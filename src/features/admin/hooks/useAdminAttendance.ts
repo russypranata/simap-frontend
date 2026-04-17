@@ -14,7 +14,7 @@ export const useAttendanceSummary = (date: string) =>
     useQuery({
         queryKey: ATTENDANCE_KEYS.summary(date),
         queryFn:  () => attendanceService.getSummary(date),
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
         enabled: !!date,
     });
 
@@ -22,26 +22,26 @@ export const useDailyAttendance = (filters: AttendanceFilters) =>
     useQuery({
         queryKey: ATTENDANCE_KEYS.daily(filters),
         queryFn:  () => attendanceService.getDaily(filters),
-        staleTime: 2 * 60 * 1000,
+        staleTime: 0,
     });
 
 export const useMorningAttendance = (filters: AttendanceFilters) =>
     useQuery({
         queryKey: ATTENDANCE_KEYS.morning(filters),
         queryFn:  () => attendanceService.getMorning(filters),
-        staleTime: 2 * 60 * 1000,
+        staleTime: 0,
     });
 
 export const usePrayerAttendance = (filters: AttendanceFilters) =>
     useQuery({
         queryKey: ATTENDANCE_KEYS.prayer(filters),
         queryFn:  () => attendanceService.getPrayer(filters),
-        staleTime: 2 * 60 * 1000,
+        staleTime: 0,
     });
 
 export const useEkskulAttendance = (filters: AttendanceFilters) =>
     useQuery({
         queryKey: ATTENDANCE_KEYS.ekskul(filters),
         queryFn:  () => attendanceService.getExtracurricular(filters),
-        staleTime: 2 * 60 * 1000,
+        staleTime: 0,
     });
