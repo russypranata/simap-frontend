@@ -207,9 +207,9 @@ export const AcademicYearList: React.FC = () => {
                                     academicYears.map((year, index) => (
                                         <tr
                                             key={year.id}
-                                            className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
+                                            className="group transition-colors border-b border-slate-50 hover:bg-slate-50/60"
                                         >
-                                            <td className="p-4 text-sm text-center text-slate-600 font-medium">{index + 1}</td>
+                                            <td className="p-4 text-sm text-center text-slate-500 font-mono">{index + 1}</td>
                                             <td className="p-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className={cn(
@@ -222,17 +222,17 @@ export const AcademicYearList: React.FC = () => {
                                                         )} />
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-semibold text-slate-800">{year.name}</p>
-                                                        <p className="text-xs text-slate-400">ID: {year.id}</p>
+                                                        <p className="text-sm font-medium text-slate-900">{year.name}</p>
+                                                        <p className="text-xs text-slate-500 font-mono mt-0.5">ID: {year.id}</p>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="p-4">
                                                 <div className="text-sm">
-                                                    <p className="font-medium text-slate-800">
+                                                    <p className="font-medium text-slate-900">
                                                         {formatDate(new Date(year.startDate), 'dd MMM yyyy')}
                                                     </p>
-                                                    <p className="text-slate-500">
+                                                    <p className="text-xs text-slate-500 mt-0.5">
                                                         s/d {formatDate(new Date(year.endDate), 'dd MMM yyyy')}
                                                     </p>
                                                 </div>

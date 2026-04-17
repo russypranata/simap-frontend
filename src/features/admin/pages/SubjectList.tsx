@@ -328,10 +328,10 @@ export const SubjectList: React.FC = () => {
                                         <tr
                                             key={item.id}
                                             className={cn(
-                                                "border-b border-slate-100 transition-colors",
+                                                "group transition-colors border-b border-slate-50",
                                                 selectedItems.includes(item.id)
                                                     ? "bg-blue-50/50"
-                                                    : "hover:bg-slate-50/50"
+                                                    : "hover:bg-slate-50/60"
                                             )}
                                         >
                                             <td className="pl-4 pr-0 py-4">
@@ -342,7 +342,7 @@ export const SubjectList: React.FC = () => {
                                             </td>
                                             <td className="pl-3 pr-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <p className="text-sm font-semibold text-slate-800">{item.name}</p>
+                                                    <p className="text-sm font-medium text-slate-900">{item.name}</p>
                                                     <div className="flex items-center gap-1.5 mt-0.5">
                                                         <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">KODE:</span>
                                                         <span className="text-xs text-slate-500 font-mono">{item.code}</span>
@@ -379,7 +379,7 @@ export const SubjectList: React.FC = () => {
                                                 </div>
                                             </td>
                                             <td className="px-4 py-4 text-center">
-                                                <span className="text-sm font-medium text-slate-600">
+                                                <span className="text-sm text-slate-700">
                                                     {formatCategory(item.category)}
                                                 </span>
                                             </td>
@@ -389,7 +389,7 @@ export const SubjectList: React.FC = () => {
                                                         <div className="h-8 w-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
                                                             <Users className="h-4 w-4" />
                                                         </div>
-                                                        <span className="text-sm font-medium text-slate-800">
+                                                        <span className="text-sm font-medium text-slate-900">
                                                             {item.teacherNames.join(', ')}
                                                         </span>
                                                     </div>
@@ -398,7 +398,7 @@ export const SubjectList: React.FC = () => {
                                                         <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center shrink-0 border border-dashed border-slate-200">
                                                             <Users className="h-4 w-4" />
                                                         </div>
-                                                        <span className="text-sm italic">Belum diset</span>
+                                                        <span className="text-sm text-slate-400">—</span>
                                                     </div>
                                                 )}
                                             </td>

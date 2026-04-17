@@ -535,36 +535,36 @@ export const AttendanceReport: React.FC = () => {
                                         items.map((item) => (
                                             <tr key={item.id} className="group transition-colors border-b border-slate-50 hover:bg-slate-50/60">
                                                 <td className="px-4 py-4">
-                                                    <span className="text-sm font-medium text-slate-800">{item.studentName ?? '—'}</span>
+                                                    <span className="font-medium text-slate-900">{item.studentName ?? '—'}</span>
                                                 </td>
                                                 <td className="px-4 py-4">
-                                                    <span className="text-xs font-mono text-slate-400">{item.studentNis ?? '—'}</span>
+                                                    <span className="text-xs font-mono text-slate-500">{item.studentNis ?? '—'}</span>
                                                 </td>
                                                 <td className="px-4 py-4">
                                                     {item.className
-                                                        ? <Badge variant="outline" className="text-xs font-medium text-slate-600 border-slate-200 bg-slate-50">{item.className}</Badge>
-                                                        : <span className="text-slate-300">—</span>}
+                                                        ? <Badge className="bg-blue-800 text-white text-xs font-medium">{item.className}</Badge>
+                                                        : <span className="text-sm text-slate-400">—</span>}
                                                 </td>
                                                 {activeTab === 'daily' && (
-                                                    <td className="px-4 py-3 text-sm text-slate-600">
+                                                    <td className="px-4 py-3 text-sm text-slate-700">
                                                         {'subjectName' in item ? (item.subjectName ?? '—') : '—'}
                                                     </td>
                                                 )}
                                                 {activeTab === 'morning' && (<>
                                                     <td className="px-4 py-4">
-                                                        <span className="text-xs font-mono text-slate-600">{'time' in item ? (item.time ?? '—') : '—'}</span>
+                                                        <span className="text-xs font-mono text-slate-500">{'time' in item ? (item.time ?? '—') : '—'}</span>
                                                     </td>
-                                                    <td className="px-4 py-3 text-sm text-slate-600">{'location' in item ? (item.location ?? '—') : '—'}</td>
-                                                    <td className="px-4 py-3 text-sm text-slate-600">{'recordedBy' in item ? (item.recordedBy ?? '—') : '—'}</td>
+                                                    <td className="px-4 py-3 text-sm text-slate-700">{'location' in item ? (item.location ?? '—') : '—'}</td>
+                                                    <td className="px-4 py-3 text-sm text-slate-700">{'recordedBy' in item ? (item.recordedBy ?? '—') : '—'}</td>
                                                 </>)}
                                                 {activeTab === 'prayer' && (<>
                                                     <td className="px-4 py-4">
-                                                        <span className="text-sm text-slate-600 capitalize">{'prayerTime' in item ? (item.prayerTime ?? '—') : '—'}</span>
+                                                        <span className="text-sm text-slate-700 capitalize">{'prayerTime' in item ? (item.prayerTime ?? '—') : '—'}</span>
                                                     </td>
-                                                    <td className="px-4 py-3 text-sm text-slate-600">{'location' in item ? (item.location ?? '—') : '—'}</td>
+                                                    <td className="px-4 py-3 text-sm text-slate-700">{'location' in item ? (item.location ?? '—') : '—'}</td>
                                                 </>)}
                                                 {activeTab === 'extracurricular' && (
-                                                    <td className="px-4 py-3 text-sm text-slate-600">{'ekskulName' in item ? item.ekskulName : '—'}</td>
+                                                    <td className="px-4 py-3 text-sm text-slate-700">{'ekskulName' in item ? item.ekskulName : '—'}</td>
                                                 )}
                                                 <td className="px-4 py-4">
                                                     <span className="text-xs text-slate-500 whitespace-nowrap">

@@ -434,12 +434,12 @@ export const UserManagement: React.FC = () => {
 
                                                 {/* Kontak */}
                                                 <td className="px-6 py-4">
-                                                    <p className="text-sm text-slate-600">{user.phone ?? <span className="text-slate-400">—</span>}</p>
+                                                    <p className="text-sm text-slate-700">{user.phone ?? <span className="text-slate-400">—</span>}</p>
                                                 </td>
 
                                                 {/* Terdaftar */}
                                                 <td className="px-6 py-4">
-                                                    <p className="text-sm text-slate-600">
+                                                    <p className="text-sm text-slate-700">
                                                         {user.created_at
                                                             ? new Date(user.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
                                                             : '—'}

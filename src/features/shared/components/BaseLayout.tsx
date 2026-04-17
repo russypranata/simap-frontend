@@ -47,12 +47,13 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
     // Persist collapsed state in localStorage so it survives navigation & refresh
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
-        }
-        return false;
-    });
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+    // Read from localStorage after mount to avoid SSR hydration mismatch
+    useEffect(() => {
+        const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+        if (saved === 'true') setSidebarCollapsed(true);
+    }, []);
 
     const handleSetCollapsed = (value: boolean) => {
         setSidebarCollapsed(value);

@@ -388,7 +388,7 @@ export const ClassList: React.FC = () => {
                                                 />
                                             </td>
                                             <td className="px-4 py-3 align-middle">
-                                                <span className="text-sm font-semibold text-slate-800">{item.name}</span>
+                                                <span className="text-sm font-medium text-slate-900">{item.name}</span>
                                             </td>
                                             <td className="px-4 py-3 align-middle">
                                                 <Badge
@@ -400,11 +400,11 @@ export const ClassList: React.FC = () => {
                                             </td>
                                             <td className="px-4 py-3 align-middle">
                                                 {item.academic_year_name ? (
-                                                    <span className="text-sm text-slate-600">
+                                                    <span className="text-sm text-slate-700">
                                                         TA. {item.academic_year_name}
                                                     </span>
                                                 ) : (
-                                                    <span className="text-slate-400 text-xs">—</span>
+                                                    <span className="text-sm text-slate-400">—</span>
                                                 )}
                                             </td>
                                             <td className="px-4 py-3 align-middle">
@@ -450,7 +450,7 @@ export const ClassList: React.FC = () => {
                                                         Lihat Mapel
                                                     </button>
                                                 ) : (
-                                                    <Badge variant="secondary" className="bg-blue-50 text-blue-800 border border-blue-200 text-xs font-medium">
+                                                    <Badge className="bg-blue-800 text-white text-xs font-medium">
                                                         {item.total_students} Siswa
                                                     </Badge>
                                                 )}

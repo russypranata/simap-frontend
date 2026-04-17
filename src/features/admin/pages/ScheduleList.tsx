@@ -709,20 +709,20 @@ export const ScheduleList: React.FC = () => {
                                                                 <td className="py-3 px-6">
                                                                     <div className="flex items-center gap-2">
                                                                         <BookOpen className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
-                                                                        <span className="font-medium text-sm text-slate-800">
+                                                                        <span className="font-medium text-sm text-slate-900">
                                                                             {schedule.subjectName}
                                                                         </span>
                                                                     </div>
                                                                 </td>
                                                                 <td className="py-3 px-6">
-                                                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium px-2 py-0.5">
+                                                                    <Badge className="bg-blue-800 text-white text-xs font-medium">
                                                                         {schedule.className}
                                                                     </Badge>
                                                                 </td>
                                                                 <td className="py-3 px-6">
                                                                     <div className="flex items-center gap-1.5">
                                                                         <User className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
-                                                                        <span className="text-sm text-slate-600 truncate max-w-[150px]">
+                                                                        <span className="text-sm text-slate-700 truncate max-w-[150px]">
                                                                             {schedule.teacherName}
                                                                         </span>
                                                                     </div>

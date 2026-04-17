@@ -263,11 +263,11 @@ export const HomeroomList: React.FC = () => {
                                     filteredClasses.map((item: ClassRoom) => (
                                         <tr
                                             key={item.id}
-                                            className="hover:bg-slate-50/50 transition-colors group border-b border-slate-100"
+                                            className="group transition-colors border-b border-slate-50 hover:bg-slate-50/60"
                                         >
                                             {/* Nama Kelas */}
                                             <td className="px-4 py-3 align-middle">
-                                                <span className="text-sm font-semibold text-slate-800">
+                                                <span className="text-sm font-medium text-slate-900">
                                                     {item.name}
                                                 </span>
                                             </td>
@@ -275,11 +275,11 @@ export const HomeroomList: React.FC = () => {
                                             {/* Tahun Ajaran */}
                                             <td className="px-4 py-3 align-middle">
                                                 {item.academic_year_name ? (
-                                                    <span className="text-sm text-slate-600">
+                                                    <span className="text-sm text-slate-700">
                                                         TA. {item.academic_year_name}
                                                     </span>
                                                 ) : (
-                                                    <span className="text-slate-400 text-xs">—</span>
+                                                    <span className="text-sm text-slate-400">—</span>
                                                 )}
                                             </td>
 
@@ -306,7 +306,7 @@ export const HomeroomList: React.FC = () => {
 
                                             {/* Jumlah Siswa */}
                                             <td className="px-4 py-3 align-middle text-center">
-                                                <Badge variant="secondary" className="bg-blue-50 text-blue-800 border border-blue-200 text-xs font-medium">
+                                                <Badge className="bg-blue-800 text-white text-xs font-medium">
                                                     {item.total_students} Siswa
                                                 </Badge>
                                             </td>

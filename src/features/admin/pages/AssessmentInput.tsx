@@ -390,18 +390,18 @@ const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({ classSubjec
                                     assessments.map((a) => (
                                         <tr key={a.id} className="group border-b border-slate-50 hover:bg-slate-50/60 transition-colors">
                                             <td className="px-6 py-4">
-                                                <p className="font-semibold text-slate-800">{a.title}</p>
-                                                <p className="text-xs text-slate-500 mt-0.5">{a.semester_name ?? `Semester ${a.semester_id}`}</p>
+                                                <p className="font-medium text-slate-900">{a.title}</p>
+                                                <p className="text-xs text-slate-500 font-mono mt-0.5">{a.semester_name ?? `Semester ${a.semester_id}`}</p>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <Badge variant="outline" className={cn('text-xs font-semibold', TYPE_STYLE[a.type])}>
                                                     {TYPE_LABEL[a.type]}
                                                 </Badge>
                                             </td>
-                                            <td className="px-6 py-4 font-semibold text-slate-700">{a.max_score}</td>
-                                            <td className="px-6 py-4 text-slate-600">{a.weight}%</td>
+                                            <td className="px-6 py-4 text-sm font-medium text-slate-700">{a.max_score}</td>
+                                            <td className="px-6 py-4 text-sm text-slate-700">{a.weight}%</td>
                                             <td className="px-6 py-4">
-                                                <span className="text-sm tabular-nums text-slate-600">
+                                                <span className="text-sm tabular-nums text-slate-700">
                                                     {a.total_grades} / {classSubject.total_students} siswa
                                                 </span>
                                             </td>
@@ -684,18 +684,16 @@ export const AssessmentInput: React.FC = () => {
                                             >
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
-                                                        <span className="font-bold text-slate-900 text-base">{item.class_name}</span>
-                                                        <span className="text-blue-700 text-xs font-semibold bg-blue-50 px-2 py-0.5 rounded w-fit mt-1">
-                                                            {item.subject_name}
-                                                        </span>
+                                                        <span className="font-medium text-slate-900">{item.class_name}</span>
+                                                        <span className="text-xs text-slate-500 mt-0.5">{item.subject_name}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-slate-600">
+                                                <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2">
                                                         <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">
                                                             {(item.teacher_name ?? '?').substring(0, 2).toUpperCase()}
                                                         </div>
-                                                        <span className="truncate max-w-[140px]">{item.teacher_name ?? '—'}</span>
+                                                        <span className="text-sm text-slate-700 truncate max-w-[140px]">{item.teacher_name ?? '—'}</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 min-w-[180px]">

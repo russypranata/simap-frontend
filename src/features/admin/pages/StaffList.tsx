@@ -288,7 +288,7 @@ export const StaffList: React.FC = () => {
                                             return (
                                                 <tr
                                                     key={item.id}
-                                                    className="hover:bg-slate-50/60 transition-colors group"
+                                                    className="group transition-colors border-b border-slate-50 hover:bg-slate-50/60"
                                                 >
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-3">
@@ -302,7 +302,7 @@ export const StaffList: React.FC = () => {
                                                                 <div className="font-medium text-slate-900">
                                                                     {item.name}
                                                                 </div>
-                                                                <div className="text-xs text-slate-500 font-mono mt-0.5 bg-slate-100 w-fit px-1 rounded">
+                                                                <div className="text-xs text-slate-500 font-mono mt-0.5">
                                                                     {item.staff_profile?.employee_id ?? '-'}
                                                                 </div>
                                                             </div>

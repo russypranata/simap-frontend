@@ -330,8 +330,8 @@ const EkskulRow: React.FC<EkskulRowProps> = ({ item, onEdit, onMembers, onDelete
                         </AvatarFallback>
                     </Avatar>
                     <div>
-                        <p className="text-sm font-medium text-slate-800">{item.tutor_name ?? '—'}</p>
-                        {item.nip && <p className="text-xs text-slate-400 font-mono">{item.nip}</p>}
+                        <p className="text-sm font-medium text-slate-900">{item.tutor_name ?? '—'}</p>
+                        {item.nip && <p className="text-xs text-slate-500 font-mono mt-0.5">{item.nip}</p>}
                     </div>
                 </div>
             </td>
@@ -341,7 +341,7 @@ const EkskulRow: React.FC<EkskulRowProps> = ({ item, onEdit, onMembers, onDelete
                 {schedules.length > 0 ? (
                     <div className="space-y-1">
                         {schedules.slice(0, 2).map((s) => (
-                            <div key={s.id} className="flex items-center gap-1.5 text-xs text-slate-600">
+                            <div key={s.id} className="flex items-center gap-1.5 text-xs text-slate-700">
                                 <Calendar className="h-3 w-3 text-slate-400 shrink-0" />
                                 <span className="font-medium">{s.day}</span>
                                 <span className="text-slate-400">{s.time_start}–{s.time_end}</span>
@@ -359,7 +359,7 @@ const EkskulRow: React.FC<EkskulRowProps> = ({ item, onEdit, onMembers, onDelete
             {/* Anggota */}
             <td className="px-6 py-4 text-center">
                 <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-sm font-semibold text-slate-800">{activeCount}</span>
+                    <span className="text-sm font-medium text-slate-900">{activeCount}</span>
                     <span className="text-xs text-slate-400">anggota aktif</span>
                 </div>
             </td>

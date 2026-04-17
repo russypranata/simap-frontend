@@ -255,17 +255,17 @@ export const ReportCardPrint: React.FC = () => {
                                             >
                                                 {/* Kelas */}
                                                 <td className="px-6 py-4">
-                                                    <div className="h-12 w-12 font-bold text-slate-800 bg-slate-100 flex items-center justify-center rounded-lg border border-slate-200 group-hover:border-blue-200 transition-colors text-sm">
+                                                    <div className="h-12 w-12 font-bold text-slate-900 bg-slate-100 flex items-center justify-center rounded-lg border border-slate-200 group-hover:border-blue-200 transition-colors text-sm">
                                                         {item.class_name}
                                                     </div>
                                                 </td>
                                                 {/* Wali Kelas */}
-                                                <td className="px-6 py-4 text-slate-600">
+                                                <td className="px-6 py-4">
                                                     <div className="flex items-center gap-2">
                                                         <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 shrink-0">
                                                             {item.homeroom_teacher.substring(0, 2).toUpperCase()}
                                                         </div>
-                                                        <span className="truncate max-w-[140px]">{item.homeroom_teacher}</span>
+                                                        <span className="text-sm text-slate-700 truncate max-w-[140px]">{item.homeroom_teacher}</span>
                                                     </div>
                                                 </td>
                                                 {/* Tahun Ajaran */}

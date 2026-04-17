@@ -325,7 +325,7 @@ export const SubjectDetail: React.FC<SubjectDetailProps> = ({ id }) => {
                                             </tr>
                                         ) : (
                                             filteredTeachers.map((teacher, index) => (
-                                                <tr key={index} className="group hover:bg-slate-50/60 transition-colors">
+                                                <tr key={index} className="group transition-colors border-b border-slate-50 hover:bg-slate-50/60">
                                                     <td className="px-6 py-4 text-center text-slate-500 font-mono text-xs">
                                                         {index + 1}
                                                     </td>
@@ -334,14 +334,14 @@ export const SubjectDetail: React.FC<SubjectDetailProps> = ({ id }) => {
                                                             <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 uppercase font-bold text-xs border border-blue-100">
                                                                 {teacher.name.charAt(0)}
                                                             </div>
-                                                            <span className="font-semibold text-slate-900 text-sm">{teacher.name}</span>
+                                                            <span className="font-medium text-slate-900 text-sm">{teacher.name}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4 font-mono text-slate-500 text-sm">
-                                                        {teacher.nip || '-'}
+                                                    <td className="px-6 py-4">
+                                                        <span className="text-xs text-slate-500 font-mono">{teacher.nip || '—'}</span>
                                                     </td>
                                                     <td className="px-6 py-4 text-center">
-                                                        <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border border-emerald-100 font-medium">
+                                                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs font-medium">
                                                             Aktif
                                                         </Badge>
                                                     </td>

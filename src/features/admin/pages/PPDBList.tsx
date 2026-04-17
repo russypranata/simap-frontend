@@ -192,7 +192,7 @@ export const PPDBList: React.FC = () => {
                                         <td className="pl-4 pr-6 py-4">
                                             <p className="font-medium text-slate-900">{r.name}</p>
                                             <p className="text-xs text-slate-500 font-mono mt-0.5">{r.registration_number}</p>
-                                            <p className="text-xs text-slate-400 mt-0.5">NISN: {r.nisn}</p>
+                                            <p className="text-xs text-slate-500 font-mono mt-0.5">NISN: {r.nisn}</p>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-slate-700">{r.previous_school}</td>
                                         <td className="px-6 py-4">
@@ -202,7 +202,7 @@ export const PPDBList: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <p className="text-sm text-slate-700">{r.parent_name}</p>
-                                            <p className="text-xs text-slate-400 mt-0.5">{r.parent_phone}</p>
+                                            <p className="text-xs text-slate-500 font-mono mt-0.5">{r.parent_phone}</p>
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <Badge variant="outline" className={cn('text-xs font-medium', STATUS_STYLE[r.status])}>

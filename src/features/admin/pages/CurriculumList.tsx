@@ -187,7 +187,7 @@ export const CurriculumList: React.FC = () => {
                                             <p className="text-xs text-slate-500 font-mono mt-0.5">{item.code}</p>
                                             {item.description && <p className="text-xs text-slate-400 mt-0.5 truncate max-w-xs">{item.description}</p>}
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-slate-600">{item.academicYearName || '—'}</td>
+                                        <td className="px-6 py-4 text-sm text-slate-700">{item.academicYearName || '—'}</td>
                                         <td className="px-6 py-4 text-center">
                                             <Badge variant="outline" className={cn('text-xs font-medium', STATUS_STYLE[item.status])}>
                                                 {STATUS_LABEL[item.status]}

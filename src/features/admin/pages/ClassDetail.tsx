@@ -355,8 +355,8 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({ id }) => {
                                             </tr>
                                         ) : (
                                             filteredSubjects.map((cs: ClassSubject, index: number) => (
-                                                <tr key={cs.id} className="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
-                                                    <td className="px-4 py-3 align-middle text-center text-slate-400 font-mono text-xs">
+                                                <tr key={cs.id} className="group transition-colors border-b border-slate-50 hover:bg-slate-50/60">
+                                                    <td className="px-4 py-3 align-middle text-center text-slate-500 font-mono text-xs">
                                                         {index + 1}
                                                     </td>
                                                     <td className="px-4 py-3 align-middle">
@@ -364,7 +364,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({ id }) => {
                                                             <div className="h-8 w-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 shrink-0 border border-amber-100">
                                                                 <Tag className="h-4 w-4" />
                                                             </div>
-                                                            <span className="text-sm font-medium text-slate-800">
+                                                            <span className="text-sm font-medium text-slate-900">
                                                                 {cs.subject_name ?? `Mapel #${cs.subject_id}`}
                                                             </span>
                                                         </div>
@@ -378,7 +378,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({ id }) => {
                                                                 <span className="text-sm text-slate-700">{cs.teacher_name}</span>
                                                             </div>
                                                         ) : (
-                                                            <span className="text-slate-400 text-xs">—</span>
+                                                            <span className="text-sm text-slate-400">—</span>
                                                         )}
                                                     </td>
                                                     <td className="px-4 py-3 align-middle text-center">
@@ -470,9 +470,9 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({ id }) => {
                                             filteredEnrollments.map((enrollment: Enrollment, index: number) => (
                                                 <tr
                                                     key={enrollment.id}
-                                                    className="hover:bg-slate-50/50 transition-colors group border-b border-slate-100"
+                                                    className="group transition-colors border-b border-slate-50 hover:bg-slate-50/60"
                                                 >
-                                                    <td className="px-4 py-3 align-middle text-center text-slate-400 font-mono text-xs">
+                                                    <td className="px-4 py-3 align-middle text-center text-slate-500 font-mono text-xs">
                                                         {index + 1}
                                                     </td>
                                                     <td className="px-4 py-3 align-middle">
@@ -480,7 +480,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({ id }) => {
                                                             <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 text-xs font-bold border border-blue-100">
                                                                 {(enrollment.student_name ?? 'S').substring(0, 2).toUpperCase()}
                                                             </div>
-                                                            <span className="text-sm font-medium text-slate-800">
+                                                            <span className="text-sm font-medium text-slate-900">
                                                                 {enrollment.student_name ?? `Siswa #${enrollment.student_id}`}
                                                             </span>
                                                         </div>
