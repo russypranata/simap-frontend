@@ -20,7 +20,7 @@ export const useStudentBehavior = () => {
         staleTime: 2 * 60 * 1000,
     });
 
-    const allRecords = query.data ?? [];
+    const allRecords = useMemo(() => query.data ?? [], [query.data]);
 
     // Auto-select latest academic year once data loads
     const academicYears = useMemo(() => {

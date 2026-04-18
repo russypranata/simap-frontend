@@ -27,7 +27,7 @@ export const useParentAchievements = () => {
         staleTime: 2 * 60 * 1000,
     });
 
-    const allRecords = achievementsQuery.data ?? [];
+    const allRecords = useMemo(() => achievementsQuery.data ?? [], [achievementsQuery.data]);
 
     const academicYears = useMemo(() => {
         const unique = new Set(allRecords.map(r => r.academicYearId));

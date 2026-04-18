@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any , @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import {
     Table,
@@ -147,21 +148,21 @@ export const HomeroomStudents = () => {
 
                         <div className="rounded-xl border shadow-sm overflow-hidden bg-card">
                             <Table>
-                                <TableHeader className="bg-muted/50">
-                                    <TableRow className="hover:bg-transparent border-b">
-                                        <TableHead className="w-[50px] p-4 font-medium text-sm text-foreground text-center">No</TableHead>
-                                        <TableHead className="w-[280px] p-4 font-medium text-sm text-foreground">Nama Siswa</TableHead>
-                                        <TableHead className="w-[120px] p-4 font-medium text-sm text-foreground">NIS</TableHead>
-                                        <TableHead className="w-[100px] p-4 font-medium text-sm text-foreground text-center">Gender</TableHead>
-                                        <TableHead className="w-[140px] p-4 font-medium text-sm text-foreground text-center">Status</TableHead>
-                                        <TableHead className="w-[200px] p-4 font-medium text-sm text-foreground">Kehadiran Semester</TableHead>
-                                        <TableHead className="w-[120px] p-4 font-medium text-sm text-foreground text-center">Rata-rata Nilai</TableHead>
-                                        <TableHead className="p-4 font-medium text-sm text-foreground text-right pr-6">Aksi</TableHead>
+                                <TableHeader className="bg-slate-50 border-b border-slate-200">
+                                    <TableRow className="bg-slate-50 border-b border-slate-200 hover:bg-slate-50">
+                                        <TableHead className="w-[50px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">No</TableHead>
+                                        <TableHead className="w-[280px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama Siswa</TableHead>
+                                        <TableHead className="w-[120px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">NIS</TableHead>
+                                        <TableHead className="w-[100px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Gender</TableHead>
+                                        <TableHead className="w-[140px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Status</TableHead>
+                                        <TableHead className="w-[200px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kehadiran Semester</TableHead>
+                                        <TableHead className="w-[120px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Rata-rata Nilai</TableHead>
+                                        <TableHead className="p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right pr-6">Aksi</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {currentStudents.map((student, index) => (
-                                        <TableRow key={student.id} className="hover:bg-muted/30 transition-colors border-b">
+                                        <TableRow key={student.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                             <TableCell className="p-4 text-sm font-medium text-center">
                                                 {startIndex + index + 1}
                                             </TableCell>

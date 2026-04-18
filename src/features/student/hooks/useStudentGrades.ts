@@ -53,7 +53,7 @@ export const useStudentGrades = () => {
         staleTime: 10 * 60 * 1000,
     });
 
-    const rawYears = academicYearsQuery.data ?? [];
+    const rawYears = useMemo(() => academicYearsQuery.data ?? [], [academicYearsQuery.data]);
 
     // Map raw years to AcademicYear shape (with semesters)
     const academicYears: AcademicYear[] = useMemo(() => {

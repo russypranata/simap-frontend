@@ -1,3 +1,4 @@
+ 
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -17,12 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileUploadButton } from "@/features/shared/components/FileUploadButton";
 import { useTeacherData } from "../hooks/useTeacherData";
-import type { Document } from "../types/teacher";
-import {
-  formatDate,
-  formatTime,
-  getRelativeTime,
-} from "@/features/shared/utils/dateFormatter";
+import type { Document as _Document } from "../types/teacher";
+import { formatDate } from "@/features/shared/utils/dateFormatter";
 import {
   FileText,
   Upload,
@@ -46,11 +43,9 @@ import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard } from "@/fe
 export const UploadDocuments: React.FC = () => {
   const {
     loading,
-    error,
     documents,
     fetchDocuments,
     uploadDocument,
-    clearError,
   } = useTeacherData();
 
 
@@ -159,6 +154,7 @@ export const UploadDocuments: React.FC = () => {
 
   useEffect(() => {
     fetchDocuments();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRefresh = async () => {
@@ -166,7 +162,7 @@ export const UploadDocuments: React.FC = () => {
     try {
       await fetchDocuments();
       toast.success("Data dokumen berhasil diperbarui!");
-    } catch (error) {
+    } catch {
       toast.error("Gagal memperbarui data dokumen");
     } finally {
       setIsRefreshing(false);
@@ -183,7 +179,7 @@ export const UploadDocuments: React.FC = () => {
       await uploadDocument(data);
       toast.success("Dokumen berhasil diupload!");
       fetchDocuments();
-    } catch (error) {
+    } catch {
       toast.error("Gagal mengupload dokumen");
     }
   };
@@ -342,15 +338,19 @@ export const UploadDocuments: React.FC = () => {
 
         <TabsContent value="upload" className="space-y-6">
           {/* Upload Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Upload className="h-5 w-5" />
-                <span>Upload Dokumen Baru</span>
-              </CardTitle>
-              <CardDescription>
-                Upload dokumen pembelajaran dan administrasi yang diperlukan
-              </CardDescription>
+          <Card className="border-slate-100 shadow-sm">
+            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Upload className="h-5 w-5 text-blue-700" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold text-slate-800">Upload Dokumen Baru</CardTitle>
+                  <CardDescription className="text-slate-600">
+                    Upload dokumen pembelajaran dan administrasi yang diperlukan
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -424,15 +424,19 @@ export const UploadDocuments: React.FC = () => {
           </Card>
 
           {/* Required Documents */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <FolderOpen className="h-5 w-5" />
-                <span>Dokumen yang Diperlukan</span>
-              </CardTitle>
-              <CardDescription>
-                Daftar dokumen yang harus diupload guru
-              </CardDescription>
+          <Card className="border-slate-100 shadow-sm">
+            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <FolderOpen className="h-5 w-5 text-amber-700" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold text-slate-800">Dokumen yang Diperlukan</CardTitle>
+                  <CardDescription className="text-slate-600">
+                    Daftar dokumen yang harus diupload guru
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -491,7 +495,7 @@ export const UploadDocuments: React.FC = () => {
 
         <TabsContent value="list" className="space-y-6">
           {/* Filters */}
-          <Card>
+          <Card className="border-slate-100 shadow-sm">
             <CardContent className="p-4">
               <div className="flex flex-col lg:flex-row gap-4">
                 <div className="flex-1">
@@ -572,76 +576,80 @@ export const UploadDocuments: React.FC = () => {
 
           {/* Documents List */}
           {filteredDocuments.length > 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <FileText className="h-5 w-5" />
-                  <span>Daftar Dokumen</span>
-                </CardTitle>
-                <CardDescription>
-                  Daftar dokumen yang telah diupload
-                </CardDescription>
+            <Card className="border-slate-100 shadow-sm overflow-hidden">
+              <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <FileText className="h-5 w-5 text-blue-700" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Daftar Dokumen</CardTitle>
+                    <CardDescription className="text-slate-600">
+                      Daftar dokumen yang telah diupload
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="text-left p-3 font-medium text-sm">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                           Nama Dokumen
                         </th>
-                        <th className="text-left p-3 font-medium text-sm">
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                           Jenis
                         </th>
-                        <th className="text-left p-3 font-medium text-sm">
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                           Kategori
                         </th>
-                        <th className="text-left p-3 font-medium text-sm">
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                           Ukuran
                         </th>
-                        <th className="text-left p-3 font-medium text-sm">
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                           Tanggal Upload
                         </th>
-                        <th className="text-left p-3 font-medium text-sm">
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="text-left p-3 font-medium text-sm">
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                           Aksi
                         </th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredDocuments.map((doc) => (
-                        <tr key={doc.id} className="border-b hover:bg-muted/30">
-                          <td className="p-3">
+                        <tr key={doc.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4">
                             <div>
-                              <div className="font-medium text-sm">
+                              <div className="font-semibold text-sm text-slate-800">
                                 {doc.name}
                               </div>
-                              <div className="text-xs text-muted-foreground line-clamp-1">
+                              <div className="text-xs text-slate-500 line-clamp-1">
                                 {doc.description}
                               </div>
                             </div>
                           </td>
-                          <td className="p-3">
+                          <td className="p-4">
                             <Badge variant="outline" className="text-xs">
                               {doc.type}
                             </Badge>
                           </td>
-                          <td className="p-3">
+                          <td className="p-4">
                             <Badge variant="secondary" className="text-xs">
                               {documentTypes.find(dt => dt.id === doc.type)?.category || 'N/A'}
                             </Badge>
                           </td>
-                          <td className="p-3 text-sm">
+                          <td className="p-4 text-sm text-slate-600">
                             {formatFileSize(doc.fileSize)}
                           </td>
-                          <td className="p-3 text-sm">
+                          <td className="p-4 text-sm text-slate-600">
                             {formatDate(doc.uploadDate, "dd MMM yyyy")}
                           </td>
-                          <td className="p-3">
+                          <td className="p-4">
                             <Badge className={getStatusColor(doc.status)}>
-                              <div className="flex items-center space-x-1">
+                              <div className="flex items-center gap-1">
                                 {getStatusIcon(doc.status)}
                                 <span className="text-xs">
                                   {getStatusLabel(doc.status)}
@@ -649,8 +657,8 @@ export const UploadDocuments: React.FC = () => {
                               </div>
                             </Badge>
                           </td>
-                          <td className="p-3">
-                            <div className="flex items-center space-x-1">
+                          <td className="p-4">
+                            <div className="flex items-center gap-1">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -701,35 +709,39 @@ export const UploadDocuments: React.FC = () => {
           {/* Status Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Category Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
-                  <span>Status per Kategori</span>
-                </CardTitle>
-                <CardDescription>
-                  Status dokumen berdasarkan kategori
-                </CardDescription>
+            <Card className="border-slate-100 shadow-sm">
+              <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <BarChart3 className="h-5 w-5 text-purple-700" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Status per Kategori</CardTitle>
+                    <CardDescription className="text-slate-600">
+                      Status dokumen berdasarkan kategori
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {stats.categoryStats.map((category) => (
                     <div
                       key={category.category}
-                      className="flex items-center justify-between p-3 border rounded-lg"
+                      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50"
                     >
                       <div className="flex-1">
-                        <div className="font-medium text-sm">
+                        <div className="font-medium text-sm text-slate-800">
                           {category.category}
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-slate-500">
                           {category.uploaded} dari {category.total} dokumen
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-20 bg-muted rounded-full h-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 bg-slate-100 rounded-full h-1.5">
                           <div
-                            className="h-2 rounded-full bg-green-500"
+                            className="h-1.5 rounded-full bg-green-500"
                             style={{
                               width: `${
                                 (category.uploaded / category.total) * 100
@@ -737,7 +749,7 @@ export const UploadDocuments: React.FC = () => {
                             }}
                           />
                         </div>
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-slate-700">
                           {((category.uploaded / category.total) * 100).toFixed(
                             0
                           )}
@@ -751,15 +763,19 @@ export const UploadDocuments: React.FC = () => {
             </Card>
 
             {/* Completion Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5" />
-                  <span>Status Kelengkapan</span>
-                </CardTitle>
-                <CardDescription>
-                  Persentase kelengkapan dokumen
-                </CardDescription>
+            <Card className="border-slate-100 shadow-sm">
+              <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-green-700" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Status Kelengkapan</CardTitle>
+                    <CardDescription className="text-slate-600">
+                      Persentase kelengkapan dokumen
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -813,21 +829,21 @@ export const UploadDocuments: React.FC = () => {
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="text-left p-3 font-medium text-sm">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                         Jenis Dokumen
                       </th>
-                      <th className="text-left p-3 font-medium text-sm">
+                      <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                         Kategori
                       </th>
-                      <th className="text-left p-3 font-medium text-sm">
+                      <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="text-left p-3 font-medium text-sm">
+                      <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                         Tanggal Upload
                       </th>
-                      <th className="text-left p-3 font-medium text-sm">
+                      <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                         Ukuran
                       </th>
                     </tr>
@@ -840,10 +856,10 @@ export const UploadDocuments: React.FC = () => {
                       return (
                         <tr
                           key={docType.id}
-                          className="border-b hover:bg-muted/30"
+                          className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
                         >
-                          <td className="p-3">
-                            <div className="flex items-center space-x-2">
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
                               <div
                                 className={`w-2 h-2 rounded-full ${
                                   docType.required
@@ -852,21 +868,21 @@ export const UploadDocuments: React.FC = () => {
                                 }`}
                               />
                               <div>
-                                <div className="font-medium text-sm">
+                                <div className="font-semibold text-sm text-slate-800">
                                   {docType.name}
                                 </div>
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-xs text-slate-500">
                                   {docType.description}
                                 </div>
                               </div>
                             </div>
                           </td>
-                          <td className="p-3">
+                          <td className="p-4">
                             <Badge variant="outline" className="text-xs">
                               {docType.category}
                             </Badge>
                           </td>
-                          <td className="p-3">
+                          <td className="p-4">
                             {status === "missing" ? (
                               <Badge
                                 variant="outline"
@@ -877,7 +893,7 @@ export const UploadDocuments: React.FC = () => {
                               </Badge>
                             ) : (
                               <Badge className={getStatusColor(status)}>
-                                <div className="flex items-center space-x-1">
+                                <div className="flex items-center gap-1">
                                   {getStatusIcon(status)}
                                   <span className="text-xs">
                                     {getStatusLabel(status)}
@@ -886,12 +902,12 @@ export const UploadDocuments: React.FC = () => {
                               </Badge>
                             )}
                           </td>
-                          <td className="p-3 text-sm">
+                          <td className="p-4 text-sm text-slate-600">
                             {doc
                               ? formatDate(doc.uploadDate, "dd MMM yyyy")
                               : "-"}
                           </td>
-                          <td className="p-3 text-sm">
+                          <td className="p-4 text-sm text-slate-600">
                             {doc ? formatFileSize(doc.fileSize) : "-"}
                           </td>
                         </tr>

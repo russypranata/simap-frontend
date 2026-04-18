@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 

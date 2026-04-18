@@ -5,8 +5,7 @@ import {
     GetBehaviorRecordsParams,
     CreateBehaviorRecordData,
     BehaviorRecordWithStudent,
-    PaginatedResponse,
-} from "../services/behaviorService";
+    } from "../services/behaviorService";
 
 export interface UseBehaviorRecordsResult {
     records: BehaviorRecordWithStudent[];

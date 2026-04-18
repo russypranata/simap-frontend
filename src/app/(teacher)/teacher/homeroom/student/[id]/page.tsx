@@ -8,22 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    User,
     Phone,
     MapPin,
     Mail,
     Award,
     FileText,
-    AlertCircle,
     Clock,
     CheckCircle2,
     BookOpen,
     Download,
     Eye,
     ArrowLeft,
-    Calendar
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export default function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();

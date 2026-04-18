@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -488,9 +489,11 @@ export const EditAchievement: React.FC = () => {
                                         <div className="flex flex-wrap gap-3">
                                             {existingPhotos.map((photo) => (
                                                 <div key={photo.id} className="relative">
-                                                    <img
+                                                    <Image
                                                         src={photo.url}
                                                         alt="Foto prestasi"
+                                                        width={320}
+                                                        height={192}
                                                         className="max-w-xs max-h-48 rounded-lg border object-cover"
                                                     />
                                                     <Button
@@ -520,9 +523,11 @@ export const EditAchievement: React.FC = () => {
                                         <div className="flex flex-wrap gap-3">
                                             {imagePreviews.map((preview, index) => (
                                                 <div key={index} className="relative">
-                                                    <img
+                                                    <Image
                                                         src={preview}
                                                         alt={`Preview ${index + 1}`}
+                                                        width={320}
+                                                        height={192}
                                                         className="max-w-xs max-h-48 rounded-lg border object-cover"
                                                     />
                                                     <Button

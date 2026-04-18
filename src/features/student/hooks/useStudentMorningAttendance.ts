@@ -15,7 +15,7 @@ export const useStudentMorningAttendance = () => {
         staleTime: 10 * 60 * 1000,
     });
 
-    const academicYears = academicYearsQuery.data ?? [];
+    const academicYears = useMemo(() => academicYearsQuery.data ?? [], [academicYearsQuery.data]);
 
     const effectiveYearId = useMemo(() => {
         if (selectedYearId !== 'all') return selectedYearId;
@@ -28,7 +28,7 @@ export const useStudentMorningAttendance = () => {
         staleTime: 2 * 60 * 1000,
     });
 
-    const allRecords = morningQuery.data ?? [];
+    const allRecords = useMemo(() => morningQuery.data ?? [], [morningQuery.data]);
 
     // Filter by semester if selected
     const records = useMemo(() => {

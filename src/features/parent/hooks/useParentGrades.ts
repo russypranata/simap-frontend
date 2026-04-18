@@ -8,7 +8,6 @@ const defaultAttitude: AttitudeScore = {
     social: { score: "B", predicate: "Baik", description: "Memuat data sikap..." },
 };
 const defaultAttendance: AttendanceSummary = { sick: 0, permission: 0, alpha: 0, total: 0, attendanceRate: 0 };
-const defaultExtracurriculars: Extracurricular[] = [];
 const defaultReportCardNotes: { category: string; note: string; icon: string }[] = [];
 
 const getDefaultYearId = (years: AcademicYear[]): string => {
@@ -49,10 +48,10 @@ export const useParentGrades = () => {
     }));
 
     const effectiveChildId = selectedChildId || children[0]?.id || "";
-    const activeChild = children.find(c => c.id === effectiveChildId);
 
     const academicYears: AcademicYear[] = useMemo(() => {
-        return (activeChild?.enrolledYears ?? []).map(y => ({
+        const child = children.find(c => c.id === effectiveChildId);
+        return (child?.enrolledYears ?? []).map(y => ({
             id: y.id,
             year: y.name,
             semesters: [
@@ -60,7 +59,7 @@ export const useParentGrades = () => {
                 { id: "genap",  label: "Genap",  status: (y.isActive ? "upcoming" : "completed") as "active" | "completed" | "upcoming" },
             ],
         }));
-    }, [activeChild]);
+    }, [children, effectiveChildId]);
 
     const effectiveYearId = useMemo(() => {
         if (selectedYearId && academicYears.some(y => y.id === selectedYearId)) return selectedYearId;
@@ -178,7 +177,7 @@ export const useParentGrades = () => {
             currentRank: gradesQuery.data?.rank ?? 0,
             totalStudents: gradesQuery.data?.totalStudents ?? 0,
         };
-    }, [grades]);
+    }, [grades, gradesQuery.data]);
 
     const handleSetSelectedChildId = useCallback((id: string) => {
         setSelectedChildId(id);

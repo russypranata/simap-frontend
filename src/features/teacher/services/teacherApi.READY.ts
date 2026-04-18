@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Teacher API service - READY FOR REAL API
 import axios, { AxiosInstance } from 'axios';
 import {
@@ -68,7 +69,7 @@ apiClient.interceptors.response.use(
 
 // Mock axios implementation (for development)
 const mockAxios = {
-    get: async <T = any>(url: string): Promise<{ data: T }> => {
+    get: async <T = unknown>(_url: string): Promise<{ data: T }> => {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 300));
 
@@ -114,7 +115,7 @@ const mockAxios = {
         }
     },
 
-    post: async <T = any>(url: string, data: any): Promise<{ data: T }> => {
+    post: async <T = unknown>(url: string, _data: unknown): Promise<{ data: T }> => {
         await new Promise(resolve => setTimeout(resolve, 500));
 
         switch (url) {
@@ -131,12 +132,12 @@ const mockAxios = {
         }
     },
 
-    put: async <T = any>(url: string, data: any): Promise<{ data: T }> => {
+    put: async <T = unknown>(_url: string, _data: unknown): Promise<{ data: T }> => {
         await new Promise(resolve => setTimeout(resolve, 500));
         return { data: { success: true, message: 'Data berhasil diperbarui' } as T };
     },
 
-    delete: async <T = any>(url: string): Promise<{ data: T }> => {
+    delete: async <T = unknown>(_url: string): Promise<{ data: T }> => {
         await new Promise(resolve => setTimeout(resolve, 500));
         return { data: { success: true, message: 'Data berhasil dihapus' } as T };
     },
@@ -217,7 +218,7 @@ export const teacherApi = {
             return filtered;
         } else {
             // Real API call with query params
-            const params: any = {};
+            const params: Record<string, string> = {};
             if (classId) params.classId = classId;
             if (date) params.date = date;
 
@@ -266,7 +267,7 @@ export const teacherApi = {
 
             return filtered;
         } else {
-            const params: any = {};
+            const params: Record<string, string> = {};
             if (classId) params.classId = classId;
             if (subject) params.subject = subject;
 
@@ -342,7 +343,7 @@ export const teacherApi = {
 
             return filtered;
         } else {
-            const params: any = {};
+            const params: Record<string, string> = {};
             if (classId) params.classId = classId;
             if (subject) params.subject = subject;
             if (semester) params.semester = semester;
@@ -427,7 +428,7 @@ export const teacherApi = {
 
             return filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
         } else {
-            const params: any = {};
+            const params: Record<string, string> = {};
             if (type) params.type = type;
             if (priority) params.priority = priority;
 
@@ -454,7 +455,7 @@ export const teacherApi = {
 
             return filtered.sort((a, b) => b.uploadDate.getTime() - a.uploadDate.getTime());
         } else {
-            const params: any = {};
+            const params: Record<string, string> = {};
             if (type) params.type = type;
             if (status) params.status = status;
 
@@ -511,7 +512,7 @@ export const teacherApi = {
 
             return filtered.sort((a, b) => b.generatedDate.getTime() - a.generatedDate.getTime());
         } else {
-            const params: any = {};
+            const params: Record<string, string> = {};
             if (classId) params.classId = classId;
             if (status) params.status = status;
 

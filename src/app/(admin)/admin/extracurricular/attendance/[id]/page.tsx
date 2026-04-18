@@ -2,10 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-    ChevronLeft, 
     Calendar, 
     Clock, 
-    UserCircle, 
     CheckCircle2, 
     XCircle,
     ClipboardCheck,
@@ -66,6 +64,7 @@ export default function AttendanceDetailPage() {
         if (id) {
             fetchData();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchData = async () => {
@@ -216,7 +215,7 @@ export default function AttendanceDetailPage() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <span className="text-sm font-semibold text-slate-600 italic">"{session.topic}"</span>
+                                                    <span className="text-sm font-semibold text-slate-600 italic">&ldquo;{session.topic}&rdquo;</span>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex flex-col items-center gap-1">

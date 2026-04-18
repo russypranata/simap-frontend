@@ -19,7 +19,7 @@ const DAYS_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"]
 export const getMorningTardiness = async (
     childId: string,
     academicYearId: string,
-    _semesterId?: string  // eslint-disable-line @typescript-eslint/no-unused-vars
+    _semesterId?: string
 ): Promise<LateRecord[]> => {
     const params = new URLSearchParams();
     if (academicYearId && academicYearId !== "all") params.append("academic_year_id", academicYearId);

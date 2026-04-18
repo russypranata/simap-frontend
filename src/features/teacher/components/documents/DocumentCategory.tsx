@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Upload, History, File, Folder } from "lucide-react";
+import { FileText, Upload, History } from "lucide-react";
 import { DocumentUploadModal } from "./DocumentUploadModal";
 import { RevisionHistory } from "./RevisionHistory";
 
@@ -19,8 +19,8 @@ interface DocumentCategoryProps {
 }
 
 export const DocumentCategory: React.FC<DocumentCategoryProps> = ({
-    title,
-    description,
+    title: _title,
+    description: _description,
     documentTypes,
 }) => {
     const [selectedDocType, setSelectedDocType] = useState<string | null>(null);
@@ -28,7 +28,7 @@ export const DocumentCategory: React.FC<DocumentCategoryProps> = ({
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
     // Mock state for uploaded files (in a real app, this would come from an API)
-    const [uploadedFiles, setUploadedFiles] = useState<Record<string, boolean>>({
+    const [uploadedFiles, _setUploadedFiles] = useState<Record<string, boolean>>({
         "Capaian Pembelajaran (CP)": true,
         "Alur Tujuan Pembelajaran (ATP)": true,
     });
@@ -50,8 +50,8 @@ export const DocumentCategory: React.FC<DocumentCategoryProps> = ({
                     <Card key={index} className="h-full flex flex-col hover:shadow-md transition-shadow">
                         <CardHeader className="pb-3 flex-1">
                             <div className="flex justify-between items-start">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                    <FileText className="h-5 w-5 text-primary" />
+                                <div className="p-2 bg-slate-100 rounded-lg">
+                                    <FileText className="h-5 w-5 text-slate-600" />
                                 </div>
                                 {uploadedFiles[docType] ? (
                                     <Badge variant="default" className="bg-green-600 hover:bg-green-700">

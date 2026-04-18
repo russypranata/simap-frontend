@@ -9,7 +9,7 @@ interface ScheduleHeaderProps {
     activeYearName?: string;
 }
 
-export const ScheduleHeader: React.FC<ScheduleHeaderProps> = ({ childName, childClass, activeYearName }) => {
+export const ScheduleHeader: React.FC<ScheduleHeaderProps> = ({ childName, childClass, activeYearName: _activeYearName }) => {
     return (
         <div>
             <div className="flex items-center gap-3">

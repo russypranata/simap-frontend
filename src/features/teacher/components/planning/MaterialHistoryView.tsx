@@ -111,8 +111,8 @@ export const MaterialHistoryView: React.FC<MaterialHistoryViewProps> = ({
                 <CardHeader className="border-b pb-4">
                     <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <BookOpen className="h-5 w-5 text-primary" />
+                            <div className="p-2 bg-slate-100 rounded-lg">
+                                <BookOpen className="h-5 w-5 text-slate-600" />
                             </div>
                             <div>
                                 <CardTitle className="text-lg">Daftar Materi</CardTitle>
@@ -165,7 +165,7 @@ export const MaterialHistoryView: React.FC<MaterialHistoryViewProps> = ({
                         ) : (
                             <div className="overflow-x-auto">
                                 <Table>
-                                    <TableHeader className="bg-muted/50">
+                                    <TableHeader className="bg-slate-50 border-b border-slate-200">
                                         <TableRow>
                                             <TableHead className="w-[80px] p-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Kode</TableHead>
                                             <TableHead className="p-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nama Materi</TableHead>
@@ -176,7 +176,7 @@ export const MaterialHistoryView: React.FC<MaterialHistoryViewProps> = ({
                                     </TableHeader>
                                     <TableBody>
                                         {filteredMaterials.map((m) => (
-                                            <TableRow key={m.id} className="border-b hover:bg-muted/30 transition-colors">
+                                            <TableRow key={m.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                                 <TableCell className="p-4 text-sm font-medium">{m.code || "-"}</TableCell>
                                                 <TableCell className="p-4 text-sm">
                                                     <div className="font-semibold text-foreground">{m.name}</div>

@@ -24,8 +24,6 @@ import {
     AlertCircle,
     ShieldCheck,
     ShieldAlert,
-    GraduationCap,
-    IdCard,
     History,
     Trophy,
     Star,
@@ -63,7 +61,7 @@ const mockMemberDetail = {
 
 export default function MemberDetailPage() {
     const router = useRouter();
-    const params = useParams();
+    useParams();
 
     // Helper Functions
     const getInitials = (name: string) => {

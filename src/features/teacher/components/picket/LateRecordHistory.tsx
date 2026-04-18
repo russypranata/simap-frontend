@@ -1,3 +1,4 @@
+ 
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -140,8 +141,8 @@ export default function LateRecordHistory() {
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <History className="h-5 w-5 text-primary" />
+                            <div className="p-2 bg-slate-100 rounded-lg">
+                                <History className="h-5 w-5 text-slate-600" />
                             </div>
                             <div>
                                 <CardTitle className="text-lg font-semibold">Riwayat Lengkap</CardTitle>
@@ -215,78 +216,78 @@ export default function LateRecordHistory() {
 
                 <CardContent className="pt-0">
                     {filteredData.length > 0 ? (
-                        <Card className="border-muted">
+                        <Card className="border-slate-100 shadow-sm overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="bg-muted/50">
-                                        <tr>
-                                            <th className="text-left p-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider">
+                                    <thead>
+                                        <tr className="bg-slate-50 border-b border-slate-200">
+                                            <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                                                 Tanggal
                                             </th>
-                                            <th className="text-left p-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider">
+                                            <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                                                 Siswa
                                             </th>
-                                            <th className="text-center p-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider w-[100px]">
+                                            <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider w-[100px]">
                                                 Waktu
                                             </th>
-                                            <th className="text-left p-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider">
+                                            <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                                                 Keterangan
                                             </th>
-                                            <th className="text-left p-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider">
+                                            <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                                                 Dicatat Oleh
                                             </th>
-                                            <th className="w-[60px] p-3"></th>
+                                            <th className="w-[60px] p-4"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {paginatedData.map((record) => (
                                             <tr
                                                 key={record.id}
-                                                className="border-b hover:bg-muted/30 transition-colors"
+                                                className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
                                             >
-                                                <td className="p-3">
-                                                    <div className="text-sm font-medium">
+                                                <td className="p-4">
+                                                    <div className="text-sm font-semibold text-slate-800">
                                                         {format(new Date(record.date), "dd MMM yyyy", { locale: id })}
                                                     </div>
                                                 </td>
-                                                <td className="p-3">
+                                                <td className="p-4">
                                                     <div className="flex items-center gap-3">
                                                         <div className="h-9 w-9 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xs font-bold shrink-0 border border-red-200">
                                                             {record.studentName.charAt(0)}
                                                         </div>
                                                         <div>
-                                                            <div className="font-medium text-sm">{record.studentName}</div>
+                                                            <div className="font-semibold text-sm text-slate-800">{record.studentName}</div>
                                                             <div className="flex items-center gap-2 mt-0.5 whitespace-nowrap">
-                                                                <span className="text-xs font-mono text-muted-foreground">
+                                                                <span className="text-xs font-mono text-slate-500">
                                                                     {record.studentNIS}
                                                                 </span>
-                                                                <span className="text-xs text-muted-foreground">•</span>
-                                                                <span className="text-xs text-muted-foreground">
+                                                                <span className="text-xs text-slate-400">·</span>
+                                                                <span className="text-xs text-slate-500">
                                                                     {record.studentClass}
                                                                 </span>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="p-3 text-center">
+                                                <td className="p-4 text-center">
                                                     <Badge className="font-mono text-xs bg-orange-100 text-orange-700 border-orange-200">
                                                         {record.arrivalTime}
                                                     </Badge>
                                                 </td>
-                                                <td className="p-3">
-                                                    <p className="text-sm text-muted-foreground italic line-clamp-2">
+                                                <td className="p-4">
+                                                    <p className="text-sm text-slate-500 italic line-clamp-2">
                                                         {record.note || "-"}
                                                     </p>
                                                 </td>
-                                                <td className="p-3">
+                                                <td className="p-4">
                                                     <div className="flex items-center gap-2">
-                                                        <User className="h-4 w-4 text-muted-foreground" />
-                                                        <span className="text-sm font-medium text-primary">
+                                                        <User className="h-4 w-4 text-slate-400" />
+                                                        <span className="text-sm font-medium text-blue-700">
                                                             {record.recordedBy}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="p-3 text-right">
+                                                <td className="p-4 text-right">
                                                     <Button size="icon" variant="ghost" className="h-8 w-8">
                                                         <Eye className="h-4 w-4" />
                                                     </Button>

@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Clock, Timer, AlertTriangle, FileText, RefreshCw, Filter, RotateCcw, Check, MapPin, UserCheck } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Calendar, Clock, Timer, FileText, Filter, RotateCcw, Check, MapPin, UserCheck } from "lucide-react";
 import { useStudentMorningAttendance } from "../hooks/useStudentMorningAttendance";
 import { ErrorState, LoadingOverlay, PageHeader, PaginationControls } from "@/features/shared/components";
 

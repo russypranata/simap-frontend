@@ -35,7 +35,7 @@ export const JournalList: React.FC<JournalListProps> = ({
   if (journals.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-4">
-        <div className="p-4 bg-muted/50 rounded-full">
+        <div className="p-4 bg-slate-100 rounded-full">
           <BookOpen className="h-10 w-10 text-muted-foreground/50" />
         </div>
         <div className="text-center space-y-1">

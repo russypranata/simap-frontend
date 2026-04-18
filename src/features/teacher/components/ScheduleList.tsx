@@ -1,3 +1,4 @@
+ 
 'use client';
 
 import React from 'react';
@@ -13,12 +14,8 @@ import {
   Users, 
   BookOpen,
   User,
-  Bell,
-  Coffee,
-  AlertCircle,
-  CheckCircle,
-  MoreHorizontal,
-  Edit,
+    Coffee,
+        Edit,
   Trash2,
   Plus
 } from 'lucide-react';
@@ -353,7 +350,7 @@ export const ScheduleList: React.FC<ScheduleListProps> = ({
                         <Clock className={`h-4 w-4 ${timeStatus.color}`} />
                       </div>
                       <div>
-                        <p className="font-medium text-sm">{schedule.subject}</p>
+                        <p className="font-semibold text-sm text-slate-800">{schedule.subject}</p>
                         <p className="text-xs text-muted-foreground">
                           {schedule.class} • {schedule.room}
                         </p>

@@ -43,7 +43,7 @@ export const useParentSubjectAttendance = () => {
         },
     });
 
-    const allRecords = subjectQuery.data ?? [];
+    const allRecords = useMemo(() => subjectQuery.data ?? [], [subjectQuery.data]);
 
     const subjects = useMemo(() => Array.from(new Set(allRecords.map(r => r.subject))).sort(), [allRecords]);
     const academicYears = useMemo(() => Array.from(new Set(allRecords.map(r => r.academicYearId))).sort((a, b) => b.localeCompare(a)), [allRecords]);

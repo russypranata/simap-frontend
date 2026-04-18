@@ -1,13 +1,13 @@
+ 
 "use client";
 
 import React, { useState } from "react";
 import { DocumentCategory } from "@/features/teacher/components/documents/DocumentCategory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatDate, getDayName } from "@/features/shared/utils/dateFormatter";
 import { Calendar, BookOpen, ClipboardCheck, TrendingUp } from "lucide-react";
 import { MaterialCard } from "@/features/teacher/components/planning/MaterialCard";
 import { LearningObjectiveCard } from "@/features/teacher/components/planning/LearningObjectiveCard";
-import { Material, LearningObjective, ACTIVE_ACADEMIC_YEAR, ACTIVE_SEMESTER, MOCK_MATERIALS, MOCK_LEARNING_OBJECTIVES } from "@/features/teacher/components/planning/types";
+import { Material, LearningObjective, MOCK_MATERIALS, MOCK_LEARNING_OBJECTIVES } from "@/features/teacher/components/planning/types";
 import { MaterialInputView } from "@/features/teacher/components/planning/MaterialInputView";
 import { MaterialHistoryView } from "@/features/teacher/components/planning/MaterialHistoryView";
 import { LearningObjectiveInputView } from "@/features/teacher/components/planning/LearningObjectiveInputView";

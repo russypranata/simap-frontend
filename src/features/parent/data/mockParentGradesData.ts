@@ -348,8 +348,8 @@ export const childGradesMap: Record<string, ChildGradesData> = {
 // Get grades for a child
 export const getChildGrades = async (
     childId: string,
-    _academicYearId?: string,  // eslint-disable-line @typescript-eslint/no-unused-vars
-    _semesterId?: string  // eslint-disable-line @typescript-eslint/no-unused-vars
+    _academicYearId?: string,
+    _semesterId?: string
 ): Promise<ChildGradesData> => {
     await new Promise((resolve) => setTimeout(resolve, 800));
 

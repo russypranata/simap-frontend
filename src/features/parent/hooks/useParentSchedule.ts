@@ -24,7 +24,7 @@ export const useParentSchedule = () => {
         staleTime: 5 * 60 * 1000,
     });
 
-    const children = childrenQuery.data ?? [];
+    const children = useMemo(() => childrenQuery.data ?? [], [childrenQuery.data]);
     const effectiveChildId = selectedChildId || children[0]?.childId || "";
 
     // Academic years available for the selected child — derived from their enrollment history.
@@ -57,7 +57,7 @@ export const useParentSchedule = () => {
     });
 
     const scheduleData = scheduleQuery.data;
-    const schedule = scheduleData?.schedule ?? [];
+    const schedule = useMemo(() => scheduleData?.schedule ?? [], [scheduleData]);
 
     // Resolve child info from children list (schedule API doesn't return name/class)
     const activeChild = children.find(c => c.childId === effectiveChildId);

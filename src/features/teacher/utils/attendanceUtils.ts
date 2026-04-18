@@ -1,11 +1,15 @@
 // Utility functions for attendance calculations
 
+interface AttendanceEntry {
+  status: string;
+}
+
 /**
  * Calculate attendance statistics from attendance records
  * @param records - Array of attendance records
  * @returns Object with attendance statistics
  */
-export const calculateAttendanceStats = (records: any[]) => {
+export const calculateAttendanceStats = (records: AttendanceEntry[]) => {
   if (!records || records.length === 0) {
     return {
       total: 0,

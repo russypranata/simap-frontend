@@ -18,7 +18,7 @@ export const useStudentAchievements = () => {
         staleTime: 2 * 60 * 1000,
     });
 
-    const allRecords = query.data ?? [];
+    const allRecords = useMemo(() => query.data ?? [], [query.data]);
 
     const academicYears = useMemo(() => {
         const unique = new Set(allRecords.map(r => r.academicYearId).filter(Boolean));

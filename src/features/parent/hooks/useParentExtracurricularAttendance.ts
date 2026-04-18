@@ -39,8 +39,8 @@ export const useParentExtracurricularAttendance = () => {
         },
     });
 
-    const allExtracurriculars = ekskulQuery.data?.extracurriculars ?? [];
-    const allAttendance = ekskulQuery.data?.recentAttendance ?? [];
+    const allExtracurriculars = useMemo(() => ekskulQuery.data?.extracurriculars ?? [], [ekskulQuery.data]);
+    const allAttendance = useMemo(() => ekskulQuery.data?.recentAttendance ?? [], [ekskulQuery.data]);
 
     const academicYears = useMemo(() => {
         const unique = new Set(allExtracurriculars.map(e => e.academicYearId));

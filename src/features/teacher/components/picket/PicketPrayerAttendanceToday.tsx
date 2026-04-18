@@ -1,3 +1,4 @@
+ 
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -217,8 +218,8 @@ export default function PicketPrayerAttendanceToday() {
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <Moon className="h-5 w-5 text-primary" />
+                            <div className="p-2 bg-slate-100 rounded-lg">
+                                <Moon className="h-5 w-5 text-slate-600" />
                             </div>
                             <div>
                                 <CardTitle className="text-lg font-semibold">Pilih Waktu Sholat</CardTitle>
@@ -282,8 +283,8 @@ export default function PicketPrayerAttendanceToday() {
                     <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                    <Search className="h-5 w-5 text-primary" />
+                                <div className="p-2 bg-slate-100 rounded-lg">
+                                    <Search className="h-5 w-5 text-slate-600" />
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg font-semibold">Daftar Siswa</CardTitle>
@@ -410,7 +411,7 @@ export default function PicketPrayerAttendanceToday() {
                                             {student.class.substring(0, 3)}
                                         </div>
                                         <div className="flex-1">
-                                            <p className="font-medium text-sm">{student.name}</p>
+                                            <p className="font-semibold text-sm text-slate-800">{student.name}</p>
                                             <p className="text-xs text-muted-foreground">
                                                 <span className="font-mono">{student.nis}</span> •{" "}
                                                 {student.class}
@@ -484,8 +485,8 @@ export default function PicketPrayerAttendanceToday() {
                     <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                    <Check className="h-5 w-5 text-primary" />
+                                <div className="p-2 bg-slate-100 rounded-lg">
+                                    <Check className="h-5 w-5 text-slate-600" />
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg font-semibold">
@@ -518,14 +519,14 @@ export default function PicketPrayerAttendanceToday() {
                                             {student.class.substring(0, 3)}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-sm">{student.name}</p>
+                                            <p className="font-semibold text-sm text-slate-800">{student.name}</p>
                                             <p className="text-xs text-muted-foreground">
                                                 <span className="font-mono">{student.nis}</span> •{" "}
                                                 {student.class}
                                             </p>
                                             {record.note && (
                                                 <p className="text-xs text-muted-foreground italic mt-1 line-clamp-1">
-                                                    "{record.note}"
+                                                    &quot;{record.note}&quot;
                                                 </p>
                                             )}
                                         </div>

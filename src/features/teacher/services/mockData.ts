@@ -1,5 +1,6 @@
+ 
 // Mock data for teacher functionality
-import { TeacherClass, Student, AttendanceRecord, TeachingJournal, Grade, Schedule, Announcement, Document as TeacherDocument, EReport } from '../types/teacher';
+import { TeacherClass, Student, Grade, Announcement, Document as TeacherDocument, EReport } from '../types/teacher';
 
 // Mock teacher data
 export const mockTeacher = {

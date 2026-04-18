@@ -8,45 +8,35 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useRole } from '@/app/context/RoleContext';
+
 import { useTeacherData } from '../hooks/useTeacherData';
 import type { EReport as EReportType } from '../types/teacher';
-import { formatDate, formatTime, getRelativeTime } from '@/features/shared/utils/dateFormatter';
+import { formatDate } from '@/features/shared/utils/dateFormatter';
 import {
   FileText,
   Download,
-  Upload,
   Search,
-  Filter,
   RefreshCw,
   Eye,
-  Edit,
-  Trash2,
-  Plus,
   CheckCircle,
   AlertCircle,
   Clock,
-  Calendar,
   Users,
   BarChart3,
   TrendingUp,
   Target,
   FileCheck,
   Printer,
-  Settings,
-  Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard } from '@/features/shared/components';
 
 export const EReport: React.FC = () => {
-  const { role, isHomeroomTeacher } = useRole();
+  // useRole not needed here
   const {
     loading,
-    error,
     ereports,
     fetchEReports,
-    clearError,
   } = useTeacherData();
 
   const [selectedClass, setSelectedClass] = useState('');
@@ -60,14 +50,15 @@ export const EReport: React.FC = () => {
 
   useEffect(() => {
     fetchEReports();
-  }, []);
+  }// eslint-disable-next-line react-hooks/exhaustive-deps
+, []);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
       await fetchEReports();
       toast.success('Data E-Rapor berhasil diperbarui!');
-    } catch (error) {
+    } catch {
       toast.error('Gagal memperbarui data E-Rapor');
     } finally {
       setIsRefreshing(false);
@@ -187,13 +178,7 @@ export const EReport: React.FC = () => {
     }
   };
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
+  
 
   const getProgressPercentage = (report: EReportType) => {
     if (report.studentCount === 0) return 0;
@@ -285,22 +270,26 @@ export const EReport: React.FC = () => {
           {/* Overview Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Reports */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <FileCheck className="h-5 w-5" />
-                  <span>E-Rapor Terbaru</span>
-                </CardTitle>
-                <CardDescription>
-                  E-Rapor yang baru dibuat atau diperbarui
-                </CardDescription>
+            <Card className="border-slate-100 shadow-sm">
+              <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <FileCheck className="h-5 w-5 text-blue-700" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-slate-800">E-Rapor Terbaru</CardTitle>
+                    <CardDescription className="text-slate-600">
+                      E-Rapor yang baru dibuat atau diperbarui
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {ereports.slice(0, 5).map((report) => (
                     <div
                       key={report.id}
-                      className="p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                      className="p-4 border rounded-lg hover:bg-slate-50/50 transition-colors cursor-pointer"
                       onClick={() => handleViewReport(report)}
                     >
                       <div className="flex items-start justify-between">
@@ -351,15 +340,19 @@ export const EReport: React.FC = () => {
             </Card>
 
             {/* Quick Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
-                  <span>Ringkasan E-Rapor</span>
-                </CardTitle>
-                <CardDescription>
-                  Status kelengkapan E-Rapor
-                </CardDescription>
+            <Card className="border-slate-100 shadow-sm">
+              <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <BarChart3 className="h-5 w-5 text-purple-700" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Ringkasan E-Rapor</CardTitle>
+                    <CardDescription className="text-slate-600">
+                      Status kelengkapan E-Rapor
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -394,15 +387,19 @@ export const EReport: React.FC = () => {
           </div>
 
           {/* Type Distribution */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Target className="h-5 w-5" />
-                <span>Distribusi Jenis E-Rapor</span>
-              </CardTitle>
-              <CardDescription>
-                Sebaran E-Rapor berdasarkan jenis
-              </CardDescription>
+          <Card className="border-slate-100 shadow-sm">
+            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <Target className="h-5 w-5 text-amber-700" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-semibold text-slate-800">Distribusi Jenis E-Rapor</CardTitle>
+                  <CardDescription className="text-slate-600">
+                    Sebaran E-Rapor berdasarkan jenis
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -451,7 +448,7 @@ export const EReport: React.FC = () => {
 
         <TabsContent value="reports" className="space-y-6">
           {/* Filters */}
-          <Card>
+          <Card className="border-slate-100 shadow-sm">
             <CardContent className="p-4">
               <div className="flex flex-col lg:flex-row gap-4">
                 <div className="flex-1">
@@ -536,67 +533,71 @@ export const EReport: React.FC = () => {
 
           {/* E-Reports List */}
           {filteredReports.length > 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <FileText className="h-5 w-5" />
-                  <span>Daftar E-Rapor</span>
-                </CardTitle>
-                <CardDescription>
-                  Daftar E-Rapor yang tersedia
-                </CardDescription>
+            <Card className="border-slate-100 shadow-sm overflow-hidden">
+              <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <FileText className="h-5 w-5 text-blue-700" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Daftar E-Rapor</CardTitle>
+                    <CardDescription className="text-slate-600">
+                      Daftar E-Rapor yang tersedia
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="text-left p-3 font-medium text-sm">Judul</th>
-                        <th className="text-left p-3 font-medium text-sm">Kelas</th>
-                        <th className="text-left p-3 font-medium text-sm">Semester</th>
-                        <th className="text-left p-3 font-medium text-sm">Tahun Ajaran</th>
-                        <th className="text-left p-3 font-medium text-sm">Status</th>
-                        <th className="text-left p-3 font-medium text-sm">Progress</th>
-                        <th className="text-left p-3 font-medium text-sm">Deadline</th>
-                        <th className="text-left p-3 font-medium text-sm">Aksi</th>
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Judul</th>
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kelas</th>
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Semester</th>
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Tahun Ajaran</th>
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Status</th>
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Progress</th>
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Deadline</th>
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Aksi</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredReports.map((report) => (
-                        <tr key={report.id} className="border-b hover:bg-muted/30">
-                          <td className="p-3">
-                            <div className="font-medium text-sm line-clamp-1">
+                        <tr key={report.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4">
+                            <div className="font-semibold text-sm text-slate-800 line-clamp-1">
                               {report.title}
                             </div>
                           </td>
-                          <td className="p-3 text-sm">{report.class}</td>
-                          <td className="p-3 text-sm">{report.semester}</td>
-                          <td className="p-3 text-sm">{report.academicYear}</td>
-                          <td className="p-3">
+                          <td className="p-4 text-sm text-slate-600">{report.class}</td>
+                          <td className="p-4 text-sm text-slate-600">{report.semester}</td>
+                          <td className="p-4 text-sm text-slate-600">{report.academicYear}</td>
+                          <td className="p-4">
                             <Badge className={getStatusColor(report.status)}>
-                              <div className="flex items-center space-x-1">
+                              <div className="flex items-center gap-1">
                                 {getStatusIcon(report.status)}
                                 <span className="text-xs">{getStatusLabel(report.status)}</span>
                               </div>
                             </Badge>
                           </td>
-                          <td className="p-3">
-                            <div className="flex items-center space-x-2">
-                              <div className="w-16 bg-muted rounded-full h-2">
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-16 bg-slate-100 rounded-full h-1.5">
                                 <div
-                                  className="h-2 rounded-full bg-green-500"
+                                  className="h-1.5 rounded-full bg-green-500"
                                   style={{ width: `${getProgressPercentage(report)}%` }}
                                 />
                               </div>
-                              <span className="text-xs font-medium">
+                              <span className="text-xs font-medium text-slate-600">
                                 {report.completedCount}/{report.studentCount}
                               </span>
                             </div>
                           </td>
-                          <td className="p-3 text-sm">
+                          <td className="p-4 text-sm text-slate-600">
                             {formatDate(report.dueDate, 'dd MMM yyyy')}
                           </td>
-                          <td className="p-3">
+                          <td className="p-4">
                             <Button
                               variant="outline"
                               size="sm"
@@ -633,15 +634,19 @@ export const EReport: React.FC = () => {
         <TabsContent value="statistics" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Completion Overview */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5" />
-                  <span>Overview Kelengkapan</span>
-                </CardTitle>
-                <CardDescription>
-                  Status kelengkapan E-Rapor
-                </CardDescription>
+            <Card className="border-slate-100 shadow-sm">
+              <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-green-700" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Overview Kelengkapan</CardTitle>
+                    <CardDescription className="text-slate-600">
+                      Status kelengkapan E-Rapor
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -675,15 +680,19 @@ export const EReport: React.FC = () => {
             </Card>
 
             {/* Type Statistics */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
-                  <span>Statistik Jenis E-Rapor</span>
-                </CardTitle>
-                <CardDescription>
-                  Statistik berdasarkan jenis E-Rapor
-                </CardDescription>
+            <Card className="border-slate-100 shadow-sm">
+              <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <BarChart3 className="h-5 w-5 text-blue-700" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Statistik Jenis E-Rapor</CardTitle>
+                    <CardDescription className="text-slate-600">
+                      Statistik berdasarkan jenis E-Rapor
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -804,7 +813,7 @@ export const EReport: React.FC = () => {
                 {ereports.slice(0, 5).map((report) => (
                   <div
                     key={report.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50/50 transition-colors"
                   >
                     <div className="flex items-center space-x-3">
                       <div className={`p-2 rounded-full ${getStatusColor(report.status)}`}>

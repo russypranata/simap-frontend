@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +12,7 @@ import {
     ChevronsRight,
     ArrowDownUp,
     Eye,
-    TrendingUp,
-    TrendingDown,
-    Minus,
-    Search
+                Search
 } from "lucide-react";
 
 interface SubjectSummary {

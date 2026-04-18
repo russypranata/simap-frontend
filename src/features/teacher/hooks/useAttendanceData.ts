@@ -23,6 +23,7 @@ export const useAttendanceData = (selectedClass: string, selectedDate: string) =
     // If not provided, fetch ALL data (Global Mode)
     fetchStudents(selectedClass);
     fetchAttendanceRecords(selectedClass);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClass]);
 
   const handleSaveAttendance = async (attendanceData: {
@@ -45,14 +46,14 @@ export const useAttendanceData = (selectedClass: string, selectedDate: string) =
       if (selectedClass) {
         await fetchAttendanceRecords(selectedClass);
       }
-    } catch (error) {
+    } catch {
       toast.error('Gagal menyimpan data presensi');
     }
   };
 
   const handleMarkAllPresent = async (
-    filteredStudents: any[],
-    selectedClassData: any,
+    filteredStudents: { id: string; class?: string }[],
+    selectedClassData: { name?: string } | undefined,
     selectedSubject: string
   ) => {
     if (!selectedClass || !selectedSubject || !selectedDate) {
@@ -79,7 +80,7 @@ export const useAttendanceData = (selectedClass: string, selectedDate: string) =
     className: string,
     subject: string,
     lessonHour?: string
-  ): { isDuplicate: boolean; existingRecord?: any } => {
+  ): { isDuplicate: boolean; existingRecord?: unknown } => {
     const existing = attendanceRecords.find(
       r => r.date === date &&
         r.class === className &&

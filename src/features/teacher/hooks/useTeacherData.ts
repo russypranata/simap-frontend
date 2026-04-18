@@ -1,3 +1,4 @@
+ 
 // Custom hook for teacher data management
 import { useState, useEffect } from 'react';
 import { useRole } from '@/app/context/RoleContext';
@@ -15,8 +16,18 @@ import {
   EReport,
 } from '../types/teacher';
 
+// Real API services
+import { getTeacherProfile, updateTeacherProfile as apiUpdateProfile } from '../services/teacherProfileService';
+import { getTeacherDashboard } from '../services/teacherDashboardService';
+import { getTeacherClasses, getClassStudents } from '../services/teacherClassService';
+import { getTeacherSchedule } from '../services/teacherScheduleService';
+import { getTeacherAttendance, saveTeacherAttendance } from '../services/teacherAttendanceService';
+import { getTeacherGrades, saveTeacherGrades } from '../services/teacherGradeService';
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
+
 export const useTeacherData = () => {
-  const { role, isHomeroomTeacher } = useRole();
+  const { role, isHomeroomTeacher: _isHomeroomTeacher } = useRole();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,8 +62,9 @@ export const useTeacherData = () => {
   const [ereports, setEreports] = useState<EReport[]>([]);
 
   // Generic error handler
-  const handleError = (err: any, defaultMessage: string) => {
-    const errorMessage = err?.response?.data?.message || err?.message || defaultMessage;
+  const handleError = (err: unknown, defaultMessage: string) => {
+    const error = err as { response?: { data?: { message?: string } }; message?: string };
+    const errorMessage = error?.response?.data?.message || error?.message || defaultMessage;
     setError(errorMessage);
     console.error(defaultMessage, err);
   };
@@ -66,8 +78,24 @@ export const useTeacherData = () => {
     
     setLoading(true);
     try {
-      const stats = await teacherApi.getDashboardStats();
-      setDashboardStats(stats);
+      if (USE_MOCK) {
+        const stats = await teacherApi.getDashboardStats();
+        setDashboardStats(stats);
+      } else {
+        const data = await getTeacherDashboard();
+        setDashboardStats({
+          totalClasses:   data.stats.totalClasses,
+          todaySchedule:  data.stats.todaySchedule,
+          teachingJournals: 0,
+          attendanceStatus: {
+            present: data.stats.attendanceToday.present,
+            absent:  data.stats.attendanceToday.absent,
+            total:   data.stats.attendanceToday.total,
+          },
+          documentsSent:       0,
+          latestAnnouncements: 0,
+        });
+      }
       setError(null);
     } catch (err) {
       handleError(err, 'Gagal memuat data dashboard');
@@ -82,8 +110,26 @@ export const useTeacherData = () => {
     
     setLoading(true);
     try {
-      const profileData = await teacherApi.getProfile();
-      setProfile(profileData);
+      if (USE_MOCK) {
+        const profileData = await teacherApi.getProfile();
+        setProfile(profileData);
+      } else {
+        const data = await getTeacherProfile();
+        setProfile({
+          id:               String(data.id),
+          name:             data.name,
+          nip:              data.nip ?? '',
+          email:            data.email,
+          phone:            data.phone ?? '',
+          role:             'guru',
+          isHomeroomTeacher: false,
+          subjects:         [],
+          joinDate:         data.joinDate ?? '',
+          education:        data.lastEducation ?? '',
+          certification:    '',
+          profilePicture:   data.profilePicture ?? undefined,
+        } as Teacher);
+      }
       setError(null);
     } catch (err) {
       handleError(err, 'Gagal memuat data profil');
@@ -97,12 +143,17 @@ export const useTeacherData = () => {
     
     setLoading(true);
     try {
-      const result = await teacherApi.updateProfile(data);
-      if (result.success) {
-        await fetchProfile(); // Refresh profile data
+      if (USE_MOCK) {
+        const result = await teacherApi.updateProfile(data);
+        if (result.success) await fetchProfile();
+        setError(null);
+        return result;
+      } else {
+        await apiUpdateProfile({ name: data.name, email: data.email, phone: data.phone });
+        await fetchProfile();
+        setError(null);
+        return { success: true, message: 'Profil berhasil diperbarui.' };
       }
-      setError(null);
-      return result;
     } catch (err) {
       handleError(err, 'Gagal memperbarui profil');
       throw err;
@@ -117,8 +168,21 @@ export const useTeacherData = () => {
     
     setLoading(true);
     try {
-      const classesData = await teacherApi.getClasses();
-      setClasses(classesData);
+      if (USE_MOCK) {
+        const classesData = await teacherApi.getClasses();
+        setClasses(classesData);
+      } else {
+        const data = await getTeacherClasses();
+        setClasses(data.map(c => ({
+          id:              c.id,
+          name:            c.name,
+          grade:           c.name.split(' ')[0] ?? '',
+          homeroomTeacher: c.homeroomTeacher,
+          studentCount:    c.studentCount,
+          schedule:        [],
+          subjects:        c.subjects.map(s => s.name),
+        } as TeacherClass)));
+      }
       setError(null);
     } catch (err) {
       handleError(err, 'Gagal memuat data kelas');
@@ -133,8 +197,28 @@ export const useTeacherData = () => {
     
     setLoading(true);
     try {
-      const studentsData = await teacherApi.getStudents(classId);
-      setStudents(studentsData);
+      if (USE_MOCK) {
+        const studentsData = await teacherApi.getStudents(classId);
+        setStudents(studentsData);
+      } else {
+        if (classId) {
+          const data = await getClassStudents(classId);
+          setStudents(data.map(s => ({
+            id:          s.id,
+            nis:         s.nis,
+            name:        s.name,
+            class:       '',
+            gender:      (s.gender === 'L' || s.gender === 'P') ? s.gender : 'L',
+            birthDate:   s.birthDate ?? '',
+            address:     s.address,
+            phone:       s.phone,
+            parentsName: '',
+            parentsPhone: '',
+          })));
+        } else {
+          setStudents([]);
+        }
+      }
       setError(null);
     } catch (err) {
       handleError(err, 'Gagal memuat data siswa');
@@ -149,8 +233,26 @@ export const useTeacherData = () => {
     
     setLoading(true);
     try {
-      const records = await teacherApi.getAttendanceRecords(classId, date);
-      setAttendanceRecords(records);
+      if (USE_MOCK) {
+        const records = await teacherApi.getAttendanceRecords(classId, date);
+        setAttendanceRecords(records);
+      } else {
+        const data = await getTeacherAttendance({ class_id: classId, date });
+        setAttendanceRecords(data.map(a => ({
+          id:          a.id,
+          studentId:   a.studentId,
+          studentName: a.studentName,
+          class:       a.class,
+          date:        a.date,
+          status:      a.status,
+          subject:     a.subject,
+          teacher:     '',
+          lessonHour:  '',
+          notes:       a.notes ?? undefined,
+          academicYear: '',
+          semester:    'Ganjil' as const,
+        })));
+      }
       setError(null);
     } catch (err) {
       handleError(err, 'Gagal memuat data absensi');
@@ -165,16 +267,32 @@ export const useTeacherData = () => {
     date: string;
     status: 'hadir' | 'sakit' | 'izin' | 'tanpa-keterangan';
     subject: string;
+    lessonHour?: string;
+    classSubjectId?: string;
     notes?: string;
   }[]) => {
     if (role !== 'guru') return;
     
     setLoading(true);
     try {
-      const result = await teacherApi.saveAttendance(data);
-      await fetchAttendanceRecords(); // Refresh attendance data
-      setError(null);
-      return result;
+      if (USE_MOCK) {
+        const result = await teacherApi.saveAttendance(data as Parameters<typeof teacherApi.saveAttendance>[0]);
+        await fetchAttendanceRecords();
+        setError(null);
+        return result;
+      } else {
+        const records = data.map(d => ({
+          student_id:       parseInt(d.studentId),
+          class_subject_id: parseInt(d.classSubjectId ?? '0'),
+          date:             d.date,
+          status:           d.status,
+          notes:            d.notes,
+        }));
+        await saveTeacherAttendance(records);
+        await fetchAttendanceRecords();
+        setError(null);
+        return { success: true, message: 'Presensi berhasil disimpan.' };
+      }
     } catch (err) {
       handleError(err, 'Gagal menyimpan data absensi');
       throw err;
@@ -256,8 +374,27 @@ export const useTeacherData = () => {
     
     setLoading(true);
     try {
-      const gradesData = await teacherApi.getGrades(classId, subject, semester);
-      setGrades(gradesData);
+      if (USE_MOCK) {
+        const gradesData = await teacherApi.getGrades(classId, subject, semester);
+        setGrades(gradesData);
+      } else {
+        const data = await getTeacherGrades({ class_id: classId, subject_id: subject });
+        setGrades(data.map(g => ({
+          id:          g.id,
+          studentId:   g.studentId,
+          studentName: g.studentName,
+          class:       g.class,
+          subject:     g.subject,
+          semester:    'Ganjil' as const,
+          academicYear: '',
+          assignments: g.assignments,
+          midTerm:     g.midTerm,
+          finalExam:   g.finalExam,
+          average:     g.average,
+          grade:       g.grade,
+          description: g.description,
+        })));
+      }
       setError(null);
     } catch (err) {
       handleError(err, 'Gagal memuat data nilai');
@@ -271,10 +408,30 @@ export const useTeacherData = () => {
     
     setLoading(true);
     try {
-      const result = await teacherApi.saveGrade(data);
-      await fetchGrades(); // Refresh grades data
-      setError(null);
-      return result;
+      if (USE_MOCK) {
+        const result = await teacherApi.saveGrade(data);
+        await fetchGrades();
+        setError(null);
+        return result;
+      } else {
+        // Real API: simpan via assessment bulk
+        // Caller harus pass classSubjectId dan semesterId via data
+        const extData = data as Grade & { classSubjectId?: string; semesterId?: string; assessmentType?: string; title?: string };
+        await saveTeacherGrades({
+          class_subject_id: parseInt(extData.classSubjectId ?? '0'),
+          semester_id:      parseInt(extData.semesterId ?? '0'),
+          assessment_type:  (extData.assessmentType ?? 'assignment') as 'quiz' | 'exam' | 'assignment' | 'project',
+          title:            extData.title ?? 'Penilaian',
+          max_score:        100,
+          grades: [{
+            student_id: parseInt(data.studentId),
+            score:      data.assignments?.[0]?.score ?? 0,
+          }],
+        });
+        await fetchGrades();
+        setError(null);
+        return { success: true, message: 'Nilai berhasil disimpan.' };
+      }
     } catch (err) {
       handleError(err, 'Gagal menyimpan data nilai');
       throw err;
@@ -289,8 +446,21 @@ export const useTeacherData = () => {
     
     setLoading(true);
     try {
-      const scheduleData = await teacherApi.getSchedule(day);
-      setSchedule(scheduleData);
+      if (USE_MOCK) {
+        const scheduleData = await teacherApi.getSchedule(day);
+        setSchedule(scheduleData);
+      } else {
+        const data = await getTeacherSchedule(day);
+        setSchedule(data.map(s => ({
+          id:      s.id,
+          day:     s.day,
+          time:    s.time,
+          class:   s.class,
+          subject: s.subject,
+          teacher: s.teacher,
+          room:    s.room,
+        })));
+      }
       setError(null);
     } catch (err) {
       handleError(err, 'Gagal memuat jadwal mengajar');
@@ -364,6 +534,7 @@ export const useTeacherData = () => {
       fetchDocuments();
       fetchEReports();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role]);
 
   return {

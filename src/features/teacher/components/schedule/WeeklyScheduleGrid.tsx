@@ -1,18 +1,15 @@
+ 
 'use client';
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { Schedule } from '../../types/teacher';
 import {
     Clock,
     BookOpen,
     Users,
-    Circle,
-    CheckCircle2,
-
-    AlertCircle,
-    Calendar
+    Calendar,
 } from 'lucide-react';
 
 interface WeeklyScheduleGridProps {
@@ -141,8 +138,8 @@ export const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
             </div>
             <CardHeader>
                 <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                        <Clock className="h-5 w-5 text-primary" />
+                    <div className="p-2 bg-slate-100 rounded-lg">
+                        <Clock className="h-5 w-5 text-slate-600" />
                     </div>
                     <div>
                         <CardTitle className="text-lg font-semibold">Jadwal Mengajar Mingguan</CardTitle>

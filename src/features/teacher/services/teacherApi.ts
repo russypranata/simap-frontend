@@ -1,5 +1,5 @@
+ 
 // Teacher API service with mocked data
-import axios from 'axios';
 import {
   Teacher,
   TeacherClass,
@@ -25,12 +25,9 @@ import {
 import { extendedMockSchedule } from './extendedMockSchedule';
 import { extendedMockAttendanceRecords, extendedMockTeachingJournals } from './extendedMockData';
 
-// Mock API base URL (not actually used since we're mocking)
-const API_BASE_URL = '/api';
-
 // Mock axios implementation
 const mockAxios = {
-  get: async <T = any>(url: string): Promise<{ data: T }> => {
+  get: async <T = unknown>(url: string): Promise<{ data: T }> => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 300));
 
@@ -76,13 +73,13 @@ const mockAxios = {
     }
   },
 
-  post: async <T = any>(url: string, data: any): Promise<{ data: T }> => {
+  post: async <T = unknown>(url: string, data: unknown): Promise<{ data: T }> => {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     switch (url) {
-      case '/teacher/attendance':
+      case '/teacher/attendance': {
         // Update mock data
-        const newRecords = data as any[];
+        const newRecords = data as AttendanceRecord[];
         newRecords.forEach(newRecord => {
           const existingIndex = extendedMockAttendanceRecords.findIndex(
             r => r.studentId === newRecord.studentId &&
@@ -92,13 +89,11 @@ const mockAxios = {
           );
 
           if (existingIndex >= 0) {
-            // Update existing
             extendedMockAttendanceRecords[existingIndex] = {
               ...extendedMockAttendanceRecords[existingIndex],
               ...newRecord
             };
           } else {
-            // Add new
             extendedMockAttendanceRecords.push({
               id: Math.random().toString(36).substr(2, 9),
               teacher: mockTeacher.name,
@@ -107,7 +102,8 @@ const mockAxios = {
           }
         });
         return { data: { success: true, message: 'Absensi berhasil disimpan' } as T };
-      case '/teacher/attendance/update':
+      }
+      case '/teacher/attendance/update': {
         const updateData = data as AttendanceRecord;
         const updateIndex = extendedMockAttendanceRecords.findIndex(
           r => r.studentId === updateData.studentId &&
@@ -120,7 +116,8 @@ const mockAxios = {
           return { data: { success: true, message: 'Data presensi berhasil diperbarui' } as T };
         }
         return { data: { success: false, message: 'Data presensi tidak ditemukan' } as T };
-      case '/teacher/attendance/delete':
+      }
+      case '/teacher/attendance/delete': {
         const deleteData = data as AttendanceRecord;
         const deleteIndex = extendedMockAttendanceRecords.findIndex(
           r => r.studentId === deleteData.studentId &&
@@ -133,6 +130,7 @@ const mockAxios = {
           return { data: { success: true, message: 'Data presensi berhasil dihapus' } as T };
         }
         return { data: { success: false, message: 'Data presensi tidak ditemukan' } as T };
+      }
       case '/teacher/journals':
         return { data: { success: true, message: 'Jurnal mengajar berhasil disimpan' } as T };
       case '/teacher/grades':
@@ -144,12 +142,12 @@ const mockAxios = {
     }
   },
 
-  put: async <T = any>(url: string, data: any): Promise<{ data: T }> => {
+  put: async <T = unknown>(_url: string, _data: unknown): Promise<{ data: T }> => {
     await new Promise(resolve => setTimeout(resolve, 500));
     return { data: { success: true, message: 'Data berhasil diperbarui' } as T };
   },
 
-  delete: async <T = any>(url: string): Promise<{ data: T }> => {
+  delete: async <T = unknown>(_url: string): Promise<{ data: T }> => {
     await new Promise(resolve => setTimeout(resolve, 500));
     return { data: { success: true, message: 'Data berhasil dihapus' } as T };
   },
@@ -416,7 +414,7 @@ export const teacherApi = {
     ];
   },
 
-  fetchMoodleAssignments: async (courseId: string): Promise<{ id: string; name: string; maxScore: number }[]> => {
+  fetchMoodleAssignments: async (_courseId: string): Promise<{ id: string; name: string; maxScore: number }[]> => {
     // Mock Moodle assignments based on course
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network
     return [
@@ -427,15 +425,13 @@ export const teacherApi = {
     ];
   },
 
-  syncMoodleGrades: async (config: {
+  syncMoodleGrades: async (_config: {
     courseId: string;
-    mapping: Record<string, string>; // moodleAssignmentId -> simapColumnName (e.g., 'm1' -> 'assignment_0')
+    mapping: Record<string, string>;
     overwriteManual: boolean;
   }): Promise<{ success: boolean; message: string; syncedCount: number }> => {
     await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing
 
-    // In a real app, this would fetch grades from Moodle and update the backend.
-    // Here we just simulate a success response.
     return {
       success: true,
       message: 'Sinkronisasi dengan Moodle berhasil!',

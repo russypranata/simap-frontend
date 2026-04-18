@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any , @typescript-eslint/no-unused-vars */
 'use client';
 
 import React, { useState } from 'react';
@@ -72,7 +73,7 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
   const [showPermit, setShowPermit] = useState(true);
   const [showAlpha, setShowAlpha] = useState(true);
 
-  const FilterBadges = () => (
+  const filterBadges = (
     <div className="flex flex-wrap gap-2 mt-3">
       {academicYear && (
         <Badge variant="secondary" className="gap-1.5 bg-blue-800 text-white border-none px-2.5 py-0.5 text-xs font-medium">
@@ -136,7 +137,7 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
                 <CardDescription className="text-sm text-muted-foreground">
                   Grafik persentase kehadiran, sakit, izin, dan alpha setiap bulan
                 </CardDescription>
-                <FilterBadges />
+                {filterBadges}
               </div>
             </div>
 

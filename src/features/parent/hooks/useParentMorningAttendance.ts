@@ -23,7 +23,7 @@ export const useParentMorningAttendance = () => {
     });
 
     const children = childrenQuery.data ?? [];
-    const academicYears = academicYearsQuery.data ?? [];
+    const academicYears = useMemo(() => academicYearsQuery.data ?? [], [academicYearsQuery.data]);
     const effectiveChildId = selectedChildId || children[0]?.id || "";
 
     // Auto-select active year on first load
@@ -40,7 +40,7 @@ export const useParentMorningAttendance = () => {
         staleTime: 2 * 60 * 1000,
     });
 
-    const records = morningQuery.data ?? [];
+    const records = useMemo(() => morningQuery.data ?? [], [morningQuery.data]);
     const totalItems = records.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
 

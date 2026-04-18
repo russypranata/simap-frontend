@@ -37,7 +37,7 @@ export const useParentBehavior = () => {
         },
     });
 
-    const allRecords = behaviorQuery.data ?? [];
+    const allRecords = useMemo(() => behaviorQuery.data ?? [], [behaviorQuery.data]);
 
     const academicYears = useMemo(() => {
         const unique = new Set(allRecords.map(r => r.academicYearId));

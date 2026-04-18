@@ -88,15 +88,11 @@ export const StudentAchievements: React.FC = () => {
         selectedAcademicYear, setSelectedAcademicYear,
         searchQuery, setSearchQuery,
         currentPage, setCurrentPage, totalPages, itemsPerPage, setItemsPerPage,
-        ITEMS_PER_PAGE,
         isLoading, error, refetch,
     } = useStudentAchievements();
 
     const filteredTotal = filteredAchievements.length;
     const startIndexDisplay = filteredTotal === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
-    const goToPage = (p: number) => {
-        // handled by setCurrentPage in hook — expose via hook
-    };
 
     const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
     const [isFilterOpen, setIsFilterOpen] = useState(false);

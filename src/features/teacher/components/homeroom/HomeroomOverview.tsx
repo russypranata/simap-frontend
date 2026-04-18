@@ -48,8 +48,8 @@ export const HomeroomOverview = () => {
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-primary/10 rounded-lg">
-                                        <TrendingUp className="h-5 w-5 text-primary" />
+                                    <div className="p-2 bg-slate-100 rounded-lg">
+                                        <TrendingUp className="h-5 w-5 text-slate-600" />
                                     </div>
                                     <div>
                                         <CardTitle className="text-lg font-semibold">Statistik Kehadiran Mingguan</CardTitle>

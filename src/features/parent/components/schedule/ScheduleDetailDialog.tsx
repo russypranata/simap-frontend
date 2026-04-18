@@ -19,6 +19,16 @@ interface ScheduleDetailDialogProps {
     childClass?: string;
 }
 
+const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) => (
+    <div className="p-3 bg-slate-50 rounded-lg">
+        <div className="flex items-center gap-2 text-slate-500 mb-1">
+            <Icon className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="text-xs font-medium">{label}</span>
+        </div>
+        <p className="text-sm font-semibold text-slate-800 pl-[22px]">{value}</p>
+    </div>
+);
+
 export const ScheduleDetailDialog: React.FC<ScheduleDetailDialogProps> = ({
     item,
     open,
@@ -28,16 +38,6 @@ export const ScheduleDetailDialog: React.FC<ScheduleDetailDialogProps> = ({
     if (!item) return null;
 
     const period = getLessonPeriod(item.startTime);
-
-    const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) => (
-        <div className="p-3 bg-slate-50 rounded-lg">
-            <div className="flex items-center gap-2 text-slate-500 mb-1">
-                <Icon className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="text-xs font-medium">{label}</span>
-            </div>
-            <p className="text-sm font-semibold text-slate-800 pl-[22px]">{value}</p>
-        </div>
-    );
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

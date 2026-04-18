@@ -33,7 +33,7 @@ export const StudentSubjectAttendance: React.FC = () => {
         selectedAcademicYear, setSelectedAcademicYear, selectedSemester, setSelectedSemester,
         currentPage, totalPages, itemsPerPage, setItemsPerPage,
         filteredTotal, startIndexDisplay, endIndexDisplay,
-        goToPage, goToNextPage, goToPrevPage,
+        goToPage,
         isLoading, isFetching, error, refetch, triggerFetchingOverlay,
     } = useStudentSubjectAttendance();
 

@@ -333,7 +333,6 @@ export const createAchievement = async (
         return result.data;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { photo: _, ...jsonData } = data;
     const response = await fetch(`${MUTAMAYIZIN_API_URL}/achievements`, {
         method: "POST",
@@ -379,7 +378,6 @@ export const updateAchievement = async (
         return result.data;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { photo: _, ...jsonData } = data as UpdateAchievementData & { photo?: File | null };
     if (jsonData.level) jsonData.level = jsonData.level.toLowerCase();
     const response = await fetch(`${MUTAMAYIZIN_API_URL}/achievements/${id}`, {

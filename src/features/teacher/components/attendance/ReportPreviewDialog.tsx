@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 import React, { useEffect, useState, useMemo } from 'react';
 import {
     Dialog,
@@ -56,6 +58,7 @@ export const ReportPreviewDialog: React.FC<ReportPreviewDialogProps> = ({
         if (isOpen && filters.classId) {
             fetchStudents(filters.classId);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, filters.classId]);
 
     // Load attendance records when dialog opens

@@ -104,7 +104,6 @@ export const getChildGrades = async (
     const result = await response.json();
     const raw = result.data ?? {};
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const grades: GradeItem[] = (raw.grades ?? [])
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .filter((item: Record<string, any>) =>

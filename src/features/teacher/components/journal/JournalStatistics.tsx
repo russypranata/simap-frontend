@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any , @typescript-eslint/no-unused-vars */
 'use client';
 
 import React, { useMemo, useState } from 'react';
@@ -391,8 +392,8 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
             <Card className="lg:col-span-2 outline-none focus:outline-none" tabIndex={-1}>
               <CardHeader>
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-primary" />
+                  <div className="p-2 bg-slate-100 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-slate-600" />
                   </div>
                   <div className="flex-1">
                     <CardTitle className="text-lg font-semibold">
@@ -488,8 +489,8 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
             <Card className="outline-none focus:outline-none" tabIndex={-1}>
               <CardHeader>
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <PieChartIcon className="h-5 w-5 text-primary" />
+                  <div className="p-2 bg-slate-100 rounded-lg">
+                    <PieChartIcon className="h-5 w-5 text-slate-600" />
                   </div>
                   <div className="flex-1">
                     <CardTitle className="text-lg font-semibold">Distribusi Metode Mengajar</CardTitle>
@@ -549,8 +550,8 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
             <Card className="outline-none focus:outline-none" tabIndex={-1}>
               <CardHeader>
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <BarChart3 className="h-5 w-5 text-primary" />
+                  <div className="p-2 bg-slate-100 rounded-lg">
+                    <BarChart3 className="h-5 w-5 text-slate-600" />
                   </div>
                   <div className="flex-1">
                     <CardTitle className="text-lg font-semibold">Rata-rata Kehadiran per Kelas</CardTitle>

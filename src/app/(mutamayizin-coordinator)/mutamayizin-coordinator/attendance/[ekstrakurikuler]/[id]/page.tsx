@@ -33,6 +33,7 @@ import {
     ChevronRight,
     Download,
 } from "lucide-react";
+import Image from "next/image";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
 import { cn } from "@/lib/utils";
 
@@ -79,8 +80,7 @@ const uniqueClasses = [...new Set(mockDetailData.students.map(s => s.class))].so
 
 export default function AttendanceDetailPage() {
     const router = useRouter();
-    const params = useParams();
-    const { ekstrakurikuler, id } = params as { ekstrakurikuler: string; id: string };
+    useParams();
 
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
@@ -444,10 +444,12 @@ export default function AttendanceDetailPage() {
                                                 <td className="p-4 text-sm font-mono">{student.nis}</td>
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-3">
-                                                        {(student as any).photo ? (
-                                                            <img
-                                                                src={(student as any).photo}
+                                                        {student.photo ? (
+                                                            <Image
+                                                                src={student.photo}
                                                                 alt={student.name}
+                                                                width={40}
+                                                                height={40}
                                                                 className="h-10 w-10 rounded-full object-cover border border-slate-200"
                                                             />
                                                         ) : (

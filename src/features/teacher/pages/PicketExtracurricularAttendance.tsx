@@ -1,3 +1,4 @@
+ 
 "use client";
 
 import React, { useState } from "react";
@@ -52,15 +53,15 @@ export default function PicketExtracurricularAttendance() {
     return (
         <div className="space-y-6">
 
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                            <Filter className="h-5 w-5 text-primary" />
+            <Card className="border-slate-100 shadow-sm">
+                <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-slate-100 rounded-lg">
+                            <Filter className="h-5 w-5 text-slate-600" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg font-semibold">Filter Kegiatan</CardTitle>
-                            <CardDescription>
+                            <CardTitle className="text-lg font-semibold text-slate-800">Filter Kegiatan</CardTitle>
+                            <CardDescription className="text-slate-600">
                                 Filter daftar siswa berdasarkan kegiatan ekstrakurikuler
                             </CardDescription>
                         </div>
@@ -125,39 +126,39 @@ export default function PicketExtracurricularAttendance() {
             </Card>
 
             <div className="grid grid-cols-1 gap-6">
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center space-x-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <Trophy className="h-5 w-5 text-primary" />
+                <Card className="border-slate-100 shadow-sm overflow-hidden">
+                    <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-purple-100 rounded-lg">
+                                <Trophy className="h-5 w-5 text-purple-700" />
                             </div>
                             <div>
-                                <CardTitle className="text-lg font-semibold">Daftar Hadir Ekstrakurikuler</CardTitle>
-                                <CardDescription>
+                                <CardTitle className="text-lg font-semibold text-slate-800">Daftar Hadir Ekstrakurikuler</CardTitle>
+                                <CardDescription className="text-slate-600">
                                     Menampilkan data kehadiran siswa di berbagai kegiatan ekstrakurikuler.
                                 </CardDescription>
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent>
-                        <div className="rounded-md border overflow-hidden">
+                    <CardContent className="p-0">
+                        <div className="overflow-hidden">
                             <Table>
-                                <TableHeader className="bg-muted/50">
-                                    <TableRow className="hover:bg-transparent border-b">
-                                        <TableHead className="w-[50px] p-4 text-center font-medium text-sm text-foreground">No</TableHead>
-                                        <TableHead className="w-[200px] p-4 font-medium text-sm text-foreground">Nama Siswa</TableHead>
-                                        <TableHead className="w-[150px] p-4 font-medium text-sm text-foreground">Ekstrakurikuler</TableHead>
-                                        <TableHead className="p-4 font-medium text-sm text-foreground">Waktu Hadir</TableHead>
-                                        <TableHead className="w-[120px] p-4 font-medium text-sm text-foreground text-center">Status</TableHead>
+                                <TableHeader>
+                                    <TableRow className="bg-slate-50 border-b border-slate-200 hover:bg-slate-50">
+                                        <TableHead className="w-[50px] p-4 text-center font-semibold text-xs text-slate-600 uppercase tracking-wider">No</TableHead>
+                                        <TableHead className="w-[200px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama Siswa</TableHead>
+                                        <TableHead className="w-[150px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Ekstrakurikuler</TableHead>
+                                        <TableHead className="p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Waktu Hadir</TableHead>
+                                        <TableHead className="w-[120px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Status</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {mockExtraAttendance.map((student, index) => (
-                                        <TableRow key={student.id} className="hover:bg-muted/50 transition-colors border-b">
-                                            <TableCell className="p-4 text-center text-sm font-medium">{index + 1}</TableCell>
-                                            <TableCell className="font-medium p-4">{student.name}</TableCell>
-                                            <TableCell className="p-4 text-muted-foreground">{student.extra}</TableCell>
-                                            <TableCell className="p-4 text-sm font-medium text-muted-foreground">{student.time}</TableCell>
+                                        <TableRow key={student.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                            <TableCell className="p-4 text-center text-sm font-medium text-slate-600">{index + 1}</TableCell>
+                                            <TableCell className="font-semibold p-4 text-slate-800">{student.name}</TableCell>
+                                            <TableCell className="p-4 text-slate-600">{student.extra}</TableCell>
+                                            <TableCell className="p-4 text-sm font-medium text-slate-600">{student.time}</TableCell>
                                             <TableCell className="p-4 text-center">
                                                 <Badge
                                                     variant={

@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
@@ -20,25 +19,27 @@ import {
     Users,
     TrendingUp,
     Search,
-    Filter,
     ChevronLeft,
     ChevronRight,
     Eye,
-    Edit,
-    Trash2,
     Download,
     ArrowLeft,
-    Plus,
     CheckCircle,
-    XCircle,
     AlertCircle,
     ClipboardList,
 } from "lucide-react";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
 import { cn } from "@/lib/utils";
 
+interface EkskulData {
+    id: number;
+    name: string;
+    tutor: string;
+    category: string;
+}
+
 // Mock ekstrakurikuler data
-const mockEkstrakurikulerData: Record<string, any> = {
+const mockEkstrakurikulerData: Record<string, EkskulData> = {
     "1": { id: 1, name: "Pramuka", tutor: "Ahmad Fauzi, S.Pd", category: "Kepanduan" },
     "2": { id: 2, name: "PMR", tutor: "Siti Nurhaliza, S.Kep", category: "Kesehatan" },
     "3": { id: 3, name: "Paskibra", tutor: "Bambang Sutrisno, S.Pd", category: "Bela Negara" },

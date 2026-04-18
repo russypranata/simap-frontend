@@ -45,44 +45,49 @@ export const ProfilePage: React.FC = () => {
             />
 
             {/* Additional Info Card */}
-            <Card>
+            <Card className="border-slate-100 shadow-sm">
                 <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold mb-4">Informasi Tambahan</h3>
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                            <Users className="h-5 w-5 text-blue-700" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-slate-800">Informasi Tambahan</h3>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                            <div className="p-2 rounded-full bg-primary/10">
-                                <Users className="h-5 w-5 text-primary" />
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-blue-50/50 border border-blue-100">
+                            <div className="p-2 rounded-xl bg-blue-100">
+                                <Users className="h-5 w-5 text-blue-700" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">Total Kelas</p>
-                                <p className="text-lg font-semibold">5</p>
+                                <p className="text-xs text-slate-500">Total Kelas</p>
+                                <p className="text-lg font-bold text-slate-800">5</p>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                            <div className="p-2 rounded-full bg-primary/10">
-                                <GraduationCap className="h-5 w-5 text-primary" />
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-green-50/50 border border-green-100">
+                            <div className="p-2 rounded-xl bg-green-100">
+                                <GraduationCap className="h-5 w-5 text-green-700" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">Total Siswa</p>
-                                <p className="text-lg font-semibold">150</p>
+                                <p className="text-xs text-slate-500">Total Siswa</p>
+                                <p className="text-lg font-bold text-slate-800">150</p>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                            <div className="p-2 rounded-full bg-primary/10">
-                                <Clock className="h-5 w-5 text-primary" />
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-50/50 border border-amber-100">
+                            <div className="p-2 rounded-xl bg-amber-100">
+                                <Clock className="h-5 w-5 text-amber-700" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">Jam Mengajar/Minggu</p>
-                                <p className="text-lg font-semibold">24</p>
+                                <p className="text-xs text-slate-500">Jam Mengajar/Minggu</p>
+                                <p className="text-lg font-bold text-slate-800">24</p>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
-                            <div className="p-2 rounded-full bg-primary/10">
-                                <Home className="h-5 w-5 text-primary" />
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 border border-purple-100">
+                            <div className="p-2 rounded-xl bg-purple-100">
+                                <Home className="h-5 w-5 text-purple-700" />
                             </div>
                             <div className="flex-1">
-                                <p className="text-xs text-muted-foreground">Wali Kelas</p>
-                                <p className="text-lg font-semibold">Kelas XI A</p>
+                                <p className="text-xs text-slate-500">Wali Kelas</p>
+                                <p className="text-lg font-bold text-slate-800">Kelas XI A</p>
                             </div>
                         </div>
                     </div>

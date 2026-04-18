@@ -76,8 +76,8 @@ export const LearningObjectiveInputView: React.FC<LearningObjectiveInputViewProp
             <Card className="border-t-4 border-t-primary/20">
                 <CardHeader>
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                            <Target className="h-5 w-5 text-primary" />
+                        <div className="p-2 bg-slate-100 rounded-lg">
+                            <Target className="h-5 w-5 text-slate-600" />
                         </div>
                         <CardTitle>Formulir Tujuan Pembelajaran</CardTitle>
                     </div>

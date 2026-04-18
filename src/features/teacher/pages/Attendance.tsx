@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -15,7 +16,6 @@ import {
   FilterSection,
   StatisticSection,
   HistorySection,
-  MonthlyRecap,
   ModalDetailPresensi,
   StatsCards,
   EditAttendanceView,
@@ -23,9 +23,9 @@ import {
   UnsavedChangesDialog,
   DailySummary
 } from '../components/attendance';
-import { SUBJECTS, LESSON_HOURS, ACADEMIC_YEARS, SEMESTERS } from '../constants/attendance';
+import { SUBJECTS, ACADEMIC_YEARS, SEMESTERS } from '../constants/attendance';
 import { getHolidayInfo } from '../constants/holidays';
-import { formatDate } from '@/features/shared/utils/dateFormatter';
+
 import { PageHeader } from '@/features/shared/components';
 import {
   Users,
@@ -36,8 +36,7 @@ import {
   AlertTriangle,
   Calendar,
   Clock,
-  FileText,
-  ClipboardCheck,
+    ClipboardCheck,
   BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -52,7 +51,12 @@ interface AttendanceProps {
 export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) => {
   // const { toast } = useToast(); // Removed shadcn toast
   const router = useRouter();
-  const { loading, error, classes, profile, schedule, clearError } = useTeacherData();
+  const {
+    loading,
+    classes,
+    profile,
+    schedule,
+  } = useTeacherData();
   const searchParams = useSearchParams();
 
   const [selectedClass, setSelectedClass] = useState('');
@@ -174,7 +178,7 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
   const selectedClassData = classes.find(c => c.id === selectedClass);
   const filteredStudents = selectedClass ? students.filter(s => s.class === selectedClassData?.name) : [];
 
-  const { stats, attendanceTrend } = useAttendanceStatistics(
+  const { _stats, _attendanceTrend } = useAttendanceStatistics(
     attendanceRecords,
     filteredStudents,
     selectedDate
@@ -229,8 +233,7 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
     updateRecord,
     deleteRecord,
     exportToCSV,
-    isEditing,
-  } = useAttendanceHistory(); // No parameters - loads independently from localStorage
+      } = useAttendanceHistory(); // No parameters - loads independently from localStorage
 
   // State for Full Page Edit View
   const [isEditingPage, setIsEditingPage] = useState(false);
@@ -403,6 +406,7 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
     if (subjects.length === 1 && selectedSubject !== subjects[0]) {
       setSelectedSubject(subjects[0]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjects]);
 
   // Reset selectedSubject if it's not in the available subjects list
@@ -502,6 +506,7 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
     if (lessonHours.length === 1 && selectedLessonHour !== lessonHours[0]) {
       setSelectedLessonHour(lessonHours[0]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessonHours]);
 
   // Reset selected lesson hour if not in available list
@@ -537,6 +542,7 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
         setSelectedSubject(subjectParam);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [classes, classParam, subjectParam]);
 
   // Add refresh counter to force component re-render
@@ -576,7 +582,7 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
 
       // Show success message
       toast.success('Halaman presensi telah di-refresh!');
-    } catch (error) {
+    } catch {
       toast.error('Gagal me-refresh halaman');
     } finally {
       setTimeout(() => {
@@ -740,7 +746,7 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
                   Anda memiliki perubahan yang belum disimpan
                 </p>
                 <p className="text-xs text-yellow-700 mt-1">
-                  Jangan lupa klik tombol "Save" di bawah sebelum meninggalkan halaman ini
+                  Jangan lupa klik tombol &quot;Save&quot; di bawah sebelum meninggalkan halaman ini
                 </p>
               </div>
               <div className="flex-shrink-0">

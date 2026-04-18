@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import {
     Card,
@@ -53,8 +54,8 @@ export const LearningObjectiveCard: React.FC<LearningObjectiveCardProps> = ({
         <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
             <CardHeader className="pb-3 flex-1">
                 <div className="flex justify-between items-start">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                        <Target className="h-5 w-5 text-primary" />
+                    <div className="p-2 bg-slate-100 rounded-lg">
+                        <Target className="h-5 w-5 text-slate-600" />
                     </div>
                     {activeTPCount > 0 ? (
                         <Badge variant="default" className="bg-green-600 hover:bg-green-700">

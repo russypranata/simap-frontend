@@ -2,17 +2,14 @@
 
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Student, AttendanceRecord } from '../../types/teacher';
-import { formatDate, formatTime, getRelativeTime } from '@/features/shared/utils/dateFormatter';
+import { formatDate } from '@/features/shared/utils/dateFormatter';
 import {
   CheckCircle,
   XCircle,
@@ -20,15 +17,11 @@ import {
   Clock,
   Save,
   Search,
-  Filter,
   Eye,
-  Edit,
-  Trash2,
   RefreshCw,
   Users,
   Calendar,
   BookOpen,
-  MoreHorizontal,
   ChevronLeft,
   ChevronRight,
   PieChart,
@@ -81,10 +74,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [isSaving, setIsSaving] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [_isSaved, setIsSaved] = useState(false);
   // Removed internal hasUnsavedChanges state as it's now controlled by parent
-  const [selectedStudentHistory, setSelectedStudentHistory] = useState<Student | null>(null);
-  const [showHistory, setShowHistory] = useState(false);
+  const [_selectedStudentHistory, setSelectedStudentHistory] = useState<Student | null>(null);
+  const [_showHistory, setShowHistory] = useState(false);
 
   // Extract lesson hour code from display string (e.g., "Jam ke-1-2 (07:00-08:30)" -> "1-2")
   const lessonHourCode = useMemo(() => {
@@ -137,11 +130,12 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   React.useEffect(() => {
     setIsSaved(false);
     onUnsavedChanges?.(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClass, selectedDate, selectedSubject, selectedLessonHour]);
 
   // Filter and paginate students
   const filteredStudents = useMemo(() => {
-    let filtered = students.filter(student => {
+    const filtered = students.filter(student => {
       const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.nis.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'all' ||
@@ -223,7 +217,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
     }
   };
 
-  const handleReset = () => {
+  const _handleReset = () => {
     setAttendanceData(prev => {
       const updated: Record<string, StudentAttendanceData> = {};
       students.forEach(student => {
@@ -536,7 +530,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                         <td className="p-4">
                           <Select
                             value={currentData?.status || 'hadir'}
-                            onValueChange={(value: any) => handleStatusChange(student.id, value)}
+                            onValueChange={(value: string) => handleStatusChange(student.id, value)}
                           >
                             <SelectTrigger className="w-40">
                               <SelectValue />
@@ -653,7 +647,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                           <p className="text-sm text-muted-foreground max-w-md">
                             {searchTerm ? (
                               <>
-                                Tidak ada siswa yang cocok dengan pencarian <strong>"{searchTerm}"</strong>
+                                Tidak ada siswa yang cocok dengan pencarian <strong>&quot;{searchTerm}&quot;</strong>
                                 {statusFilter !== 'all' && <> dan status <strong>{getStatusLabel(statusFilter)}</strong></>}.
                               </>
                             ) : statusFilter !== 'all' ? (

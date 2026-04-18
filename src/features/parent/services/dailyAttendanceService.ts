@@ -40,7 +40,7 @@ export const getDailyAttendance = async (
     childId: string,
     year: number,
     month: number,
-    _semesterId?: string  // eslint-disable-line @typescript-eslint/no-unused-vars
+    _semesterId?: string
 ): Promise<DailyAttendanceResponse> => {
     const params = new URLSearchParams({ year: String(year), month: String(month + 1) });
     const response = await fetch(`${PARENT_API_URL}/children/${childId}/attendance/daily?${params}`, {

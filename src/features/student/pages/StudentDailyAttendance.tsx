@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
     Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from "@/components/ui/tooltip";
@@ -14,13 +14,13 @@ import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle, XCircle, Clock,
-    AlertCircle, CalendarCheck, FileText, Thermometer, HandHeart, X, Info, AlertTriangle,
-    RefreshCw, RotateCcw, Check, CalendarOff, Filter, Loader2, CircleDashed, BookOpen,
+    AlertCircle, CalendarCheck, FileText, Thermometer, HandHeart, X, Info,
+    RefreshCw, RotateCcw, Check, CalendarOff, Filter, CircleDashed, BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStudentDailyAttendance } from "../hooks/useStudentDailyAttendance";
-import type { AttendanceStatus, DailyAttendanceRecord } from "../services/studentAttendanceService";
+import type { AttendanceStatus } from "../services/studentAttendanceService";
 import { ErrorState, LoadingOverlay, PageHeader } from "@/features/shared/components";
 
 interface SelectedRecord {

@@ -22,8 +22,8 @@ export const useStudentExtracurricular = () => {
         staleTime: 2 * 60 * 1000,
     });
 
-    const allExtracurriculars = query.data?.extracurriculars ?? [];
-    const allAttendance       = query.data?.recentAttendance ?? [];
+    const allExtracurriculars = useMemo(() => query.data?.extracurriculars ?? [], [query.data]);
+    const allAttendance       = useMemo(() => query.data?.recentAttendance ?? [], [query.data]);
 
     const academicYears = useMemo(() => {
         const unique = new Set(allExtracurriculars.map(e => e.academicYearId).filter(Boolean));

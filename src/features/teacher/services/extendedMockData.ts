@@ -1,3 +1,4 @@
+ 
 // Extended mock data for attendance and journals based on weekly schedule
 import { AttendanceRecord, TeachingJournal } from '../types/teacher';
 import { mockTeacher, mockStudents } from './mockData';
@@ -102,10 +103,10 @@ const MOCK_TUESDAY = '2025-11-19';
 const MOCK_MONDAY = '2025-11-18';
 
 // Historical Data (One representative week per month for trend demo)
-const MOCK_OCT_MON = '2025-10-20';
-const MOCK_SEP_MON = '2025-09-15';
-const MOCK_AUG_MON = '2025-08-18';
-const MOCK_JUL_MON = '2025-07-21';
+
+
+
+
 
 const dateScheduleMap: Record<string, string> = {
     // Current Week (Nov)
@@ -154,9 +155,6 @@ Object.entries(dateScheduleMap).forEach(([date, day]) => {
 
     dayGroups.forEach(group => {
         const classStudents = mockStudents.filter(s => s.class === group.class);
-
-        // If no students in mockData, create dummy count
-        const studentCount = classStudents.length || 30;
 
         if (classStudents.length > 0) {
             classStudents.forEach((student) => {

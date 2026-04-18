@@ -28,7 +28,7 @@ export const useParentDailyAttendance = () => {
     });
 
     const children = childrenQuery.data ?? [];
-    const academicYears = academicYearsQuery.data ?? [];
+    const academicYears = useMemo(() => academicYearsQuery.data ?? [], [academicYearsQuery.data]);
     const effectiveChildId = selectedChildId || children[0]?.id || "";
 
     // Auto-derive effective year/semester from data
@@ -77,7 +77,7 @@ export const useParentDailyAttendance = () => {
         staleTime: 2 * 60 * 1000,
     });
 
-    const records: DailyAttendanceRecord[] = attendanceQuery.data?.records ?? [];
+    const records: DailyAttendanceRecord[] = useMemo(() => attendanceQuery.data?.records ?? [], [attendanceQuery.data]);
     const childName = attendanceQuery.data?.childName ?? "";
     const childClass = attendanceQuery.data?.childClass ?? "";
 

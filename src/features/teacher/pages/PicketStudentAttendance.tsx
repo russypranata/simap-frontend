@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
     Card,
     CardContent,
@@ -23,13 +24,8 @@ import {
     UserMinus,
     AlertCircle,
     History,
-    Calendar,
-    ArrowRight,
-    X,
-    Filter,
-    FileText,
-    ChevronLeft,
-    ChevronRight,
+            X,
+        FileText,
     Eye,
     Trash2
 } from "lucide-react";
@@ -54,7 +50,7 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs";
 import LateRecordHistory from "@/features/teacher/components/picket/LateRecordHistory";
-import { StatCard } from "@/features/shared/components";
+import { StatCard, PaginationControls } from "@/features/shared/components";
 
 // Mock data for students
 const mockStudentsInitial = [
@@ -266,11 +262,6 @@ export default function PicketStudentAttendance() {
     const discoveryEndIndex = discoveryStartIndex + discoveryItemsPerPage;
     const paginatedDiscoveryStudents = discoveryStudents.slice(discoveryStartIndex, discoveryEndIndex);
 
-    // Reset discovery page when filters change
-    useEffect(() => {
-        setDiscoveryPage(1);
-    }, [selectedClass, searchQuery, lateRecords.length]);
-
     // Get combined data for the log with filtering
     const logData = useMemo(() => {
         return lateRecords.map(record => {
@@ -289,11 +280,6 @@ export default function PicketStudentAttendance() {
             })
             .sort((a, b) => b.time.localeCompare(a.time));
     }, [lateRecords, riwayatSearchQuery, riwayatSelectedClass]);
-
-    // Reset page when riwayat filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [riwayatSearchQuery, riwayatSelectedClass]);
 
     // Pagination calculations
     const totalPages = Math.ceil(logData.length / itemsPerPage);
@@ -353,18 +339,18 @@ export default function PicketStudentAttendance() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[600px] h-fit">
                     {/* LEFT: Discovery Section (42% width on large screens) */}
-                    <Card className="lg:col-span-5 flex flex-col h-full">
+                    <Card className="lg:col-span-5 flex flex-col h-full border-slate-100 shadow-sm">
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-primary/10 rounded-lg">
-                                        <Search className="h-5 w-5 text-primary" />
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                        <Search className="h-5 w-5 text-blue-700" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-lg font-semibold">
+                                        <CardTitle className="text-lg font-semibold text-slate-800">
                                             Daftar Siswa
                                         </CardTitle>
-                                        <CardDescription>
+                                        <CardDescription className="text-slate-600">
                                             Cari siswa untuk dicatat keterlambatannya
                                         </CardDescription>
                                     </div>
@@ -456,7 +442,7 @@ export default function PicketStudentAttendance() {
                                 {paginatedDiscoveryStudents.map((student) => (
                                     <div
                                         key={student.id}
-                                        className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors group"
+                                        className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/50 hover:border-blue-200 transition-colors group"
                                     >
                                         <Checkbox
                                             checked={selectedStudents.includes(student.id)}
@@ -469,18 +455,18 @@ export default function PicketStudentAttendance() {
                                             onClick={() => handleOpenLateForm(student)}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
+                                                <div className="h-9 w-9 rounded-full bg-blue-50 flex items-center justify-center text-blue-700 text-xs font-bold border border-blue-100">
                                                     {student.class.substring(0, 3)}
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">{student.name}</p>
-                                                    <p className="text-xs text-muted-foreground whitespace-nowrap"><span className="font-mono">{student.nis}</span> • {student.class}</p>
+                                                    <p className="font-semibold text-sm text-slate-800 group-hover:text-blue-700 transition-colors">{student.name}</p>
+                                                    <p className="text-xs text-slate-500 whitespace-nowrap"><span className="font-mono">{student.nis}</span> · {student.class}</p>
                                                 </div>
                                             </div>
                                             <Button
                                                 size="icon"
                                                 variant="ghost"
-                                                className="h-8 w-8 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+                                                className="h-8 w-8 bg-blue-50 text-blue-700 hover:bg-blue-700 hover:text-white transition-all border border-blue-100"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleOpenLateForm(student);
@@ -500,54 +486,22 @@ export default function PicketStudentAttendance() {
                             </div>
 
                             {/* Pagination for Discovery */}
-                            {discoveryTotalPages > 1 && (
-                                <div className="flex items-center justify-between pt-4 px-4 pb-4">
-                                    <div className="text-sm text-muted-foreground">
-                                        Menampilkan {discoveryStartIndex + 1}-{Math.min(discoveryEndIndex, discoveryStudents.length)} dari {discoveryStudents.length} siswa
-                                    </div>
-
-                                    <div className="flex items-center space-x-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setDiscoveryPage(discoveryPage - 1)}
-                                            disabled={discoveryPage === 1}
-                                            className="w-9 h-9 p-0"
-                                        >
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Button>
-
-                                        <div className="flex items-center space-x-1">
-                                            {Array.from({ length: discoveryTotalPages }, (_, i) => i + 1).map((page) => (
-                                                <Button
-                                                    key={page}
-                                                    variant={discoveryPage === page ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => setDiscoveryPage(page)}
-                                                    className="w-9 h-9"
-                                                >
-                                                    {page}
-                                                </Button>
-                                            ))}
-                                        </div>
-
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setDiscoveryPage(discoveryPage + 1)}
-                                            disabled={discoveryPage === discoveryTotalPages}
-                                            className="w-9 h-9 p-0"
-                                        >
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
+                            <PaginationControls
+                                currentPage={discoveryPage}
+                                totalPages={discoveryTotalPages}
+                                totalItems={discoveryStudents.length}
+                                startIndex={discoveryStudents.length === 0 ? 0 : discoveryStartIndex + 1}
+                                endIndex={Math.min(discoveryEndIndex, discoveryStudents.length)}
+                                itemsPerPage={discoveryItemsPerPage}
+                                itemLabel="siswa"
+                                onPageChange={setDiscoveryPage}
+                                onItemsPerPageChange={(val) => { setDiscoveryItemsPerPage(val); setDiscoveryPage(1); }}
+                            />
                         </CardContent>
                     </Card>
 
                     {/* RIGHT: Late Log Section (58% width) */}
-                    <Card className="lg:col-span-7 flex flex-col h-full">
+                    <Card className="lg:col-span-7 flex flex-col h-full border-slate-100 shadow-sm">
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -555,8 +509,8 @@ export default function PicketStudentAttendance() {
                                         <History className="h-5 w-5 text-red-600" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-lg font-semibold">Riwayat Hari Ini</CardTitle>
-                                        <CardDescription>
+                                        <CardTitle className="text-lg font-semibold text-slate-800">Riwayat Hari Ini</CardTitle>
+                                        <CardDescription className="text-slate-600">
                                             Catatan keterlambatan <span className="font-semibold">{format(new Date(), "EEEE, dd MMMM yyyy", { locale: id })}</span>
                                         </CardDescription>
                                     </div>
@@ -643,8 +597,8 @@ export default function PicketStudentAttendance() {
 
                                     <div className="overflow-x-auto flex-1">
                                         <table className="w-full">
-                                            <thead className="bg-muted/50">
-                                                <tr>
+                                            <thead>
+                                                <tr className="bg-slate-50 border-b border-slate-200">
                                                     <th className="w-[50px] p-3">
                                                         <div className="flex items-center justify-start">
                                                             <Checkbox
@@ -654,9 +608,9 @@ export default function PicketStudentAttendance() {
                                                             />
                                                         </div>
                                                     </th>
-                                                    <th className="text-left p-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Siswa</th>
-                                                    <th className="text-center p-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider w-[120px]">Waktu</th>
-                                                    <th className="text-left p-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Keterangan</th>
+                                                    <th className="text-left p-3 font-semibold text-xs text-slate-600 uppercase tracking-wider">Siswa</th>
+                                                    <th className="text-center p-3 font-semibold text-xs text-slate-600 uppercase tracking-wider w-[120px]">Waktu</th>
+                                                    <th className="text-left p-3 font-semibold text-xs text-slate-600 uppercase tracking-wider">Keterangan</th>
                                                     <th className="w-[60px] p-3"></th>
                                                 </tr>
                                             </thead>
@@ -664,7 +618,7 @@ export default function PicketStudentAttendance() {
                                                 {paginatedData.map((record) => (
                                                     <tr
                                                         key={record.studentId}
-                                                        className="border-b hover:bg-muted/30 transition-colors group"
+                                                        className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors group"
                                                     >
                                                         <td className="p-3">
                                                             <Checkbox
@@ -680,11 +634,11 @@ export default function PicketStudentAttendance() {
                                                                     {record.student?.name.charAt(0)}
                                                                 </div>
                                                                 <div>
-                                                                    <div className="font-medium text-sm">{record.student?.name}</div>
+                                                                    <div className="font-semibold text-sm text-slate-800">{record.student?.name}</div>
                                                                     <div className="flex items-center gap-2 mt-0.5 whitespace-nowrap">
-                                                                        <span className="text-xs font-mono text-muted-foreground">{record.student?.nis}</span>
-                                                                        <span className="text-xs text-muted-foreground">•</span>
-                                                                        <span className="text-xs text-muted-foreground">{record.student?.class}</span>
+                                                                        <span className="text-xs font-mono text-slate-500">{record.student?.nis}</span>
+                                                                        <span className="text-xs text-slate-400">·</span>
+                                                                        <span className="text-xs text-slate-500">{record.student?.class}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -695,7 +649,7 @@ export default function PicketStudentAttendance() {
                                                             </Badge>
                                                         </td>
                                                         <td className="p-3">
-                                                            <p className="text-sm text-muted-foreground italic line-clamp-2" title={record.note}>
+                                                            <p className="text-sm text-slate-500 italic line-clamp-2" title={record.note}>
                                                                 {record.note || "-"}
                                                             </p>
                                                         </td>
@@ -703,7 +657,7 @@ export default function PicketStudentAttendance() {
                                                             <Button
                                                                 size="icon"
                                                                 variant="ghost"
-                                                                className="h-8 w-8 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all"
+                                                                className="h-8 w-8 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all border border-red-100"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     handleDeleteRecord(record.studentId);
@@ -719,49 +673,17 @@ export default function PicketStudentAttendance() {
                                     </div>
 
                                     {/* Pagination */}
-                                    {totalPages > 1 && (
-                                        <div className="flex items-center justify-between pt-4 px-4">
-                                            <div className="text-sm text-muted-foreground">
-                                                Menampilkan {startIndex + 1}-{Math.min(endIndex, logData.length)} dari {logData.length} siswa
-                                            </div>
-
-                                            <div className="flex items-center space-x-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => setCurrentPage(currentPage - 1)}
-                                                    disabled={currentPage === 1}
-                                                    className="w-9 h-9 p-0"
-                                                >
-                                                    <ChevronLeft className="h-4 w-4" />
-                                                </Button>
-
-                                                <div className="flex items-center space-x-1">
-                                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                                        <Button
-                                                            key={page}
-                                                            variant={currentPage === page ? "default" : "outline"}
-                                                            size="sm"
-                                                            onClick={() => setCurrentPage(page)}
-                                                            className="w-9 h-9"
-                                                        >
-                                                            {page}
-                                                        </Button>
-                                                    ))}
-                                                </div>
-
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => setCurrentPage(currentPage + 1)}
-                                                    disabled={currentPage === totalPages}
-                                                    className="w-9 h-9 p-0"
-                                                >
-                                                    <ChevronRight className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    )}
+                                    <PaginationControls
+                                        currentPage={currentPage}
+                                        totalPages={totalPages}
+                                        totalItems={logData.length}
+                                        startIndex={logData.length === 0 ? 0 : startIndex + 1}
+                                        endIndex={Math.min(endIndex, logData.length)}
+                                        itemsPerPage={itemsPerPage}
+                                        itemLabel="siswa"
+                                        onPageChange={setCurrentPage}
+                                        onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+                                    />
                                 </Card>
                             ) : (
                                 <Card className="flex-1 border-muted">
@@ -1087,7 +1009,7 @@ export default function PicketStudentAttendance() {
                                             <span className="font-mono">{record.time}</span>
                                         </div>
                                         {record.note && (
-                                            <p className="text-sm text-muted-foreground italic">"{record.note}"</p>
+                                            <p className="text-sm text-muted-foreground italic">&quot;{record.note}&quot;</p>
                                         )}
                                     </div>
                                 ) : null;
@@ -1145,7 +1067,7 @@ export default function PicketStudentAttendance() {
                                                         {student.name.charAt(0)}
                                                     </div>
                                                     <div className="flex-1">
-                                                        <p className="font-medium text-sm">{student.name}</p>
+                                                        <p className="font-semibold text-sm text-slate-800">{student.name}</p>
                                                         <p className="text-xs text-muted-foreground">
                                                             <span className="font-mono">{student.nis}</span> • {student.class}
                                                         </p>
@@ -1155,7 +1077,7 @@ export default function PicketStudentAttendance() {
                                                     </Badge>
                                                 </div>
                                                 {record.note && (
-                                                    <p className="text-xs text-muted-foreground italic pl-11">"{record.note}"</p>
+                                                    <p className="text-xs text-muted-foreground italic pl-11">&quot;{record.note}&quot;</p>
                                                 )}
                                             </div>
                                         ) : null;

@@ -1,3 +1,4 @@
+ 
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -44,13 +45,11 @@ export const SchedulePage: React.FC = () => {
   const router = useRouter();
   const {
     loading,
-    error,
     schedule,
     classes,
     teachingJournals,
     attendanceRecords,
     fetchSchedule,
-    clearError,
   } = useTeacherData();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,6 +59,7 @@ export const SchedulePage: React.FC = () => {
 
   useEffect(() => {
     fetchSchedule();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRefresh = () => {
@@ -219,13 +219,13 @@ export const SchedulePage: React.FC = () => {
       </Tabs>
 
       {/* Additional Information Section */}
-      <Card>
+      <Card className="border-slate-100 shadow-sm">
         <CardContent className="p-6">
-          <div className="flex items-center space-x-2 mb-6">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Calendar className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Calendar className="h-5 w-5 text-blue-700" />
             </div>
-            <h3 className="text-lg font-semibold">Informasi Jadwal</h3>
+            <h3 className="text-lg font-semibold text-slate-800">Informasi Jadwal</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -236,24 +236,24 @@ export const SchedulePage: React.FC = () => {
                 <h4 className="font-semibold text-sm">Fitur Tampilan</h4>
               </div>
               <div className="space-y-2.5">
-                <div className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div className="flex items-start space-x-3 p-3 rounded-lg bg-slate-50/50 border border-slate-100 hover:bg-slate-100/50 transition-colors">
                   <Grid3x3 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-sm">Mingguan</p>
+                    <p className="font-semibold text-sm text-slate-800">Mingguan</p>
                     <p className="text-xs text-muted-foreground">Lihat semua jadwal dalam satu minggu</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div className="flex items-start space-x-3 p-3 rounded-lg bg-slate-50/50 border border-slate-100 hover:bg-slate-100/50 transition-colors">
                   <Calendar className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-sm">Harian</p>
+                    <p className="font-semibold text-sm text-slate-800">Harian</p>
                     <p className="text-xs text-muted-foreground">Fokus pada jadwal hari tertentu</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div className="flex items-start space-x-3 p-3 rounded-lg bg-slate-50/50 border border-slate-100 hover:bg-slate-100/50 transition-colors">
                   <BarChart3 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-sm">Statistik</p>
+                    <p className="font-semibold text-sm text-slate-800">Statistik</p>
                     <p className="text-xs text-muted-foreground">Analisis distribusi jadwal mengajar</p>
                   </div>
                 </div>
@@ -267,24 +267,24 @@ export const SchedulePage: React.FC = () => {
                 <h4 className="font-semibold text-sm">Aksi Cepat</h4>
               </div>
               <div className="space-y-2.5">
-                <div className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div className="flex items-start space-x-3 p-3 rounded-lg bg-slate-50/50 border border-slate-100 hover:bg-slate-100/50 transition-colors">
                   <FileText className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-sm">Jurnal</p>
+                    <p className="font-semibold text-sm text-slate-800">Jurnal</p>
                     <p className="text-xs text-muted-foreground">Langsung isi jurnal mengajar dari jadwal</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div className="flex items-start space-x-3 p-3 rounded-lg bg-slate-50/50 border border-slate-100 hover:bg-slate-100/50 transition-colors">
                   <ClipboardCheck className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-sm">Presensi</p>
+                    <p className="font-semibold text-sm text-slate-800">Presensi</p>
                     <p className="text-xs text-muted-foreground">Catat kehadiran siswa dengan cepat</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div className="flex items-start space-x-3 p-3 rounded-lg bg-slate-50/50 border border-slate-100 hover:bg-slate-100/50 transition-colors">
                   <Search className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-sm">Filter</p>
+                    <p className="font-semibold text-sm text-slate-800">Filter</p>
                     <p className="text-xs text-muted-foreground">Cari jadwal berdasarkan kelas atau mapel</p>
                   </div>
                 </div>

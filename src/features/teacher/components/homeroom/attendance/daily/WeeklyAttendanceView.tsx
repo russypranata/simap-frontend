@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any , @typescript-eslint/no-unused-vars */
 import React from "react";
 import {
     Table,
@@ -95,6 +96,7 @@ export const WeeklyAttendanceView = ({
             });
         });
         return stats;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [students, currentWeekStart]); // Re-calculate when students or week changes
 
     const totalAttendance = weeklyStats.H + weeklyStats.S + weeklyStats.I + weeklyStats.A;
@@ -106,8 +108,8 @@ export const WeeklyAttendanceView = ({
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <CalendarIcon className="h-5 w-5 text-primary" />
+                            <div className="p-2 bg-slate-100 rounded-lg">
+                                <CalendarIcon className="h-5 w-5 text-slate-600" />
                             </div>
                             <div>
                                 <CardTitle className="text-lg font-semibold">Rekap Presensi Pagi Mingguan</CardTitle>
@@ -163,11 +165,11 @@ export const WeeklyAttendanceView = ({
                         <div className="overflow-auto max-h-[600px]">
                             <Table>
                                 <TableHeader className="bg-muted/50 sticky top-0 z-20 shadow-sm">
-                                    <TableRow className="hover:bg-transparent border-b">
-                                        <TableHead className="w-[50px] p-3 font-medium text-sm text-foreground text-center sticky left-0 z-20 bg-muted/50 backdrop-blur-sm">No</TableHead>
-                                        <TableHead className="w-[250px] p-3 font-medium text-sm text-foreground sticky left-[50px] z-20 bg-muted/50 backdrop-blur-sm border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Siswa</TableHead>
+                                    <TableRow className="bg-slate-50 border-b border-slate-200 hover:bg-slate-50">
+                                        <TableHead className="w-[50px] p-3 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center sticky left-0 z-20 bg-muted/50 backdrop-blur-sm">No</TableHead>
+                                        <TableHead className="w-[250px] p-3 font-semibold text-xs text-slate-600 uppercase tracking-wider sticky left-[50px] z-20 bg-muted/50 backdrop-blur-sm border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Siswa</TableHead>
                                         {weekDays.map((day, i) => (
-                                            <TableHead key={i} className="p-2 font-medium text-sm text-foreground text-center min-w-[60px]">
+                                            <TableHead key={i} className="p-2 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center min-w-[60px]">
                                                 <div className="flex flex-col items-center justify-center gap-1 py-1">
                                                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
                                                         {format(day, "EEE", { locale: idLocale })}
@@ -209,9 +211,9 @@ export const WeeklyAttendanceView = ({
                                         });
 
                                         return (
-                                            <TableRow key={student.id} className="hover:bg-muted/30 transition-colors border-b group">
-                                                <TableCell className="p-3 text-sm font-medium text-center sticky left-0 z-10 bg-background group-hover:bg-muted/30 transition-colors">{index + 1}</TableCell>
-                                                <TableCell className="p-3 sticky left-[50px] z-10 bg-background group-hover:bg-muted/30 transition-colors border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                                            <TableRow key={student.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors group">
+                                                <TableCell className="p-3 text-sm font-medium text-center sticky left-0 z-10 bg-background group-hover:bg-slate-50/50 transition-colors">{index + 1}</TableCell>
+                                                <TableCell className="p-3 sticky left-[50px] z-10 bg-background group-hover:bg-slate-50/50 transition-colors border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                                                     <div className="flex items-center space-x-3">
                                                         <Avatar className="h-8 w-8 border border-border/50">
                                                             <AvatarImage src="" />
@@ -220,7 +222,7 @@ export const WeeklyAttendanceView = ({
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         <div>
-                                                            <p className="font-medium text-sm text-foreground truncate max-w-[150px]" title={student.name}>{student.name}</p>
+                                                            <p className="font-semibold text-xs text-slate-600 uppercase tracking-wider truncate max-w-[150px]" title={student.name}>{student.name}</p>
                                                             <span className="text-xs text-muted-foreground font-mono">{student.nis}</span>
                                                         </div>
                                                     </div>

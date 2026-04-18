@@ -14,7 +14,7 @@ export const useStudentDailyAttendance = () => {
         staleTime: 10 * 60 * 1000,
     });
 
-    const academicYears = academicYearsQuery.data ?? [];
+    const academicYears = useMemo(() => academicYearsQuery.data ?? [], [academicYearsQuery.data]);
 
     const effectiveYearId = useMemo(() => {
         if (selectedYearId) return selectedYearId;
@@ -34,7 +34,7 @@ export const useStudentDailyAttendance = () => {
         staleTime: 2 * 60 * 1000,
     });
 
-    const records: DailyAttendanceRecord[] = attendanceQuery.data?.records ?? [];
+    const records: DailyAttendanceRecord[] = useMemo(() => attendanceQuery.data?.records ?? [], [attendanceQuery.data]);
 
     const activeSemester = useMemo(() => {
         const year = academicYears.find(y => y.id === effectiveYearId);

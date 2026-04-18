@@ -19,7 +19,7 @@ export const useStudentSubjectAttendance = () => {
         staleTime: 2 * 60 * 1000,
     });
 
-    const allRecords = query.data ?? [];
+    const allRecords = useMemo(() => query.data ?? [], [query.data]);
     const subjects      = useMemo(() => Array.from(new Set(allRecords.map(r => r.subject))).sort(), [allRecords]);
     const academicYears = useMemo(() => Array.from(new Set(allRecords.map(r => r.academicYearId))).sort((a, b) => b.localeCompare(a)), [allRecords]);
 

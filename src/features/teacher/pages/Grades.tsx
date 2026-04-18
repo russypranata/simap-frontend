@@ -1,3 +1,4 @@
+ 
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -12,36 +13,25 @@ import { useTeacherData } from '../hooks/useTeacherData';
 import { GradeInputForm } from '../components/GradeInputForm';
 import { RemediationEnrichment } from '../components/RemediationEnrichment';
 import { MultiSelectDropdown } from '../components/MultiSelectDropdown';
-import type { Grade } from '../types/teacher';
-import { formatDate, formatTime, getRelativeTime } from '@/features/shared/utils/dateFormatter';
+import type { Grade as _Grade } from '../types/teacher';
 import {
   Award,
   Calculator,
   Users,
-  Calendar,
   BookOpen,
   Search,
   Filter,
   Download,
-  Upload,
   FileText,
   TrendingUp,
   TrendingDown,
   BarChart3,
-  Star,
   CheckCircle,
   AlertCircle,
-  Clock,
-  Target,
   RefreshCw,
   Printer,
-  Settings,
-  Eye,
-  Edit,
-  Trash2,
   Pencil,
   X,
-  GraduationCap
 } from 'lucide-react';
 import {
   BarChart,
@@ -50,10 +40,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
   Cell,
 } from 'recharts';
 import { toast } from 'sonner';
@@ -62,14 +49,12 @@ import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard } from '@/fe
 export const Grades: React.FC = () => {
   const {
     loading,
-    error,
     classes,
     students,
     grades,
     fetchStudents,
     fetchGrades,
     saveGrade,
-    clearError,
   } = useTeacherData();
 
   const [selectedClass, setSelectedClass] = useState('');
@@ -133,21 +118,21 @@ export const Grades: React.FC = () => {
 
   // Dynamic subjects based on selected class
   const subjects = selectedClassData && 'subjects' in selectedClassData
-    ? (selectedClassData as any).subjects as string[]
+    ? (selectedClassData as { subjects: string[] }).subjects
     : [];
 
   // Get available subjects for stats (from selected classes or all)
   const availableStatsSubjects = useMemo(() => {
     if (statsSelectedClasses.length === 0) {
       return Array.from(new Set(
-        classes.flatMap(c => 'subjects' in c ? (c as any).subjects : [])
+        classes.flatMap(c => 'subjects' in c ? (c as { subjects: string[] }).subjects : [])
       ));
     }
-    const subjects = statsSelectedClasses.flatMap(classId => {
+    const subjectList = statsSelectedClasses.flatMap(classId => {
       const classData = classes.find(c => c.id === classId);
-      return classData && 'subjects' in classData ? (classData as any).subjects : [];
+      return classData && 'subjects' in classData ? (classData as { subjects: string[] }).subjects : [];
     });
-    return Array.from(new Set(subjects));
+    return Array.from(new Set(subjectList));
   }, [statsSelectedClasses, classes]);
 
   // Filtered grades for statistics tab
@@ -210,7 +195,7 @@ export const Grades: React.FC = () => {
   }, [filteredGradesForStats]);
 
   // Class comparison data for bar chart
-  const classComparisonData = useMemo(() => {
+  const _classComparisonData = useMemo(() => {
     if (filteredGradesForStats.length === 0) return [];
 
     const classStats: Record<string, { total: number; count: number }> = {};
@@ -232,7 +217,7 @@ export const Grades: React.FC = () => {
   }, [filteredGradesForStats]);
 
   // Category pie chart data
-  const categoryPieData = useMemo(() => {
+  const _categoryPieData = useMemo(() => {
     return [
       { name: 'Remedial', value: statsCalculations.remedialCount, color: '#ef4444' },
       { name: 'Standar', value: statsCalculations.standardCount, color: '#3b82f6' },
@@ -264,13 +249,15 @@ export const Grades: React.FC = () => {
     if (selectedClass) {
       fetchStudents(selectedClass);
     }
-  }, [selectedClass]);
+  }// eslint-disable-next-line react-hooks/exhaustive-deps
+, [selectedClass]);
 
   useEffect(() => {
     if (selectedClass && selectedSubject && selectedSemester) {
       fetchGrades(selectedClass, selectedSubject, selectedSemester);
     }
-  }, [selectedClass, selectedSubject, selectedSemester]);
+  }// eslint-disable-next-line react-hooks/exhaustive-deps
+, [selectedClass, selectedSubject, selectedSemester]);
 
   const handleSaveGrades = async (gradesData: {
     studentId: string;
@@ -293,7 +280,7 @@ export const Grades: React.FC = () => {
       }
       toast.success('Data nilai berhasil disimpan!');
       fetchGrades(selectedClass, selectedSubject, selectedSemester);
-    } catch (error) {
+    } catch {
       toast.error('Gagal menyimpan data nilai');
     }
   };
@@ -308,7 +295,7 @@ export const Grades: React.FC = () => {
         await fetchGrades(selectedClass, selectedSubject, selectedSemester);
       }
       toast.success('Data berhasil diperbarui!');
-    } catch (error) {
+    } catch {
       toast.error('Gagal memperbarui data');
     } finally {
       setIsRefreshing(false);
@@ -485,16 +472,16 @@ export const Grades: React.FC = () => {
 
         <TabsContent value="input" className="space-y-6">
           {/* Filters */}
-          <Card>
-            <CardHeader>
+          <Card className="border-slate-100 shadow-sm">
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Filter className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-slate-100 rounded-lg">
+                    <Filter className="h-5 w-5 text-slate-600" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-semibold">Filter Nilai</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Filter Nilai</CardTitle>
+                    <CardDescription className="text-slate-600">
                       Pilih kelas, mata pelajaran, dan semester untuk input nilai
                     </CardDescription>
                   </div>
@@ -668,15 +655,15 @@ export const Grades: React.FC = () => {
 
         <TabsContent value="list" className="space-y-6">
           {/* List Filters */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Filter className="h-5 w-5 text-primary" />
+          <Card className="border-slate-100 shadow-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-slate-100 rounded-lg">
+                  <Filter className="h-5 w-5 text-slate-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-semibold">Filter Daftar Nilai</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-lg font-semibold text-slate-800">Filter Daftar Nilai</CardTitle>
+                  <CardDescription className="text-slate-600">
                     Filter data nilai berdasarkan kriteria tertentu
                   </CardDescription>
                 </div>
@@ -707,7 +694,7 @@ export const Grades: React.FC = () => {
                   )}
                   {searchTerm && (
                     <Badge variant="outline" className="text-xs">
-                      🔍 "{searchTerm}"
+                      🔍 &quot;{searchTerm}&quot;
                     </Badge>
                   )}
                 </div>
@@ -840,62 +827,62 @@ export const Grades: React.FC = () => {
 
           {/* Grades List */}
           {filteredGrades.length > 0 ? (
-            <Card>
-              <CardHeader>
+            <Card className="border-slate-100 shadow-sm overflow-hidden">
+              <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <BookOpen className="h-5 w-5 text-primary" />
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <BookOpen className="h-5 w-5 text-blue-700" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg font-semibold">Daftar Nilai Siswa</CardTitle>
-                      <CardDescription>
+                      <CardTitle className="text-lg font-semibold text-slate-800">Daftar Nilai Siswa</CardTitle>
+                      <CardDescription className="text-slate-600">
                         Daftar nilai siswa yang telah diinput
                       </CardDescription>
                     </div>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="text-left p-3 font-medium text-sm">Nama Siswa</th>
-                        <th className="text-left p-3 font-medium text-sm">Kelas</th>
-                        <th className="text-left p-3 font-medium text-sm">Mata Pelajaran</th>
-                        <th className="text-left p-3 font-medium text-sm">Semester</th>
-                        <th className="text-left p-3 font-medium text-sm">Rata-rata</th>
-                        <th className="text-left p-3 font-medium text-sm">Grade</th>
-                        <th className="text-left p-3 font-medium text-sm">Deskripsi</th>
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama Siswa</th>
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kelas</th>
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Mata Pelajaran</th>
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Semester</th>
+                        <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Rata-rata</th>
+                        <th className="text-center p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Grade</th>
+                        <th className="text-left p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Deskripsi</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredGrades.map((grade) => (
-                        <tr key={grade.id} className="border-b hover:bg-muted/30">
-                          <td className="p-3">
-                            <div className="font-medium text-sm">{grade.studentName}</div>
+                        <tr key={grade.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4">
+                            <div className="font-semibold text-sm text-slate-800">{grade.studentName}</div>
                           </td>
-                          <td className="p-3 text-sm">{grade.class}</td>
-                          <td className="p-3 text-sm">{grade.subject}</td>
-                          <td className="p-3 text-sm">{grade.semester}</td>
-                          <td className="p-3">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-bold">{grade.average.toFixed(1)}</span>
-                              <div className="w-12 bg-muted rounded-full h-2">
+                          <td className="p-4 text-sm text-slate-600">{grade.class}</td>
+                          <td className="p-4 text-sm text-slate-600">{grade.subject}</td>
+                          <td className="p-4 text-sm text-slate-600">{grade.semester}</td>
+                          <td className="p-4 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <span className="text-sm font-bold text-slate-800">{grade.average.toFixed(1)}</span>
+                              <div className="w-12 bg-slate-100 rounded-full h-1.5">
                                 <div
-                                  className="h-2 rounded-full bg-primary"
+                                  className="h-1.5 rounded-full bg-blue-500"
                                   style={{ width: `${grade.average}%` }}
                                 />
                               </div>
                             </div>
                           </td>
-                          <td className="p-3">
+                          <td className="p-4 text-center">
                             <Badge className={getGradeColor(grade.grade)}>
                               {grade.grade}
                             </Badge>
                           </td>
-                          <td className="p-3 text-sm">{grade.description}</td>
+                          <td className="p-4 text-sm text-slate-600">{grade.description}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -926,16 +913,16 @@ export const Grades: React.FC = () => {
 
         <TabsContent value="statistics" className="space-y-6">
           {/* Filters */}
-          <Card>
-            <CardHeader>
+          <Card className="border-slate-100 shadow-sm">
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Filter className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-slate-100 rounded-lg">
+                    <Filter className="h-5 w-5 text-slate-600" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-semibold">Filter Statistik</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Filter Statistik</CardTitle>
+                    <CardDescription className="text-slate-600">
                       Pilih periode, kelas, dan mata pelajaran untuk analisis
                     </CardDescription>
                   </div>
@@ -960,7 +947,7 @@ export const Grades: React.FC = () => {
 
                 <div className="space-y-2">
                   <Label>Semester</Label>
-                  <Select value={statsSemester} onValueChange={(value: any) => setStatsSemester(value)}>
+                  <Select value={statsSemester} onValueChange={(value: 'Ganjil' | 'Genap') => setStatsSemester(value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1147,16 +1134,16 @@ export const Grades: React.FC = () => {
           </div>
 
           {/* Grade Distribution */}
-          <Card>
-            <CardHeader>
+          <Card className="border-slate-100 shadow-sm">
+            <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <BarChart3 className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <BarChart3 className="h-5 w-5 text-purple-700" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-semibold">Distribusi Nilai</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-lg font-semibold text-slate-800">Distribusi Nilai</CardTitle>
+                    <CardDescription className="text-slate-600">
                       Sebaran nilai siswa per grade{statsCalculations.totalStudents > 0 ? ` (${statsCalculations.totalStudents} siswa)` : ''}
                     </CardDescription>
                   </div>

@@ -1,6 +1,7 @@
+ 
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
     Card,
     CardContent,
@@ -19,24 +20,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
     Search,
-    UserMinus,
-    AlertCircle,
     History,
-    Calendar,
-    ArrowRight,
     X,
-    Filter,
     FileText,
     Eye,
-    Plus,
-    ThumbsUp,
-    ThumbsDown,
     ClipboardList,
-    AlertTriangle,
     FilePenLine,
     User,
-    Clock,
     MapPin,
+    Calendar,
 } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
@@ -51,7 +43,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
     Tabs,
     TabsContent,
@@ -79,6 +70,18 @@ const mockStudentsInitial = [
     { id: 14, name: "Nur Azizah", class: "XI B", nis: "2024114" },
     { id: 15, name: "Omar Bakri", class: "X A", nis: "2024115" },
     { id: 16, name: "Putri Ayu", class: "X B", nis: "2024116" },
+];
+
+// Static mock records — dates computed once at module load, not during render
+const _now = Date.now();
+const mockInitialRecords = [
+    { id: 1, studentId: 3, teacherName: "Pak Budi", problem: "Terlambat masuk kelas lebih dari 15 menit tanpa keterangan.", followUp: "Diberikan teguran lisan dan dicatat.", location: "sekolah" as const, date: new Date(_now - 86400000).toISOString() },
+    { id: 2, studentId: 5, teacherName: "Bu Siti", problem: "Tidak memakai seragam lengkap saat upacara.", followUp: "Diminta melengkapi atribut seragam.", location: "sekolah" as const, date: new Date(_now - 172800000).toISOString() },
+    { id: 3, studentId: 10, teacherName: "Ust. Ahmad", problem: "Ribut di asrama saat jam istirahat malam.", followUp: "Diberikan nasehat dan poin pelanggaran.", location: "asrama" as const, date: new Date(_now - 259200000).toISOString() },
+    { id: 4, studentId: 1, teacherName: "Pak Budi", problem: "Tidak membawa buku paket pelajaran.", followUp: "Diberikan tugas tambahan.", location: "sekolah" as const, date: new Date(_now - 345600000).toISOString() },
+    { id: 5, studentId: 7, teacherName: "Bu Rina", problem: "Tidur di kelas saat jam pelajaran berlangsung.", followUp: "Dibangunkan dan diminta cuci muka.", location: "sekolah" as const, date: new Date(_now - 432000000).toISOString() },
+    { id: 6, studentId: 12, teacherName: "Ust. Yusuf", problem: "Keluar lingkungan asrama tanpa izin.", followUp: "Panggilan orang tua dan skorsing asrama 1 hari.", location: "asrama" as const, date: new Date(_now - 518400000).toISOString() },
+    { id: 7, studentId: 2, teacherName: "Pak Joko", problem: "Membuang sampah sembarangan di koridor.", followUp: "Diminta membersihkan koridor.", location: "sekolah" as const, date: new Date(_now - 604800000).toISOString() },
 ];
 
 export default function StudentBehaviorPage() {
@@ -165,79 +168,7 @@ export default function StudentBehaviorPage() {
     };
 
     // Records state - UPDATED
-    const [records, setRecords] = useState<Array<{
-        id: number;
-        studentId: number;
-        teacherName: string;
-        problem: string;
-        followUp: string;
-        location: "sekolah" | "asrama";
-        date: string;
-    }>>([
-        {
-            id: 1,
-            studentId: 3,
-            teacherName: "Pak Budi",
-            problem: "Terlambat masuk kelas lebih dari 15 menit tanpa keterangan.",
-            followUp: "Diberikan teguran lisan dan dicatat.",
-            location: "sekolah",
-            date: new Date(Date.now() - 86400000).toISOString(), // Kemarin
-        },
-        {
-            id: 2,
-            studentId: 5,
-            teacherName: "Bu Siti",
-            problem: "Tidak memakai seragam lengkap saat upacara.",
-            followUp: "Diminta melengkapi atribut seragam.",
-            location: "sekolah",
-            date: new Date(Date.now() - 172800000).toISOString(), // 2 hari lalu
-        },
-        {
-            id: 3,
-            studentId: 10,
-            teacherName: "Ust. Ahmad",
-            problem: "Ribut di asrama saat jam istirahat malam.",
-            followUp: "Diberikan nasehat dan poin pelanggaran.",
-            location: "asrama",
-            date: new Date(Date.now() - 259200000).toISOString(), // 3 hari lalu
-        },
-        {
-            id: 4,
-            studentId: 1,
-            teacherName: "Pak Budi",
-            problem: "Tidak membawa buku paket pelajaran.",
-            followUp: "Diberikan tugas tambahan.",
-            location: "sekolah",
-            date: new Date(Date.now() - 345600000).toISOString(),
-        },
-        {
-            id: 5,
-            studentId: 7,
-            teacherName: "Bu Rina",
-            problem: "Tidur di kelas saat jam pelajaran berlangsung.",
-            followUp: "Dibangunkan dan diminta cuci muka.",
-            location: "sekolah",
-            date: new Date(Date.now() - 432000000).toISOString(),
-        },
-        {
-            id: 6,
-            studentId: 12,
-            teacherName: "Ust. Yusuf",
-            problem: "Keluar lingkungan asrama tanpa izin.",
-            followUp: "Panggilan orang tua dan skorsing asrama 1 hari.",
-            location: "asrama",
-            date: new Date(Date.now() - 518400000).toISOString(),
-        },
-        {
-            id: 7,
-            studentId: 2,
-            teacherName: "Pak Joko",
-            problem: "Membuang sampah sembarangan di koridor.",
-            followUp: "Diminta membersihkan koridor.",
-            location: "sekolah",
-            date: new Date(Date.now() - 604800000).toISOString(),
-        },
-    ]);
+    const [records, setRecords] = useState(mockInitialRecords);
 
     const handleOpenForm = (student: typeof mockStudentsInitial[0]) => {
         setSelectedStudent(student);
@@ -252,7 +183,7 @@ export default function StudentBehaviorPage() {
         if (!selectedStudent) return;
 
         const newRecord = {
-            id: Date.now(),
+            id: records.length + 1,
             studentId: selectedStudent.id,
             teacherName: teacherName,
             problem: problemDescription,
@@ -362,16 +293,16 @@ export default function StudentBehaviorPage() {
                 </TabsList>
 
                 <TabsContent value="record" className="space-y-6">
-                    <Card className="border-border/50 shadow-sm">
+                    <Card className="border-slate-100 shadow-sm">
                         <CardHeader className="pb-3">
                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-primary/10 rounded-lg">
-                                        <Search className="h-5 w-5 text-primary" />
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                        <Search className="h-5 w-5 text-blue-700" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-lg font-semibold">Daftar Siswa</CardTitle>
-                                        <CardDescription>
+                                        <CardTitle className="text-lg font-semibold text-slate-800">Daftar Siswa</CardTitle>
+                                        <CardDescription className="text-slate-600">
                                             Pilih siswa untuk mencatat masalah dan pelanggaran.
                                         </CardDescription>
                                     </div>
@@ -407,19 +338,19 @@ export default function StudentBehaviorPage() {
                                 {paginatedStudents.map((student) => (
                                     <div
                                         key={student.id}
-                                        className="flex items-center justify-between p-4 rounded-xl border bg-card hover:bg-accent/50 hover:border-primary/20 transition-all cursor-pointer group"
+                                        className="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/50 hover:border-blue-200 transition-all cursor-pointer group"
                                         onClick={() => handleOpenForm(student)}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                                            <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-700 font-bold text-sm border border-blue-100">
                                                 {student.class.substring(0, 3)}
                                             </div>
                                             <div>
-                                                <p className="font-medium text-foreground group-hover:text-primary transition-colors">{student.name}</p>
-                                                <p className="text-xs text-muted-foreground"><span className="font-mono">{student.nis}</span> • {student.class}</p>
+                                                <p className="font-semibold text-sm text-slate-800 group-hover:text-blue-700 transition-colors">{student.name}</p>
+                                                <p className="text-xs text-slate-500"><span className="font-mono">{student.nis}</span> · {student.class}</p>
                                             </div>
                                         </div>
-                                        <Button size="icon" className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground shadow-sm">
+                                        <Button size="icon" className="bg-blue-50 text-blue-700 hover:bg-blue-700 hover:text-white shadow-sm border border-blue-100">
                                             <FilePenLine className="h-4 w-4" />
                                         </Button>
                                     </div>
@@ -703,7 +634,7 @@ export default function StudentBehaviorPage() {
                                             <tr>
                                                 <td colSpan={7} className="p-12 text-center">
                                                     <div className="flex flex-col items-center justify-center text-muted-foreground">
-                                                        <div className="p-4 bg-muted/50 rounded-full mb-3">
+                                                        <div className="p-4 bg-slate-100 rounded-full mb-3">
                                                             <ClipboardList className="h-8 w-8 text-muted-foreground/50" />
                                                         </div>
                                                         <p className="font-medium text-lg">Belum ada catatan pelanggaran</p>

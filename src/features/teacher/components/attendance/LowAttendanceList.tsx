@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain, @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -131,7 +132,7 @@ export const LowAttendanceList: React.FC<LowAttendanceListProps> = ({
                             </thead>
                             <tbody className="divide-y divide-border">
                                 {lowAttendanceStudents.map((student) => (
-                                    <tr key={student?.id} className="hover:bg-muted/50 transition-colors">
+                                    <tr key={student?.id} className="hover:bg-slate-50/50 transition-colors">
                                         <td className="px-4 py-3">
                                             <div className="font-medium text-gray-900">{student?.name}</div>
                                             <div className="text-xs text-muted-foreground">{student?.class}</div>

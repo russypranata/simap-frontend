@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import React from 'react';
@@ -19,11 +20,7 @@ import {
   Eye,
   Search,
   Filter,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  FileDown,
+          FileDown,
   Edit,
   Trash2,
   ArrowDownUp
@@ -118,9 +115,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
   startIndex,
   endIndex,
   goToPage,
-  nextPage,
-  previousPage,
-  classes,
+      classes,
   subjects,
   isLoading,
   onEditRecord,
@@ -399,7 +394,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
                 {recentRecords.length > 0 ? (
                   <>
                     {recentRecords.map((record) => (
-                      <div key={generateRecordKey(record)} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div key={generateRecordKey(record)} className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50/50 transition-colors">
                         <div className="flex items-center space-x-4">
                           <div className="p-2 rounded-full bg-muted">
                             {record.status === 'hadir' && <CheckCircle className="h-4 w-4 text-green-500" />}

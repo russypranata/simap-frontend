@@ -1,6 +1,8 @@
+ 
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -21,14 +23,11 @@ import {
 import { useRole } from '@/app/context/RoleContext';
 import {
     School,
-    LogIn,
     User,
     Lock,
     Menu,
     X,
-    Zap,
     ArrowRight,
-    Play,
     GraduationCap,
     BookOpen,
     Shield,
@@ -326,9 +325,11 @@ const HeroSection = ({ onLoginClick }: { onLoginClick: () => void }) => (
 
                 <div className="hidden lg:block relative">
                     <div className="relative rounded-3xl overflow-hidden shadow-2xl border-8 border-white bg-slate-100 max-w-[92%] mx-auto">
-                        <img
+                        <Image
                             src="/assets/illustrations/education-illustration.webp"
                             alt="Dashboard Preview"
+                            width={800}
+                            height={600}
                             className="w-full h-auto object-cover transform transition-transform hover:scale-105 duration-700"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent pointer-events-none"></div>
@@ -668,7 +669,7 @@ export const WelcomeScreen: React.FC = () => {
                                 <Label>Peran Pengguna</Label>
                                 <Select
                                     value={loginData.role}
-                                    onValueChange={(val: any) =>
+                                    onValueChange={(val: 'guru' | 'siswa' | 'admin' | 'orang_tua') =>
                                         setLoginData((prev) => ({
                                             ...prev,
                                             role: val,
@@ -764,15 +765,13 @@ export const WelcomeScreen: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                            {['guru', 'siswa', 'admin', 'orang_tua'].map(
+                            {(['guru', 'siswa', 'admin', 'orang_tua'] as const).map(
                                 (r) => (
                                     <Button
                                         key={r}
                                         variant="outline"
                                         size="sm"
-                                        onClick={() =>
-                                            handleQuickLogin(r as any)
-                                        }
+                                        onClick={() => handleQuickLogin(r)}
                                         className="capitalize"
                                     >
                                         {r.replace('_', ' ')}

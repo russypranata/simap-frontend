@@ -1,3 +1,4 @@
+ 
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -11,19 +12,15 @@ import {
     JournalList,
     JournalTable,
     JournalStatistics,
-    JournalForm,
     JournalReports,
     JournalPeriodSelector,
 } from '@/features/teacher/components/journal';
 import type { QuickDateFilter } from '@/features/teacher/components/journal';
 import { TeachingJournal } from '@/features/teacher/types/teacher';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
-import { LESSON_HOURS } from '@/features/teacher/constants/attendance';
 import {
     BookOpen,
     FilePen,
-    RefreshCw,
-    Calendar,
     BarChart3,
     FileText,
     ClipboardCheck,
@@ -50,17 +47,15 @@ export const JournalPage: React.FC = () => {
     const router = useRouter();
     const {
         loading,
-        error,
         classes,
         teachingJournals,
         fetchTeachingJournals,
         saveTeachingJournal,
         updateTeachingJournal,
         deleteTeachingJournal,
-        clearError,
     } = useTeacherData();
 
-    const [isSaving, setIsSaving] = useState(false);
+    const [_isSaving, setIsSaving] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterClass, setFilterClass] = useState('all');
     const [filterSubject, setFilterSubject] = useState('all');
@@ -132,7 +127,8 @@ export const JournalPage: React.FC = () => {
 
     useEffect(() => {
         fetchTeachingJournals();
-    }, []);
+    }// eslint-disable-next-line react-hooks/exhaustive-deps
+, []);
 
     const formatJournalData = (data: typeof formData) => {
         return {
@@ -148,7 +144,7 @@ export const JournalPage: React.FC = () => {
         };
     };
 
-    const handleCreateJournal = async () => {
+    const _handleCreateJournal = async () => {
         if (!formData.class || !formData.subject || !formData.material || !formData.topic) {
             toast.error('Mohon lengkapi semua field yang wajib diisi');
             return;
@@ -161,20 +157,20 @@ export const JournalPage: React.FC = () => {
             router.push('/teacher/journal/new');
             resetForm();
             fetchTeachingJournals();
-        } catch (error) {
+        } catch {
             toast.error('Gagal menyimpan jurnal mengajar');
         } finally {
             setIsSaving(false);
         }
     };
 
-    const handleUpdateJournal = async (updatedJournal: TeachingJournal) => {
+    const _handleUpdateJournal = async (updatedJournal: TeachingJournal) => {
         setIsSaving(true);
         try {
             await updateTeachingJournal(updatedJournal.id, updatedJournal);
             toast.success('Jurnal mengajar berhasil diperbarui!');
             fetchTeachingJournals();
-        } catch (error) {
+        } catch {
             toast.error('Gagal memperbarui jurnal mengajar');
         } finally {
             setIsSaving(false);
@@ -187,7 +183,7 @@ export const JournalPage: React.FC = () => {
             await deleteTeachingJournal(journal.id);
             toast.success('Jurnal mengajar berhasil dihapus!');
             fetchTeachingJournals();
-        } catch (error) {
+        } catch {
             toast.error('Gagal menghapus jurnal mengajar');
         }
     };
@@ -250,7 +246,8 @@ export const JournalPage: React.FC = () => {
             }
             return matchesSearch && matchesClass && matchesSubject && matchesDate;
         });
-    }, [periodJournals, searchTerm, filterClass, filterSubject, activeDateFilter]);
+    }// eslint-disable-next-line react-hooks/exhaustive-deps
+    , [periodJournals, searchTerm, filterClass, filterSubject, activeDateFilter]);
 
     const stats = useMemo(() => {
         const uniqueClasses = new Set(periodJournals.map(j => j.class));

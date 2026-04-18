@@ -1,3 +1,4 @@
+ 
 import React, { useState } from "react";
 import {
     Table,
@@ -120,8 +121,8 @@ export const LearningObjectiveHistoryView: React.FC<LearningObjectiveHistoryView
                 <CardHeader className="border-b pb-4">
                     <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <Target className="h-5 w-5 text-primary" />
+                            <div className="p-2 bg-slate-100 rounded-lg">
+                                <Target className="h-5 w-5 text-slate-600" />
                             </div>
                             <div>
                                 <CardTitle className="text-lg">Daftar Tujuan Pembelajaran</CardTitle>
@@ -188,7 +189,7 @@ export const LearningObjectiveHistoryView: React.FC<LearningObjectiveHistoryView
                         ) : (
                             <div className="overflow-x-auto">
                                 <Table>
-                                    <TableHeader className="bg-muted/50">
+                                    <TableHeader className="bg-slate-50 border-b border-slate-200">
                                         <TableRow>
                                             <TableHead className="w-[80px] p-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Kode</TableHead>
                                             <TableHead className="p-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Isi TP</TableHead>
@@ -200,7 +201,7 @@ export const LearningObjectiveHistoryView: React.FC<LearningObjectiveHistoryView
                                     </TableHeader>
                                     <TableBody>
                                         {filteredTPs.map((tp) => (
-                                            <TableRow key={tp.id} className="border-b hover:bg-muted/30 transition-colors">
+                                            <TableRow key={tp.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                                 <TableCell className="p-4 text-sm font-medium">{tp.code || "-"}</TableCell>
                                                 <TableCell className="p-4 text-sm max-w-[300px]">
                                                     <div className="font-semibold truncate text-foreground" title={tp.title}>{tp.title}</div>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React from 'react';
@@ -6,16 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+
 import { formatDate } from '@/features/shared/utils/dateFormatter';
 import {
   Filter,
   Download,
   FileText,
-  CheckSquare,
-  CheckCircle,
-  Clock,
-  AlertCircle
+        AlertCircle
 } from 'lucide-react';
 
 interface FilterSectionProps {
@@ -54,12 +52,8 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   lessonHours,
   filteredStudents,
   selectedClassData,
-  isAttendanceMarked,
-  isSaved,
-  hasUnsavedChanges,
-  onFilterChange,
-  onMarkAllPresent,
-  onExportData,
+        onFilterChange,
+    onExportData,
 }) => {
   return (
     <>

@@ -11,7 +11,7 @@ export const useStudentSchedule = () => {
         staleTime: 5 * 60 * 1000,
     });
 
-    const schedule = query.data ?? [];
+    const schedule = useMemo(() => query.data ?? [], [query.data]);
 
     const currentDay = useMemo(() => {
         const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];

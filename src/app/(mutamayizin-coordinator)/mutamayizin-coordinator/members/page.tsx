@@ -30,10 +30,8 @@ import {
     ShieldCheck,
     ShieldAlert,
     Mail,
-    Phone,
     Eye,
     Edit,
-    Calendar,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -45,6 +43,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 // Interface
 interface Member {
@@ -424,9 +423,11 @@ export default function MembersPage() {
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-3">
                                                         {member.photo ? (
-                                                            <img
+                                                            <Image
                                                                 src={member.photo}
                                                                 alt={member.name}
+                                                                width={40}
+                                                                height={40}
                                                                 className="h-10 w-10 rounded-full object-cover border border-slate-200"
                                                             />
                                                         ) : (
@@ -565,7 +566,7 @@ export default function MembersPage() {
                                     <ChevronLeft className="h-4 w-4" />
                                 </Button>
                                 {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                                    let pageNumber = i + 1;
+                                    const pageNumber = i + 1;
                                     // Simple logic to show window around current page could be added
                                     return (
                                         <Button

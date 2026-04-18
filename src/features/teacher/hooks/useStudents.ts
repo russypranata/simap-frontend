@@ -3,8 +3,7 @@ import {
     getStudents,
     GetStudentsParams,
     Student,
-    PaginatedResponse,
-} from "../services/behaviorService";
+    } from "../services/behaviorService";
 
 export interface UseStudentsResult {
     students: Student[];

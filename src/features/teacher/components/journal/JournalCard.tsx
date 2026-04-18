@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,11 +12,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { TeachingJournal } from '@/features/teacher/types/teacher';
-import { formatDate, getRelativeTime } from '@/features/shared/utils/dateFormatter';
+import { formatDate } from '@/features/shared/utils/dateFormatter';
 import {
-  BookOpen, Calendar, Users, Clock, Edit, Eye, Trash2, FileText,
-  Target, Award, CheckCircle, AlertCircle, MoreHorizontal, History,
-  Layout, MonitorPlay
+  Calendar, Users, Clock, Edit, Eye, Trash2, Target, MoreHorizontal, Layout, MonitorPlay
 } from 'lucide-react';
 
 interface JournalCardProps {

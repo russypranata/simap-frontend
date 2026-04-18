@@ -1,3 +1,4 @@
+ 
 import React, { useState } from "react";
 import {
     Dialog,
@@ -83,7 +84,7 @@ export const LearningObjectiveHistoryModal: React.FC<LearningObjectiveHistoryMod
             <DialogContent className="w-[95vw] max-w-full max-h-[90vh] overflow-y-auto">
                 <DialogHeader className="border-b pb-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-3 bg-primary/10 rounded-lg">
+                        <div className="p-3 bg-slate-100 rounded-lg">
                             <Target className="h-6 w-6 text-primary" />
                         </div>
                         <div>
@@ -152,7 +153,7 @@ export const LearningObjectiveHistoryModal: React.FC<LearningObjectiveHistoryMod
                     ) : (
                         <div className="overflow-x-auto">
                             <Table>
-                                <TableHeader className="bg-muted/50">
+                                <TableHeader className="bg-slate-50 border-b border-slate-200">
                                     <TableRow>
                                         <TableHead className="w-[80px] p-4 text-sm font-medium">Kode</TableHead>
                                         <TableHead className="p-4 text-sm font-medium">Isi TP</TableHead>
@@ -164,7 +165,7 @@ export const LearningObjectiveHistoryModal: React.FC<LearningObjectiveHistoryMod
                                 </TableHeader>
                                 <TableBody>
                                     {filteredTPs.map((tp) => (
-                                        <TableRow key={tp.id} className="border-b hover:bg-muted/30 transition-colors">
+                                        <TableRow key={tp.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                             <TableCell className="p-4 text-sm font-medium">{tp.code || "-"}</TableCell>
                                             <TableCell className="p-4 text-sm max-w-[300px]">
                                                 <div className="font-medium truncate text-foreground" title={tp.title}>{tp.title}</div>

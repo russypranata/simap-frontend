@@ -1,3 +1,4 @@
+ 
 "use client";
 
 import React, { useState } from "react";
@@ -107,15 +108,15 @@ export default function DailyPicketJournal() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Input Form Section */}
-                <Card className="md:col-span-1 h-fit">
-                    <CardHeader>
-                        <div className="flex items-center space-x-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <Edit className="h-5 w-5 text-primary" />
+                <Card className="md:col-span-1 h-fit border-slate-100 shadow-sm">
+                    <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                                <Edit className="h-5 w-5 text-blue-700" />
                             </div>
                             <div>
-                                <CardTitle className="text-lg font-semibold">Catat Aktivitas</CardTitle>
-                                <CardDescription>
+                                <CardTitle className="text-lg font-semibold text-slate-800">Catat Aktivitas</CardTitle>
+                                <CardDescription className="text-slate-600">
                                     Isi formulir untuk menambahkan catatan piket baru.
                                 </CardDescription>
                             </div>
@@ -216,52 +217,52 @@ export default function DailyPicketJournal() {
                 </Card>
 
                 {/* List Section */}
-                <Card className="md:col-span-2">
-                    <CardHeader>
-                        <div className="flex items-center space-x-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <HistoryIcon className="h-5 w-5 text-primary" />
+                <Card className="md:col-span-2 border-slate-100 shadow-sm overflow-hidden">
+                    <CardHeader className="pb-3 border-b border-slate-50 bg-slate-50/50">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-purple-100 rounded-lg">
+                                <HistoryIcon className="h-5 w-5 text-purple-700" />
                             </div>
                             <div>
-                                <CardTitle className="text-lg font-semibold">Riwayat Jurnal Piket</CardTitle>
-                                <CardDescription>
+                                <CardTitle className="text-lg font-semibold text-slate-800">Riwayat Jurnal Piket</CardTitle>
+                                <CardDescription className="text-slate-600">
                                     Daftar catatan aktivitas piket yang telah dimasukkan.
                                 </CardDescription>
                             </div>
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex items-center space-x-2 mb-6">
+                        <div className="flex items-center gap-2 my-4">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input placeholder="Cari catatan..." className="pl-9" />
                             </div>
                         </div>
 
-                        <div className="rounded-md border overflow-hidden">
+                        <div className="rounded-md border border-slate-100 overflow-hidden">
                             <Table>
-                                <TableHeader className="bg-muted/50">
-                                    <TableRow className="hover:bg-transparent border-b">
-                                        <TableHead className="w-[50px] p-4 text-center font-medium text-sm text-foreground">No</TableHead>
-                                        <TableHead className="w-[120px] p-4 font-medium text-sm text-foreground">Waktu</TableHead>
-                                        <TableHead className="w-[180px] p-4 font-medium text-sm text-foreground">Kegiatan</TableHead>
-                                        <TableHead className="w-[150px] p-4 font-medium text-sm text-foreground">Lokasi</TableHead>
-                                        <TableHead className="p-4 font-medium text-sm text-foreground">Catatan</TableHead>
-                                        <TableHead className="w-[120px] p-4 font-medium text-sm text-foreground text-center">Status</TableHead>
+                                <TableHeader>
+                                    <TableRow className="bg-slate-50 border-b border-slate-200 hover:bg-slate-50">
+                                        <TableHead className="w-[50px] p-4 text-center font-semibold text-xs text-slate-600 uppercase tracking-wider">No</TableHead>
+                                        <TableHead className="w-[120px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Waktu</TableHead>
+                                        <TableHead className="w-[180px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kegiatan</TableHead>
+                                        <TableHead className="w-[150px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Lokasi</TableHead>
+                                        <TableHead className="p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Catatan</TableHead>
+                                        <TableHead className="w-[120px] p-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Status</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {journals.map((journal, index) => (
-                                        <TableRow key={journal.id} className="hover:bg-muted/50 transition-colors border-b">
-                                            <TableCell className="p-4 text-center font-medium text-sm">
+                                        <TableRow key={journal.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                            <TableCell className="p-4 text-center font-medium text-sm text-slate-600">
                                                 {index + 1}
                                             </TableCell>
-                                            <TableCell className="p-4 font-medium whitespace-nowrap text-sm">
+                                            <TableCell className="p-4 font-semibold whitespace-nowrap text-sm text-slate-800">
                                                 {format(journal.date, "dd MMM yyyy", { locale: id })}
                                             </TableCell>
-                                            <TableCell className="p-4 text-sm font-medium">{journal.activity}</TableCell>
-                                            <TableCell className="p-4 text-sm text-muted-foreground">{journal.location}</TableCell>
-                                            <TableCell className="p-4 text-sm text-muted-foreground max-w-[300px] truncate">
+                                            <TableCell className="p-4 text-sm font-semibold text-slate-800">{journal.activity}</TableCell>
+                                            <TableCell className="p-4 text-sm text-slate-500">{journal.location}</TableCell>
+                                            <TableCell className="p-4 text-sm text-slate-500 max-w-[300px] truncate">
                                                 {journal.description}
                                             </TableCell>
                                             <TableCell className="p-4 text-center">
