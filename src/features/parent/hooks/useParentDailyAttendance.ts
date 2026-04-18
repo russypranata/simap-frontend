@@ -71,9 +71,9 @@ export const useParentDailyAttendance = () => {
     }, [canGoNext]);
 
     const attendanceQuery = useQuery({
-        queryKey: ["parent-daily-attendance", effectiveChildId, currentDate.getFullYear(), currentDate.getMonth(), effectiveSemesterId],
-        queryFn: () => getDailyAttendance(effectiveChildId, currentDate.getFullYear(), currentDate.getMonth(), effectiveSemesterId),
-        enabled: !!effectiveChildId && !!effectiveSemesterId,
+        queryKey: ["parent-daily-attendance", effectiveChildId, currentDate.getFullYear(), currentDate.getMonth()],
+        queryFn: () => getDailyAttendance(effectiveChildId, currentDate.getFullYear(), currentDate.getMonth()),
+        enabled: !!effectiveChildId,
         staleTime: 2 * 60 * 1000,
     });
 

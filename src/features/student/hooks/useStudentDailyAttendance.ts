@@ -28,9 +28,9 @@ export const useStudentDailyAttendance = () => {
     }, [selectedSemesterId, academicYears, effectiveYearId]);
 
     const attendanceQuery = useQuery({
-        queryKey: ['student-daily-attendance', currentDate.getFullYear(), currentDate.getMonth(), effectiveSemesterId],
-        queryFn: () => getStudentDailyAttendance(currentDate.getFullYear(), currentDate.getMonth(), effectiveSemesterId),
-        enabled: !!effectiveSemesterId,
+        queryKey: ['student-daily-attendance', currentDate.getFullYear(), currentDate.getMonth()],
+        queryFn: () => getStudentDailyAttendance(currentDate.getFullYear(), currentDate.getMonth()),
+        enabled: true,
         staleTime: 2 * 60 * 1000,
     });
 
@@ -76,7 +76,7 @@ export const useStudentDailyAttendance = () => {
         selectedYearId: effectiveYearId,
         selectedSemesterId: effectiveSemesterId,
         currentDate,
-        isLoading:  academicYearsQuery.isLoading || (!!effectiveSemesterId && attendanceQuery.isLoading),
+        isLoading:  academicYearsQuery.isLoading || attendanceQuery.isLoading,
         isFetching: attendanceQuery.isFetching,
         error,
         setSelectedYearId: (id: string) => { setSelectedYearId(id); setSelectedSemesterId(''); },

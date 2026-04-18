@@ -66,6 +66,13 @@ export const getAcademicYears = async (): Promise<AcademicYearItem[]> => {
         isActive: item.is_active ?? false,
         startDate: item.start_date ?? "",
         endDate: item.end_date ?? "",
-        semesters: [],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        semesters: (item.semesters ?? []).map((s: Record<string, any>) => ({
+            id: String(s.id),
+            name: s.name ?? "",
+            isActive: s.is_active ?? false,
+            startDate: s.start_date ?? "",
+            endDate: s.end_date ?? "",
+        })),
     }));
 };
