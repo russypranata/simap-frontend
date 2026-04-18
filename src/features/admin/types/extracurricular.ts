@@ -48,7 +48,7 @@ export interface ExtracurricularMember {
 export interface TutorOption {
     id: number;
     name: string;
-    extracurricular: string | null;
+    extracurricular: string | { id: number; name: string } | null;
     tutor_profile_id: number | null;
 }
 

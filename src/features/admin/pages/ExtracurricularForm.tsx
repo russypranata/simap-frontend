@@ -238,7 +238,7 @@ export const ExtracurricularForm: React.FC = () => {
                                                         <div className="flex flex-col">
                                                             <span>{t.name}</span>
                                                             {t.extracurricular && (
-                                                                <span className="text-xs text-slate-400">Ekskul: {t.extracurricular}</span>
+                                                                <span className="text-xs text-slate-400">Ekskul: {typeof t.extracurricular === 'object' ? t.extracurricular.name : t.extracurricular}</span>
                                                             )}
                                                         </div>
                                                     </SelectItem>
@@ -335,7 +335,7 @@ export const ExtracurricularForm: React.FC = () => {
                                                         <span>{t.name}</span>
                                                         {t.extracurricular && (
                                                             <span className="text-xs text-slate-400">
-                                                                Saat ini: {t.extracurricular}
+                                                                Saat ini: {typeof t.extracurricular === 'object' ? t.extracurricular.name : t.extracurricular}
                                                             </span>
                                                         )}
                                                     </div>

@@ -33,7 +33,7 @@ export interface ParentProfile {
 export interface TutorProfile {
     id: number;
     nip?: string | null;
-    extracurricular?: string | null;
+    extracurricular?: string | { id: number; name: string } | null;
     join_date?: string | null;
 }
 

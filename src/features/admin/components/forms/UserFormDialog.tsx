@@ -220,7 +220,11 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
                 religion:         p.student_profile?.religion ?? '',
                 occupation: p.parent_profile?.occupation ?? '',
                 nip:             p.tutor_profile?.nip ?? '',
-                extracurricular: p.tutor_profile?.extracurricular ?? '',
+                extracurricular: p.tutor_profile?.extracurricular
+                    ? (typeof p.tutor_profile.extracurricular === 'object'
+                        ? (p.tutor_profile.extracurricular as { name?: string }).name ?? ''
+                        : p.tutor_profile.extracurricular)
+                    : '',
                 join_date:       p.tutor_profile?.join_date ?? '',
             });
         } else if (open && !editingUser) {

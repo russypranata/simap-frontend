@@ -106,7 +106,9 @@ export const getProfile = async (): Promise<AdvisorProfileData> => {
         address: (d.address as string) ?? "",
         joinDate: (d.join_date ?? d.joinDate ?? "") as string,
         nip: (d.nip as string | undefined),
-        extracurricular: (d.extracurricular as string) ?? "",
+        extracurricular: (typeof d.extracurricular === 'object' && d.extracurricular !== null
+            ? (d.extracurricular as { name?: string }).name
+            : d.extracurricular as string) ?? "",
         totalMembers: (d.total_members ?? d.totalMembers ?? 0) as number,
         activeMembers: (d.active_members ?? d.activeMembers ?? 0) as number,
         totalMeetings: (d.total_meetings ?? d.totalMeetings ?? 0) as number,
@@ -139,7 +141,9 @@ export const updateProfile = async (data: UpdateAdvisorProfileRequest): Promise<
         address: (d.address as string) ?? "",
         joinDate: (d.join_date ?? d.joinDate ?? "") as string,
         nip: (d.nip as string | undefined),
-        extracurricular: (d.extracurricular as string) ?? "",
+        extracurricular: (typeof d.extracurricular === 'object' && d.extracurricular !== null
+            ? (d.extracurricular as { name?: string }).name
+            : d.extracurricular as string) ?? "",
         totalMembers: (d.total_members ?? d.totalMembers ?? 0) as number,
         activeMembers: (d.active_members ?? d.activeMembers ?? 0) as number,
         totalMeetings: (d.total_meetings ?? d.totalMeetings ?? 0) as number,

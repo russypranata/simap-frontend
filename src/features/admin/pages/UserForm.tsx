@@ -186,7 +186,11 @@ export const UserForm: React.FC = () => {
                     religion:         user.student_profile?.religion ?? '',
                     occupation:       user.parent_profile?.occupation ?? '',
                     nip:              user.tutor_profile?.nip ?? '',
-                    extracurricular:  user.tutor_profile?.extracurricular ?? '',
+                    extracurricular:  user.tutor_profile?.extracurricular
+                        ? (typeof user.tutor_profile.extracurricular === 'object'
+                            ? (user.tutor_profile.extracurricular as { name?: string }).name ?? ''
+                            : user.tutor_profile.extracurricular)
+                        : '',
                     join_date:        user.tutor_profile?.join_date ?? '',
                 });
                 startTransition(() => {
