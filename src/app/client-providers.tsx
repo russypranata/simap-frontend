@@ -11,10 +11,10 @@ import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            staleTime: 0,                    // selalu refetch saat mount — data selalu fresh
-            gcTime: 5 * 60 * 1000,          // cache disimpan 5 menit setelah tidak dipakai
-            retry: 1,                        // retry 1x kalau gagal
-            refetchOnWindowFocus: false,     // tidak refetch saat tab di-focus ulang
+            staleTime: 2 * 60 * 1000,       // 2 menit — data dianggap fresh, tidak refetch saat mount
+            gcTime: 10 * 60 * 1000,         // 10 menit di cache setelah tidak dipakai
+            retry: 1,
+            refetchOnWindowFocus: false,
         },
     },
 });

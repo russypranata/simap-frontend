@@ -1,13 +1,53 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PicketStudentAttendance from "@/features/teacher/pages/PicketStudentAttendance";
 import PicketPrayerAttendance from "@/features/teacher/pages/PicketPrayerAttendance";
 import { Users, Moon, ClipboardCheck } from "lucide-react";
 import { PageHeader } from "@/features/shared/components";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function PicketDashboard() {
+    const [isMounted, setIsMounted] = useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return (
+            <div className="space-y-6 animate-in fade-in duration-500">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="space-y-2">
+                        <Skeleton className="h-10 w-56" />
+                        <Skeleton className="h-4 w-80" />
+                    </div>
+                </div>
+                <div className="flex gap-1 p-1 bg-muted/50 rounded-full w-fit">
+                    <Skeleton className="h-8 w-40 rounded-full" />
+                    <Skeleton className="h-8 w-36 rounded-full" />
+                </div>
+                <Card className="animate-pulse">
+                    <CardContent className="p-4 space-y-3">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="flex items-center gap-4 p-3 rounded-lg border border-muted">
+                                <Skeleton className="h-9 w-9 rounded-full flex-shrink-0" />
+                                <div className="flex-1 space-y-1.5">
+                                    <Skeleton className="h-4 w-36" />
+                                    <Skeleton className="h-3 w-24" />
+                                </div>
+                                <Skeleton className="h-8 w-24 rounded-lg" />
+                                <Skeleton className="h-8 w-8 rounded-lg" />
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             <PageHeader
@@ -42,8 +82,6 @@ export default function PicketDashboard() {
                 <TabsContent value="prayer" className="space-y-4">
                     <PicketPrayerAttendance />
                 </TabsContent>
-
-
             </Tabs>
         </div>
     );

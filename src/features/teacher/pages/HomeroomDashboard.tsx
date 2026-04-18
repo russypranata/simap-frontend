@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HomeroomOverview } from "@/features/teacher/components/homeroom/HomeroomOverview";
 import { HomeroomStudents } from "@/features/teacher/components/homeroom/HomeroomStudents";
@@ -9,8 +9,79 @@ import { EReport } from "@/features/teacher/components/homeroom/HomeroomEReport"
 import { HomeroomGrades } from "@/features/teacher/components/homeroom/HomeroomGrades";
 import { GraduationCap, Users, ClipboardCheck, Award, Calendar, FileText } from "lucide-react";
 import { PageHeader } from "@/features/shared/components";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const HomeroomDashboard = () => {
+    const [isMounted, setIsMounted] = useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return (
+            <div className="space-y-6 animate-in fade-in duration-500">
+                {/* Page header skeleton */}
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="space-y-2">
+                        <Skeleton className="h-10 w-64" />
+                        <Skeleton className="h-4 w-96" />
+                    </div>
+                </div>
+                {/* Tabs skeleton */}
+                <div className="flex gap-0.5 p-1 bg-muted/50 rounded-full w-fit flex-wrap">
+                    {[72, 80, 68, 56, 68, 72].map((w, i) => (
+                        <Skeleton key={i} className="h-8 rounded-full" style={{ width: w }} />
+                    ))}
+                </div>
+                {/* Overview tab skeleton - 4 stat cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="rounded-xl bg-white shadow-sm border border-slate-100 animate-pulse">
+                            <div className="px-5 py-4 flex items-center gap-4">
+                                <Skeleton className="w-11 h-11 rounded-xl flex-shrink-0" />
+                                <div className="space-y-2 flex-1">
+                                    <Skeleton className="h-3 w-20" />
+                                    <Skeleton className="h-7 w-12" />
+                                    <Skeleton className="h-3 w-24" />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                {/* Content cards skeleton */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {Array.from({ length: 2 }).map((_, i) => (
+                        <Card key={i} className="animate-pulse">
+                            <CardContent className="p-5 space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <Skeleton className="h-9 w-9 rounded-lg" />
+                                    <div className="space-y-1.5">
+                                        <Skeleton className="h-5 w-36" />
+                                        <Skeleton className="h-3 w-48" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    {Array.from({ length: 4 }).map((_, j) => (
+                                        <div key={j} className="flex items-center gap-3 p-3 rounded-lg border border-muted">
+                                            <Skeleton className="h-8 w-8 rounded-full flex-shrink-0" />
+                                            <div className="flex-1 space-y-1">
+                                                <Skeleton className="h-4 w-32" />
+                                                <Skeleton className="h-3 w-20" />
+                                            </div>
+                                            <Skeleton className="h-6 w-16 rounded-full" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             <PageHeader

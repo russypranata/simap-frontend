@@ -26,6 +26,7 @@ import {
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard } from '@/features/shared/components';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Mock subjects for filtering
 const SUBJECTS = [
@@ -129,10 +130,49 @@ export const SchedulePage: React.FC = () => {
     return (
       <div className="space-y-6 animate-in fade-in duration-500">
         <SkeletonPageHeader withAction />
+        {/* 4 stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
         </div>
-        <Card><CardContent className="p-6"><div className="h-64 bg-slate-100 rounded animate-pulse" /></CardContent></Card>
+        {/* Filter section skeleton */}
+        <Card className="animate-pulse">
+          <CardContent className="p-4">
+            <div className="flex flex-wrap gap-3">
+              <Skeleton className="h-10 w-56 rounded-lg" />
+              <Skeleton className="h-10 w-36 rounded-lg" />
+              <Skeleton className="h-10 w-36 rounded-lg" />
+              <div className="flex gap-2 ml-auto">
+                <Skeleton className="h-10 w-24 rounded-lg" />
+                <Skeleton className="h-10 w-24 rounded-lg" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        {/* Tabs skeleton */}
+        <div className="flex gap-1 p-1.5 bg-muted/50 rounded-full w-fit">
+          {[100, 96, 80].map((w, i) => (
+            <Skeleton key={i} className="h-9 rounded-full" style={{ width: w }} />
+          ))}
+        </div>
+        {/* Weekly grid skeleton */}
+        <Card className="animate-pulse">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-6 gap-2 mb-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 rounded-lg" />
+              ))}
+            </div>
+            <div className="space-y-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="grid grid-cols-6 gap-2">
+                  {Array.from({ length: 6 }).map((_, j) => (
+                    <Skeleton key={j} className="h-16 rounded-lg" />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

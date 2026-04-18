@@ -45,6 +45,7 @@ import {
 } from 'recharts';
 import { toast } from 'sonner';
 import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard } from '@/features/shared/components';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const Grades: React.FC = () => {
   const {
@@ -378,28 +379,51 @@ export const Grades: React.FC = () => {
     return (
       <div className="space-y-6 animate-in fade-in duration-500">
         <SkeletonPageHeader withAction />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
+        {/* Tabs skeleton */}
+        <div className="flex gap-1 p-1 bg-muted/50 rounded-full w-fit">
+          {[4].map((_, i) => (
+            <Skeleton key={i} className="h-8 rounded-full" style={{ width: [80, 88, 72, 120][i] }} />
+          ))}
         </div>
+        {/* Filter card skeleton */}
         <Card className="animate-pulse">
-          <CardHeader>
-            <div className="h-5 bg-muted rounded w-1/4"></div>
-            <div className="h-4 bg-muted rounded w-1/3"></div>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-9 w-9 rounded-lg" />
+              <div className="space-y-1.5">
+                <Skeleton className="h-5 w-28" />
+                <Skeleton className="h-4 w-56" />
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="h-10 bg-muted rounded"></div>
-              <div className="h-10 bg-muted rounded"></div>
-              <div className="h-10 bg-muted rounded"></div>
-              <div className="h-10 bg-muted rounded"></div>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 rounded-lg" />
+              ))}
             </div>
           </CardContent>
         </Card>
+        {/* 5 stat cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+          {Array.from({ length: 5 }).map((_, i) => <SkeletonStatCard key={i} />)}
+        </div>
+        {/* Grade list skeleton */}
         <Card className="animate-pulse">
           <CardContent className="p-4">
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-16 bg-muted rounded"></div>
+                <div key={i} className="flex items-center gap-4 p-3 rounded-lg border border-muted">
+                  <Skeleton className="h-9 w-9 rounded-full flex-shrink-0" />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                  <Skeleton className="h-8 w-16 rounded-lg" />
+                  <Skeleton className="h-8 w-16 rounded-lg" />
+                  <Skeleton className="h-8 w-16 rounded-lg" />
+                  <Skeleton className="h-6 w-10 rounded-full" />
+                </div>
               ))}
             </div>
           </CardContent>

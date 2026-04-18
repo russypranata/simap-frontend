@@ -22,7 +22,8 @@ import { getTeacherDashboard } from '../services/teacherDashboardService';
 import { getTeacherClasses, getClassStudents } from '../services/teacherClassService';
 import { getTeacherSchedule } from '../services/teacherScheduleService';
 import { getTeacherAttendance, saveTeacherAttendance } from '../services/teacherAttendanceService';
-import { getTeacherGrades, saveTeacherGrades } from '../services/teacherGradeService';
+import { getTeacherGrades, saveTeacherGrades, getTeacherClassSubjects } from '../services/teacherGradeService';
+import { getAuthHeaders } from '../services/teacherApiClient';
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
@@ -249,8 +250,8 @@ export const useTeacherData = () => {
           teacher:     '',
           lessonHour:  '',
           notes:       a.notes ?? undefined,
-          academicYear: '',
-          semester:    'Ganjil' as const,
+          academicYear: a.academicYear,
+          semester:    (a.semester === 'Genap' ? 'Genap' : 'Ganjil') as 'Ganjil' | 'Genap',
         })));
       }
       setError(null);
@@ -378,7 +379,19 @@ export const useTeacherData = () => {
         const gradesData = await teacherApi.getGrades(classId, subject, semester);
         setGrades(gradesData);
       } else {
-        const data = await getTeacherGrades({ class_id: classId, subject_id: subject });
+        // subject param is a subject name — resolve to subject_id via class-subjects lookup
+        let subjectId: string | undefined;
+        if (subject && classId) {
+          try {
+            const classSubjects = await getTeacherClassSubjects();
+            const match = classSubjects.find(
+              cs => cs.classId === classId && cs.subject === subject
+            );
+            subjectId = match?.subjectId;
+          } catch { /* ignore, fetch without subject filter */ }
+        }
+
+        const data = await getTeacherGrades({ class_id: classId, subject_id: subjectId });
         setGrades(data.map(g => ({
           id:          g.id,
           studentId:   g.studentId,
@@ -523,6 +536,48 @@ export const useTeacherData = () => {
     }
   };
 
+  // Semesters
+  const [semesters, setSemesters] = useState<Array<{ id: string; name: string; startDate: string; endDate: string; isActive: boolean }>>([]);
+  const [activeSemester, setActiveSemester] = useState<{ id: string; name: string; startDate: string; endDate: string; isActive: boolean } | null>(null);
+
+  const fetchSemesters = async () => {
+    if (role !== 'guru') return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/teacher/semesters`, {
+        headers: getAuthHeaders(),
+      });
+      if (!response.ok) throw new Error('Failed to fetch semesters');
+      const result = await response.json();
+      setSemesters(result.data ?? []);
+      setError(null);
+    } catch (err) {
+      handleError(err, 'Gagal memuat data semester');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchActiveSemester = async () => {
+    if (role !== 'guru') return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/teacher/active-semester`, {
+        headers: getAuthHeaders(),
+      });
+      if (!response.ok) throw new Error('Failed to fetch active semester');
+      const result = await response.json();
+      setActiveSemester(result.data);
+      setError(null);
+    } catch (err) {
+      handleError(err, 'Gagal memuat semester aktif');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Initialize data on component mount
   useEffect(() => {
     if (role === 'guru') {
@@ -533,6 +588,8 @@ export const useTeacherData = () => {
       fetchSchedule();
       fetchDocuments();
       fetchEReports();
+      fetchSemesters();
+      fetchActiveSemester();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role]);
@@ -551,6 +608,8 @@ export const useTeacherData = () => {
     schedule,
     documents,
     ereports,
+    semesters,
+    activeSemester,
     
     // Actions
     clearError,
@@ -571,5 +630,7 @@ export const useTeacherData = () => {
     fetchDocuments,
     uploadDocument,
     fetchEReports,
+    fetchSemesters,
+    fetchActiveSemester,
   };
 };

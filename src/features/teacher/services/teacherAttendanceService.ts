@@ -10,6 +10,8 @@ export interface TeacherAttendanceRecord {
     date: string;
     status: 'hadir' | 'sakit' | 'izin' | 'tanpa-keterangan';
     notes: string | null;
+    academicYear: string;
+    semester: string;
 }
 
 export interface AttendanceSummaryItem {
@@ -48,15 +50,17 @@ export const getTeacherAttendance = async (params?: {
     const result = await response.json();
 
     return (result.data ?? []).map((a: Record<string, unknown>) => ({
-        id:          String(a.id),
-        studentId:   String(a.studentId   ?? a.student_id   ?? ''),
-        studentName: String(a.studentName ?? a.student_name ?? ''),
-        class:       String(a.class       ?? ''),
-        classId:     String(a.classId     ?? a.class_id     ?? ''),
-        subject:     String(a.subject     ?? ''),
-        date:        String(a.date        ?? ''),
-        status:      a.status as TeacherAttendanceRecord['status'],
-        notes:       (a.notes as string) ?? null,
+        id:           String(a.id),
+        studentId:    String(a.studentId   ?? a.student_id   ?? ''),
+        studentName:  String(a.studentName ?? a.student_name ?? ''),
+        class:        String(a.class       ?? ''),
+        classId:      String(a.classId     ?? a.class_id     ?? ''),
+        subject:      String(a.subject     ?? ''),
+        date:         String(a.date        ?? ''),
+        status:       a.status as TeacherAttendanceRecord['status'],
+        notes:        (a.notes as string) ?? null,
+        academicYear: String(a.academicYear ?? a.academic_year ?? '2025/2026'),
+        semester:     String(a.semester    ?? 'Ganjil'),
     }));
 };
 

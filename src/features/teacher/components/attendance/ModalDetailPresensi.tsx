@@ -2,15 +2,21 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { formatDate } from '@/features/shared/utils/dateFormatter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatDate } from '@/features/shared/utils/dateFormatter';
 import { AttendanceRecord } from '../../types/teacher';
 import { formatLessonHourWithTime } from '../../utils/lessonHourFormatter';
-import { XCircle, Edit, Save } from 'lucide-react';
+import { ClipboardCheck, Pencil, Save, X } from 'lucide-react';
 
 interface ModalDetailPresensiProps {
   isOpen: boolean;
@@ -20,6 +26,13 @@ interface ModalDetailPresensiProps {
   onSave?: (record: AttendanceRecord) => Promise<boolean>;
   onEdit?: () => void;
 }
+
+const STATUS_BADGE: Record<string, { label: string; className: string }> = {
+  hadir:              { label: 'Hadir',  className: 'bg-green-100 text-green-700 border-green-200' },
+  sakit:              { label: 'Sakit',  className: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+  izin:               { label: 'Izin',   className: 'bg-blue-100 text-blue-700 border-blue-200' },
+  'tanpa-keterangan': { label: 'Alpa',   className: 'bg-red-100 text-red-700 border-red-200' },
+};
 
 export const ModalDetailPresensi: React.FC<ModalDetailPresensiProps> = ({
   isOpen,
@@ -42,79 +55,67 @@ export const ModalDetailPresensi: React.FC<ModalDetailPresensiProps> = ({
 
   const handleSave = async () => {
     if (!record || !onSave) return;
-
     setIsSaving(true);
-    const updatedRecord = { ...record, status: status as any, notes };
-    const success = await onSave(updatedRecord);
+    const success = await onSave({ ...record, status: status as any, notes });
     setIsSaving(false);
-
-    if (success) {
-      onClose();
-    }
+    if (success) onClose();
   };
-  if (!isOpen || !record) return null;
+
+  const badge = STATUS_BADGE[record?.status ?? ''] ?? { label: record?.status ?? '-', className: '' };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <Card className="w-full max-w-md m-4">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Detail Presensi {isEditing ? '(Edit Mode)' : ''}</CardTitle>
-            <div className="flex items-center gap-2">
-              {!isEditing && onEdit && (
-                <Button variant="ghost" size="sm" onClick={onEdit} title="Edit">
-                  <Edit className="h-4 w-4" />
+    <Dialog open={isOpen && !!record} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="sm:max-w-[460px] rounded-2xl">
+        {/* Header — same pattern as parent GradeDetailDialog */}
+        <DialogHeader className="flex-row items-center gap-4 flex-shrink-0 pb-2">
+          <div className="p-2.5 bg-blue-100 rounded-xl flex-shrink-0">
+            <ClipboardCheck className="h-5 w-5 text-blue-700" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <DialogTitle className="text-lg font-semibold text-slate-900 leading-tight">
+                {isEditing ? 'Edit Presensi' : 'Detail Presensi'}
+              </DialogTitle>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {!isEditing && onEdit && (
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEdit}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
+                  <X className="h-4 w-4" />
                 </Button>
-              )}
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                <XCircle className="h-4 w-4" />
-              </Button>
+              </div>
             </div>
+            <DialogDescription className="text-slate-500 text-sm mt-0.5">
+              {record?.studentName} · {record?.class}
+            </DialogDescription>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        </DialogHeader>
+
+        <div className="space-y-4 pt-1">
           {/* Periode Akademik */}
-          <div className="space-y-2 pb-3 border-b">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Periode Akademik</h4>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Tahun Ajaran:</span>
-              <span className="text-sm font-medium">{record.academicYear}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Semester:</span>
-              <span className="text-sm font-medium">{record.semester}</span>
-            </div>
-          </div>
+          <Section title="Periode Akademik">
+            <Row label="Tahun Ajaran" value={record?.academicYear ?? '-'} />
+            <Row label="Semester" value={record?.semester ?? '-'} />
+          </Section>
 
           {/* Informasi Kelas */}
-          <div className="space-y-2 pb-3 border-b">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Informasi Kelas</h4>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Kelas:</span>
-              <span className="text-sm font-medium">{record.class}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Mata Pelajaran:</span>
-              <span className="text-sm font-medium">{record.subject}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Jam Pelajaran:</span>
-              <span className="text-sm font-medium">{formatLessonHourWithTime(record.lessonHour)}</span>
-            </div>
-          </div>
+          <Section title="Informasi Kelas">
+            <Row label="Kelas" value={record?.class ?? '-'} />
+            <Row label="Mata Pelajaran" value={record?.subject ?? '-'} />
+            {record?.lessonHour && (
+              <Row label="Jam Pelajaran" value={formatLessonHourWithTime(record.lessonHour)} />
+            )}
+          </Section>
 
-          {/* Informasi Siswa */}
-          <div className="space-y-2 pb-3 border-b">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Informasi Siswa</h4>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Nama Siswa:</span>
-              <span className="text-sm font-medium">{record.studentName}</span>
-            </div>
-            <div className="flex justify-between items-center">
+          {/* Status */}
+          <Section title="Status Kehadiran">
+            <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Status:</span>
               {isEditing ? (
                 <select
-                  className="flex h-9 w-full max-w-[200px] items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                 >
@@ -124,65 +125,57 @@ export const ModalDetailPresensi: React.FC<ModalDetailPresensiProps> = ({
                   <option value="tanpa-keterangan">Alpa</option>
                 </select>
               ) : (
-                <Badge variant={
-                  record.status === 'hadir' ? 'default' :
-                    record.status === 'sakit' ? 'secondary' :
-                      record.status === 'izin' ? 'outline' : 'destructive'
-                }>
-                  {record.status === 'tanpa-keterangan' ? 'Alpa' : record.status}
-                </Badge>
+                <Badge variant="outline" className={badge.className}>{badge.label}</Badge>
               )}
             </div>
-          </div>
+            <Row label="Tanggal" value={record?.date ? formatDate(record.date, 'dd MMMM yyyy') : '-'} />
+            {record?.teacher && <Row label="Guru" value={record.teacher} />}
+          </Section>
 
-          {/* Detail Presensi */}
-          <div className="space-y-2">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Detail Presensi</h4>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Tanggal:</span>
-              <span className="text-sm font-medium">{formatDate(record.date, 'dd MMMM yyyy')}</span>
+          {/* Catatan */}
+          {isEditing ? (
+            <div className="space-y-1.5">
+              <Label htmlFor="notes" className="text-sm font-medium">Catatan</Label>
+              <Input
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Tambahkan catatan..."
+              />
             </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Guru:</span>
-              <span className="text-sm font-medium">{record.teacher}</span>
-            </div>
-            {isEditing ? (
-              <div className="space-y-2">
-                <Label htmlFor="notes" className="text-sm text-muted-foreground">Catatan:</Label>
-                <Input
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Tambahkan catatan..."
-                />
-              </div>
-            ) : (
-              record.notes && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Catatan:</span>
-                  <span className="text-sm font-medium">{record.notes}</span>
-                </div>
-              )
-            )}
-          </div>
+          ) : record?.notes ? (
+            <Section title="Catatan">
+              <p className="text-sm text-slate-700">{record.notes}</p>
+            </Section>
+          ) : null}
 
+          {/* Actions */}
           {isEditing && (
-            <div className="flex justify-end gap-2 pt-4 border-t">
-              <Button variant="outline" onClick={onClose} disabled={isSaving}>
-                Batal
-              </Button>
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <Button variant="outline" onClick={onClose} disabled={isSaving}>Batal</Button>
               <Button onClick={handleSave} disabled={isSaving} className="gap-2">
-                {isSaving ? 'Menyimpan...' : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    Simpan Perubahan
-                  </>
-                )}
+                {isSaving ? 'Menyimpan...' : <><Save className="h-4 w-4" />Simpan</>}
               </Button>
             </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
+
+// ─── Helper sub-components ────────────────────────────────────────────────────
+
+const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+  <div className="space-y-2 pb-3 border-b last:border-0 last:pb-0">
+    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{title}</h4>
+    {children}
+  </div>
+);
+
+const Row: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <div className="flex justify-between items-center">
+    <span className="text-sm text-muted-foreground">{label}:</span>
+    <span className="text-sm font-medium text-slate-900">{value}</span>
+  </div>
+);

@@ -10,6 +10,7 @@ import { useTeacherData } from '../hooks/useTeacherData';
 import { useAttendanceData } from '../hooks/useAttendanceData';
 import { useAttendanceStatistics } from '../hooks/useAttendanceStatistics';
 import { useAttendanceHistory } from '../hooks/useAttendanceHistory';
+import { useAttendanceStats } from '../hooks/useAttendanceStats';
 
 import {
   AttendanceTable,
@@ -91,25 +92,23 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
   const [statsSelectedClass, setStatsSelectedClass] = useState(''); // Default to empty (Global)
   const [statsSelectedSubject, setStatsSelectedSubject] = useState(''); // Default to empty (All Subjects)
   const [statsAcademicYear, setStatsAcademicYear] = useState<string>(ACADEMIC_YEARS[0]);
-  const [statsSemester, setStatsSemester] = useState<string>(SEMESTERS[0]);
+  const [statsSemester, setStatsSemester] = useState<string>('Genap'); // April 2026 = Semester Genap
 
-  // Calculate available subjects based on selected class for Statistics
+  // Hook baru: fetch semua data attendance untuk statistik
+  const {
+    allRecords: statsAllRecords,
+    classes: statsClasses,
+    isLoading: statsLoading,
+    isFetching: statsFetching,
+    getSubjectsForClass,
+    refresh: refreshStats,
+  } = useAttendanceStats();
+
+  // Subjects available for selected class in stats
   const statsAvailableSubjects = React.useMemo(() => {
-    // If no class selected, return all teacher's subjects
-    if (!statsSelectedClass) {
-      return profile?.subjects || [];
-    }
-
-    // Find class name
-    const className = classes.find(c => c.id === statsSelectedClass)?.name;
-    if (!className) return [];
-
-    // Filter schedule for this class to find subjects taught
-    const classSchedules = schedule.filter(s => s.class === className);
-    const uniqueSubjects = Array.from(new Set(classSchedules.map(s => s.subject)));
-
-    return uniqueSubjects;
-  }, [statsSelectedClass, classes, schedule, profile]);
+    const subjects = getSubjectsForClass(statsSelectedClass).map(s => s.name);
+    return Array.from(new Set(subjects)); // deduplicate
+  }, [statsSelectedClass, getSubjectsForClass]);
 
   // Reset selected subject when class changes
   useEffect(() => {
@@ -118,10 +117,10 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
 
   // Auto-select class if only one is available (Statistics Tab)
   useEffect(() => {
-    if (classes.length === 1 && !statsSelectedClass) {
-      setStatsSelectedClass(classes[0].id);
+    if (statsClasses.length === 1 && !statsSelectedClass) {
+      setStatsSelectedClass(statsClasses[0].id);
     }
-  }, [classes, statsSelectedClass]);
+  }, [statsClasses, statsSelectedClass]);
 
   // Auto-select subject if only one is available (Statistics Tab)
   useEffect(() => {
@@ -130,49 +129,67 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
     }
   }, [statsAvailableSubjects, statsSelectedSubject]);
 
-  // Always use today for statistics trend
-  const todayStr = new Date().toISOString().split('T')[0];
-
-  // Fetch data specifically for Statistics tab
-  const {
-    students: statsStudents,
-    attendanceRecords: rawStatsAttendanceRecords,
-    refresh: refreshStats,
-  } = useAttendanceData(statsSelectedClass, todayStr);
-
-  // Filter records by subject if selected
-  // Filter records by subject and academic period
   const statsAttendanceRecords = React.useMemo(() => {
-    let records = rawStatsAttendanceRecords;
-
-    // Filter by Subject
-    if (statsSelectedSubject) {
-      records = records.filter(r => r.subject === statsSelectedSubject);
-    }
-
-    // Filter by Academic Year & Semester
-    // Now using explicit fields from the record as requested
-    records = records.filter(r => {
-      const matchYear = r.academicYear === statsAcademicYear;
-      const matchSemester = statsSemester ? r.semester === statsSemester : true;
-      return matchYear && matchSemester;
+    return statsAllRecords.filter(r => {
+      if (statsAcademicYear && r.academicYear !== statsAcademicYear) return false;
+      if (statsSemester && r.semester !== statsSemester) return false;
+      if (statsSelectedClass && r.classId !== statsSelectedClass) return false;
+      if (statsSelectedSubject && r.subject !== statsSelectedSubject) return false;
+      return true;
     });
+  }, [statsAllRecords, statsAcademicYear, statsSemester, statsSelectedClass, statsSelectedSubject]);
 
-    return records;
-  }, [rawStatsAttendanceRecords, statsSelectedSubject, statsAcademicYear, statsSemester]);
+  const statsTabStats = React.useMemo(() => {
+    const records = statsAttendanceRecords;
+    const uniqueStudents = new Set(records.map(r => r.studentId));
+    const total = uniqueStudents.size;
+    const totalRecords = records.length;
+    const hadir = records.filter(r => r.status === 'hadir').length;
+    const sakit = records.filter(r => r.status === 'sakit').length;
+    const izin = records.filter(r => r.status === 'izin').length;
+    const tanpaKeterangan = records.filter(r => r.status === 'tanpa-keterangan').length;
+    const percentage = totalRecords > 0 ? ((hadir / totalRecords) * 100).toFixed(1) : '0.0';
+    return { total, totalRecords, hadir, sakit, izin, tanpaKeterangan, percentage };
+  }, [statsAttendanceRecords]);
 
-  const statsClassData = classes.find(c => c.id === statsSelectedClass);
-  // If class selected, filter students. If not (Global), use all fetched students.
-  const statsFilteredStudents = statsSelectedClass
-    ? statsStudents.filter(s => s.class === statsClassData?.name)
-    : statsStudents;
+  const statsTabTrend = React.useMemo(() => {
+    const monthlyData: Record<string, { total: number; hadir: number; sakit: number; izin: number; tanpaKeterangan: number }> = {};
+    statsAttendanceRecords.forEach(record => {
+      const date = new Date(record.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthlyData[monthKey]) monthlyData[monthKey] = { total: 0, hadir: 0, sakit: 0, izin: 0, tanpaKeterangan: 0 };
+      monthlyData[monthKey].total += 1;
+      if (record.status === 'hadir') monthlyData[monthKey].hadir += 1;
+      else if (record.status === 'sakit') monthlyData[monthKey].sakit += 1;
+      else if (record.status === 'izin') monthlyData[monthKey].izin += 1;
+      else if (record.status === 'tanpa-keterangan') monthlyData[monthKey].tanpaKeterangan += 1;
+    });
+    const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+    const FULL_MONTH_NAMES = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return Object.keys(monthlyData).sort().map(monthKey => {
+      const [, month] = monthKey.split('-');
+      const data = monthlyData[monthKey];
+      const pct = (count: number) => data.total > 0 ? parseFloat(((count / data.total) * 100).toFixed(1)) : 0;
+      return {
+        name: MONTH_NAMES[parseInt(month) - 1],
+        fullName: FULL_MONTH_NAMES[parseInt(month) - 1],
+        percentage: pct(data.hadir),
+        percentageSakit: pct(data.sakit),
+        percentageIzin: pct(data.izin),
+        percentageAlpha: pct(data.tanpaKeterangan),
+        total: data.total, hadir: data.hadir, sakit: data.sakit, izin: data.izin, tanpaKeterangan: data.tanpaKeterangan,
+      };
+    });
+  }, [statsAttendanceRecords]);
 
-  // Calculate statistics based on the independent stats data
-  const { stats: statsTabStats, attendanceTrend: statsTabTrend } = useAttendanceStatistics(
-    statsAttendanceRecords,
-    statsFilteredStudents,
-    todayStr
-  );
+  const statsClassData = statsClasses.find(c => c.id === statsSelectedClass);
+  const statsFilteredStudents = React.useMemo(() => {
+    const uniqueStudents = new Map<string, { id: string; class: string }>();
+    statsAttendanceRecords.forEach(r => {
+      if (!uniqueStudents.has(r.studentId)) uniqueStudents.set(r.studentId, { id: r.studentId, class: r.class });
+    });
+    return Array.from(uniqueStudents.values());
+  }, [statsAttendanceRecords]);
 
   // Main tab data (kept for backward compatibility with existing code structure)
   const selectedClassData = classes.find(c => c.id === selectedClass);
@@ -666,54 +683,83 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-in fade-in duration-300">
+        {/* Header */}
+        {!isEmbedded && (
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="h-8 bg-muted rounded-lg w-56 animate-pulse" />
+              <div className="h-4 bg-muted rounded w-80 animate-pulse" />
+            </div>
+            <div className="h-9 bg-muted rounded-lg w-24 animate-pulse" />
+          </div>
+        )}
 
-        {/* Header Skeleton */}
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/3 mb-2"></div>
-          <div className="h-4 bg-muted rounded w-1/2"></div>
-        </div>
-
-        {/* Stats Cards Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="pb-2">
-                <div className="h-4 bg-muted rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
-                <div className="h-3 bg-muted rounded w-full"></div>
-              </CardContent>
-            </Card>
+        {/* Tabs */}
+        <div className="flex gap-1 bg-muted/50 rounded-full p-1 w-fit">
+          {['Presensi', 'Statistik', 'Riwayat'].map(t => (
+            <div key={t} className="h-8 bg-muted rounded-full w-24 animate-pulse" />
           ))}
         </div>
 
-        {/* Filter Skeleton */}
-        <Card className="animate-pulse">
-          <CardHeader>
-            <div className="h-5 bg-muted rounded w-1/4"></div>
-            <div className="h-4 bg-muted rounded w-1/3"></div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="h-10 bg-muted rounded"></div>
-              <div className="h-10 bg-muted rounded"></div>
-              <div className="h-10 bg-muted rounded"></div>
+        {/* DailySummary skeleton — matches the card with timeline layout */}
+        <div className="rounded-xl border bg-card overflow-hidden animate-pulse">
+          <div className="p-4 border-b flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 bg-muted rounded-lg" />
+              <div className="space-y-1.5">
+                <div className="h-4 bg-muted rounded w-40" />
+                <div className="h-3 bg-muted rounded w-28" />
+              </div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="h-6 bg-muted rounded-full w-20" />
+          </div>
+          <div className="p-4 space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex gap-4 items-start">
+                {/* Time column */}
+                <div className="flex flex-col items-center gap-1 w-14 flex-shrink-0">
+                  <div className="h-3 bg-muted rounded w-10" />
+                  <div className="h-3 bg-muted rounded w-8" />
+                </div>
+                {/* Card */}
+                <div className="flex-1 rounded-lg border p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 bg-muted rounded w-32" />
+                    <div className="h-5 bg-muted rounded-full w-20" />
+                  </div>
+                  <div className="h-3 bg-muted rounded w-24" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        {/* Table Skeleton */}
-        <Card className="animate-pulse">
-          <CardContent className="p-4">
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-16 bg-muted rounded"></div>
-              ))}
+        {/* FilterSection skeleton — matches icon + title + 4 dropdowns */}
+        <div className="rounded-xl border bg-card p-5 space-y-4 animate-pulse">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-muted rounded-lg" />
+            <div className="space-y-1.5">
+              <div className="h-4 bg-muted rounded w-36" />
+              <div className="h-3 bg-muted rounded w-52" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {['Kelas', 'Tanggal', 'Mata Pelajaran', 'Jam Pelajaran'].map(label => (
+              <div key={label} className="space-y-1.5">
+                <div className="h-3 bg-muted rounded w-24" />
+                <div className="h-10 bg-muted rounded-lg" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Empty state hint */}
+        <div className="rounded-xl border bg-card p-8 flex flex-col items-center gap-3 animate-pulse">
+          <div className="h-12 w-12 bg-muted rounded-full" />
+          <div className="h-4 bg-muted rounded w-48" />
+          <div className="h-3 bg-muted rounded w-64" />
+        </div>
       </div>
     );
   }
@@ -995,25 +1041,32 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Kelas</label>
                   <div className="relative">
+                    {statsLoading ? (
+                      <div className="h-10 bg-muted rounded-lg animate-pulse" />
+                    ) : (
                     <select
                       className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
                       value={statsSelectedClass}
                       onChange={(e) => setStatsSelectedClass(e.target.value)}
                     >
-                      {classes.length > 1 && <option value="">Semua Kelas</option>}
-                      {classes.map((c) => (
+                      {statsClasses.length > 1 && <option value="">Semua Kelas</option>}
+                      {statsClasses.map((c) => (
                         <option key={c.id} value={c.id}>
-                          {c.name} ({c.studentCount} Siswa)
+                          {c.name}{c.studentCount > 0 ? ` (${c.studentCount} Siswa)` : ''}
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    )}
+                    {!statsLoading && <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />}
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Mata Pelajaran</label>
                   <div className="relative">
+                    {statsLoading ? (
+                      <div className="h-10 bg-muted rounded-lg animate-pulse" />
+                    ) : (
                     <select
                       className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background pl-3 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
                       value={statsSelectedSubject}
@@ -1026,7 +1079,8 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    )}
+                    {!statsLoading && <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />}
                   </div>
                 </div>
               </div>
@@ -1035,11 +1089,30 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
 
           {/* Always show stats (Global or Class-specific) */}
           <>
+            {statsLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="rounded-xl border bg-card p-4 space-y-2 animate-pulse">
+                    <div className="h-3 bg-muted rounded w-16" />
+                    <div className="h-7 bg-muted rounded w-12" />
+                    <div className="h-2 bg-muted rounded w-full" />
+                  </div>
+                ))}
+              </div>
+            ) : (
             <StatsCards
               stats={statsTabStats}
               selectedClassName={statsSelectedClass ? statsClassData?.name : undefined}
             />
+            )}
 
+            {statsLoading ? (
+              <div className="rounded-xl border bg-card p-6 space-y-4 animate-pulse">
+                <div className="h-5 bg-muted rounded w-48" />
+                <div className="h-3 bg-muted rounded w-64" />
+                <div className="h-[300px] bg-muted rounded-lg" />
+              </div>
+            ) : (
             <StatisticSection
               stats={statsTabStats}
               attendanceTrend={statsTabTrend}
@@ -1050,6 +1123,7 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
               academicYear={statsAcademicYear}
               semester={statsSemester}
             />
+            )}
           </>
         </TabsContent>
 
