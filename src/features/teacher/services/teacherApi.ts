@@ -94,10 +94,12 @@ const mockAxios = {
               ...newRecord
             };
           } else {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { id: _id, teacher: _teacher, ...newRecordClean } = newRecord as AttendanceRecord & { id?: string; teacher?: string };
             extendedMockAttendanceRecords.push({
               id: Math.random().toString(36).substr(2, 9),
               teacher: mockTeacher.name,
-              ...newRecord
+              ...newRecordClean
             });
           }
         });

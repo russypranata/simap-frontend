@@ -530,7 +530,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                         <td className="p-4">
                           <Select
                             value={currentData?.status || 'hadir'}
-                            onValueChange={(value: string) => handleStatusChange(student.id, value)}
+                            onValueChange={(value: string) => handleStatusChange(student.id, value as 'hadir' | 'sakit' | 'izin' | 'tanpa-keterangan')}
                           >
                             <SelectTrigger className="w-40">
                               <SelectValue />

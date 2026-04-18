@@ -195,9 +195,11 @@ export const Attendance: React.FC<AttendanceProps> = ({ isEmbedded = false }) =>
   const selectedClassData = classes.find(c => c.id === selectedClass);
   const filteredStudents = selectedClass ? students.filter(s => s.class === selectedClassData?.name) : [];
 
-  const { _stats, _attendanceTrend } = useAttendanceStatistics(
-    attendanceRecords,
-    filteredStudents,
+  const { stats: _stats, attendanceTrend: _attendanceTrend } = useAttendanceStatistics(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    attendanceRecords as any[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    filteredStudents as any[],
     selectedDate
   );
 

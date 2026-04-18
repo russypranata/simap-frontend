@@ -181,7 +181,7 @@ export const useTeacherData = () => {
           homeroomTeacher: c.homeroomTeacher,
           studentCount:    c.studentCount,
           schedule:        [],
-          subjects:        c.subjects.map(s => s.name),
+          subjects:        c.subjects.map(s => ({ id: s.id ?? s.name, name: s.name })),
         } as TeacherClass)));
       }
       setError(null);

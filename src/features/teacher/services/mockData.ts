@@ -19,15 +19,15 @@ export const mockTeacher = {
 };
 
 // Mock classes data - Classes taught by the teacher
-export const mockClasses: (TeacherClass & { subjects: string[] })[] = [
+export const mockClasses: TeacherClass[] = [
   {
     id: '1',
     name: 'XII A',
     grade: 'XII',
-    homeroomTeacher: mockTeacher.name, // Teacher is homeroom here
+    homeroomTeacher: mockTeacher.name,
     studentCount: 32,
     schedule: ['Senin', 'Kamis'],
-    subjects: ['Matematika'],
+    subjects: [{ id: '1', name: 'Matematika' }],
   },
   {
     id: '2',
@@ -36,7 +36,7 @@ export const mockClasses: (TeacherClass & { subjects: string[] })[] = [
     homeroomTeacher: 'Siti Aminah, S.Pd.',
     studentCount: 28,
     schedule: ['Selasa', 'Rabu', 'Jumat'],
-    subjects: ['Matematika', 'Fisika'],
+    subjects: [{ id: '1', name: 'Matematika' }, { id: '2', name: 'Fisika' }],
   },
   {
     id: '3',
@@ -45,7 +45,7 @@ export const mockClasses: (TeacherClass & { subjects: string[] })[] = [
     homeroomTeacher: 'Lina Marlina, S.Pd.',
     studentCount: 30,
     schedule: ['Rabu', 'Kamis'],
-    subjects: ['Biologi'],
+    subjects: [{ id: '3', name: 'Biologi' }],
   },
 ];
 

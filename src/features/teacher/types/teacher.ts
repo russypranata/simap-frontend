@@ -23,6 +23,7 @@ export interface TeacherClass {
   homeroomTeacher: string;
   studentCount: number;
   schedule: string[];
+  subjects?: { id: string; name: string }[];
 }
 
 export interface Student {

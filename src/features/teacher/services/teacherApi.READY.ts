@@ -73,7 +73,7 @@ const mockAxios = {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 300));
 
-        switch (url) {
+        switch (_url) {
             case '/teacher/profile':
                 return { data: mockTeacher as T };
             case '/teacher/classes':
@@ -111,7 +111,7 @@ const mockAxios = {
                 };
                 return { data: stats as T };
             default:
-                throw new Error(`API endpoint not found: ${url}`);
+                throw new Error(`API endpoint not found: ${_url}`);
         }
     },
 

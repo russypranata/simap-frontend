@@ -833,7 +833,7 @@ export const EReport: React.FC = () => {
                         {getStatusLabel(report.status)}
                       </Badge>
                       <span className="text-xs text-muted-foreground ml-2">
-                        {getRelativeTime(report.generatedDate)}
+                        {report.generatedDate ? new Date(report.generatedDate).toLocaleDateString('id-ID') : '-'}
                       </span>
                     </div>
                   </div>

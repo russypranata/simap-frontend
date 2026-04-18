@@ -119,19 +119,19 @@ export const Grades: React.FC = () => {
 
   // Dynamic subjects based on selected class
   const subjects = selectedClassData && 'subjects' in selectedClassData
-    ? (selectedClassData as { subjects: string[] }).subjects
+    ? (selectedClassData as { subjects: { id: string; name: string }[] }).subjects.map(s => s.name)
     : [];
 
   // Get available subjects for stats (from selected classes or all)
   const availableStatsSubjects = useMemo(() => {
     if (statsSelectedClasses.length === 0) {
       return Array.from(new Set(
-        classes.flatMap(c => 'subjects' in c ? (c as { subjects: string[] }).subjects : [])
+        classes.flatMap(c => 'subjects' in c ? (c as { subjects: { id: string; name: string }[] }).subjects.map(s => s.name) : [])
       ));
     }
     const subjectList = statsSelectedClasses.flatMap(classId => {
       const classData = classes.find(c => c.id === classId);
-      return classData && 'subjects' in classData ? (classData as { subjects: string[] }).subjects : [];
+      return classData && 'subjects' in classData ? (classData as { subjects: { id: string; name: string }[] }).subjects.map(s => s.name) : [];
     });
     return Array.from(new Set(subjectList));
   }, [statsSelectedClasses, classes]);

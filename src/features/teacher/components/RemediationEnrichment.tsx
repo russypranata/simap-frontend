@@ -248,7 +248,7 @@ export const RemediationEnrichment: React.FC<RemediationEnrichmentProps> = ({
 
                         <div className="space-y-2">
                             <Label>Semester</Label>
-                            <Select value={semester} onValueChange={(value: string) => setSemester(value)}>
+                            <Select value={semester} onValueChange={(value: string) => setSemester(value as 'Ganjil' | 'Genap')}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
@@ -329,7 +329,7 @@ export const RemediationEnrichment: React.FC<RemediationEnrichmentProps> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <div className="space-y-2">
                             <Label>Status</Label>
-                            <Select value={statusFilter} onValueChange={(value: string) => setStatusFilter(value)}>
+                            <Select value={statusFilter} onValueChange={(value: string) => setStatusFilter(value as 'all' | 'remedial' | 'enrichment')}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Filter status" />
                                 </SelectTrigger>
