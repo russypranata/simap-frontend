@@ -204,11 +204,13 @@ export const useTeacherData = () => {
       } else {
         if (classId) {
           const data = await getClassStudents(classId);
+          // Cari nama kelas dari classes state
+          const className = classes.find(c => c.id === classId)?.name ?? '';
           setStudents(data.map(s => ({
             id:          s.id,
             nis:         s.nis,
             name:        s.name,
-            class:       '',
+            class:       className,
             gender:      (s.gender === 'L' || s.gender === 'P') ? s.gender : 'L',
             birthDate:   s.birthDate ?? '',
             address:     s.address,
