@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
+
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,8 @@ export const EditAchievement: React.FC = () => {
     const [selectedImages, setSelectedImages] = useState<File[]>([]);
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
     const [existingPhotos, setExistingPhotos] = useState<{ id: number; url: string }[]>([]);
+    const [photoLoadedMap, setPhotoLoadedMap] = useState<Record<number, boolean>>({});
+    const [newPhotoLoadedMap, setNewPhotoLoadedMap] = useState<Record<number, boolean>>({});
     const [deletingPhotoId, setDeletingPhotoId] = useState<number | null>(null);
     const [isCustomRank, setIsCustomRank] = useState(false);
     const [customRank, setCustomRank] = useState("");
@@ -489,12 +491,15 @@ export const EditAchievement: React.FC = () => {
                                         <div className="flex flex-wrap gap-3">
                                             {existingPhotos.map((photo) => (
                                                 <div key={photo.id} className="relative">
-                                                    <Image
+                                                    {!photoLoadedMap[photo.id] && (
+                                                        <div className="max-w-xs max-h-48 rounded-lg border bg-muted animate-pulse" style={{ width: 320, height: 192 }} />
+                                                    )}
+                                                    <img
                                                         src={photo.url}
                                                         alt="Foto prestasi"
-                                                        width={320}
-                                                        height={192}
                                                         className="max-w-xs max-h-48 rounded-lg border object-cover"
+                                                        onLoad={() => setPhotoLoadedMap(prev => ({ ...prev, [photo.id]: true }))}
+                                                        style={{ display: photoLoadedMap[photo.id] ? undefined : 'none' }}
                                                     />
                                                     <Button
                                                         type="button"
@@ -523,12 +528,15 @@ export const EditAchievement: React.FC = () => {
                                         <div className="flex flex-wrap gap-3">
                                             {imagePreviews.map((preview, index) => (
                                                 <div key={index} className="relative">
-                                                    <Image
+                                                    {!newPhotoLoadedMap[index] && (
+                                                        <div className="max-w-xs max-h-48 rounded-lg border bg-muted animate-pulse" style={{ width: 320, height: 192 }} />
+                                                    )}
+                                                    <img
                                                         src={preview}
                                                         alt={`Preview ${index + 1}`}
-                                                        width={320}
-                                                        height={192}
                                                         className="max-w-xs max-h-48 rounded-lg border object-cover"
+                                                        onLoad={() => setNewPhotoLoadedMap(prev => ({ ...prev, [index]: true }))}
+                                                        style={{ display: newPhotoLoadedMap[index] ? undefined : 'none' }}
                                                     />
                                                     <Button
                                                         type="button"

@@ -179,9 +179,11 @@ export const ViewAchievement: React.FC = () => {
     const [achievement, setAchievement] = useState<AchievementDetail | null>(
         null,
     );
-    const [isLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+    const [photoLoaded, setPhotoLoaded] = useState(false);
+    const [lightboxLoaded, setLightboxLoaded] = useState(false);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
     const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
@@ -192,6 +194,7 @@ export const ViewAchievement: React.FC = () => {
         setError(null);
 
         if (useMock) {
+            setIsLoading(false);
             return;
         }
 
@@ -199,7 +202,8 @@ export const ViewAchievement: React.FC = () => {
             .then((result) => {
                 setAchievement(result);
             })
-            .catch((err) => setError(err.message));
+            .catch((err) => setError(err.message))
+            .finally(() => setIsLoading(false));
     }, [achievementId, useMock]);
 
     useEffect(() => {
@@ -427,11 +431,18 @@ export const ViewAchievement: React.FC = () => {
                             <div className="w-14 h-14 rounded-full bg-blue-800 flex items-center justify-center shrink-0 ring-4 ring-primary/10 overflow-hidden">
                                 {useMock && (data as MockAchievement)?.studentPhoto ? (
                                     // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                        src={(data as MockAchievement).studentPhoto!}
-                                        alt={studentName}
-                                        className="w-full h-full rounded-full object-cover"
-                                    />
+                                    <>
+                                        {!photoLoaded && (
+                                            <div className="w-full h-full rounded-full bg-muted animate-pulse" />
+                                        )}
+                                        <img
+                                            src={(data as MockAchievement).studentPhoto!}
+                                            alt={studentName}
+                                            className="w-full h-full rounded-full object-cover"
+                                            onLoad={() => setPhotoLoaded(true)}
+                                            style={{ display: photoLoaded ? undefined : 'none' }}
+                                        />
+                                    </>
                                 ) : (
                                     <span className="text-lg font-semibold text-white">
                                         {getInitials(studentName)}
@@ -638,11 +649,17 @@ export const ViewAchievement: React.FC = () => {
                                         className="w-full h-full cursor-pointer relative"
                                         onClick={() => setIsLightboxOpen(true)}
                                     >
+                                        {/* Skeleton while loading */}
+                                        {!photoLoaded && (
+                                            <div className="absolute inset-0 bg-muted animate-pulse" />
+                                        )}
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={photos[currentPhotoIndex]}
                                             alt={`Dokumentasi ${currentPhotoIndex + 1}`}
                                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            onLoad={() => setPhotoLoaded(true)}
+                                            style={{ display: photoLoaded ? undefined : 'none' }}
                                         />
 
                                         {/* Hover Overlay */}
@@ -725,11 +742,17 @@ export const ViewAchievement: React.FC = () => {
 
                     {/* Main Image */}
                     <div className="relative w-full max-w-5xl max-h-[85vh] px-4 flex items-center justify-center">
+                        {/* Skeleton while loading */}
+                        {!lightboxLoaded && (
+                            <div className="absolute inset-0 bg-muted animate-pulse rounded-md" />
+                        )}
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={photos[currentPhotoIndex]}
                             alt="Full Preview"
                             className="max-w-full max-h-[85vh] object-contain rounded-md shadow-2xl"
+                            onLoad={() => setLightboxLoaded(true)}
+                            style={{ display: lightboxLoaded ? undefined : 'none' }}
                         />
                     </div>
 
