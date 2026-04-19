@@ -1,15 +1,21 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     getExtracurriculars,
     getExtracurricularDetail,
     getAttendanceSessions,
     getAttendanceSession,
     getTutorAttendance,
+    getMembers,
+    getMember,
+    createMember,
+    updateMember,
+    deleteMember,
 } from "../services/mutamayizinService";
 import type {
     ExtracurricularParams,
     AttendanceSessionParams,
     TutorAttendanceParams,
+    MemberParams,
 } from "../services/mutamayizinService";
 
 export const useMutamayizinExtracurriculars = (params?: ExtracurricularParams) => {
@@ -51,5 +57,51 @@ export const useMutamayizinTutorAttendance = (params?: TutorAttendanceParams) =>
     return useQuery({
         queryKey: ["mutamayizin-tutor-attendance", params],
         queryFn: () => getTutorAttendance(params),
+    });
+};
+
+export const useMutamayizinMembers = (params?: MemberParams) => {
+    return useQuery({
+        queryKey: ["mutamayizin-members", params],
+        queryFn: () => getMembers(params),
+    });
+};
+
+export const useMutamayizinMember = (id: number) => {
+    return useQuery({
+        queryKey: ["mutamayizin-member", id],
+        queryFn: () => getMember(id),
+        enabled: !!id,
+    });
+};
+
+export const useCreateMember = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: createMember,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["mutamayizin-members"] });
+        },
+    });
+};
+
+export const useUpdateMember = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, data }: { id: number; data: Parameters<typeof updateMember>[1] }) =>
+            updateMember(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["mutamayizin-members"] });
+        },
+    });
+};
+
+export const useDeleteMember = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: deleteMember,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["mutamayizin-members"] });
+        },
     });
 };

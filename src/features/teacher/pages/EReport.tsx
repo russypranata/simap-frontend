@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { useTeacherData } from '../hooks/useTeacherData';
 import type { EReport as EReportType } from '../types/teacher';
-import { formatDate } from '@/features/shared/utils/dateFormatter';
+import { formatDate, getRelativeTime } from '@/features/shared/utils/dateFormatter';
 import {
   FileText,
   Download,

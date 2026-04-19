@@ -32,6 +32,7 @@ import {
     Mail,
     Eye,
     Edit,
+    Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -44,8 +45,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import { getMembers, getExtracurricularsForMember } from "@/features/mutamayizin/services/mutamayizinService";
 
-// Interface
 interface Member {
     id: number;
     nis: string;
@@ -59,188 +61,84 @@ interface Member {
     joinDate: string;
 }
 
-// Mock Data
-const mockMembers: Member[] = [
-    {
-        id: 1,
-        nis: "2023001",
-        name: "Abdullah",
-        class: "X A",
-        email: "abdullah@student.sch.id",
-        phone: "081234567890",
-        ekstrakurikuler: ["Pramuka", "Basket"],
-        status: "active",
-        photo: null,
-        joinDate: "2023-07-15",
-    },
-    {
-        id: 2,
-        nis: "2023002",
-        name: "Siti Aminah",
-        class: "XI B",
-        email: "siti.aminah@student.sch.id",
-        phone: "081234567891",
-        ekstrakurikuler: ["PMR"],
-        status: "active",
-        photo: null,
-        joinDate: "2022-07-15",
-    },
-    {
-        id: 3,
-        nis: "2023003",
-        name: "Budi Santoso",
-        class: "XII A",
-        email: "budi.santoso@student.sch.id",
-        phone: "081234567892",
-        ekstrakurikuler: ["Paskibra", "Futsal"],
-        status: "inactive",
-        photo: null,
-        joinDate: "2021-07-15",
-    },
-    {
-        id: 4,
-        nis: "2023004",
-        name: "Dewi Lestari",
-        class: "X B",
-        email: "dewi.lestari@student.sch.id",
-        phone: "081234567893",
-        ekstrakurikuler: ["Pramuka"],
-        status: "active",
-        photo: null,
-        joinDate: "2023-07-20",
-    },
-    {
-        id: 5,
-        nis: "2023005",
-        name: "Eko Prasetyo",
-        class: "XI A",
-        email: "eko.prasetyo@student.sch.id",
-        phone: "081234567894",
-        ekstrakurikuler: ["Basket", "PMR"],
-        status: "active",
-        photo: null,
-        joinDate: "2022-08-01",
-    },
-    {
-        id: 6,
-        nis: "2023006",
-        name: "Fani Rahmawati",
-        class: "XII B",
-        email: "fani.rahma@student.sch.id",
-        phone: "081234567895",
-        ekstrakurikuler: ["Seni Tari"],
-        status: "active",
-        photo: null,
-        joinDate: "2021-07-18",
-    },
-    {
-        id: 7,
-        nis: "2023007",
-        name: "Gilang Ramadhan",
-        class: "X A",
-        email: "gilang.rama@student.sch.id",
-        phone: "081234567896",
-        ekstrakurikuler: ["Futsal"],
-        status: "active",
-        photo: null,
-        joinDate: "2023-07-15",
-    },
-    {
-        id: 8,
-        nis: "2023008",
-        name: "Haniifah",
-        class: "XI B",
-        email: "haniifah@student.sch.id",
-        phone: "081234567897",
-        ekstrakurikuler: ["Pramuka", "PMR"],
-        status: "inactive",
-        photo: null,
-        joinDate: "2022-07-20",
-    },
-    {
-        id: 9,
-        nis: "2023009",
-        name: "Iwan Setiawan",
-        class: "XII A",
-        email: "iwan.setiawan@student.sch.id",
-        phone: "081234567898",
-        ekstrakurikuler: ["Paskibra"],
-        status: "active",
-        photo: null,
-        joinDate: "2021-08-05",
-    },
-    {
-        id: 10,
-        nis: "2023010",
-        name: "Joko Susilo",
-        class: "X B",
-        email: "joko.susilo@student.sch.id",
-        phone: "081234567899",
-        ekstrakurikuler: ["Basket"],
-        status: "active",
-        photo: null,
-        joinDate: "2023-07-25",
-    },
-    {
-        id: 11,
-        nis: "2023011",
-        name: "Kartika Sari",
-        class: "XI A",
-        email: "kartika.sari@student.sch.id",
-        phone: "081234567800",
-        ekstrakurikuler: ["Seni Tari", "Pramuka"],
-        status: "active",
-        photo: null,
-        joinDate: "2022-07-16",
-    },
-    {
-        id: 12,
-        nis: "2023012",
-        name: "Lukman Hakim",
-        class: "XII B",
-        email: "lukman.hakim@student.sch.id",
-        phone: "081234567801",
-        ekstrakurikuler: ["Futsal"],
-        status: "active",
-        photo: null,
-        joinDate: "2021-07-20",
-    },
-];
+interface ExtracurricularOption {
+    id: number;
+    name: string;
+}
 
 export default function MembersPage() {
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState("");
-    const [ekskulFilter, setEkskulFilter] = useState("all");
-    const [classFilter, setClassFilter] = useState("all");
+    const [ekskulFilter, setEkskulFilter] = useState<string>("all");
+    const [classFilter, setClassFilter] = useState<string>("all");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Filter Logic
+    // Fetch members from API
+    const { data: membersData, isLoading: isLoadingMembers } = useQuery({
+        queryKey: ["mutamayizin-members"],
+        queryFn: () => getMembers(),
+    });
+
+    // Fetch extracurriculars for filter dropdown
+    const { data: extracurriculars } = useQuery({
+        queryKey: ["mutamayizin-extracurriculars-for-member"],
+        queryFn: () => getExtracurricularsForMember(),
+    });
+
+    // Flatten members array from API response
+    const members: Member[] = membersData?.data || [];
+
+    // Client-side filtering
     const filteredMembers = useMemo(() => {
-        return mockMembers.filter((member) => {
+        return members.filter((member) => {
             const matchesSearch =
                 member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                member.nis.includes(searchQuery) ||
+                member.nis.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 member.email.toLowerCase().includes(searchQuery.toLowerCase());
 
-            const matchesEkskul = ekskulFilter === "all" || member.ekstrakurikuler.includes(ekskulFilter);
-            const matchesClass = classFilter === "all" || member.class.startsWith(classFilter); // Simplified class filter
+            const matchesEkskul = ekskulFilter === "all" || 
+                member.ekstrakurikuler.some(e => e.toLowerCase() === ekskulFilter.toLowerCase());
+            const matchesClass = classFilter === "all" || member.class.startsWith(classFilter);
 
             return matchesSearch && matchesEkskul && matchesClass;
         });
-    }, [searchQuery, ekskulFilter, classFilter]);
+    }, [members, searchQuery, ekskulFilter, classFilter]);
 
     // Pagination Logic
-    const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
+    const totalItems = filteredMembers.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
     const paginatedMembers = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         return filteredMembers.slice(startIndex, startIndex + itemsPerPage);
     }, [filteredMembers, currentPage, itemsPerPage]);
 
     // Stats
-    const totalMembers = mockMembers.length;
-    const activeMembers = mockMembers.filter(m => m.status === "active").length;
-    const multiEkskulMembers = mockMembers.filter(m => m.ekstrakurikuler.length > 1).length;
+    const totalMembers = members.length;
+    const activeMembers = members.filter(m => m.status === "active").length;
+    const multiEkskulMembers = members.filter(m => m.ekstrakurikuler.length > 1).length;
+
+    // Unique extracurriculars for filter dropdown
+    const uniqueEkskul = useMemo(() => {
+        const names = members.flatMap(m => m.ekstrakurikuler);
+        return Array.from(new Set(names)).sort();
+    }, [members]);
+
+    // Reset to page 1 when filters change
+    const handleEkskulFilterChange = (value: string) => {
+        setEkskulFilter(value);
+        setCurrentPage(1);
+    };
+
+    const handleClassFilterChange = (value: string) => {
+        setClassFilter(value);
+        setCurrentPage(1);
+    };
+
+    const handleSearchChange = (value: string) => {
+        setSearchQuery(value);
+        setCurrentPage(1);
+    };
 
     // Helper functions
     const getInitials = (name: string) => {
@@ -252,7 +150,13 @@ export default function MembersPage() {
             .toUpperCase();
     };
 
-    const uniqueEkskul = Array.from(new Set(mockMembers.flatMap(m => m.ekstrakurikuler))).sort();
+    if (isLoadingMembers) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-800" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -271,25 +175,22 @@ export default function MembersPage() {
                     <p className="text-muted-foreground mt-1">
                         Kelola data siswa yang terdaftar dalam program ekstrakurikuler
                     </p>
-
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button className="bg-blue-800 text-white hover:bg-blue-900 gap-2">
+                    <Button className="bg-blue-800 text-white hover:bg-blue-900 gap-2" onClick={() => router.push('/mutamayizin-coordinator/members/add')}>
                         <UserPlus className="h-4 w-4" />
                         Tambah Anggota
                     </Button>
                 </div>
             </div>
 
-            {/* Stats Cards (Blue Theme like Achievements) */}
+            {/* Stats Cards */}
             <Card className="overflow-hidden p-0">
                 <div className="bg-blue-800 p-4 relative overflow-hidden">
-                    {/* Decorative Pattern */}
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 right-0 w-40 h-40 border-[20px] border-white rounded-full -translate-y-1/2 translate-x-1/4" />
                         <div className="absolute bottom-0 right-1/3 w-20 h-20 border-[8px] border-white rounded-full translate-y-1/2" />
                     </div>
-
                     <div className="flex items-center gap-3 relative z-10">
                         <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
                             <Users className="h-6 w-6 text-white" />
@@ -303,7 +204,6 @@ export default function MembersPage() {
 
                 <CardContent className="p-0">
                     <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x">
-                        {/* Total Members */}
                         <div className="p-2.5 text-center">
                             <div className="inline-flex p-2 bg-blue-100 rounded-full mb-1.5">
                                 <Users className="h-4 w-4 text-blue-800" />
@@ -311,8 +211,6 @@ export default function MembersPage() {
                             <p className="text-2xl font-bold text-slate-900">{totalMembers}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Siswa Terdaftar</p>
                         </div>
-
-                        {/* Active Members */}
                         <div className="p-2.5 text-center">
                             <div className="inline-flex p-2 bg-green-100 rounded-full mb-1.5">
                                 <ShieldCheck className="h-4 w-4 text-green-600" />
@@ -320,8 +218,6 @@ export default function MembersPage() {
                             <p className="text-2xl font-bold text-slate-900">{activeMembers}</p>
                             <p className="text-xs font-medium text-muted-foreground mt-0.5">Status Aktif</p>
                         </div>
-
-                        {/* Multi Ekskul */}
                         <div className="p-2.5 text-center">
                             <div className="inline-flex p-2 bg-purple-100 rounded-full mb-1.5">
                                 <Users className="h-4 w-4 text-purple-600" />
@@ -355,12 +251,12 @@ export default function MembersPage() {
                                 <Input
                                     placeholder="Cari nama, NIS, atau email..."
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-10 h-11"
                                 />
                             </div>
                             <div className="flex gap-2">
-                                <Select value={ekskulFilter} onValueChange={setEkskulFilter}>
+                                <Select value={ekskulFilter} onValueChange={handleEkskulFilterChange}>
                                     <SelectTrigger className="w-[240px] h-11">
                                         <Filter className="h-4 w-4 mr-2" />
                                         <SelectValue placeholder="Ekstrakurikuler" />
@@ -372,7 +268,7 @@ export default function MembersPage() {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                <Select value={classFilter} onValueChange={setClassFilter}>
+                                <Select value={classFilter} onValueChange={handleClassFilterChange}>
                                     <SelectTrigger className="w-[180px] h-11">
                                         <Filter className="h-4 w-4 mr-2" />
                                         <SelectValue placeholder="Kelas" />
@@ -464,10 +360,10 @@ export default function MembersPage() {
                                                     <Badge
                                                         variant={member.status === "active" ? "default" : "secondary"}
                                                         className={cn(
-                                                            "pl-2 pr-3 py-1 rounded-full border shadow-none font-medium", // Common styles
+                                                            "pl-2 pr-3 py-1 rounded-full border shadow-none font-medium",
                                                             member.status === "active"
-                                                                ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-100" // Active styles
-                                                                : "bg-red-100 text-red-700 border-red-200 hover:bg-red-100" // Inactive styles
+                                                                ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-100"
+                                                                : "bg-red-100 text-red-700 border-red-200 hover:bg-red-100"
                                                         )}
                                                     >
                                                         <div className={cn(
@@ -530,10 +426,10 @@ export default function MembersPage() {
                     <div className="border-t p-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50/50">
                         <div className="text-sm text-muted-foreground order-2 sm:order-1">
                             Menampilkan <span className="font-medium text-gray-900">
-                                {Math.min((currentPage - 1) * itemsPerPage + 1, filteredMembers.length)}
+                                {totalItems === 0 ? 0 : Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}
                             </span> - <span className="font-medium text-gray-900">
-                                {Math.min(currentPage * itemsPerPage, filteredMembers.length)}
-                            </span> dari <span className="font-medium text-gray-900">{filteredMembers.length}</span> data
+                                {Math.min(currentPage * itemsPerPage, totalItems)}
+                            </span> dari <span className="font-medium text-gray-900">{totalItems}</span> data
                         </div>
 
                         <div className="flex items-center gap-2 order-1 sm:order-2">
@@ -567,7 +463,6 @@ export default function MembersPage() {
                                 </Button>
                                 {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                                     const pageNumber = i + 1;
-                                    // Simple logic to show window around current page could be added
                                     return (
                                         <Button
                                             key={pageNumber}
@@ -588,7 +483,7 @@ export default function MembersPage() {
                                     size="icon"
                                     className="h-9 w-9"
                                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                    disabled={currentPage === totalPages}
+                                    disabled={currentPage === totalPages || totalPages === 0}
                                 >
                                     <ChevronRight className="h-4 w-4" />
                                 </Button>

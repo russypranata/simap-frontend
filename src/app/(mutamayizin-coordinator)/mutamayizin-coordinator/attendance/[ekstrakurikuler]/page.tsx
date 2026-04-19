@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,207 +27,94 @@ import {
     CheckCircle,
     AlertCircle,
     ClipboardList,
+    Loader2,
 } from "lucide-react";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { getExtracurricularDetail, getAttendanceSessions } from "@/features/mutamayizin/services/mutamayizinService";
 
-interface EkskulData {
+interface AttendanceSession {
     id: number;
-    name: string;
-    tutor: string;
-    category: string;
+    date: string;
+    topic?: string;
+    stats?: {
+        present: number;
+        total: number;
+        percentage: number;
+    };
+    // Fallback from API
+    presentCount?: number;
+    totalCount?: number;
 }
-
-// Mock ekstrakurikuler data
-const mockEkstrakurikulerData: Record<string, EkskulData> = {
-    "1": { id: 1, name: "Pramuka", tutor: "Ahmad Fauzi, S.Pd", category: "Kepanduan" },
-    "2": { id: 2, name: "PMR", tutor: "Siti Nurhaliza, S.Kep", category: "Kesehatan" },
-    "3": { id: 3, name: "Paskibra", tutor: "Bambang Sutrisno, S.Pd", category: "Bela Negara" },
-    "4": { id: 4, name: "Basket", tutor: "Dimas Prakoso, S.Pd", category: "Olahraga" },
-};
-
-// Mock attendance history
-const mockAttendanceHistory = [
-    {
-        id: 1,
-        date: "2026-01-02",
-        activity: "Pertemuan Rutin",
-        tutorStatus: "hadir",
-        totalPresent: 42,
-        totalAbsent: 3,
-        percentage: 93,
-        semester: "ganjil",
-        academicYear: "2025/2026",
-    },
-    {
-        id: 2,
-        date: "2024-12-20",
-        activity: "Pertemuan Rutin",
-        tutorStatus: "hadir",
-        totalPresent: 40,
-        totalAbsent: 5,
-        percentage: 89,
-        semester: "ganjil",
-        academicYear: "2024/2025",
-    },
-    {
-        id: 3,
-        date: "2024-11-29",
-        activity: "Jambore Sekolah",
-        tutorStatus: "hadir",
-        totalPresent: 43,
-        totalAbsent: 2,
-        percentage: 96,
-        semester: "ganjil",
-        academicYear: "2024/2025",
-    },
-    {
-        id: 4,
-        date: "2024-10-25",
-        activity: "Persiapan Lomba",
-        tutorStatus: "hadir",
-        totalPresent: 45,
-        totalAbsent: 0,
-        percentage: 100,
-        semester: "ganjil",
-        academicYear: "2024/2025",
-    },
-    {
-        id: 5,
-        date: "2024-09-20",
-        activity: "Simulasi Kegiatan",
-        tutorStatus: "hadir",
-        totalPresent: 43,
-        totalAbsent: 2,
-        percentage: 96,
-        semester: "ganjil",
-        academicYear: "2024/2025",
-    },
-    {
-        id: 5,
-        date: "2024-05-15",
-        activity: "Evaluasi Akhir",
-        tutorStatus: "hadir",
-        totalPresent: 40,
-        totalAbsent: 5,
-        percentage: 89,
-        semester: "genap",
-        academicYear: "2023/2024",
-    },
-    {
-        id: 6,
-        date: "2024-04-12",
-        activity: "Latihan Dasar",
-        tutorStatus: "hadir",
-        totalPresent: 44,
-        totalAbsent: 1,
-        percentage: 98,
-        semester: "genap",
-        academicYear: "2023/2024",
-    },
-    {
-        id: 7,
-        date: "2024-03-08",
-        activity: "Pertemuan Rutin",
-        tutorStatus: "hadir",
-        totalPresent: 38,
-        totalAbsent: 7,
-        percentage: 84,
-        semester: "genap",
-        academicYear: "2023/2024",
-    },
-    {
-        id: 8,
-        date: "2024-02-02",
-        activity: "Materi Ruangan",
-        tutorStatus: "hadir",
-        totalPresent: 45,
-        totalAbsent: 0,
-        percentage: 100,
-        semester: "genap",
-        academicYear: "2023/2024",
-    },
-    {
-        id: 9,
-        date: "2024-01-26",
-        activity: "Persiapan Semester",
-        tutorStatus: "hadir",
-        totalPresent: 44,
-        totalAbsent: 1,
-        percentage: 98,
-        semester: "genap",
-        academicYear: "2023/2024",
-    },
-    {
-        id: 10,
-        date: "2024-01-19",
-        activity: "Pertemuan Rutin",
-        tutorStatus: "hadir",
-        totalPresent: 40,
-        totalAbsent: 5,
-        percentage: 89,
-        semester: "genap",
-        academicYear: "2023/2024",
-    },
-    {
-        id: 11,
-        date: "2024-12-06",
-        activity: "Remedial Materi",
-        tutorStatus: "hadir",
-        totalPresent: 42,
-        totalAbsent: 3,
-        percentage: 93,
-        semester: "ganjil",
-        academicYear: "2024/2025",
-    },
-    {
-        id: 12,
-        date: "2024-11-22",
-        activity: "Latihan Gabungan",
-        tutorStatus: "hadir",
-        totalPresent: 45,
-        totalAbsent: 0,
-        percentage: 100,
-        semester: "ganjil",
-        academicYear: "2024/2025",
-    },
-    {
-        id: 13,
-        date: "2024-11-15",
-        activity: "Pertemuan Rutin",
-        tutorStatus: "hadir",
-        totalPresent: 38,
-        totalAbsent: 7,
-        percentage: 84,
-        semester: "ganjil",
-        academicYear: "2024/2025",
-    },
-    {
-        id: 14,
-        date: "2024-11-08",
-        activity: "Evaluasi Bulanan",
-        tutorStatus: "hadir",
-        totalPresent: 43,
-        totalAbsent: 2,
-        percentage: 96,
-        semester: "ganjil",
-        academicYear: "2024/2025",
-    },
-];
 
 export default function EkstrakurikulerAttendancePage() {
     const router = useRouter();
     const params = useParams();
-    const searchParams = useSearchParams();
     const ekstrakurikulerId = params.ekstrakurikuler as string;
 
-    const ekskul = mockEkstrakurikulerData[ekstrakurikulerId];
-
     const [searchQuery, setSearchQuery] = useState("");
-    const [academicYearFilter, setAcademicYearFilter] = useState(searchParams.get("year") || "2025/2026");
-    const [semesterFilter, setSemesterFilter] = useState(searchParams.get("semester") || "Ganjil");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    // Fetch extracurricular detail
+    const { data: ekskulData, isLoading: isLoadingEkskul } = useQuery({
+        queryKey: ["mutamayizin-extracurricular", ekstrakurikulerId],
+        queryFn: () => getExtracurricularDetail(Number(ekstrakurikulerId)),
+        enabled: !!ekstrakurikulerId,
+    });
+
+    // Fetch attendance sessions
+    const { data: sessionsData, isLoading: isLoadingSessions } = useQuery({
+        queryKey: ["mutamayizin-attendance-sessions", ekstrakurikulerId],
+        queryFn: () => getAttendanceSessions(Number(ekstrakurikulerId)),
+        enabled: !!ekstrakurikulerId,
+    });
+
+    const sessions: AttendanceSession[] = sessionsData?.data || [];
+    const ekskul = ekskulData;
+
+    // Filter sessions by search
+    const filteredSessions = sessions.filter((record) => {
+        if (!searchQuery) return true;
+        const formattedDate = formatDate(record.date, "dd MMMM yyyy").toLowerCase();
+        return formattedDate.includes(searchQuery.toLowerCase()) ||
+            record.topic?.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+
+    // Calculate stats
+    const totalMeetings = filteredSessions.length;
+    const avgAttendance = totalMeetings > 0
+        ? Math.round(filteredSessions.reduce((sum, record) => {
+            const percentage = record.stats?.percentage ?? 
+                (record.totalCount && record.totalCount > 0 
+                    ? Math.round((record.presentCount || 0) / record.totalCount * 100) 
+                    : 0);
+            return sum + percentage;
+        }, 0) / totalMeetings)
+        : 0;
+    const lastMeeting = filteredSessions.length > 0 ? filteredSessions[0].date : null;
+
+    // Pagination
+    const totalPages = Math.ceil(filteredSessions.length / itemsPerPage);
+    const paginatedSessions = filteredSessions.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const getAttendanceBadgeColor = (percentage: number) => {
+        if (percentage >= 90) return "bg-green-100 text-green-700 border-green-200";
+        if (percentage >= 75) return "bg-yellow-100 text-yellow-700 border-yellow-200";
+        return "bg-red-100 text-red-700 border-red-200";
+    };
+
+    if (isLoadingEkskul || isLoadingSessions) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-800" />
+            </div>
+        );
+    }
 
     if (!ekskul) {
         return (
@@ -242,47 +129,6 @@ export default function EkstrakurikulerAttendancePage() {
             </div>
         );
     }
-
-    // Filter
-    const filteredHistory = mockAttendanceHistory.filter((record) => {
-        const matchesAcademicYear = academicYearFilter === "all" || record.academicYear === academicYearFilter;
-        const matchesSemester = semesterFilter === "all" || record.semester === semesterFilter.toLowerCase();
-
-        const formattedDate = formatDate(record.date, "dd MMMM yyyy").toLowerCase();
-        const matchesSearch = formattedDate.includes(searchQuery.toLowerCase());
-
-        return matchesSearch && matchesAcademicYear && matchesSemester;
-    });
-
-    // Calculate stats based on filtered data
-    const totalMeetings = filteredHistory.length;
-    const avgAttendance = totalMeetings > 0 ? Math.round(
-        filteredHistory.reduce((sum, record) => sum + record.percentage, 0) / totalMeetings
-    ) : 0;
-    const lastMeeting = filteredHistory.length > 0 ? filteredHistory[0].date : null;
-
-    // Pagination
-    const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
-    const paginatedHistory = filteredHistory.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
-
-    const getSemesterLabel = (sem: string) => {
-        if (sem === "all") return "Semua Semester";
-        return sem === "ganjil" ? "Semester Ganjil" : "Semester Genap";
-    };
-
-    const getAcademicYearLabel = (year: string) => {
-        if (year === "all") return "Semua Tahun";
-        return `TA ${year}`;
-    };
-
-    const getAttendanceBadgeColor = (percentage: number) => {
-        if (percentage >= 90) return "bg-green-100 text-green-700 border-green-200";
-        if (percentage >= 75) return "bg-yellow-100 text-yellow-700 border-yellow-200";
-        return "bg-red-100 text-red-700 border-red-200";
-    };
 
     return (
         <div className="space-y-6">
@@ -312,7 +158,7 @@ export default function EkstrakurikulerAttendancePage() {
                     <div className="flex items-center gap-2 mt-3">
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                             <Calendar className="h-4 w-4" />
-                            <span className="text-sm font-semibold">Tutor: {ekskul.tutor}</span>
+                            <span className="text-sm font-semibold">Tutor: {ekskul.tutorName || "-"}</span>
                         </div>
                     </div>
                 </div>
@@ -332,7 +178,7 @@ export default function EkstrakurikulerAttendancePage() {
                         <div className="flex-1">
                             <h2 className="text-xl font-bold text-white">Statistik Presensi</h2>
                             <p className="text-blue-100 text-sm">
-                                Ringkasan performa kehadiran TA {academicYearFilter} {semesterFilter === "all" ? "(1 Tahun Penuh)" : `Semester ${semesterFilter}`}
+                                Ringkasan performa kehadiran ekstrakurikuler
                             </p>
                         </div>
                     </div>
@@ -379,12 +225,12 @@ export default function EkstrakurikulerAttendancePage() {
                             <div>
                                 <CardTitle className="text-lg font-semibold">Riwayat Presensi Kegiatan</CardTitle>
                                 <CardDescription>
-                                    Daftar data kehadiran TA {academicYearFilter} {semesterFilter === "all" ? "(1 Tahun Penuh)" : `Semester ${semesterFilter}`}
+                                    Daftar data kehadiran ekstrakurikuler
                                 </CardDescription>
                             </div>
                         </div>
                         <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-                            {filteredHistory.length} Presensi
+                            {filteredSessions.length} Presensi
                         </Badge>
                     </div>
                 </CardHeader>
@@ -392,39 +238,14 @@ export default function EkstrakurikulerAttendancePage() {
                     {/* Toolbar */}
                     <div className="p-4 border-b">
                         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                            <div className="flex flex-col sm:flex-row gap-4 flex-1 w-full lg:w-auto">
-                                <div className="relative flex-1 min-w-[200px]">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        placeholder="Cari tanggal..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pl-9"
-                                    />
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                    <Select value={academicYearFilter} onValueChange={setAcademicYearFilter}>
-                                        <SelectTrigger className="w-full sm:w-[150px] h-9">
-                                            <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                                            <SelectValue placeholder="TA" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="2025/2026">2025/2026</SelectItem>
-                                            <SelectItem value="2024/2025">2024/2025</SelectItem>
-                                            <SelectItem value="2023/2024">2023/2024</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <Select value={semesterFilter} onValueChange={setSemesterFilter}>
-                                        <SelectTrigger className="w-full sm:w-[140px] h-9">
-                                            <SelectValue placeholder="Semester" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">1 Tahun Penuh</SelectItem>
-                                            <SelectItem value="Ganjil">Ganjil</SelectItem>
-                                            <SelectItem value="Genap">Genap</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                            <div className="relative flex-1 min-w-[200px]">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Cari tanggal atau topik..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-9"
+                                />
                             </div>
                             <div className="flex items-center gap-2">
                                 <Button className="bg-blue-800 hover:bg-blue-900 text-white">
@@ -442,8 +263,7 @@ export default function EkstrakurikulerAttendancePage() {
                                 <tr>
                                     <th className="text-left p-4 font-medium text-sm w-12">No</th>
                                     <th className="text-left p-4 font-medium text-sm min-w-[120px]">Tanggal</th>
-
-                                    <th className="text-left p-4 font-medium text-sm min-w-[180px]">Status Tutor</th>
+                                    <th className="text-left p-4 font-medium text-sm min-w-[180px]">Topik</th>
                                     <th className="text-center p-4 font-medium text-sm w-24">Hadir</th>
                                     <th className="text-center p-4 font-medium text-sm w-24">Tidak Hadir</th>
                                     <th className="text-center p-4 font-medium text-sm w-32">Persentase</th>
@@ -451,7 +271,7 @@ export default function EkstrakurikulerAttendancePage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {paginatedHistory.length === 0 ? (
+                                {paginatedSessions.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className="p-0">
                                             <div className="flex flex-col items-center justify-center py-16">
@@ -462,54 +282,40 @@ export default function EkstrakurikulerAttendancePage() {
                                                     Belum Ada Data Presensi
                                                 </h3>
                                                 <p className="text-sm text-muted-foreground text-center max-w-md px-4">
-                                                    Tidak ada data presensi untuk periode {getAcademicYearLabel(academicYearFilter)} - {getSemesterLabel(semesterFilter)}.
+                                                    Tidak ada data presensi untuk ekstrakurikuler ini.
                                                 </p>
                                             </div>
                                         </td>
                                     </tr>
                                 ) : (
-                                    paginatedHistory.map((record, index) => {
+                                    paginatedSessions.map((record, index) => {
                                         const globalIndex = (currentPage - 1) * itemsPerPage + index + 1;
+                                        const present = record.stats?.present ?? record.presentCount ?? 0;
+                                        const total = record.stats?.total ?? record.totalCount ?? 0;
+                                        const percentage = record.stats?.percentage ?? (total > 0 ? Math.round(present / total * 100) : 0);
+                                        const absent = total - present;
                                         return (
                                             <tr key={record.id} className="border-b hover:bg-muted/30 transition-colors">
                                                 <td className="p-4 text-sm">{globalIndex}</td>
                                                 <td className="p-4 text-sm">
                                                     {formatDate(record.date, "dd MMMM yyyy")}
                                                 </td>
-
-                                                <td className="p-4">
-                                                    {record.tutorStatus === "hadir" ? (
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="h-7 w-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                                                                <CheckCircle className="h-4 w-4 text-green-600" />
-                                                            </div>
-                                                            <span className="text-sm font-medium">{ekskul.tutor}</span>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="h-7 w-7 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                                                                <AlertCircle className="h-4 w-4 text-amber-600" />
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-medium text-amber-700">Belum Terisi</p>
-                                                                <p className="text-xs text-muted-foreground">Tutor belum mengisi presensi</p>
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                <td className="p-4 text-sm">
+                                                    {record.topic || "Pertemuan Rutin"}
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 min-w-[3rem] justify-center">
-                                                        {record.totalPresent}
+                                                        {present}
                                                     </Badge>
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200 min-w-[3rem] justify-center">
-                                                        {record.totalAbsent}
+                                                        {absent}
                                                     </Badge>
                                                 </td>
                                                 <td className="p-4 text-center">
-                                                    <Badge variant="outline" className={getAttendanceBadgeColor(record.percentage)}>
-                                                        {record.percentage}%
+                                                    <Badge variant="outline" className={getAttendanceBadgeColor(percentage)}>
+                                                        {percentage}%
                                                     </Badge>
                                                 </td>
                                                 <td className="p-4">
@@ -535,22 +341,20 @@ export default function EkstrakurikulerAttendancePage() {
 
                     {/* Footer with Pagination */}
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 bg-muted/20">
-                        {/* Left: Pagination Info */}
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>Menampilkan</span>
                             <span className="font-medium text-foreground">
-                                {filteredHistory.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
+                                {filteredSessions.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
                             </span>
                             <span>-</span>
                             <span className="font-medium text-foreground">
-                                {Math.min(currentPage * itemsPerPage, filteredHistory.length)}
+                                {Math.min(currentPage * itemsPerPage, filteredSessions.length)}
                             </span>
                             <span>dari</span>
-                            <span className="font-medium text-foreground">{filteredHistory.length}</span>
+                            <span className="font-medium text-foreground">{filteredSessions.length}</span>
                             <span>data</span>
                         </div>
 
-                        {/* Right: Pagination Controls */}
                         <div className="flex items-center gap-3">
                             <Select
                                 value={itemsPerPage.toString()}
@@ -601,7 +405,7 @@ export default function EkstrakurikulerAttendancePage() {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                    disabled={currentPage === totalPages}
+                                    disabled={currentPage === totalPages || totalPages === 0}
                                     className="h-8 w-8 p-0"
                                 >
                                     <ChevronRight className="h-4 w-4" />

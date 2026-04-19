@@ -159,16 +159,27 @@ export interface AttendanceSessionParams {
 }
 
 export interface AttendanceRecord {
-    studentId: number;
+    id: number;
     nis: string;
     name: string;
+    class: string;
     status: string;
+    note?: string;
+}
+
+export interface AttendanceSessionStats {
+    present: number;
+    total: number;
+    percentage: number;
 }
 
 export interface AttendanceSessionDetail {
     id: number;
     date: string;
+    start_time?: string;
+    end_time?: string;
     topic?: string;
+    stats: AttendanceSessionStats;
     records: AttendanceRecord[];
 }
 
@@ -238,6 +249,55 @@ export interface CreateAchievementData {
 }
 
 export type UpdateAchievementData = Partial<Omit<CreateAchievementData, 'photo'> & { photo?: File | null }>;
+
+export interface Member {
+    id: number;
+    nis: string;
+    name: string;
+    class: string;
+    email: string;
+    phone: string;
+    ekstrakurikuler: string[];
+    status: "active" | "inactive";
+    photo: string | null;
+    joinDate: string;
+}
+
+export interface MemberDetail extends Omit<Member, 'ekstrakurikuler'> {
+    ekstrakurikuler: { id: number; name: string }[];
+    academicYears: { id: number; name: string; joinDate: string }[];
+}
+
+export interface MemberParams {
+    academic_year_id?: number | string;
+    ekstrakurikuler_id?: number | string;
+    status?: string;
+    search?: string;
+    page?: number;
+    per_page?: number;
+}
+
+export interface CreateMemberData {
+    student_profile_id: number;
+    ekstrakurikuler_id: number;
+    academic_year_id: number;
+    join_date: string;
+}
+
+export interface ApiResult<T> {
+    success: boolean;
+    data?: T;
+    error?: {
+        message: string;
+        code: number;
+        errors?: Record<string, string[]>;
+    };
+}
+
+export interface ExtracurricularOption {
+    id: number;
+    name: string;
+}
 
 // ==================== SERVICE FUNCTIONS ====================
 
@@ -582,6 +642,135 @@ export const updatePassword = async (data: UpdatePasswordData): Promise<void> =>
     if (!response.ok) await handleApiError(response);
 };
 
+export const getMembers = async (
+    params?: MemberParams
+): Promise<PaginatedResponse<Member>> => {
+    const queryParams = new URLSearchParams();
+    if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== "") {
+                queryParams.append(key, String(value));
+            }
+        });
+    }
+    const response = await fetch(
+        `${MUTAMAYIZIN_API_URL}/members?${queryParams.toString()}`,
+        { method: "GET", headers: getAuthHeaders() }
+    );
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    return { data: result.data, meta: result.meta };
+};
+
+export const getMember = async (id: number): Promise<MemberDetail> => {
+    const response = await fetch(`${MUTAMAYIZIN_API_URL}/members/${id}`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    return result.data;
+};
+
+export const createMember = async (
+    data: CreateMemberData
+): Promise<ApiResult<Member>> => {
+    const response = await fetch(`${MUTAMAYIZIN_API_URL}/members`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+    });
+    
+    const result = await response.json();
+    
+    // Check if API returned success:false (even with HTTP 200)
+    if (!response.ok || result.success === false) {
+        return {
+            success: false,
+            error: {
+                message: result.message || `HTTP ${response.status}`,
+                code: response.status,
+                errors: result.errors,
+            },
+        };
+    }
+    
+    return {
+        success: true,
+        data: result.data,
+    };
+};
+
+export const updateMember = async (
+    id: number,
+    data: Partial<Omit<CreateMemberData, 'student_profile_id'>>
+): Promise<Member> => {
+    const response = await fetch(`${MUTAMAYIZIN_API_URL}/members/${id}`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+    });
+    
+    let errorData: { message?: string; code?: number; errors?: Record<string, string[]> } = {};
+    try {
+        errorData = await response.json();
+    } catch {
+        // Non-JSON response
+    }
+    
+    if (!response.ok) {
+        const error = new Error(errorData.message || `HTTP ${response.status}`) as Error & {
+            code: number;
+            errors?: Record<string, string[]>;
+        };
+        error.code = errorData.code ?? response.status;
+        error.errors = errorData.errors;
+        throw error;
+    }
+    
+    const result = await response.json();
+    return result.data;
+};
+
+export const deleteMember = async (id: number): Promise<void> => {
+    const response = await fetch(`${MUTAMAYIZIN_API_URL}/members/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+        let errorData: { message?: string; code?: number; errors?: Record<string, string[]> } = {};
+        try {
+            errorData = await response.json();
+        } catch {
+            // Non-JSON response
+        }
+        const error = new Error(errorData.message || `HTTP ${response.status}`) as Error & {
+            code: number;
+            errors?: Record<string, string[]>;
+        };
+        error.code = errorData.code ?? response.status;
+        error.errors = errorData.errors;
+        throw error;
+    }
+};
+
+export const getExtracurricularsForMember = async (
+    academicYearId?: number | string
+): Promise<ExtracurricularOption[]> => {
+    const queryParams = new URLSearchParams();
+    if (academicYearId !== undefined && academicYearId !== null && academicYearId !== "") {
+        queryParams.append("academic_year_id", String(academicYearId));
+    }
+    const response = await fetch(
+        `${MUTAMAYIZIN_API_URL}/extracurriculars-list?${queryParams.toString()}`,
+        { method: "GET", headers: getAuthHeaders() }
+    );
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    return result.data;
+};
+
 // Named export object for backward compatibility
 export const mutamayizinService = {
     getDashboard,
@@ -603,4 +792,10 @@ export const mutamayizinService = {
     updateProfile,
     updateAvatar,
     updatePassword,
+    getMembers,
+    getMember,
+    createMember,
+    updateMember,
+    deleteMember,
+    getExtracurricularsForMember,
 };
