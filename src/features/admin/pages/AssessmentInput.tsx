@@ -99,40 +99,44 @@ const TYPE_STYLE: Record<string, string> = {
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 const PageSkeleton: React.FC = () => (
-    <div className="space-y-6">
-        <div className="space-y-2">
-            <Skeleton className="h-10 w-64" />
-            <Skeleton className="h-4 w-52" />
-        </div>
-        <Card>
-            <CardHeader className="pb-4 space-y-4">
-                <div className="flex items-center gap-3">
-                    <Skeleton className="h-10 w-10 rounded-lg" />
-                    <div className="space-y-1">
-                        <Skeleton className="h-5 w-48" />
-                        <Skeleton className="h-4 w-32" />
-                    </div>
+    <tr>
+        <td colSpan={5} className="px-6 py-12">
+            <div className="space-y-6">
+                <div className="space-y-2">
+                    <Skeleton className="h-10 w-64" />
+                    <Skeleton className="h-4 w-52" />
                 </div>
-                <Skeleton className="h-10 w-full" />
-            </CardHeader>
-            <CardContent className="p-0">
-                <div className="border-t">
-                    {[...Array(5)].map((_, i) => (
-                        <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-slate-50">
-                            <div className="flex-1 space-y-1.5">
-                                <Skeleton className="h-4 w-24" />
-                                <Skeleton className="h-3 w-40" />
+                <Card>
+                    <CardHeader className="pb-4 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <Skeleton className="h-10 w-10 rounded-lg" />
+                            <div className="space-y-1">
+                                <Skeleton className="h-5 w-48" />
+                                <Skeleton className="h-4 w-32" />
                             </div>
-                            <Skeleton className="h-3 w-28" />
-                            <Skeleton className="h-2 w-32 rounded-full" />
-                            <Skeleton className="h-6 w-20 rounded-full" />
-                            <Skeleton className="h-8 w-24 rounded-lg" />
                         </div>
-                    ))}
-                </div>
-            </CardContent>
-        </Card>
-    </div>
+                        <Skeleton className="h-10 w-full" />
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        <div className="border-t">
+                            {[...Array(5)].map((_, i) => (
+                                <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-slate-50">
+                                    <div className="flex-1 space-y-1.5">
+                                        <Skeleton className="h-4 w-24" />
+                                        <Skeleton className="h-3 w-40" />
+                                    </div>
+                                    <Skeleton className="h-3 w-28" />
+                                    <Skeleton className="h-2 w-32 rounded-full" />
+                                    <Skeleton className="h-6 w-20 rounded-full" />
+                                    <Skeleton className="h-8 w-24 rounded-lg" />
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </td>
+    </tr>
 );
 
 // ─── Dialog: Input Nilai ──────────────────────────────────────────────────────

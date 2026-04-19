@@ -234,15 +234,16 @@ export const StatisticSection: React.FC<StatisticSectionProps> = ({
                         }
                         return label;
                       }}
-                      formatter={(value: number, name: string, props: any) => {
-                        const data = props.payload;
+                      formatter={(value, name, props) => {
+                        const data = (props as any).payload;
+                        const nameStr = String(name);
                         let count = 0;
-                        if (name === 'Hadir (%)') count = data.hadir;
-                        else if (name === 'Sakit (%)') count = data.sakit;
-                        else if (name === 'Izin (%)') count = data.izin;
-                        else if (name === 'Alpha (%)') count = data.tanpaKeterangan;
+                        if (nameStr === 'Hadir (%)') count = data.hadir;
+                        else if (nameStr === 'Sakit (%)') count = data.sakit;
+                        else if (nameStr === 'Izin (%)') count = data.izin;
+                        else if (nameStr === 'Alpha (%)') count = data.tanpaKeterangan;
 
-                        return [`${value}% (${count} Siswa)`, name.replace(' (%)', '')];
+                        return [`${value}% (${count} Siswa)`, nameStr.replace(' (%)', '')];
                       }}
                     />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />

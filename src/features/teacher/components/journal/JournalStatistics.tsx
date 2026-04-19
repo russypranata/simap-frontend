@@ -132,7 +132,8 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
   }, [filteredJournals]);
 
   // 2. Monthly Trend Data (Dynamic based on semester selection)
-  const monthlyTrendData = useMemo(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const monthlyTrendData = useMemo<any[]>(() => {
     if (semester === 'all') {
       // Show both semesters for comparison (12 months)
       const months = [
@@ -589,7 +590,7 @@ export const JournalStatistics: React.FC<JournalStatisticsProps> = ({
                         <XAxis type="number" domain={[0, 100]} unit="%" />
                         <YAxis dataKey="name" type="category" width={70} />
                         <Tooltip
-                          formatter={(value: number) => [`${value}%`, 'Kehadiran']}
+                          formatter={(value) => [`${value}%`, 'Kehadiran']}
                           cursor={{ fill: 'transparent' }}
                           contentStyle={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '8px' }}
                         />
