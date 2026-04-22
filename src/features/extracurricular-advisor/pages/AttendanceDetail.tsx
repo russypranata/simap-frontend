@@ -2,9 +2,8 @@
 
 import React from "react";
 import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle } from "lucide-react";
-import { PageHeader } from "@/features/shared/components";
+import { CheckCircle } from "lucide-react";
+import { PageHeader, ErrorState } from "@/features/shared/components";
 import { AttendanceDetailSkeleton } from "../components/AdvisorSkeletons";
 import { AttendanceInfoCard, AttendanceStudentTable } from "../components/attendance";
 import { useAdvisorAttendanceDetail } from "../hooks/useAdvisorAttendanceDetail";
@@ -14,7 +13,7 @@ export const AttendanceDetailPage: React.FC = () => {
     const id = Number(params.id);
 
     const {
-        detail, stats, isLoading,
+        detail, stats, isLoading, isError, refetch,
         extracurricularName,
         searchTerm, setSearchTerm,
         statusFilter, setStatusFilter,
@@ -25,14 +24,11 @@ export const AttendanceDetailPage: React.FC = () => {
     } = useAdvisorAttendanceDetail(id);
 
     if (isLoading) return <AttendanceDetailSkeleton />;
-
-    if (!detail) return (
-        <div className="flex flex-col items-center justify-center py-12">
-            <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
-            <h2 className="text-lg font-semibold">Data Tidak Ditemukan</h2>
-            <p className="text-muted-foreground">Detail presensi tidak dapat ditemukan.</p>
-            <Button onClick={() => window.location.reload()} variant="outline" className="mt-4">Coba Lagi</Button>
-        </div>
+    if (isError || !detail) return (
+        <ErrorState
+            error="Detail presensi tidak dapat ditemukan atau gagal dimuat."
+            onRetry={refetch}
+        />
     );
 
     return (

@@ -22,6 +22,7 @@ interface UseAdvisorMembersReturn {
     isLoading: boolean;
     isStatsLoading: boolean;
     error: string | null;
+    refetch: () => void;
     currentPage: number;
     setCurrentPage: (page: number) => void;
     totalPages: number;
@@ -89,12 +90,14 @@ export const useAdvisorMembers = (): UseAdvisorMembersReturn => {
             academicYear: ay,
             status: "Aktif",
         }),
-        placeholderData: (prev) => prev, // keep previous data saat filter berubah (no flicker)
+        placeholderData: (prev) => prev,
+        staleTime: 2 * 60 * 1000,
     });
 
     const statsQuery = useQuery({
         queryKey: ["advisor-members-stats", ay, semester],
         queryFn: () => getDashboardStats({ academicYear: ay, semester }),
+        staleTime: 3 * 60 * 1000,
     });
 
     const members = membersQuery.data?.data ?? [];
@@ -134,6 +137,7 @@ export const useAdvisorMembers = (): UseAdvisorMembersReturn => {
         isLoading: membersQuery.isLoading,
         isStatsLoading: statsQuery.isLoading,
         error: membersQuery.error instanceof Error ? membersQuery.error.message : null,
+        refetch: membersQuery.refetch,
         currentPage,
         setCurrentPage,
         totalPages,

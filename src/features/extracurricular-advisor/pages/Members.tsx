@@ -15,12 +15,24 @@ const MembersSkeleton: React.FC = () => (
             {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
         </div>
         <Card>
-            <CardHeader>
-                <div className="h-5 w-48 bg-slate-100 rounded" />
+            {/* Card header dengan icon + title + badge */}
+            <CardHeader className="pb-4 border-b border-slate-200">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-slate-100 animate-pulse" />
+                        <div className="space-y-1.5">
+                            <div className="h-5 w-44 bg-slate-100 rounded animate-pulse" />
+                            <div className="h-4 w-36 bg-slate-100 rounded animate-pulse" />
+                        </div>
+                    </div>
+                    <div className="h-6 w-20 bg-slate-100 rounded-full animate-pulse" />
+                </div>
             </CardHeader>
             <CardContent className="p-0">
-                <div className="p-4 border-b">
-                    <div className="h-10 w-full bg-slate-100 rounded" />
+                {/* Toolbar */}
+                <div className="p-4 border-b flex gap-3">
+                    <div className="h-10 flex-1 bg-slate-100 rounded animate-pulse" />
+                    <div className="h-10 w-44 bg-slate-100 rounded animate-pulse" />
                 </div>
                 <table className="w-full">
                     <tbody>
@@ -35,7 +47,7 @@ const MembersSkeleton: React.FC = () => (
 // ==================== MAIN ====================
 export const ExtracurricularMembers: React.FC = () => {
     const {
-        members, stats, isLoading, error,
+        members, stats, isLoading, error, refetch,
         currentPage, setCurrentPage, totalPages, totalItems, itemsPerPage, setItemsPerPage,
         startIndex, endIndex,
         searchQuery, setSearchQuery, classFilter, setClassFilter,
@@ -43,7 +55,7 @@ export const ExtracurricularMembers: React.FC = () => {
     } = useAdvisorMembers();
 
     if (isLoading && members.length === 0) return <MembersSkeleton />;
-    if (error) return <ErrorState error={error} onRetry={() => window.location.reload()} />;
+    if (error) return <ErrorState error={error} onRetry={refetch} />;
 
     return (
         <div className="space-y-6">

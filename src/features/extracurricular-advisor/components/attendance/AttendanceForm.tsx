@@ -4,7 +4,8 @@ import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar, Clock } from "lucide-react";
+import { BookOpen, Calendar, Clock } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface AttendanceFormProps {
     tutorName: string;
@@ -12,9 +13,11 @@ interface AttendanceFormProps {
     selectedDate: string;
     startTime: string;
     endTime: string;
+    topic?: string;
     onDateChange: (d: string) => void;
     onStartTimeChange: (t: string) => void;
     onEndTimeChange: (t: string) => void;
+    onTopicChange?: (t: string) => void;
 }
 
 export const AttendanceForm: React.FC<AttendanceFormProps> = ({
@@ -23,9 +26,11 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
     selectedDate,
     startTime,
     endTime,
+    topic = "",
     onDateChange,
     onStartTimeChange,
     onEndTimeChange,
+    onTopicChange,
 }) => (
     <Card>
         <CardHeader>
@@ -49,6 +54,20 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
                     <div className="space-y-2">
                         <Label htmlFor="type-eskul" className="text-sm font-semibold">Jenis Ekstrakurikuler</Label>
                         <Input id="type-eskul" value={extracurricularName || "—"} readOnly className="h-11 bg-muted/50" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="topic" className="text-sm font-semibold flex items-center gap-1.5">
+                            <BookOpen className="h-4 w-4 text-muted-foreground" />
+                            Materi / Topik Pertemuan
+                        </Label>
+                        <Textarea
+                            id="topic"
+                            value={topic}
+                            onChange={(e) => onTopicChange?.(e.target.value)}
+                            placeholder="Contoh: Teknik dasar dribbling, Latihan formasi, Pengenalan alat musik, dll."
+                            className="resize-none h-20"
+                            readOnly={!onTopicChange}
+                        />
                     </div>
                 </div>
                 <div className="space-y-4">

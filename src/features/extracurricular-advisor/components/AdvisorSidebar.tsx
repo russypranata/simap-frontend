@@ -8,6 +8,8 @@ import {
     Users,
     CheckCircle,
     User,
+    Star,
+    ClipboardList,
 } from "lucide-react";
 
 export const AdvisorSidebar: React.FC = () => {
@@ -28,6 +30,16 @@ export const AdvisorSidebar: React.FC = () => {
             title: "Presensi Kegiatan",
             href: "/extracurricular-advisor/attendance",
             icon: CheckCircle,
+        },
+        {
+            title: "Penilaian",
+            href: "/extracurricular-advisor/assessments",
+            icon: Star,
+        },
+        {
+            title: "Tugas",
+            href: "/extracurricular-advisor/assignments",
+            icon: ClipboardList,
         },
         {
             title: "Profil",

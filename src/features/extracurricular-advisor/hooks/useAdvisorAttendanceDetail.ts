@@ -17,6 +17,8 @@ interface UseAdvisorAttendanceDetailReturn {
     detail: AttendanceDetail | null;
     stats: AttendanceStats;
     isLoading: boolean;
+    isError: boolean;
+    refetch: () => void;
     extracurricularName: string;
     searchTerm: string;
     setSearchTerm: (s: string) => void;
@@ -51,6 +53,7 @@ export const useAdvisorAttendanceDetail = (id: number): UseAdvisorAttendanceDeta
         queryKey: ["advisor-attendance-detail", id],
         queryFn: () => getAttendanceDetail(id),
         enabled: !!id,
+        staleTime: 5 * 60 * 1000, // detail presensi jarang berubah
     });
 
     const profileQuery = useQuery({
@@ -104,6 +107,8 @@ export const useAdvisorAttendanceDetail = (id: number): UseAdvisorAttendanceDeta
 
     return {
         detail, stats, isLoading,
+        isError: detailQuery.isError,
+        refetch: detailQuery.refetch,
         extracurricularName: profileQuery.data?.extracurricular ?? "",
         searchTerm, setSearchTerm,
         statusFilter, setStatusFilter,

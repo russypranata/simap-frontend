@@ -3,7 +3,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, CheckCircle, Clock, Users, AlertCircle, XCircle, ClipboardList } from "lucide-react";
+import { Calendar, CheckCircle, Clock, Users, AlertCircle, XCircle, ClipboardList, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
 import { type AttendanceDetail } from "../../services/advisorAttendanceService";
@@ -98,5 +98,18 @@ export const AttendanceInfoCard: React.FC<AttendanceInfoCardProps> = ({ detail, 
                 </div>
             ))}
         </div>
+
+        {/* Topic row */}
+        {detail.topic && (
+            <div className="px-4 py-3 border-t bg-amber-50/50 flex items-start gap-2.5">
+                <div className="p-1.5 rounded-lg bg-amber-100 shrink-0 mt-0.5">
+                    <BookOpen className="h-4 w-4 text-amber-600" />
+                </div>
+                <div>
+                    <p className="text-xs text-muted-foreground">Materi / Topik Pertemuan</p>
+                    <p className="text-sm font-medium text-slate-800 mt-0.5">{detail.topic}</p>
+                </div>
+            </div>
+        )}
     </Card>
 );

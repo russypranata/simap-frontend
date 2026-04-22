@@ -10,11 +10,13 @@ export const useAdvisorProfile = () => {
     const profileQuery = useQuery({
         queryKey: ["advisor-profile"],
         queryFn: getProfile,
+        staleTime: 5 * 60 * 1000,
     });
 
     const statsQuery = useQuery({
         queryKey: ["advisor-dashboard-stats", ay],
         queryFn: () => getDashboardStats({ academicYear: ay }),
+        staleTime: 3 * 60 * 1000,
     });
 
     const isLoading = profileQuery.isLoading || statsQuery.isLoading;

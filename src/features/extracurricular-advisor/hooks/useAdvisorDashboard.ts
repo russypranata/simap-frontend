@@ -19,6 +19,8 @@ const DEFAULT_STATS: AdvisorDashboardStats = {
     totalMeetings: 0,
     activeStudents: 0,
     needsAttention: 0,
+    activeAssignments: 0,
+    averageAssessmentScore: 0,
 };
 
 export const useAdvisorDashboard = () => {
@@ -28,27 +30,31 @@ export const useAdvisorDashboard = () => {
     const statsQuery = useQuery({
         queryKey: ["advisor-dashboard-stats", ay],
         queryFn: () => getDashboardStats({ academicYear: ay }),
-        // tidak pakai placeholderData — biarkan isLoading bekerja natural
+        staleTime: 3 * 60 * 1000,
     });
 
     const scheduleQuery = useQuery({
         queryKey: ["advisor-dashboard-schedule"],
         queryFn: getUpcomingSchedule,
+        staleTime: 5 * 60 * 1000,
     });
 
     const regularScheduleQuery = useQuery({
         queryKey: ["advisor-dashboard-regular-schedule"],
         queryFn: getRegularSchedule,
+        staleTime: 10 * 60 * 1000, // jadwal rutin jarang berubah
     });
 
     const activitiesQuery = useQuery({
         queryKey: ["advisor-dashboard-activities"],
         queryFn: getRecentActivities,
+        staleTime: 2 * 60 * 1000,
     });
 
     const profileQuery = useQuery({
         queryKey: ["advisor-profile"],
         queryFn: getProfile,
+        staleTime: 5 * 60 * 1000,
     });
 
     // isLoading true hanya saat pertama kali fetch (tidak ada cache sama sekali)

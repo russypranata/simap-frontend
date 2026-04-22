@@ -35,6 +35,8 @@ interface UseAdvisorAttendanceReturn {
     setStartTime: (t: string) => void;
     endTime: string;
     setEndTime: (t: string) => void;
+    topic: string;
+    setTopic: (t: string) => void;
     attendanceRecords: Map<number, AttendanceRecord>;
     handleStatusChange: (studentId: number, status: AttendanceStatus) => void;
     handleMarkAllPresent: () => void;
@@ -92,16 +94,19 @@ export const useAdvisorAttendance = (): UseAdvisorAttendanceReturn => {
     const profileQuery = useQuery({
         queryKey: ["advisor-profile"],
         queryFn: getProfile,
+        staleTime: 5 * 60 * 1000,
     });
 
     const membersQuery = useQuery({
         queryKey: ["advisor-attendance-members", academicYear.academicYear],
         queryFn: () => getMembers({ limit: 100, status: "Aktif", academicYear: academicYear.academicYear }),
+        staleTime: 2 * 60 * 1000,
     });
 
     const historyQuery = useQuery({
         queryKey: ["advisor-attendance-history"],
         queryFn: () => getAttendanceHistory(),
+        staleTime: 1 * 60 * 1000,
     });
 
     // ── Local UI state ─────────────────────────────────────────────────────
@@ -109,6 +114,7 @@ export const useAdvisorAttendance = (): UseAdvisorAttendanceReturn => {
     const [selectedDate, setSelectedDate] = useState(todayStr);
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
+    const [topic, setTopic] = useState("");
     const [attendanceRecords, setAttendanceRecords] = useState<Map<number, AttendanceRecord>>(new Map());
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState<"all" | AttendanceStatus>("all");
@@ -211,7 +217,7 @@ export const useAdvisorAttendance = (): UseAdvisorAttendanceReturn => {
                 date: selectedDate,
                 start_time: startTime,
                 end_time: endTime,
-                topic: "Kegiatan Rutin",
+                topic: topic || undefined,
                 students: Array.from(attendanceRecords.entries()).map(([studentId, r]) => ({
                     student_id: studentId, status: r.status, note: r.note,
                 })),
@@ -226,10 +232,11 @@ export const useAdvisorAttendance = (): UseAdvisorAttendanceReturn => {
             setAttendanceRecords(new Map());
             setStartTime("");
             setEndTime("");
+            setTopic("");
         } catch {
             toast.error("Gagal menyimpan presensi");
         }
-    }, [selectedDate, startTime, endTime, members, attendanceRecords, queryClient]);
+    }, [selectedDate, startTime, endTime, topic, members, attendanceRecords, queryClient]);
 
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
@@ -284,6 +291,7 @@ export const useAdvisorAttendance = (): UseAdvisorAttendanceReturn => {
     return {
         members, history, tutorName, extracurricularName, isLoading, isHistoryLoading, isRefreshing,
         selectedDate, setSelectedDate, startTime, setStartTime, endTime, setEndTime,
+        topic, setTopic,
         attendanceRecords, handleStatusChange, handleMarkAllPresent, handleSaveAttendance,
         searchTerm, setSearchTerm, statusFilter, setStatusFilter,
         currentPage, setCurrentPage, itemsPerPage, setItemsPerPage,

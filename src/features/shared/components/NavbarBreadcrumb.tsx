@@ -18,6 +18,7 @@ import {
     BookOpen,
     Trophy,
     Activity,
+    Star,
     Pencil,
     CircleDot,
     ArrowLeft,
@@ -165,6 +166,8 @@ const routeConfig: Record<string, RouteItem> = {
     'extracurricular-advisor:members': { label: 'Daftar Anggota', icon: Users },
     'extracurricular-advisor:presensi': { label: 'Presensi Kegiatan', icon: ClipboardList },
     'extracurricular-advisor:attendance': { label: 'Presensi Kegiatan', icon: ClipboardList },
+    'extracurricular-advisor:assessments': { label: 'Penilaian', icon: Star },
+    'extracurricular-advisor:assignments': { label: 'Tugas', icon: ClipboardList },
     'extracurricular-advisor:profile': { label: 'Profil', icon: User },
 
     // ── MUTAMAYIZIN ───────────────────────────────────────────────────────────

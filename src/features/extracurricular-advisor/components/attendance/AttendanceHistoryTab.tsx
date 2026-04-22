@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, Search, History, Eye, XCircle } from "lucide-react";
+import { Calendar, Search, History, Eye, XCircle, BookOpen } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/features/shared/utils/dateFormatter";
@@ -213,6 +213,15 @@ export const AttendanceHistoryTab: React.FC<AttendanceHistoryTabProps> = ({
                                             {record.advisorStats.startTime} - {record.advisorStats.endTime}
                                         </Badge>
                                     </div>
+                                    {record.topic && (
+                                        <div className="flex items-start gap-1.5">
+                                            <BookOpen className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                                            <div>
+                                                <span className="text-xs text-muted-foreground block">Materi</span>
+                                                <span className="text-xs text-slate-700 line-clamp-1">{record.topic}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <Button
                                     size="sm"

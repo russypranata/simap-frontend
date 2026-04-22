@@ -36,6 +36,8 @@ export interface AdvisorDashboardStats {
     totalMeetings: number;
     activeStudents: number;
     needsAttention: number;
+    activeAssignments: number;
+    averageAssessmentScore: number;
 }
 
 export interface RegularScheduleItem {
@@ -111,6 +113,8 @@ export const getDashboardStats = async (
             totalMeetings: 12,
             activeStudents,
             needsAttention,
+            activeAssignments: 0,
+            averageAssessmentScore: 0,
         };
     }
 
@@ -133,6 +137,8 @@ export const getDashboardStats = async (
         totalMeetings: d.total_meetings ?? d.totalMeetings ?? 0,
         activeStudents: d.active_students ?? d.activeStudents ?? 0,
         needsAttention: d.needs_attention ?? d.needsAttention ?? 0,
+        activeAssignments: d.active_assignments ?? d.activeAssignments ?? 0,
+        averageAssessmentScore: d.average_assessment_score ?? d.averageAssessmentScore ?? 0,
     };
 };
 

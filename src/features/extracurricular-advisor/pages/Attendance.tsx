@@ -8,7 +8,7 @@ import { CheckCircle, Users, RefreshCw, History, TrendingUp, Calendar, Clipboard
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard, ErrorState } from "@/features/shared/components";
+import { PageHeader, StatCard, SkeletonPageHeader, SkeletonStatCard, SkeletonTableRow, ErrorState } from "@/features/shared/components";
 import { useAdvisorAttendance } from "../hooks/useAdvisorAttendance";
 import { AttendanceForm, AttendanceTable, AttendanceHistoryTab } from "../components/attendance";
 
@@ -18,9 +18,65 @@ const AttendanceSkeleton: React.FC = () => (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
         </div>
+        {/* Tabs skeleton */}
+        <div className="flex gap-1 p-1.5 bg-muted/50 rounded-full w-fit">
+            <Skeleton className="h-9 w-32 rounded-full" />
+            <Skeleton className="h-9 w-36 rounded-full" />
+        </div>
+        {/* Form card skeleton */}
         <Card>
-            <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
-            <CardContent><Skeleton className="h-64 w-full" /></CardContent>
+            <CardHeader>
+                <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-lg" />
+                    <div className="space-y-1.5">
+                        <Skeleton className="h-5 w-40" />
+                        <Skeleton className="h-4 w-56" />
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                        <Skeleton className="h-11 w-full" />
+                        <Skeleton className="h-11 w-full" />
+                        <Skeleton className="h-20 w-full" />
+                    </div>
+                    <div className="space-y-4">
+                        <Skeleton className="h-11 w-full" />
+                        <div className="grid grid-cols-2 gap-4">
+                            <Skeleton className="h-11 w-full" />
+                            <Skeleton className="h-11 w-full" />
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+        {/* Table card skeleton */}
+        <Card>
+            <CardHeader>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-lg" />
+                        <div className="space-y-1.5">
+                            <Skeleton className="h-5 w-32" />
+                            <Skeleton className="h-4 w-44" />
+                        </div>
+                    </div>
+                    <Skeleton className="h-6 w-24 rounded-full" />
+                </div>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="px-6 py-4 border-b flex gap-3">
+                    <Skeleton className="h-10 flex-1" />
+                    <Skeleton className="h-10 w-40" />
+                    <Skeleton className="h-10 w-44" />
+                </div>
+                <table className="w-full">
+                    <tbody>
+                        {Array.from({ length: 5 }).map((_, i) => <SkeletonTableRow key={i} cols={6} />)}
+                    </tbody>
+                </table>
+            </CardContent>
         </Card>
     </div>
 );
@@ -32,6 +88,7 @@ export const ExtracurricularAttendance: React.FC = () => {
     const {
         members, history, tutorName, extracurricularName, isLoading, isHistoryLoading, isRefreshing,
         selectedDate, setSelectedDate, startTime, setStartTime, endTime, setEndTime,
+        topic, setTopic,
         attendanceRecords, handleStatusChange, handleMarkAllPresent, handleSaveAttendance,
         searchTerm, setSearchTerm, statusFilter, setStatusFilter,
         currentPage, setCurrentPage, itemsPerPage, setItemsPerPage,
@@ -99,9 +156,11 @@ export const ExtracurricularAttendance: React.FC = () => {
                         selectedDate={selectedDate}
                         startTime={startTime}
                         endTime={endTime}
+                        topic={topic}
                         onDateChange={setSelectedDate}
                         onStartTimeChange={setStartTime}
                         onEndTimeChange={setEndTime}
+                        onTopicChange={setTopic}
                     />
                     <AttendanceTable
                         members={members}

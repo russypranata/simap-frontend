@@ -34,6 +34,7 @@ const handleApiError = async (response: Response): Promise<never> => {
 export interface AttendanceHistoryEntry {
     id: number;
     date: string;
+    topic?: string;
     studentStats: {
         present: number;
         total: number;
@@ -58,7 +59,6 @@ export interface AttendanceStudent {
 }
 
 export interface AttendanceDetail extends AttendanceHistoryEntry {
-    topic?: string;
     students: AttendanceStudent[];
 }
 
@@ -109,6 +109,7 @@ const MOCK_HISTORY: AttendanceHistoryEntry[] = [
 const normalizeHistoryEntry = (d: Record<string, any>): AttendanceHistoryEntry => ({
     id: d.id,
     date: d.date,
+    topic: d.topic ?? undefined,
     studentStats: {
         present: d.student_stats?.present ?? d.studentStats?.present ?? 0,
         total: d.student_stats?.total ?? d.studentStats?.total ?? 0,

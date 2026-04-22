@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Calendar, Users, CheckCircle, TrendingUp, Award, ClipboardList, AlertCircle } from "lucide-react";
+import { Calendar, Users, CheckCircle, TrendingUp, Award, ClipboardList, AlertCircle, Star, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -69,6 +69,9 @@ export const ExtracurricularDashboard: React.FC = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
             </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <ScheduleCardSkeleton />
                 <RecentActivitiesSkeleton />
@@ -106,6 +109,13 @@ export const ExtracurricularDashboard: React.FC = () => {
                 <StatCard title="Total Pertemuan" value={stats.totalMeetings} subtitle="Kegiatan tercatat" icon={Calendar} color="purple" />
             </div>
 
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <StatCard title="Tugas Aktif" value={stats.activeAssignments} subtitle="Tugas tahun ini" icon={BookOpen} color="amber" />
+                <StatCard title="Rata-rata Nilai" value={stats.averageAssessmentScore} subtitle="Penilaian ekskul" icon={Star} color="amber" />
+                <StatCard title="Siswa Aktif" value={stats.activeStudents} subtitle="Kehadiran ≥ 90%" icon={CheckCircle} color="green" />
+                <StatCard title="Perlu Perhatian" value={stats.needsAttention} subtitle="Kehadiran < 75%" icon={AlertCircle} color="red" />
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <ScheduleCard upcomingSchedules={upcomingSchedules} regularSchedules={regularSchedules} extracurricularName={extracurricularName} />
                 <RecentActivitiesCard recentActivities={recentActivities} />
@@ -120,6 +130,8 @@ export const ExtracurricularDashboard: React.FC = () => {
                             <ul className="text-sm text-blue-900 space-y-1 list-disc list-inside">
                                 <li>Isi presensi siswa dan tutor setiap ada kegiatan ekstrakurikuler</li>
                                 <li>Pantau kehadiran anggota untuk memastikan partisipasi aktif</li>
+                                <li>Tambahkan penilaian ekskul di menu <strong>Penilaian</strong> untuk setiap anggota</li>
+                                <li>Buat dan kelola tugas ekskul di menu <strong>Tugas</strong></li>
                             </ul>
                         </div>
                     </div>

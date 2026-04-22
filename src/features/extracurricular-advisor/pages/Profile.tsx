@@ -12,10 +12,10 @@ import { ErrorState } from "@/features/shared/components";
 
 export const ExtracurricularAdvisorProfile: React.FC = () => {
     const router = useRouter();
-    const { profile, stats, isLoading, isFetching, refetch } = useAdvisorProfile();
+    const { profile, stats, isLoading, isFetching, error, refetch } = useAdvisorProfile();
 
     if (isLoading) return <ProfileSkeleton />;
-    if (!profile) return <ErrorState error="Gagal memuat profil." onRetry={refetch} />;
+    if (error || !profile) return <ErrorState error={error ?? "Gagal memuat profil."} onRetry={refetch} />;
 
     return (
         <div className="space-y-6">
