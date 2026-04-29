@@ -7,6 +7,7 @@ import {
     LayoutDashboard,
     GraduationCap,
     Calendar,
+    CalendarDays,
     User,
     CheckCircle,
     Trophy,
@@ -32,6 +33,7 @@ export const StudentSidebar: React.FC = () => {
             icon: GraduationCap,
             isGroup: true,
             subItems: [
+                { title: "Kalender Akademik", href: "/student/academic/calendar", icon: CalendarDays },
                 { title: "Jadwal Pelajaran", href: "/student/schedule", icon: Calendar },
                 { title: "Nilai & Rapor", href: "/student/grades", icon: GraduationCap },
                 { title: "Prestasi", href: "/student/achievements", icon: Award },

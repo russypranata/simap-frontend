@@ -10,6 +10,7 @@ export { FilterButton } from "./FilterButton";
 export { ActiveFilterBadges } from "./ActiveFilterBadges";
 export type { FilterBadge } from "./ActiveFilterBadges";
 export { BackButton } from "./BackButton";
+export { AcademicCalendarView } from "./AcademicCalendarView";
 export {
     SkeletonStatCard,
     SkeletonPageHeader,

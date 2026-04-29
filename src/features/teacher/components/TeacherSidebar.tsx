@@ -9,6 +9,7 @@ import {
     BookOpen,
     GraduationCap,
     Calendar,
+    CalendarDays,
     Home,
     FileText,
     User,
@@ -24,6 +25,11 @@ export const TeacherSidebar: React.FC = () => {
             title: "Dashboard",
             href: "/teacher/dashboard",
             icon: LayoutDashboard,
+        },
+        {
+            title: "Kalender Akademik",
+            href: "/teacher/academic/calendar",
+            icon: CalendarDays,
         },
         {
             title: "Jurnal Mengajar",

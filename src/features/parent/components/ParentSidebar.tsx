@@ -6,6 +6,7 @@ import { useRole } from "@/app/context/RoleContext";
 import {
     LayoutDashboard,
     Calendar,
+    CalendarDays,
     GraduationCap,
     Award,
     CheckCircle,
@@ -33,6 +34,11 @@ export const ParentSidebar: React.FC = () => {
             icon: GraduationCap,
             isGroup: true,
             subItems: [
+                {
+                    title: "Kalender Akademik",
+                    href: "/parent/academic/calendar",
+                    icon: CalendarDays,
+                },
                 {
                     title: "Jadwal Pelajaran",
                     href: "/parent/academic/schedule",
