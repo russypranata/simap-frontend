@@ -125,6 +125,7 @@ export interface ExtracurricularItem {
 
 export interface ExtracurricularParams {
     academic_year_id?: number | string;
+    semester?: string;
     page?: number;
 }
 
@@ -155,6 +156,7 @@ export interface AttendanceSession {
 
 export interface AttendanceSessionParams {
     academic_year_id?: number | string;
+    semester?: string;
     page?: number;
 }
 
@@ -297,6 +299,19 @@ export interface ApiResult<T> {
 export interface ExtracurricularOption {
     id: number;
     name: string;
+}
+
+export interface RegularScheduleItem {
+    id: number;
+    day: string;
+    time_start: string;
+    time_end: string;
+}
+
+export interface CreateScheduleData {
+    day: string;
+    time_start: string;
+    time_end: string;
 }
 
 // ==================== SERVICE FUNCTIONS ====================
@@ -771,6 +786,46 @@ export const getExtracurricularsForMember = async (
     return result.data;
 };
 
+export const getEkskulSchedules = async (tutorId: number): Promise<RegularScheduleItem[]> => {
+    const response = await fetch(`${MUTAMAYIZIN_API_URL}/extracurriculars/${tutorId}/schedules`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    return result.data;
+};
+
+export const createEkskulSchedule = async (tutorId: number, data: CreateScheduleData): Promise<RegularScheduleItem> => {
+    const response = await fetch(`${MUTAMAYIZIN_API_URL}/extracurriculars/${tutorId}/schedules`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    return result.data;
+};
+
+export const updateEkskulSchedule = async (tutorId: number, scheduleId: number, data: Partial<CreateScheduleData>): Promise<RegularScheduleItem> => {
+    const response = await fetch(`${MUTAMAYIZIN_API_URL}/extracurriculars/${tutorId}/schedules/${scheduleId}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) await handleApiError(response);
+    const result = await response.json();
+    return result.data;
+};
+
+export const deleteEkskulSchedule = async (tutorId: number, scheduleId: number): Promise<void> => {
+    const response = await fetch(`${MUTAMAYIZIN_API_URL}/extracurriculars/${tutorId}/schedules/${scheduleId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) await handleApiError(response);
+};
+
 // Named export object for backward compatibility
 export const mutamayizinService = {
     getDashboard,
@@ -798,4 +853,8 @@ export const mutamayizinService = {
     updateMember,
     deleteMember,
     getExtracurricularsForMember,
+    getEkskulSchedules,
+    createEkskulSchedule,
+    updateEkskulSchedule,
+    deleteEkskulSchedule,
 };

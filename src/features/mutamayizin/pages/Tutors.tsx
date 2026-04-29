@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     Card,
     CardContent,
@@ -35,6 +36,10 @@ import {
     TrendingUp,
     UserCheck,
     Activity,
+    CalendarCheck,
+    Clock,
+    Plus,
+    Trash2,
 } from 'lucide-react';
 import { formatDate } from '@/features/shared/utils/dateFormatter';
 import { EmptyState } from '@/features/shared/components/EmptyState';
@@ -45,10 +50,16 @@ import {
     useMutamayizinExtracurriculars,
     useMutamayizinExtracurricularDetail,
 } from '../hooks/useMutamayizinEkskul';
-import { getAcademicYears } from '../services/mutamayizinService';
+import {
+    getAcademicYears,
+    getEkskulSchedules,
+    createEkskulSchedule,
+    deleteEkskulSchedule,
+} from '../services/mutamayizinService';
 import type {
     AcademicYear,
     ExtracurricularItem,
+    RegularScheduleItem,
 } from '../services/mutamayizinService';
 
 // ─── Detail Modal ────────────────────────────────────────────────────────────
@@ -57,18 +68,74 @@ interface DetailModalProps {
     tutorId: number | null;
     open: boolean;
     onClose: () => void;
+    onViewAttendance?: (tutorId: number) => void;
 }
 
 const DetailModal: React.FC<DetailModalProps> = ({
     tutorId,
     open,
     onClose,
+    onViewAttendance,
 }) => {
     const {
         data: detail,
         isLoading,
         error,
     } = useMutamayizinExtracurricularDetail(tutorId ?? 0);
+
+    const [schedules, setSchedules] = useState<RegularScheduleItem[]>([]);
+    const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
+    const [showAddSchedule, setShowAddSchedule] = useState(false);
+    const [newSchedule, setNewSchedule] = useState({ day: '', time_start: '', time_end: '' });
+    const [isSubmittingSchedule, setIsSubmittingSchedule] = useState(false);
+
+    useEffect(() => {
+        if (!open || !tutorId) return;
+        setIsLoadingSchedules(true);
+        getEkskulSchedules(tutorId)
+            .then(setSchedules)
+            .catch(() => setSchedules([]))
+            .finally(() => setIsLoadingSchedules(false));
+    }, [open, tutorId]);
+
+    // Reset form saat modal ditutup
+    useEffect(() => {
+        if (!open) {
+            setShowAddSchedule(false);
+            setNewSchedule({ day: '', time_start: '', time_end: '' });
+        }
+    }, [open]);
+
+    const handleAddSchedule = async () => {
+        if (!tutorId || !newSchedule.day || !newSchedule.time_start || !newSchedule.time_end) return;
+        setIsSubmittingSchedule(true);
+        try {
+            const created = await createEkskulSchedule(tutorId, newSchedule);
+            setSchedules((prev) => [...prev, created]);
+            setNewSchedule({ day: '', time_start: '', time_end: '' });
+            setShowAddSchedule(false);
+        } catch {
+            // silently ignore; user can retry
+        } finally {
+            setIsSubmittingSchedule(false);
+        }
+    };
+
+    const handleDeleteSchedule = async (scheduleId: number) => {
+        if (!tutorId) return;
+        // Optimistic update
+        setSchedules((prev) => prev.filter((s) => s.id !== scheduleId));
+        try {
+            await deleteEkskulSchedule(tutorId, scheduleId);
+        } catch {
+            // Rollback on failure — refetch
+            getEkskulSchedules(tutorId)
+                .then(setSchedules)
+                .catch(() => {});
+        }
+    };
+
+    const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -211,6 +278,140 @@ const DetailModal: React.FC<DetailModalProps> = ({
                                 </div>
                             )}
                         </div>
+
+                        {/* Jadwal Reguler */}
+                        <div>
+                            <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-blue-800" />
+                                Jadwal Reguler
+                            </h4>
+
+                            {isLoadingSchedules ? (
+                                <div className="space-y-2">
+                                    {Array.from({ length: 2 }).map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="h-9 bg-slate-100 rounded animate-pulse"
+                                        />
+                                    ))}
+                                </div>
+                            ) : schedules.length === 0 && !showAddSchedule ? (
+                                <p className="text-sm text-muted-foreground text-center py-4">
+                                    Belum ada jadwal reguler
+                                </p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {schedules.map((s) => (
+                                        <div
+                                            key={s.id}
+                                            className="flex items-center justify-between px-3 py-2 bg-slate-50 rounded-lg border border-slate-200"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs">
+                                                    {s.day}
+                                                </Badge>
+                                                <span className="text-sm text-slate-700">
+                                                    {s.time_start} – {s.time_end}
+                                                </span>
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleDeleteSchedule(s.id)}
+                                                className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Form tambah jadwal */}
+                            {showAddSchedule ? (
+                                <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200 space-y-3">
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <select
+                                            value={newSchedule.day}
+                                            onChange={(e) =>
+                                                setNewSchedule((prev) => ({ ...prev, day: e.target.value }))
+                                            }
+                                            className="col-span-1 h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                        >
+                                            <option value="">Pilih Hari</option>
+                                            {DAYS.map((d) => (
+                                                <option key={d} value={d}>{d}</option>
+                                            ))}
+                                        </select>
+                                        <input
+                                            type="time"
+                                            value={newSchedule.time_start}
+                                            onChange={(e) =>
+                                                setNewSchedule((prev) => ({ ...prev, time_start: e.target.value }))
+                                            }
+                                            className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                        />
+                                        <input
+                                            type="time"
+                                            value={newSchedule.time_end}
+                                            onChange={(e) =>
+                                                setNewSchedule((prev) => ({ ...prev, time_end: e.target.value }))
+                                            }
+                                            className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                        />
+                                    </div>
+                                    <div className="flex gap-2 justify-end">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setShowAddSchedule(false);
+                                                setNewSchedule({ day: '', time_start: '', time_end: '' });
+                                            }}
+                                            className="h-8"
+                                        >
+                                            Batal
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            onClick={handleAddSchedule}
+                                            disabled={
+                                                isSubmittingSchedule ||
+                                                !newSchedule.day ||
+                                                !newSchedule.time_start ||
+                                                !newSchedule.time_end
+                                            }
+                                            className="h-8 bg-blue-800 hover:bg-blue-900 text-white"
+                                        >
+                                            {isSubmittingSchedule ? 'Menyimpan...' : 'Tambah'}
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setShowAddSchedule(true)}
+                                    className="mt-3 h-8 gap-1.5 text-blue-800 border-blue-200 hover:bg-blue-50"
+                                >
+                                    <Plus className="h-3.5 w-3.5" />
+                                    Tambah Jadwal
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Tombol Lihat Presensi */}
+                        {onViewAttendance && tutorId && (
+                            <div className="flex justify-end pt-2 border-t">
+                                <Button
+                                    onClick={() => onViewAttendance(tutorId)}
+                                    className="bg-blue-800 hover:bg-blue-900 text-white gap-2"
+                                >
+                                    <CalendarCheck className="h-4 w-4" />
+                                    Lihat Presensi
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 )}
             </DialogContent>
@@ -221,9 +422,11 @@ const DetailModal: React.FC<DetailModalProps> = ({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export const MutamayizinTutors: React.FC = () => {
+    const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedAcademicYearId, setSelectedAcademicYearId] =
         useState<string>('all');
+    const [selectedSemester, setSelectedSemester] = useState<string>('all');
     const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
     const [selectedTutorId, setSelectedTutorId] = useState<number | null>(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -240,11 +443,13 @@ export const MutamayizinTutors: React.FC = () => {
     }, []);
 
     const params = useMemo(() => {
-        const p: { academic_year_id?: number | string } = {};
+        const p: { academic_year_id?: number | string; semester?: string } = {};
         if (selectedAcademicYearId !== 'all')
             p.academic_year_id = selectedAcademicYearId;
+        if (selectedSemester !== 'all')
+            p.semester = selectedSemester;
         return p;
-    }, [selectedAcademicYearId]);
+    }, [selectedAcademicYearId, selectedSemester]);
 
     const {
         data: extracurriculars,
@@ -275,7 +480,7 @@ export const MutamayizinTutors: React.FC = () => {
         }
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentPage(1);
-    }, [searchQuery, selectedAcademicYearId, itemsPerPage]);
+    }, [searchQuery, selectedAcademicYearId, selectedSemester, itemsPerPage]);
 
     // Client-side pagination
     const totalItems = filtered.length;
@@ -464,6 +669,26 @@ export const MutamayizinTutors: React.FC = () => {
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                <Select
+                                    value={selectedSemester}
+                                    onValueChange={setSelectedSemester}
+                                >
+                                    <SelectTrigger className="w-[160px] h-11">
+                                        <Calendar className="h-4 w-4 mr-2" />
+                                        <SelectValue placeholder="Semester" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">
+                                            Semua Semester
+                                        </SelectItem>
+                                        <SelectItem value="1">
+                                            Ganjil
+                                        </SelectItem>
+                                        <SelectItem value="2">
+                                            Genap
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
 
@@ -619,6 +844,11 @@ export const MutamayizinTutors: React.FC = () => {
                 onClose={() => {
                     setIsDetailOpen(false);
                     setSelectedTutorId(null);
+                }}
+                onViewAttendance={(tutorId) => {
+                    setIsDetailOpen(false);
+                    setSelectedTutorId(null);
+                    router.push(`/mutamayizin-coordinator/tutors/${tutorId}/attendance`);
                 }}
             />
         </div>
