@@ -248,7 +248,6 @@ export const updatePassword = async (
     const result: ApiResponse<PasswordUpdateResponse> = await response.json();
     return result.data;
 };
-
 // ============================================
 // VALIDATION HELPERS
 // ============================================
