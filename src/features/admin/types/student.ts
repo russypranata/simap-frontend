@@ -31,6 +31,10 @@ export interface AdminStudent {
     gender: 'L' | 'P' | null;
     // Student profile fields
     admission_number: string;
+    nis: string | null;
+    nisn: string | null;
+    birth_date: string | null;
+    valid_until: string | null;
     religion: string | null;
     guardian_details: GuardianDetails | null;
     // Class info

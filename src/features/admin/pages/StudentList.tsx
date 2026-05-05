@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
     GraduationCap, Search, Settings, UserPlus,
     Users, Trash2, Edit, Eye, RefreshCw,
-    FilterX, FileX, Loader2, X,
+    FilterX, FileX, Loader2, X, Printer,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -31,6 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { AdminStudent } from '../types/student';
 import { useStudentList } from '../hooks/useStudentList';
+import { BatchPrintDialog } from '../components/student/BatchPrintDialog';
 import { PaginationControls } from '@/features/shared/components/PaginationControls';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -84,6 +85,7 @@ export const StudentList: React.FC = () => {
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
+    const [isBatchPrintOpen, setIsBatchPrintOpen] = useState(false);
 
     const debouncedSearch = useDebounce(searchInput, 400);
 
@@ -286,6 +288,11 @@ export const StudentList: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-3">
                             <Button variant="ghost" size="sm" className="text-white hover:bg-slate-800 h-9"
+                                onClick={() => setIsBatchPrintOpen(true)}>
+                                <Printer className="h-4 w-4 mr-2 text-blue-400" />
+                                Cetak Kartu
+                            </Button>
+                            <Button variant="ghost" size="sm" className="text-white hover:bg-slate-800 h-9"
                                 onClick={() => setIsBulkDeleteOpen(true)}>
                                 <Trash2 className="h-4 w-4 mr-2 text-red-400" />
                                 Hapus Massal
@@ -340,6 +347,12 @@ export const StudentList: React.FC = () => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            <BatchPrintDialog
+                open={isBatchPrintOpen}
+                onOpenChange={setIsBatchPrintOpen}
+                selectedStudents={students.filter(s => selectedItems.includes(s.id))}
+            />
         </div>
     );
 };
