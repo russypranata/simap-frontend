@@ -3,6 +3,7 @@
 import React from "react";
 import { SidebarBase, SidebarItem } from "@/features/shared/components/SidebarBase";
 import { useRole } from "@/app/context/RoleContext";
+import { useUnreadCount } from '@/features/announcements/hooks/useAnnouncements';
 import {
     LayoutDashboard,
     Users,
@@ -10,16 +11,24 @@ import {
     User,
     Star,
     ClipboardList,
+    Megaphone,
 } from "lucide-react";
 
 export const AdvisorSidebar: React.FC = () => {
     const { logout } = useRole();
+    const { data: unreadCount } = useUnreadCount();
 
     const menuItems: SidebarItem[] = [
         {
             title: "Dashboard",
             href: "/extracurricular-advisor/dashboard",
             icon: LayoutDashboard,
+        },
+        {
+            title: "Pengumuman",
+            href: "/extracurricular-advisor/announcements",
+            icon: Megaphone,
+            badge: unreadCount && unreadCount > 0 ? String(unreadCount) : undefined,
         },
         {
             title: "Daftar Anggota",

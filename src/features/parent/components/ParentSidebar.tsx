@@ -3,6 +3,7 @@
 import React from "react";
 import { SidebarBase, SidebarItem } from "@/features/shared/components/SidebarBase";
 import { useRole } from "@/app/context/RoleContext";
+import { useUnreadCount } from '@/features/announcements/hooks/useAnnouncements';
 import {
     LayoutDashboard,
     Calendar,
@@ -10,22 +11,30 @@ import {
     GraduationCap,
     Award,
     CheckCircle,
-    Moon, // Using Moon for Prayer, alternative: Clock
-    Timer, // Using Timer for Keterlambatan Pagi
-    CalendarCheck, // Added CalendarCheck icon
+    Moon,
+    Timer,
+    CalendarCheck,
     Trophy,
     ClipboardList,
     User,
+    Megaphone,
 } from "lucide-react";
 
 export const ParentSidebar: React.FC = () => {
     const { logout } = useRole();
+    const { data: unreadCount } = useUnreadCount();
 
     const menuItems: SidebarItem[] = [
         {
             title: "Dashboard",
             href: "/parent/dashboard",
             icon: LayoutDashboard,
+        },
+        {
+            title: "Pengumuman",
+            href: "/parent/announcements",
+            icon: Megaphone,
+            badge: unreadCount && unreadCount > 0 ? String(unreadCount) : undefined,
         },
         // Akademik Anak Group
         {

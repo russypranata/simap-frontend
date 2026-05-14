@@ -169,6 +169,7 @@ const routeConfig: Record<string, RouteItem> = {
     'extracurricular-advisor:assessments': { label: 'Penilaian', icon: Star },
     'extracurricular-advisor:assignments': { label: 'Tugas', icon: ClipboardList },
     'extracurricular-advisor:profile': { label: 'Profil', icon: User },
+    'extracurricular-advisor:announcements': { label: 'Pengumuman', icon: Bell },
 
     // ── MUTAMAYIZIN ───────────────────────────────────────────────────────────
     'mutamayizin-ekstrakurikuler': { label: 'Ekstrakurikuler', icon: Activity, isClickable: false },
@@ -180,6 +181,7 @@ const routeConfig: Record<string, RouteItem> = {
     'mutamayizin-coordinator:members': { label: 'Anggota', icon: Users, parent: 'mutamayizin-ekstrakurikuler' },
     'mutamayizin-coordinator:tutors': { label: 'Data Tutor', icon: Users, parent: 'mutamayizin-ekstrakurikuler' },
     'mutamayizin-coordinator:profile': { label: 'Profil', icon: User },
+    'mutamayizin-coordinator:announcements': { label: 'Pengumuman', icon: Bell },
 
     // ── Generic fallbacks (used when no role match) ───────────────────────────
     'new': { label: 'Tambah Baru', icon: Pencil },

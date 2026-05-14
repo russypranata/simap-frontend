@@ -3,6 +3,7 @@
 import React from "react";
 import { SidebarBase, SidebarItem } from "@/features/shared/components/SidebarBase";
 import { useRole } from "@/app/context/RoleContext";
+import { useUnreadCount } from '@/features/announcements/hooks/useAnnouncements';
 import {
     LayoutDashboard,
     GraduationCap,
@@ -16,16 +17,24 @@ import {
     Timer,
     CalendarCheck,
     Moon,
+    Megaphone,
 } from "lucide-react";
 
 export const StudentSidebar: React.FC = () => {
     const { logout } = useRole();
+    const { data: unreadCount } = useUnreadCount();
 
     const menuItems: SidebarItem[] = [
         {
             title: "Dashboard",
             href: "/student/dashboard",
             icon: LayoutDashboard,
+        },
+        {
+            title: "Pengumuman",
+            href: "/student/announcements",
+            icon: Megaphone,
+            badge: unreadCount && unreadCount > 0 ? String(unreadCount) : undefined,
         },
         {
             title: "Akademik",

@@ -3,6 +3,7 @@
 import React from "react";
 import { SidebarBase, SidebarItem } from "@/features/shared/components/SidebarBase";
 import { useRole } from "@/app/context/RoleContext";
+import { useUnreadCount } from '@/features/announcements/hooks/useAnnouncements';
 import {
     LayoutDashboard,
     Award,
@@ -12,16 +13,24 @@ import {
     Star,
     FileSpreadsheet,
     Briefcase,
+    Megaphone,
 } from "lucide-react";
 
 export const MutamayizinSidebar: React.FC = () => {
     const { logout } = useRole();
+    const { data: unreadCount } = useUnreadCount();
 
     const menuItems: SidebarItem[] = [
         {
             title: "Dashboard",
             href: "/mutamayizin-coordinator/dashboard",
             icon: LayoutDashboard,
+        },
+        {
+            title: "Pengumuman",
+            href: "/mutamayizin-coordinator/announcements",
+            icon: Megaphone,
+            badge: unreadCount && unreadCount > 0 ? String(unreadCount) : undefined,
         },
         {
             title: "Prestasi",

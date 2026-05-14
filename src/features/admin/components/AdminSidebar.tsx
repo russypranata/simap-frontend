@@ -3,6 +3,7 @@
 import React from 'react';
 import { SidebarBase, SidebarItem } from '@/features/shared/components/SidebarBase';
 import { useRole } from '@/app/context/RoleContext';
+import { useUnreadCount } from '@/features/announcements/hooks/useAnnouncements';
 import {
     LayoutDashboard,
     GraduationCap,
@@ -23,10 +24,12 @@ import {
     Award,
     Clock,
     FileBarChart,
+    Megaphone,
 } from 'lucide-react';
 
 export const AdminSidebar: React.FC = () => {
     const { logout } = useRole();
+    const { data: unreadCount } = useUnreadCount();
 
     const menuItems: SidebarItem[] = [
         // GENERAL
@@ -35,6 +38,17 @@ export const AdminSidebar: React.FC = () => {
             href: '#general',
             icon: LayoutDashboard,
             sectionHeader: true,
+        },
+        {
+            title: 'Dashboard',
+            href: '/admin/dashboard',
+            icon: LayoutDashboard,
+        },
+        {
+            title: 'Pengumuman',
+            href: '/admin/announcements',
+            icon: Megaphone,
+            badge: unreadCount && unreadCount > 0 ? String(unreadCount) : undefined,
         },
         {
             title: 'Dashboard',

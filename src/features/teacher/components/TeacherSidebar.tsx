@@ -3,6 +3,7 @@
 import React from "react";
 import { SidebarBase, SidebarItem } from "@/features/shared/components/SidebarBase";
 import { useRole } from "@/app/context/RoleContext";
+import { useUnreadCount } from '@/features/announcements/hooks/useAnnouncements';
 import {
     LayoutDashboard,
     Users,
@@ -15,16 +16,24 @@ import {
     User,
     ClipboardList,
     ClipboardCheck,
+    Megaphone,
 } from "lucide-react";
 
 export const TeacherSidebar: React.FC = () => {
     const { logout, isHomeroomTeacher, isPiketTeacher } = useRole();
+    const { data: unreadCount } = useUnreadCount();
 
     const menuItems: SidebarItem[] = [
         {
             title: "Dashboard",
             href: "/teacher/dashboard",
             icon: LayoutDashboard,
+        },
+        {
+            title: "Pengumuman",
+            href: "/teacher/announcements",
+            icon: Megaphone,
+            badge: unreadCount && unreadCount > 0 ? String(unreadCount) : undefined,
         },
         {
             title: "Kalender Akademik",
