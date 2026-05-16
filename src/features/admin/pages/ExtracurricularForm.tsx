@@ -37,7 +37,7 @@ import { useExtracurricularList, useExtracurricularDetail, useTutorOptions } fro
 const formSchema = z.object({
     name:          z.string().min(3, 'Nama minimal 3 karakter'),
     tutor_user_id: z.number({ error: 'Tutor harus dipilih' }).min(1, 'Tutor harus dipilih'),
-    nip:           z.string().optional(),
+    npy:           z.string().optional(),
     join_date:     z.string().optional(),
 });
 
@@ -82,7 +82,7 @@ export const ExtracurricularForm: React.FC = () => {
         defaultValues: {
             name:          '',
             tutor_user_id: 0,
-            nip:           '',
+            npy:           '',
             join_date:     '',
         },
     });
@@ -94,7 +94,7 @@ export const ExtracurricularForm: React.FC = () => {
             form.reset({
                 name:          e.name,
                 tutor_user_id: e.tutor_id,
-                nip:           e.nip ?? '',
+                npy:           e.npy ?? '',
                 join_date:     e.join_date ?? '',
             });
         }
@@ -108,7 +108,7 @@ export const ExtracurricularForm: React.FC = () => {
                 id: ekskulId,
                 data: {
                     name:      values.name,
-                    nip:       clean(values.nip),
+                    npy:       clean(values.npy),
                     join_date: clean(values.join_date),
                 },
             });
@@ -116,7 +116,7 @@ export const ExtracurricularForm: React.FC = () => {
             await createExtracurricular({
                 name:          values.name,
                 tutor_user_id: values.tutor_user_id,
-                nip:           clean(values.nip),
+                npy:           clean(values.npy),
                 join_date:     clean(values.join_date),
             });
         }
@@ -260,8 +260,8 @@ export const ExtracurricularForm: React.FC = () => {
                                     </Avatar>
                                     <div className="flex-1">
                                         <p className="font-semibold text-slate-900 text-sm">{currentTutor.tutor_name ?? '—'}</p>
-                                        {currentTutor.nip && (
-                                            <p className="text-xs text-slate-500 font-mono mt-0.5">NIP: {currentTutor.nip}</p>
+                                        {currentTutor.npy && (
+                                            <p className="text-xs text-slate-500 font-mono mt-0.5">NPY: {currentTutor.npy}</p>
                                         )}
                                     </div>
                                     <span className="text-xs text-slate-400 bg-white border border-slate-200 px-2 py-1 rounded">Tutor Aktif</span>
@@ -269,9 +269,9 @@ export const ExtracurricularForm: React.FC = () => {
                             )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <FormField control={form.control} name="nip" render={({ field }) => (
+                                <FormField control={form.control} name="npy" render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>NIP Tutor</FormLabel>
+                                        <FormLabel>NPY Tutor</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Nomor Induk Pegawai" autoComplete="off" {...field} />
                                         </FormControl>

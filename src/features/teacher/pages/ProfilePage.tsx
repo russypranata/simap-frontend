@@ -39,7 +39,7 @@ export const ProfilePage: React.FC = () => {
                 profilePicture={profileData.profilePicture}
                 address={profileData.address}
                 joinDate={profileData.joinDate}
-                nip={profileData.nip}
+                npy={profileData.npy}
                 subject={profileData.subject}
                 onEdit={handleEditProfile}
             />

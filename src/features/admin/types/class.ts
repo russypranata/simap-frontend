@@ -55,7 +55,7 @@ export interface Class {
 export interface Teacher {
     id: string;
     name: string;
-    nip: string;
+    npy: string;
 }
 
 /** @deprecated */

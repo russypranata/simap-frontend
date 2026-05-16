@@ -236,7 +236,7 @@ export const TeacherList: React.FC = () => {
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Cari nama, NIP, atau NUPTK..."
+                                placeholder="Cari nama, NPY, atau NUPTK..."
                                 value={searchInput}
                                 onChange={(e) => setSearchInput(e.target.value)}
                                 className="pl-9 w-full"
@@ -285,7 +285,7 @@ export const TeacherList: React.FC = () => {
                                             onCheckedChange={toggleSelectAll}
                                         />
                                     </th>
-                                    <th className="pl-3 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama & NIP</th>
+                                    <th className="pl-3 pr-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama & NPY</th>
                                     <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Jabatan Kepegawaian</th>
                                     <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Akses Sistem</th>
                                     <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Kontak</th>
@@ -344,8 +344,8 @@ export const TeacherList: React.FC = () => {
                                                                 {teacher.name}
                                                             </p>
                                                             <p className="text-xs text-slate-500 font-mono mt-0.5">
-                                                                NIP:{' '}
-                                                                {teacher.teacher_profile?.employee_id ?? '-'}
+                                                                NPY:{' '}
+                                                                {teacher.teacher_profile?.npy ?? '-'}
                                                             </p>
                                                         </div>
                                                     </div>

@@ -14,7 +14,7 @@ export interface Extracurricular {
     name: string;
     tutor_id: number;
     tutor_name: string | null;
-    nip: string | null;
+    npy: string | null;
     join_date: string | null;
     regular_schedules: RegularSchedule[];
     member_count: number;
@@ -55,13 +55,13 @@ export interface TutorOption {
 export interface CreateExtracurricularRequest {
     tutor_user_id: number;
     name: string;
-    nip?: string;
+    npy?: string;
     join_date?: string;
 }
 
 export interface UpdateExtracurricularRequest {
     name?: string;
-    nip?: string;
+    npy?: string;
     join_date?: string;
 }
 

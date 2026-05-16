@@ -316,7 +316,7 @@ export const TeacherDetail: React.FC = () => {
                             Informasi Identitas
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <InfoItem icon={<BadgeCheck />} label="NIP / ID Pegawai" value={profile?.employee_id} mono />
+                            <InfoItem icon={<BadgeCheck />} label="NPY / ID Pegawai" value={profile?.npy} mono />
                             <InfoItem icon={<BookHeart />} label="NUPTK" value={profile?.nuptk} mono />
 
                             {/* NIK — masked */}

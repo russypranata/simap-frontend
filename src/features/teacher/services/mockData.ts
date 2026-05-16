@@ -6,7 +6,7 @@ import { TeacherClass, Student, Grade, Announcement, Document as TeacherDocument
 export const mockTeacher = {
   id: '1',
   name: 'Budi Santoso, S.Pd.',
-  nip: '198506152008011001',
+  npy: '198506152008011001',
   email: 'budi.santoso@sekolah.sch.id',
   phone: '+62 812-3456-7890',
   role: 'guru' as const,

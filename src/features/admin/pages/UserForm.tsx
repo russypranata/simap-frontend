@@ -84,7 +84,7 @@ const baseSchema = z.object({
     admission_number: z.string().optional(),
     religion:         z.string().optional(),
     occupation:       z.string().optional(),
-    nip:              z.string().optional(),
+    npy:              z.string().optional(),
     extracurricular:  z.string().optional(),
     join_date:        z.string().optional(),
 });
@@ -137,7 +137,7 @@ export const UserForm: React.FC = () => {
             employee_id: '', qualifications: '',
             admission_number: '', religion: '',
             occupation: '',
-            nip: '', extracurricular: '', join_date: '',
+            npy: '', extracurricular: '', join_date: '',
         },
     });
 
@@ -157,7 +157,7 @@ export const UserForm: React.FC = () => {
     // Reset profile fields saat ganti role (hanya create)
     useEffect(() => {
         if (!isEdit) {
-            const profileFields = ['department','job_title','employee_id','qualifications','admission_number','religion','occupation','nip','extracurricular','join_date'] as const;
+            const profileFields = ['department','job_title','employee_id','qualifications','admission_number','religion','occupation','npy','extracurricular','join_date'] as const;
             profileFields.forEach(f => form.setValue(f, ''));
             startTransition(() => {
                 setShowProfile(false);
@@ -180,12 +180,12 @@ export const UserForm: React.FC = () => {
                     role:             (user.roles[0] as UserRole) ?? 'admin',
                     department:       user.staff_profile?.department ?? '',
                     job_title:        user.staff_profile?.job_title ?? '',
-                    employee_id:      user.teacher_profile?.employee_id ?? '',
+                    employee_id:      user.teacher_profile?.npy ?? '',
                     qualifications:   user.teacher_profile?.qualifications ?? '',
                     admission_number: user.student_profile?.admission_number ?? '',
                     religion:         user.student_profile?.religion ?? '',
                     occupation:       user.parent_profile?.occupation ?? '',
-                    nip:              user.tutor_profile?.nip ?? '',
+                    npy:              user.tutor_profile?.npy ?? '',
                     extracurricular:  user.tutor_profile?.extracurricular
                         ? (typeof user.tutor_profile.extracurricular === 'object'
                             ? (user.tutor_profile.extracurricular as { name?: string }).name ?? ''
@@ -198,10 +198,10 @@ export const UserForm: React.FC = () => {
                 });
                 const hasProfile = !!(
                     user.staff_profile?.department || user.staff_profile?.job_title ||
-                    user.teacher_profile?.employee_id || user.teacher_profile?.qualifications ||
+                    user.teacher_profile?.npy || user.teacher_profile?.qualifications ||
                     user.student_profile?.admission_number || user.student_profile?.religion ||
                     user.parent_profile?.occupation ||
-                    user.tutor_profile?.nip || user.tutor_profile?.extracurricular
+                    user.tutor_profile?.npy || user.tutor_profile?.extracurricular
                 );
                 if (hasProfile) setShowProfile(true);
             })
@@ -218,7 +218,7 @@ export const UserForm: React.FC = () => {
             employee_id: clean(values.employee_id), qualifications: clean(values.qualifications),
             admission_number: clean(values.admission_number), religion: clean(values.religion),
             occupation: clean(values.occupation),
-            nip: clean(values.nip), extracurricular: clean(values.extracurricular), join_date: clean(values.join_date),
+            npy: clean(values.npy), extracurricular: clean(values.extracurricular), join_date: clean(values.join_date),
         };
         if (isEdit && userId) {
             await updateUser({ id: userId, data: { ...payload, password: clean((values as EditValues).password) } });
@@ -460,7 +460,7 @@ export const UserForm: React.FC = () => {
                                     {['subject_teacher','picket_teacher','homeroom_teacher'].includes(selectedRole) && (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                             <FormField control={form.control} name="employee_id" render={({ field }) => (
-                                                <FormItem><FormLabel>NIP / ID Pegawai</FormLabel><FormControl><Input placeholder="Nomor Induk Pegawai" {...field} /></FormControl><FormMessage /></FormItem>
+                                                <FormItem><FormLabel>NPY / ID Pegawai</FormLabel><FormControl><Input placeholder="Nomor Yasa Pegawai" {...field} /></FormControl><FormMessage /></FormItem>
                                             )} />
                                             <FormField control={form.control} name="qualifications" render={({ field }) => (
                                                 <FormItem><FormLabel>Gelar Akademik</FormLabel><FormControl><Input placeholder="S.Pd., M.Pd." {...field} /></FormControl><FormMessage /></FormItem>
@@ -494,8 +494,8 @@ export const UserForm: React.FC = () => {
                                     {/* Tutor */}
                                     {selectedRole === 'extracurricular_tutor' && (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                            <FormField control={form.control} name="nip" render={({ field }) => (
-                                                <FormItem><FormLabel>NIP</FormLabel><FormControl><Input placeholder="Nomor Induk Pegawai" {...field} /></FormControl><FormMessage /></FormItem>
+                                            <FormField control={form.control} name="npy" render={({ field }) => (
+                                                <FormItem><FormLabel>NPY</FormLabel><FormControl><Input placeholder="Nomor Yasa Pegawai" {...field} /></FormControl><FormMessage /></FormItem>
                                             )} />
                                             <FormField control={form.control} name="extracurricular" render={({ field }) => (
                                                 <FormItem><FormLabel>Ekskul Diampu</FormLabel><FormControl><Input placeholder="Nama ekskul" {...field} /></FormControl><FormMessage /></FormItem>

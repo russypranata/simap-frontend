@@ -148,7 +148,7 @@ export const EditExtracurricularAdvisorProfile: React.FC = () => {
                             <p className="text-sm font-semibold text-blue-800">Informasi Penting</p>
                             <ul className="text-sm text-blue-900 space-y-1.5 list-disc list-inside">
                                 <li>Pastikan data diri Anda (Nama, Email, No. Telepon) selalu valid dan aktif</li>
-                                <li><strong>NIP</strong> dan <strong>Ekstrakurikuler</strong> tidak dapat diubah.</li>
+                                <li><strong>NPY</strong> dan <strong>Ekstrakurikuler</strong> tidak dapat diubah.</li>
                                 <li>Jaga keamanan akun Anda dengan tidak membagikan kata sandi kepada orang lain</li>
                             </ul>
                         </div>

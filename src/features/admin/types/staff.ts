@@ -13,7 +13,7 @@ export type LastEducation = 'SMA' | 'D3' | 'S1' | 'S2' | 'S3';
 // Shape dari backend API
 export interface StaffProfileData {
     id: number;
-    employee_id: string | null;
+    npy: string | null;
     nuptk: string | null;
     nik: string | null;
     department: string | null;
@@ -60,7 +60,7 @@ export interface CreateStaffPayload {
     birth_place?: string;
     role: StaffRole;
 
-    // Profile fields
+    // Profile fields (backend expects employee_id in request body)
     employee_id?: string;
     nuptk?: string;
     nik?: string;

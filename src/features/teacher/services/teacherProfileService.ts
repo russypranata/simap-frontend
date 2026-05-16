@@ -7,7 +7,7 @@ export interface TeacherProfile {
     email: string;
     phone: string | null;
     address: string | null;
-    nip: string | null;
+    npy: string | null;
     nuptk: string | null;
     employmentStatus: string | null;
     positions: string[];

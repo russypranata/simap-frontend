@@ -62,7 +62,7 @@ export const EditProfilePage: React.FC = () => {
           phone: profileData.phone,
           address: profileData.address,
           profilePicture: profileData.profilePicture,
-          nip: profileData.nip,
+          npy: profileData.npy,
           subject: profileData.subject,
         }}
         onSave={handleSave}
@@ -83,7 +83,7 @@ export const EditProfilePage: React.FC = () => {
               </p>
               <ul className="text-sm text-blue-900 space-y-1 list-disc list-inside">
                 <li>Pastikan informasi yang Anda masukkan benar dan akurat</li>
-                <li>Data NIP tidak dapat diubah. Jika ada kesalahan, hubungi administrator</li>
+                <li>Data NPY tidak dapat diubah. Jika ada kesalahan, hubungi administrator</li>
               </ul>
             </div>
           </div>

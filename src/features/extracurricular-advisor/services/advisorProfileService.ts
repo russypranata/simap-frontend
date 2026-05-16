@@ -105,7 +105,7 @@ export const getProfile = async (): Promise<AdvisorProfileData> => {
         profilePicture: normalizeProfilePicture(d),
         address: (d.address as string) ?? "",
         joinDate: (d.join_date ?? d.joinDate ?? "") as string,
-        nip: (d.nip as string | undefined),
+        npy: (d.npy as string | undefined),
         extracurricular: (typeof d.extracurricular === 'object' && d.extracurricular !== null
             ? (d.extracurricular as { name?: string }).name
             : d.extracurricular as string) ?? "",
@@ -140,7 +140,7 @@ export const updateProfile = async (data: UpdateAdvisorProfileRequest): Promise<
         profilePicture: normalizeProfilePicture(d),
         address: (d.address as string) ?? "",
         joinDate: (d.join_date ?? d.joinDate ?? "") as string,
-        nip: (d.nip as string | undefined),
+        npy: (d.npy as string | undefined),
         extracurricular: (typeof d.extracurricular === 'object' && d.extracurricular !== null
             ? (d.extracurricular as { name?: string }).name
             : d.extracurricular as string) ?? "",

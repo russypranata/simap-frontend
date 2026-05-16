@@ -119,7 +119,7 @@ export const useTeacherData = () => {
         setProfile({
           id:               String(data.id),
           name:             data.name,
-          nip:              data.nip ?? '',
+          npy:              data.npy ?? '',
           email:            data.email,
           phone:            data.phone ?? '',
           role:             'guru',

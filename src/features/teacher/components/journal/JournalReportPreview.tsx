@@ -106,7 +106,7 @@ export const JournalReportPreview: React.FC<JournalReportPreviewProps> = ({
                             <span>: {filters.academicYear || '2025/2026'}</span>
                         </div>
                         <div className="flex">
-                            <span className="w-32 font-semibold">NIP</span>
+                            <span className="w-32 font-semibold">NPY</span>
                             <span>: 19850115 201001 1 005</span>
                         </div>
                         <div className="flex">
@@ -191,12 +191,12 @@ export const JournalReportPreview: React.FC<JournalReportPreviewProps> = ({
                         <div className="text-center w-64">
                             <p className="mb-20">Mengetahui,<br />Kepala Sekolah</p>
                             <p className="font-semibold underline">Dr. H. Ahmad Dahlan, M.Pd.</p>
-                            <p>NIP. 19700101 199503 1 001</p>
+                            <p>NPY. 19700101 199503 1 001</p>
                         </div>
                         <div className="text-center w-64">
                             <p className="mb-20">Jakarta, {formatDate(new Date(), 'dd MMMM yyyy')}<br />Guru Mata Pelajaran</p>
                             <p className="font-semibold underline">Budi Santoso, S.Pd.</p>
-                            <p>NIP. 19850115 201001 1 005</p>
+                            <p>NPY. 19850115 201001 1 005</p>
                         </div>
                     </div>
                 </div>

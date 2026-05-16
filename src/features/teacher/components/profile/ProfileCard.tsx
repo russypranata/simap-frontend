@@ -24,7 +24,7 @@ interface ProfileCardProps {
   profilePicture?: string;
   address?: string;
   joinDate?: string;
-  nip?: string;
+  npy?: string;
   subject?: string;
   onEdit: () => void;
 }
@@ -37,7 +37,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   profilePicture,
   address,
   joinDate,
-  nip,
+  npy,
   subject,
   onEdit,
 }) => {
@@ -105,8 +105,8 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
                 </div>
               </div>
 
-              {nip && (
-                <p className="text-sm text-muted-foreground mt-1">NIP: {nip}</p>
+              {npy && (
+                <p className="text-sm text-muted-foreground mt-1">NPY: {npy}</p>
               )}
             </div>
           </div>

@@ -24,7 +24,7 @@ const normalizeRole = (rawRole: string | undefined): UserRole => {
 };
 
 export interface LoginRequest {
-    username: string; // NIP, NIS, or specific username
+    username: string; // NPY, NIS, or specific username
     password: string;
 }
 

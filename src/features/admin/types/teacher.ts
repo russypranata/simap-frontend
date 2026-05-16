@@ -35,7 +35,7 @@ export type TeacherPosition =
 // Shape dari backend API
 export interface TeacherProfileData {
     id: number;
-    employee_id: string | null;
+    npy: string | null;
     nuptk: string | null;
     nik: string | null;
     qualifications: string | null;
@@ -98,7 +98,7 @@ export interface CreateTeacherPayload {
     role: TeacherRole;
 
     // Profile fields
-    employee_id?: string;
+    npy?: string;
     nuptk?: string;
     nik?: string;
     qualifications?: string;

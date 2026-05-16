@@ -3,7 +3,7 @@
 export interface Teacher {
   id: string;
   name: string;
-  nip: string;
+  npy: string;
   email: string;
   phone: string;
   role: 'guru' | 'admin';

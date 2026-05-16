@@ -129,7 +129,7 @@ const baseSchema = z.object({
     // Parent
     occupation: z.string().optional(),
     // Tutor
-    nip:              z.string().optional(),
+    npy:              z.string().optional(),
     extracurricular:  z.string().optional(),
     join_date:        z.string().optional(),
 });
@@ -176,7 +176,7 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
             employee_id: '', qualifications: '',
             admission_number: '', religion: '',
             occupation: '',
-            nip: '', extracurricular: '', join_date: '',
+                npy: '', extracurricular: '', join_date: '',
         },
     });
 
@@ -193,7 +193,7 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
         form.setValue('admission_number', '');
         form.setValue('religion', '');
         form.setValue('occupation', '');
-        form.setValue('nip', '');
+        form.setValue('npy', '');
         form.setValue('extracurricular', '');
         form.setValue('join_date', '');
         startTransition(() => {
@@ -214,12 +214,12 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
                 role:     (p.roles[0] as UserRole) ?? 'admin',
                 department:  p.staff_profile?.department ?? '',
                 job_title:   p.staff_profile?.job_title ?? '',
-                employee_id:    p.teacher_profile?.employee_id ?? '',
+                employee_id:    p.teacher_profile?.npy ?? '',
                 qualifications: p.teacher_profile?.qualifications ?? '',
                 admission_number: p.student_profile?.admission_number ?? '',
                 religion:         p.student_profile?.religion ?? '',
                 occupation: p.parent_profile?.occupation ?? '',
-                nip:             p.tutor_profile?.nip ?? '',
+                npy:             p.tutor_profile?.npy ?? '',
                 extracurricular: p.tutor_profile?.extracurricular
                     ? (typeof p.tutor_profile.extracurricular === 'object'
                         ? (p.tutor_profile.extracurricular as { name?: string }).name ?? ''
@@ -235,7 +235,7 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
                 employee_id: '', qualifications: '',
                 admission_number: '', religion: '',
                 occupation: '',
-                nip: '', extracurricular: '', join_date: '',
+            npy: '', extracurricular: '', join_date: '',
             });
         }
     }, [open, editingUser, form]);
@@ -257,7 +257,7 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
             admission_number: clean(values.admission_number),
             religion:         clean(values.religion),
             occupation:       clean(values.occupation),
-            nip:              clean(values.nip),
+            npy:              clean(values.npy),
             extracurricular:  clean(values.extracurricular),
             join_date:        clean(values.join_date),
         };
@@ -497,9 +497,9 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
                                             <div className="grid grid-cols-2 gap-4">
                                                 <FormField control={form.control} name="employee_id" render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>NIP / ID Pegawai</FormLabel>
+                                                        <FormLabel>NPY / ID Pegawai</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="Nomor Induk Pegawai" {...field} />
+                                                            <Input placeholder="Nomor Yasa Pegawai" {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -568,11 +568,11 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
                                         {/* Tutor fields */}
                                         {selectedRole === 'extracurricular_tutor' && (
                                             <div className="grid grid-cols-2 gap-4">
-                                                <FormField control={form.control} name="nip" render={({ field }) => (
+                                                <FormField control={form.control} name="npy" render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>NIP</FormLabel>
+                                                        <FormLabel>NPY</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="Nomor Induk Pegawai" {...field} />
+                                                            <Input placeholder="Nomor Yasa Pegawai" {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>

@@ -363,7 +363,7 @@ export default function LoginPage() {
                                             </div>
                                             <Input
                                                 className="pl-10 h-14 bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all rounded-xl shadow-sm text-base"
-                                                placeholder="Masukkan NIP, NIS, atau Username"
+                                                placeholder="Masukkan NPY, NIS, atau Username"
                                                 value={loginData.username}
                                                 onChange={(e) => setLoginData(prev => ({ ...prev, username: e.target.value }))}
                                                 required

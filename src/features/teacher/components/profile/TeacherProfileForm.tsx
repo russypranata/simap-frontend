@@ -28,7 +28,7 @@ interface ProfileFormProps {
     phone?: string;
     address?: string;
     profilePicture?: string;
-    nip?: string;
+    npy?: string;
     subject?: string;
   };
   onSave: (data: any) => void;
@@ -197,16 +197,15 @@ export const TeacherProfileForm: React.FC<ProfileFormProps> = ({
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <IdCard className="h-4 w-4 text-primary" />
-                <Label htmlFor="nip" className="mb-0">
-                  NIP
+                <Label htmlFor="npy" className="mb-0">
+                  NPY
                 </Label>
               </div>
               <Input
-                id="nip"
-                name="nip"
-                value={formData.nip || ''}
-                onChange={handleInputChange}
-                placeholder="NIP"
+                id="npy"
+                name="npy"
+                value={formData.npy || ''}
+                placeholder="NPY"
                 disabled
                 className="bg-muted cursor-not-allowed"
               />

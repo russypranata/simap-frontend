@@ -101,7 +101,7 @@ Tabel utama untuk manajemen akun dan profil detil tutor.
 | Table                | Column             | Postgres Type | Constraints                | Description                     |
 | -------------------- | ------------------ | ------------- | -------------------------- | ------------------------------- |
 | **users**            | id                 | BIGSERIAL     | PK                         | Unique ID (Auto Increment)      |
-|                      | username           | VARCHAR(50)   | UNIQUE                     | Login identifier (NIP/Username) |
+|                      | username           | VARCHAR(50)   | UNIQUE                     | Login identifier (NPY/Username) |
 |                      | email              | VARCHAR(100)  | UNIQUE                     | Email untuk reset password      |
 |                      | password_hash      | VARCHAR(255)  | NOT NULL                   | Bcrypt hash                     |
 |                      | role               | user_role     | NOT NULL                   | Custom Enum Type                |

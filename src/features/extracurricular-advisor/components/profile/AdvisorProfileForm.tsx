@@ -30,7 +30,7 @@ export interface AdvisorProfileData {
     role: string;
     profilePicture: string;
     address: string;
-    nip?: string;
+    npy?: string;
     extracurricular: string;
 }
 
@@ -216,23 +216,20 @@ export const AdvisorProfileForm: React.FC<AdvisorProfileFormProps> = ({
                             />
                         </div>
 
-                        {/* NIP (Optional) */}
+                        {/* NPY (Optional) */}
                         <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-primary" />
-                                <Label htmlFor="nip" className="mb-0">
-                                    NIP <span className="text-muted-foreground font-normal text-xs">(Opsional)</span>
-                                </Label>
-                            </div>
+                            <Label htmlFor="npy" className="mb-0">
+                                NPY <span className="text-muted-foreground font-normal text-xs">(Opsional)</span>
+                            </Label>
                             <Input
-                                id="nip"
-                                name="nip"
-                                value={formData.nip || "-"}
+                                id="npy"
+                                name="npy"
+                                value={formData.npy || "-"}
                                 readOnly
                                 disabled
                                 className="bg-muted"
                             />
-                            <p className="text-xs text-muted-foreground">NIP tidak dapat diubah</p>
+                            <p className="text-xs text-muted-foreground">NPY tidak dapat diubah</p>
                         </div>
 
                         {/* Username */}

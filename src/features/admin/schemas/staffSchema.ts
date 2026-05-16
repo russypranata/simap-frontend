@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const staffSchema = z.object({
-    nip: z.string().min(1, 'NIP harus diisi'),
+    npy: z.string().min(1, 'NPY harus diisi'),
     name: z.string().min(1, 'Nama harus diisi'),
     role: z.enum(['teacher', 'admin', 'staff', 'librarian', 'security']),
     subject: z.string().optional(),

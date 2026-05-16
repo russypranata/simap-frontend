@@ -165,7 +165,7 @@ export const TeacherForm: React.FC = () => {
                 birth_place: teacher.birth_place ?? '',
                 gender: (teacher.gender as 'L' | 'P') ?? undefined,
                 role: (teacher.roles[0] as TeacherRole) ?? 'subject_teacher',
-                employee_id: p?.employee_id ?? '',
+                employee_id: p?.npy ?? '',
                 nuptk: p?.nuptk ?? '',
                 nik: p?.nik ?? '',
                 qualifications: p?.qualifications ?? '',
@@ -417,7 +417,7 @@ export const TeacherForm: React.FC = () => {
                             <SectionHeader
                                 icon={<Briefcase />}
                                 title="Data Kepegawaian"
-                                description="NIP, NUPTK, status ikatan kerja, jabatan, dan SK pengangkatan"
+                                description="NPY, NUPTK, status ikatan kerja, jabatan, dan SK pengangkatan"
                                 iconBg="bg-blue-100"
                                 iconColor="text-blue-700"
                             />
@@ -425,13 +425,13 @@ export const TeacherForm: React.FC = () => {
                         <CardContent className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormField control={form.control} name="employee_id" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>NIP / ID Pegawai</FormLabel>
+                                    <FormLabel>NPY / ID Pegawai</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Nomor Induk Pegawai" {...field} />
+                                        <Input placeholder="Nomor Yasa Pegawai" {...field} />
                                     </FormControl>
                                     <FormDescription className="text-[11px] flex items-center gap-1.5 text-slate-500 mt-1">
                                         <Info className="h-3 w-3 text-blue-500 shrink-0" />
-                                        Untuk PNS/PPPK gunakan NIP resmi BKN.
+                                        Untuk PNS/PPPK gunakan NPY resmi BKN.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>

@@ -207,7 +207,7 @@ export const StaffList: React.FC = () => {
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Cari nama atau NIP..."
+                                placeholder="Cari nama atau NPY..."
                                 className="pl-9 w-full"
                                 value={searchInput}
                                 onChange={(e) => setSearchInput(e.target.value)}
@@ -249,7 +249,7 @@ export const StaffList: React.FC = () => {
                                 <thead className="bg-slate-50 border-b border-slate-200">
                                     <tr>
                                         <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
-                                            Nama & NIP
+                                            Nama & NPY
                                         </th>
                                         <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
                                             Jabatan Kepegawaian
@@ -303,7 +303,7 @@ export const StaffList: React.FC = () => {
                                                                     {item.name}
                                                                 </div>
                                                                 <div className="text-xs text-slate-500 font-mono mt-0.5">
-                                                                    {item.staff_profile?.employee_id ?? '-'}
+                                                                    {item.staff_profile?.npy ?? '-'}
                                                                 </div>
                                                             </div>
                                                         </div>

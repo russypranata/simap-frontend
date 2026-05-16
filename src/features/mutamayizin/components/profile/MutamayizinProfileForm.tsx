@@ -21,7 +21,7 @@ import {
 
 export interface MutamayizinProfileData {
     name: string;
-    nip: string;
+    npy: string;
     email: string;
     phone: string;
     address: string;
@@ -127,21 +127,21 @@ export const MutamayizinProfileForm: React.FC<MutamayizinProfileFormProps> = ({
                             />
                         </div>
 
-                        {/* NIP */}
+                        {/* NPY */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
                                 <IdCard className="h-4 w-4 text-primary" />
-                                <Label htmlFor="nip" className="mb-0">
-                                    NIP
+                                <Label htmlFor="npy" className="mb-0">
+                                    NPY
                                     <span className="text-red-500 ml-1">*</span>
                                 </Label>
                             </div>
                             <Input
-                                id="nip"
-                                name="nip"
-                                value={formData.nip}
+                                id="npy"
+                                name="npy"
+                                value={formData.npy}
                                 onChange={handleInputChange}
-                                placeholder="Masukkan NIP"
+                                placeholder="Masukkan NPY"
                                 required
                                 readOnly
                                 className=""

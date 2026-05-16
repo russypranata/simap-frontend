@@ -331,7 +331,7 @@ const EkskulRow: React.FC<EkskulRowProps> = ({ item, onEdit, onMembers, onDelete
                     </Avatar>
                     <div>
                         <p className="text-sm font-medium text-slate-900">{item.tutor_name ?? '—'}</p>
-                        {item.nip && <p className="text-xs text-slate-500 font-mono mt-0.5">{item.nip}</p>}
+                        {item.npy && <p className="text-xs text-slate-500 font-mono mt-0.5">{item.npy}</p>}
                     </div>
                 </div>
             </td>

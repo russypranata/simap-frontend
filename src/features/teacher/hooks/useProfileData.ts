@@ -9,7 +9,7 @@ interface ProfileData {
   address?: string;
   profilePicture?: string;
   role: string;
-  nip?: string;
+  npy?: string;
   nuptk?: string;
   subject?: string;
   joinDate?: string;
@@ -36,7 +36,7 @@ export const useProfileData = () => {
             phone: '+62 812-3456-7890',
             address: 'Jl. Pendidikan No. 123, Jakarta Selatan',
             role: 'Guru',
-            nip: '198512012010011001',
+            npy: '198512012010011001',
             subject: 'Matematika',
             joinDate: '2020-01-01',
             profilePicture: undefined,
@@ -50,7 +50,7 @@ export const useProfileData = () => {
             address:          data.address ?? undefined,
             profilePicture:   data.profilePicture ?? undefined,
             role:             'Guru',
-            nip:              data.nip ?? undefined,
+            npy:              data.npy ?? undefined,
             nuptk:            data.nuptk ?? undefined,
             joinDate:         data.joinDate ?? undefined,
             lastEducation:    data.lastEducation ?? undefined,

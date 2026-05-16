@@ -56,7 +56,7 @@ Backend **wajib** mengikuti struktur request/response di bawah ini persis agar f
 }
 ```
 
-> `username` bisa berupa username, NIP, atau NIS.
+> `username` bisa berupa username, NPY, atau NIS.
 
 **Response 200:**
 ```json

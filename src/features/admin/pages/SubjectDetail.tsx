@@ -104,13 +104,13 @@ export const SubjectDetail: React.FC<SubjectDetailProps> = ({ id }) => {
     const teachers = subject.teachers || subject.teacherNames?.map((name, index) => ({ 
         id: `mock-id-${index}`, 
         name, 
-        nip: '-',
+        npy: '-',
         specialization: ''
     })) || [];
 
     const filteredTeachers = teachers.filter(t => 
         t.name.toLowerCase().includes(teacherSearch.toLowerCase()) ||
-        (t.nip && t.nip.includes(teacherSearch))
+        (t.npy && t.npy.includes(teacherSearch))
     );
 
     return (
@@ -292,7 +292,7 @@ export const SubjectDetail: React.FC<SubjectDetailProps> = ({ id }) => {
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         type="search"
-                                        placeholder="Cari nama atau NIP..."
+                                        placeholder="Cari nama atau NPY..."
                                         className="pl-9 h-9"
                                         value={teacherSearch}
                                         onChange={(e) => setTeacherSearch(e.target.value)}
@@ -307,7 +307,7 @@ export const SubjectDetail: React.FC<SubjectDetailProps> = ({ id }) => {
                                         <tr>
                                             <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider w-[50px] text-center">No</th>
                                             <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">Nama Guru</th>
-                                            <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">NIP</th>
+                                            <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">NPY</th>
                                             <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-center">Status</th>
                                             <th className="px-6 py-4 font-semibold text-xs text-slate-600 uppercase tracking-wider text-right">Aksi</th>
                                         </tr>
@@ -338,7 +338,7 @@ export const SubjectDetail: React.FC<SubjectDetailProps> = ({ id }) => {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className="text-xs text-slate-500 font-mono">{teacher.nip || '—'}</span>
+                                                        <span className="text-xs text-slate-500 font-mono">{teacher.npy || '—'}</span>
                                                     </td>
                                                     <td className="px-6 py-4 text-center">
                                                         <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs font-medium">

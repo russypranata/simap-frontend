@@ -15,7 +15,7 @@ export type UserRole =
 
 export interface TeacherProfile {
     id: number;
-    employee_id?: string | null;
+    npy?: string | null;
     qualifications?: string | null;
 }
 
@@ -32,7 +32,7 @@ export interface ParentProfile {
 
 export interface TutorProfile {
     id: number;
-    nip?: string | null;
+    npy?: string | null;
     extracurricular?: string | { id: number; name: string } | null;
     join_date?: string | null;
 }
@@ -73,19 +73,18 @@ export interface CreateUserRequest {
     address?: string;
     dob?: string;
     birth_place?: string;
-    // Teacher
-    employee_id?: string;
+    // Profile fields (backend employee_id stored in DB; API returns npy for display)
+    npy?: string;
     qualifications?: string;
     // Student
     admission_number?: string;
     religion?: string;
     // Parent
     occupation?: string;
-    // Tutor
-    nip?: string;
+    // Tutor extras
     extracurricular?: string;
     join_date?: string;
-    // Staff
+    // Staff extras
     department?: string;
     job_title?: string;
 }
@@ -100,12 +99,11 @@ export interface UpdateUserRequest {
     address?: string;
     dob?: string;
     birth_place?: string;
-    employee_id?: string;
+    npy?: string;
     qualifications?: string;
     admission_number?: string;
     religion?: string;
     occupation?: string;
-    nip?: string;
     extracurricular?: string;
     join_date?: string;
     department?: string;

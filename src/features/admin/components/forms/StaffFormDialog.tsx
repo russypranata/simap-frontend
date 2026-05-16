@@ -117,7 +117,7 @@ export const StaffFormDialog: React.FC<StaffFormDialogProps> = ({
                     phone: initialData.phone ?? '',
                     address: initialData.address ?? '',
                     role: initialData.roles[0] ?? 'admin',
-                    employee_id: initialData.staff_profile?.employee_id ?? '',
+                    employee_id: initialData.staff_profile?.npy ?? '',
                     department: initialData.staff_profile?.department ?? '',
                     job_title: initialData.staff_profile?.job_title ?? '',
                     employment_status: initialData.staff_profile?.employment_status ?? undefined,
@@ -312,7 +312,7 @@ export const StaffFormDialog: React.FC<StaffFormDialogProps> = ({
                                 name="employee_id"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>NIP / ID Pegawai</FormLabel>
+                                        <FormLabel>NPY / ID Pegawai</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Nomor Induk Pegawai" {...field} />
                                         </FormControl>

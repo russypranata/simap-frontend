@@ -7,7 +7,7 @@ export interface AdvisorProfileData {
     profilePicture: string;
     address: string;
     joinDate: string;
-    nip?: string;
+    npy?: string;
     extracurricular: string;
     totalMembers: number;
     activeMembers: number;
@@ -24,7 +24,7 @@ export const mockAdvisorData: AdvisorProfileData = {
     profilePicture: "",
     address: "Jl. Merpati No. 45, Makassar, Sulawesi Selatan",
     joinDate: "10 Agustus 2019",
-    nip: "198812122015021002",
+    npy: "198812122015021002",
     extracurricular: "Futsal",
     totalMembers: 30,
     activeMembers: 28,

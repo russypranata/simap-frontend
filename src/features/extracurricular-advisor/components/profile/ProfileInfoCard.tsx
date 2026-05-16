@@ -130,14 +130,14 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ profile, onEdi
                                     <p className="text-sm font-medium">{profile.username}</p>
                                 </div>
                             </div>
-                            {profile.nip && (
+                            {profile.npy && (
                                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30">
                                     <div className="p-2 rounded-full bg-primary/10">
-                                        <User className="h-5 w-5 text-primary" />
+                                        <Award className="h-5 w-5 text-primary" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-muted-foreground">NIP</p>
-                                        <p className="text-sm font-medium">{profile.nip}</p>
+                                        <p className="text-xs text-muted-foreground">NPY</p>
+                                        <p className="text-sm font-medium">{profile.npy}</p>
                                     </div>
                                 </div>
                             )}
