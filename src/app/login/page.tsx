@@ -78,6 +78,9 @@ export default function LoginPage() {
             case 'pj_mutamayizin':
                 router.push('/mutamayizin-coordinator/dashboard');
                 break;
+            case 'pembimbing_lomba':
+                router.push('/competition-advisor/dashboard');
+                break;
             default:
                 router.push('/teacher/dashboard');
         }

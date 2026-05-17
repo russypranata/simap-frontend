@@ -16,9 +16,10 @@ export default function TeacherRouteLayout({ children }: { children: React.React
     if (!isAuthenticated) { router.push('/'); return; }
     if (role !== 'guru') {
       const map: Record<string, string> = {
-        siswa: '/student/dashboard', admin: '/admin/dashboard',
-        orang_tua: '/parent/dashboard', tutor_ekskul: '/extracurricular-advisor/dashboard',
-        pj_mutamayizin: '/mutamayizin-coordinator/dashboard',
+                siswa: '/student/dashboard', admin: '/admin/dashboard',
+                orang_tua: '/parent/dashboard', tutor_ekskul: '/extracurricular-advisor/dashboard',
+                pembimbing_lomba: '/competition-advisor/dashboard',
+                pj_mutamayizin: '/mutamayizin-coordinator/dashboard',
       };
       router.push(map[role!] ?? '/');
     }

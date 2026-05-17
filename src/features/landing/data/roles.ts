@@ -12,6 +12,7 @@ import {
     GraduationCap,
     Shield,
     Users,
+    Trophy,
 } from 'lucide-react';
 
 export interface Role {
@@ -64,6 +65,16 @@ export const ROLES: Role[] = [
         color: 'bg-violet-50 text-violet-600',
         borderColor: 'group-hover:border-violet-200',
         gradient: 'from-violet-500/10 to-transparent',
+    },
+    {
+        id: 'pembimbing_lomba',
+        title: 'Pembimbing Lomba',
+        description:
+            'Membimbing dan mengelola tim lomba & kompetisi. Presensi latihan, penilaian, dan monitoring anggota tim.',
+        icon: Trophy,
+        color: 'bg-amber-50 text-amber-600',
+        borderColor: 'group-hover:border-amber-200',
+        gradient: 'from-amber-500/10 to-transparent',
     },
     {
         id: 'mutamayizin',

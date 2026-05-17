@@ -19,6 +19,7 @@ export default function MutamayizinCoordinatorRouteLayout({ children }: { childr
                 guru: '/teacher/dashboard', siswa: '/student/dashboard',
                 admin: '/admin/dashboard', orang_tua: '/parent/dashboard',
                 tutor_ekskul: '/extracurricular-advisor/dashboard',
+                pembimbing_lomba: '/competition-advisor/dashboard',
             };
             router.push(map[role!] ?? '/');
         }

@@ -83,8 +83,12 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                 return 'Orang Tua';
             case 'tutor_ekskul':
                 return 'Tutor Ekskul';
+            case 'pembimbing_lomba':
+                return 'Pembimbing Lomba';
             case 'pj_mutamayizin':
                 return 'PJ Mutamayizin';
+            case 'pembimbing_lomba':
+                return 'Pembimbing Lomba';
             default:
                 return 'Pengguna';
         }
@@ -114,6 +118,8 @@ export const Navbar: React.FC<NavbarProps> = ({ showNotifications = true }) => {
                 return '/extracurricular-advisor/profile';
             case 'pj_mutamayizin':
                 return '/mutamayizin-coordinator/profile';
+            case 'pembimbing_lomba':
+                return '/competition-advisor/profile';
             default:
                 return '/profile';
         }

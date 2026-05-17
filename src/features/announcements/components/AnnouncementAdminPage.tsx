@@ -58,6 +58,7 @@ const TARGET_ROLE_OPTIONS = [
   { value: "siswa", label: "Siswa" },
   { value: "orang_tua", label: "Orang Tua" },
   { value: "tutor_ekskul", label: "Tutor Ekskul" },
+  { value: "pembimbing_lomba", label: "Pembimbing Lomba" },
   { value: "pj_mutamayizin", label: "PJ Mutamayizin" },
   { value: "admin", label: "Administrator" },
 ];

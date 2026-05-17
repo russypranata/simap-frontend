@@ -19,6 +19,7 @@ export type UserRole =
     | 'orang_tua'
     | 'tutor_ekskul'
     | 'pj_mutamayizin'
+    | 'pembimbing_lomba'
     | null;
 
 export type User = LoginResponse['user'];

@@ -16,9 +16,10 @@ export default function ParentRouteLayout({ children }: { children: React.ReactN
     if (!isAuthenticated) { router.push('/'); return; }
     if (role !== 'orang_tua') {
       const map: Record<string, string> = {
-        guru: '/teacher/dashboard', siswa: '/student/dashboard',
-        admin: '/admin/dashboard', tutor_ekskul: '/extracurricular-advisor/dashboard',
-        pj_mutamayizin: '/mutamayizin-coordinator/dashboard',
+                guru: '/teacher/dashboard', siswa: '/student/dashboard',
+                admin: '/admin/dashboard', tutor_ekskul: '/extracurricular-advisor/dashboard',
+                pembimbing_lomba: '/competition-advisor/dashboard',
+                pj_mutamayizin: '/mutamayizin-coordinator/dashboard',
       };
       router.push(map[role!] ?? '/');
     }

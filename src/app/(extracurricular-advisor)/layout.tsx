@@ -22,6 +22,7 @@ export default function ExtracurricularAdvisorRouteLayout({
             const map: Record<string, string> = {
                 guru: '/teacher/dashboard', siswa: '/student/dashboard',
                 admin: '/admin/dashboard', orang_tua: '/parent/dashboard',
+                pembimbing_lomba: '/competition-advisor/dashboard',
                 pj_mutamayizin: '/mutamayizin-coordinator/dashboard',
             };
             router.push(map[role!] ?? '/');
