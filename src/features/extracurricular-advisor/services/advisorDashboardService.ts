@@ -45,52 +45,92 @@ export interface ActiveAcademicYear {
 // ==================== SERVICE FUNCTIONS ====================
 
 export const getDashboardStats = async (
-    params: { academicYear?: string; semester?: string } = {}
+    params: { academicYear?: string; semester?: string } = {},
 ): Promise<AdvisorDashboardStats> => {
     const { academicYear, semester } = params;
 
     const queryParams = new URLSearchParams();
-    if (academicYear) queryParams.append("academic_year", academicYear);
-    if (semester && semester !== "all") queryParams.append("semester", semester);
+    if (academicYear) queryParams.append('academic_year', academicYear);
+    if (semester && semester !== 'all')
+        queryParams.append('semester', semester);
 
     const qs = queryParams.toString();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await apiClient.get<any>(`/extracurricular-advisor/dashboard/stats${qs ? `?${qs}` : ''}`);
+    const result = await apiClient.get<Record<string, number | string>>(
+        `/extracurricular-advisor/dashboard/stats${qs ? `?${qs}` : ''}`,
+    );
 
-    // Normalize snake_case from Laravel to camelCase
-    const d = result.data;
+    // Handle null/undefined result from API
+    if (!result) {
+        return {
+            totalMembers: 0,
+            lastAttendancePresent: 0,
+            averageAttendance: 0,
+            totalMeetings: 0,
+            activeStudents: 0,
+            needsAttention: 0,
+            activeAssignments: 0,
+            averageAssessmentScore: 0,
+        };
+    }
+
     return {
-        totalMembers: d.total_members ?? d.totalMembers ?? 0,
-        lastAttendancePresent: d.last_attendance_present ?? d.lastAttendancePresent ?? 0,
-        averageAttendance: d.average_attendance ?? d.averageAttendance ?? 0,
-        totalMeetings: d.total_meetings ?? d.totalMeetings ?? 0,
-        activeStudents: d.active_students ?? d.activeStudents ?? 0,
-        needsAttention: d.needs_attention ?? d.needsAttention ?? 0,
-        activeAssignments: d.active_assignments ?? d.activeAssignments ?? 0,
-        averageAssessmentScore: d.average_assessment_score ?? d.averageAssessmentScore ?? 0,
+        totalMembers: Number(
+            result['total_members'] ?? result['totalMembers'] ?? 0,
+        ),
+        lastAttendancePresent: Number(
+            result['last_attendance_present'] ??
+                result['lastAttendancePresent'] ??
+                0,
+        ),
+        averageAttendance: Number(
+            result['average_attendance'] ?? result['averageAttendance'] ?? 0,
+        ),
+        totalMeetings: Number(
+            result['total_meetings'] ?? result['totalMeetings'] ?? 0,
+        ),
+        activeStudents: Number(
+            result['active_students'] ?? result['activeStudents'] ?? 0,
+        ),
+        needsAttention: Number(
+            result['needs_attention'] ?? result['needsAttention'] ?? 0,
+        ),
+        activeAssignments: Number(
+            result['active_assignments'] ?? result['activeAssignments'] ?? 0,
+        ),
+        averageAssessmentScore: Number(
+            result['average_assessment_score'] ??
+                result['averageAssessmentScore'] ??
+                0,
+        ),
     };
 };
 
 export const getRegularSchedule = async (): Promise<RegularScheduleItem[]> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await apiClient.get<any>('/extracurricular-advisor/dashboard/regular-schedule');
-    return result.data;
+    const result = await apiClient.get<RegularScheduleItem[]>(
+        '/extracurricular-advisor/dashboard/regular-schedule',
+    );
+    return Array.isArray(result) ? result : [];
 };
 
-export const getUpcomingSchedule = async (): Promise<UpcomingScheduleItem[]> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await apiClient.get<any>('/extracurricular-advisor/dashboard/schedule');
-    return result.data;
+export const getUpcomingSchedule = async (): Promise<
+    UpcomingScheduleItem[]
+> => {
+    const result = await apiClient.get<UpcomingScheduleItem[]>(
+        '/extracurricular-advisor/dashboard/schedule',
+    );
+    return Array.isArray(result) ? result : [];
 };
 
 export const getRecentActivities = async (): Promise<RecentActivityItem[]> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await apiClient.get<any>('/extracurricular-advisor/dashboard/recent-activities');
-    return result.data;
+    const result = await apiClient.get<RecentActivityItem[]>(
+        '/extracurricular-advisor/dashboard/recent-activities',
+    );
+    return Array.isArray(result) ? result : [];
 };
 
 export const getActiveAcademicYear = async (): Promise<ActiveAcademicYear> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await apiClient.get<any>('/extracurricular-advisor/academic-year/active');
-    return result.data;
+    const result = await apiClient.get<ActiveAcademicYear>(
+        '/extracurricular-advisor/academic-year/active',
+    );
+    return result ?? { academicYear: '', semester: '', label: '' };
 };

@@ -11,7 +11,7 @@ export interface AdvisorMember {
     class: string;
     joinDate: string;
     attendance: number;
-    status: "Aktif" | "Nonaktif";
+    status: 'Aktif' | 'Nonaktif';
     inactiveDate?: string;
     inactiveReason?: string;
 }
@@ -43,8 +43,8 @@ const normalizeMember = (d: Record<string, any>): AdvisorMember => ({
     id: d.id,
     nis: d.nis,
     name: d.name,
-    class: d.class ?? d.class_name ?? d.kelas ?? "",
-    joinDate: d.join_date ?? d.joinDate ?? "",
+    class: d.class ?? d.class_name ?? d.kelas ?? '',
+    joinDate: d.join_date ?? d.joinDate ?? '',
     attendance: d.attendance ?? d.attendance_percentage ?? 0,
     status: d.status,
     inactiveDate: d.inactive_date ?? d.inactiveDate,
@@ -53,46 +53,53 @@ const normalizeMember = (d: Record<string, any>): AdvisorMember => ({
 
 // ==================== SERVICE FUNCTIONS ====================
 
-export const getMembers = async (params: GetMembersParams = {}): Promise<MembersListResponse> => {
+export const getMembers = async (
+    params: GetMembersParams = {},
+): Promise<MembersListResponse> => {
     const {
-        academicYear = "2025/2026",
+        academicYear = '2025/2026',
         class: classFilter,
         search,
         page = 1,
         limit = 10,
         semester,
-        status = "Aktif",
+        status = 'Aktif',
     } = params;
 
     const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
         academic_year: academicYear,
-        ...(semester && semester !== "all" && { semester }),
+        ...(semester && semester !== 'all' && { semester }),
         ...(search && { search }),
-        ...(classFilter && classFilter !== "all" && { class: classFilter }),
-        ...(status && status !== "all" && { status }),
+        ...(classFilter && classFilter !== 'all' && { class: classFilter }),
+        ...(status && status !== 'all' && { status }),
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await apiClient.get<any>(`/extracurricular-advisor/members?${queryParams.toString()}`);
+    const result = await apiClient.get<any>(
+        `/extracurricular-advisor/members?${queryParams.toString()}`,
+    );
 
-    // Normalize Laravel pagination envelope to our MembersListResponse shape
-    const meta = result.meta ?? result;
+    // apiClient.get unwraps data.data, so result is the array. Meta is in response._meta or we extract from headers.
+    const items = Array.isArray(result) ? result : (result.data ?? []);
+    const rawMeta = (result as any)._meta ?? (result as any).meta ?? {};
     return {
-        data: (result.data ?? []).map(normalizeMember),
+        data: (items as any[]).map(normalizeMember),
         meta: {
-            currentPage: meta.current_page ?? meta.currentPage ?? page,
-            totalPages: meta.last_page ?? meta.totalPages ?? 1,
-            totalItems: meta.total ?? meta.totalItems ?? 0,
+            currentPage: rawMeta.current_page ?? rawMeta.currentPage ?? page,
+            totalPages: rawMeta.last_page ?? rawMeta.totalPages ?? 1,
+            totalItems: rawMeta.total ?? rawMeta.totalItems ?? items.length,
         },
     };
 };
 
 export const getMemberDetail = async (id: number): Promise<AdvisorMember> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await apiClient.get<any>(`/extracurricular-advisor/members/${id}`);
-    return normalizeMember(result.data);
+    const result = await apiClient.get<any>(
+        `/extracurricular-advisor/members/${id}`,
+    );
+    return normalizeMember(result as Record<string, any>);
 };
 
 export const addMember = async (memberData: AddMemberRequest) => {

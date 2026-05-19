@@ -50,21 +50,36 @@ export interface CreateAttendanceRequest {
 // ==================== NORMALIZERS ====================
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const normalizeHistoryEntry = (d: Record<string, any>): AttendanceHistoryEntry => ({
+const normalizeHistoryEntry = (
+    d: Record<string, any>,
+): AttendanceHistoryEntry => ({
     id: d.id,
     date: d.date,
     topic: d.topic ?? undefined,
     studentStats: {
         present: d.student_stats?.present ?? d.studentStats?.present ?? 0,
         total: d.student_stats?.total ?? d.studentStats?.total ?? 0,
-        percentage: d.student_stats?.percentage ?? d.studentStats?.percentage ?? 0,
+        percentage:
+            d.student_stats?.percentage ?? d.studentStats?.percentage ?? 0,
     },
     advisorStats: {
-        tutorName: d.advisor_stats?.tutor_name ?? d.advisor_stats?.tutorName ?? d.advisorStats?.tutorName ?? "",
-        startTime: d.advisor_stats?.start_time ?? d.advisor_stats?.startTime ?? d.advisorStats?.startTime ?? "",
-        endTime: d.advisor_stats?.end_time ?? d.advisor_stats?.endTime ?? d.advisorStats?.endTime ?? "",
-        duration: d.advisor_stats?.duration ?? d.advisorStats?.duration ?? "",
-        status: d.advisor_stats?.status ?? d.advisorStats?.status ?? "",
+        tutorName:
+            d.advisor_stats?.tutor_name ??
+            d.advisor_stats?.tutorName ??
+            d.advisorStats?.tutorName ??
+            '',
+        startTime:
+            d.advisor_stats?.start_time ??
+            d.advisor_stats?.startTime ??
+            d.advisorStats?.startTime ??
+            '',
+        endTime:
+            d.advisor_stats?.end_time ??
+            d.advisor_stats?.endTime ??
+            d.advisorStats?.endTime ??
+            '',
+        duration: d.advisor_stats?.duration ?? d.advisorStats?.duration ?? '',
+        status: d.advisor_stats?.status ?? d.advisorStats?.status ?? '',
     },
 });
 
@@ -73,7 +88,7 @@ const normalizeMember = (d: Record<string, any>): AttendanceStudent => ({
     id: d.id,
     nis: d.nis,
     name: d.name,
-    class: d.class ?? d.class_name ?? d.kelas ?? "",
+    class: d.class ?? d.class_name ?? d.kelas ?? '',
     status: d.status,
     note: d.note,
 });
@@ -82,21 +97,28 @@ const normalizeMember = (d: Record<string, any>): AttendanceStudent => ({
 
 export const getAttendanceHistory = async (
     startDate?: string,
-    endDate?: string
+    endDate?: string,
 ): Promise<AttendanceHistoryEntry[]> => {
     const params = new URLSearchParams();
-    if (startDate) params.append("start_date", startDate);
-    if (endDate) params.append("end_date", endDate);
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await apiClient.get<any>(`/extracurricular-advisor/attendance?${params}`);
-    return (result.data ?? []).map(normalizeHistoryEntry);
+    const result = await apiClient.get<any>(
+        `/extracurricular-advisor/attendance?${params}`,
+    );
+    const items = Array.isArray(result) ? result : (result.data ?? []);
+    return (items as any[]).map(normalizeHistoryEntry);
 };
 
-export const getAttendanceDetail = async (id: number): Promise<AttendanceDetail> => {
+export const getAttendanceDetail = async (
+    id: number,
+): Promise<AttendanceDetail> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await apiClient.get<any>(`/extracurricular-advisor/attendance/${id}`);
-    const d = result.data;
+    const result = await apiClient.get<any>(
+        `/extracurricular-advisor/attendance/${id}`,
+    );
+    const d = result as Record<string, any>;
     return {
         ...normalizeHistoryEntry(d),
         topic: d.topic,

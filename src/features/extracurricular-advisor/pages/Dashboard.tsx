@@ -1,19 +1,29 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Calendar, Users, CheckCircle, TrendingUp, Award, ClipboardList, AlertCircle, Star, BookOpen } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useAdvisorDashboard } from "../hooks/useAdvisorDashboard";
-import { ScheduleCard, RecentActivitiesCard } from "../components/dashboard";
+import React from 'react';
+import {
+    Calendar,
+    Users,
+    CheckCircle,
+    TrendingUp,
+    Award,
+    ClipboardList,
+    AlertCircle,
+    Star,
+    BookOpen,
+} from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { useAdvisorDashboard } from '../hooks/useAdvisorDashboard';
+import { ScheduleCard, RecentActivitiesCard } from '../components/dashboard';
 import {
     PageHeader,
     StatCard,
     SkeletonPageHeader,
     SkeletonStatCard,
     ErrorState,
-} from "@/features/shared/components";
+} from '@/features/shared/components';
 
 // ==================== SKELETON ====================
 const ScheduleCardSkeleton: React.FC = () => (
@@ -52,7 +62,10 @@ const RecentActivitiesSkeleton: React.FC = () => (
         </div>
         <CardContent className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-14 w-full rounded-lg bg-slate-100 animate-pulse" />
+                <div
+                    key={i}
+                    className="h-14 w-full rounded-lg bg-slate-100 animate-pulse"
+                />
             ))}
         </CardContent>
     </Card>
@@ -61,29 +74,47 @@ const RecentActivitiesSkeleton: React.FC = () => (
 // ==================== MAIN ====================
 export const ExtracurricularDashboard: React.FC = () => {
     const router = useRouter();
-    const { stats, upcomingSchedules, regularSchedules, recentActivities, advisorName, extracurricularName, isLoading, error, refetch } = useAdvisorDashboard();
+    const {
+        stats,
+        upcomingSchedules,
+        regularSchedules,
+        recentActivities,
+        advisorName,
+        extracurricularName,
+        isLoading,
+        error,
+        refetch,
+    } = useAdvisorDashboard();
 
-    if (isLoading) return (
-        <div className="space-y-6 animate-in fade-in duration-500">
-            <SkeletonPageHeader withAction />
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
+    if (isLoading)
+        return (
+            <div className="space-y-6 animate-in fade-in duration-500">
+                <SkeletonPageHeader withAction />
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <SkeletonStatCard key={i} />
+                    ))}
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <SkeletonStatCard key={i} />
+                    ))}
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <ScheduleCardSkeleton />
+                    <RecentActivitiesSkeleton />
+                </div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ScheduleCardSkeleton />
-                <RecentActivitiesSkeleton />
-            </div>
-        </div>
-    );
+        );
 
     if (error) return <ErrorState error={error} onRetry={refetch} />;
 
     const attendanceColor =
-        stats.averageAttendance >= 90 ? "green" :
-        stats.averageAttendance >= 75 ? "amber" : "red" as const;
+        stats.averageAttendance >= 90
+            ? 'green'
+            : stats.averageAttendance >= 75
+              ? 'amber'
+              : ('red' as const);
 
     return (
         <div className="space-y-6">
@@ -91,11 +122,13 @@ export const ExtracurricularDashboard: React.FC = () => {
                 title="Dashboard"
                 titleHighlight="Tutor Ekstrakurikuler"
                 icon={Award}
-                description={`Selamat datang, ${advisorName ?? "Tutor Ekskul"}`}
+                description={`Selamat datang, ${advisorName ?? 'Tutor Ekskul'}`}
             >
                 <Button
                     className="bg-blue-800 hover:bg-blue-900 text-white"
-                    onClick={() => router.push("/extracurricular-advisor/attendance")}
+                    onClick={() =>
+                        router.push('/extracurricular-advisor/attendance')
+                    }
                 >
                     <ClipboardList className="h-4 w-4 mr-2" />
                     Isi Presensi
@@ -103,35 +136,102 @@ export const ExtracurricularDashboard: React.FC = () => {
             </PageHeader>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <StatCard title="Total Anggota" value={stats.totalMembers} subtitle="Anggota aktif" icon={Users} color="blue" />
-                <StatCard title="Hadir Terakhir" value={stats.lastAttendancePresent} subtitle="Pertemuan lalu" icon={CheckCircle} color="green" />
-                <StatCard title="Rata-rata Kehadiran" value={`${stats.averageAttendance}%`} subtitle="Tahun ajaran ini" icon={TrendingUp} color={attendanceColor} />
-                <StatCard title="Total Pertemuan" value={stats.totalMeetings} subtitle="Kegiatan tercatat" icon={Calendar} color="purple" />
+                <StatCard
+                    title="Total Anggota"
+                    value={stats.totalMembers}
+                    subtitle="Anggota aktif"
+                    icon={Users}
+                    color="blue"
+                />
+                <StatCard
+                    title="Hadir Terakhir"
+                    value={stats.lastAttendancePresent}
+                    subtitle="Pertemuan lalu"
+                    icon={CheckCircle}
+                    color="green"
+                />
+                <StatCard
+                    title="Rata-rata Kehadiran"
+                    value={`${stats.averageAttendance}%`}
+                    subtitle="Tahun ajaran ini"
+                    icon={TrendingUp}
+                    color={attendanceColor}
+                />
+                <StatCard
+                    title="Total Pertemuan"
+                    value={stats.totalMeetings}
+                    subtitle="Kegiatan tercatat"
+                    icon={Calendar}
+                    color="purple"
+                />
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <StatCard title="Tugas Aktif" value={stats.activeAssignments} subtitle="Tugas tahun ini" icon={BookOpen} color="amber" />
-                <StatCard title="Rata-rata Nilai" value={stats.averageAssessmentScore} subtitle="Penilaian ekskul" icon={Star} color="amber" />
-                <StatCard title="Siswa Aktif" value={stats.activeStudents} subtitle="Kehadiran ≥ 90%" icon={CheckCircle} color="green" />
-                <StatCard title="Perlu Perhatian" value={stats.needsAttention} subtitle="Kehadiran < 75%" icon={AlertCircle} color="red" />
+                <StatCard
+                    title="Tugas Aktif"
+                    value={stats.activeAssignments}
+                    subtitle="Tugas tahun ini"
+                    icon={BookOpen}
+                    color="amber"
+                />
+                <StatCard
+                    title="Rata-rata Nilai"
+                    value={stats.averageAssessmentScore}
+                    subtitle="Penilaian ekskul"
+                    icon={Star}
+                    color="amber"
+                />
+                <StatCard
+                    title="Siswa Aktif"
+                    value={stats.activeStudents}
+                    subtitle="Kehadiran ≥ 90%"
+                    icon={CheckCircle}
+                    color="green"
+                />
+                <StatCard
+                    title="Perlu Perhatian"
+                    value={stats.needsAttention}
+                    subtitle="Kehadiran < 75%"
+                    icon={AlertCircle}
+                    color="red"
+                />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ScheduleCard upcomingSchedules={upcomingSchedules} regularSchedules={regularSchedules} extracurricularName={extracurricularName} />
+                <ScheduleCard
+                    upcomingSchedules={upcomingSchedules}
+                    regularSchedules={regularSchedules}
+                    extracurricularName={extracurricularName}
+                />
                 <RecentActivitiesCard recentActivities={recentActivities} />
             </div>
 
             <Card className="bg-blue-50 border-blue-800/20">
                 <CardContent className="p-3">
                     <div className="flex items-start gap-3">
-                        <AlertCircle className="h-5 w-5 text-blue-800 flex-shrink-0 mt-0.5" />
+                        <AlertCircle className="h-5 w-5 text-blue-800 shrink-0 mt-0.5" />
                         <div className="space-y-1">
-                            <p className="text-sm font-semibold text-blue-800">Tips untuk Tutor</p>
+                            <p className="text-sm font-semibold text-blue-800">
+                                Tips untuk Tutor
+                            </p>
                             <ul className="text-sm text-blue-900 space-y-1 list-disc list-inside">
-                                <li>Isi presensi siswa dan tutor setiap ada kegiatan ekstrakurikuler</li>
-                                <li>Pantau kehadiran anggota untuk memastikan partisipasi aktif</li>
-                                <li>Tambahkan penilaian ekskul di menu <strong>Penilaian</strong> untuk setiap anggota</li>
-                                <li>Buat dan kelola tugas ekskul di menu <strong>Tugas</strong></li>
+                                <li>
+                                    Isi presensi siswa dan tutor setiap ada
+                                    kegiatan ekstrakurikuler
+                                </li>
+                                <li>
+                                    Pantau kehadiran anggota untuk memastikan
+                                    partisipasi aktif
+                                </li>
+                                <li>
+                                    Tambahkan penilaian ekskul di menu{' '}
+                                    <strong>Penilaian</strong> untuk setiap
+                                    anggota
+                                </li>
+                                <li>
+                                    Buat dan kelola tugas ekskul di menu{' '}
+                                    <strong>Tugas</strong>
+                                </li>
                             </ul>
                         </div>
                     </div>
